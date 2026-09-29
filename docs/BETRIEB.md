@@ -1684,6 +1684,69 @@ Tests: `backend/tests/test_anmeldung.py` — 29 Fälle, darunter der
 entscheidende, dass ein gefälschter `X-Bfl-User` im Modus `eigen` weder
 Zugang bringt noch einen Nutzer anlegt.
 
+## Datenbank ansehen — lesend, unter Zeilensicherheit
+
+Seit 0.14.0 unter *Einstellungen › Daten › Datenbank öffnen* (`/datenbank`),
+nur für `owner` und `admin`: die Tabellen der eigenen Organisation
+durchblättern, sortieren, in einer Spalte suchen, und im Reiter **SQL**
+eigene Abfragen stellen, das Ergebnis auch als CSV.
+
+### Warum kein pgweb, kein Adminer
+
+Die Fachtabellen stehen unter `FORCE ROW LEVEL SECURITY`, und die
+Richtlinien lesen `app.current_user_id`. Ein fremder Datenbank-Browser
+setzt den Wert nicht und sähe jede Tabelle **leer** — derselbe Effekt wie
+beim Nachzählen ohne Nutzerkontext (siehe oben). Eine Rolle, die die
+Zeilensicherheit umgeht, kann die von Olares vergebene Rolle nicht
+anlegen, und wenn sie es könnte, wäre die Mandantentrennung löchrig.
+Also läuft der Blick durch Rocket selbst, über `acquire_as`, und kostet
+keinen Container und keinen Eingang.
+
+### Die Lücke, die „nur lesend" nicht schließt
+
+Die Mandantentrennung hängt an einer Sitzungsvariable, und die darf jede
+Abfrage umsetzen: `select set_config('app.current_user_id', '<andere Kennung>', true)`,
+oder versteckt in einem Text, den `query_to_xml('…')` ausführt. Ein
+Verwalter läse damit die Sitzungen des Eigentümers — und `READ ONLY`
+hält das nicht auf, denn gelesen wird ja nur.
+
+Deshalb zerlegt `app/datenbank.py` jede Abfrage **vor** dem Ausführen mit
+pglast (dem Parser von Postgres selbst) und lässt nur durch:
+
+- genau eine Anweisung, und die ist ein SELECT (auch WITH, VALUES, TABLE)
+- Tabellen aus `FREI`, nur im Schema `public`
+- Funktionen aus `FUNKTIONEN` — eine Erlaubnisliste, keine Sperrliste
+- kein SELECT INTO, kein FOR UPDATE, kein WITH, das wie eine echte Tabelle heißt
+
+Dahinter liegen trotzdem `SET TRANSACTION READ ONLY`, `statement_timeout`
+von 10 Sekunden und höchstens 1.000 Zeilen am Bildschirm (100.000 in der
+CSV). Die Prüfung ist die Tür, die Transaktion das Schloss dahinter; ein
+Test nimmt die Prüfung heraus und zeigt, dass ein INSERT trotzdem scheitert.
+
+### Gesperrt, und warum
+
+| Tabelle | Grund |
+|---|---|
+| `users` | Passwort-Hashes, Zweitfaktor |
+| `sitzungen` | wer sie liest, kann sich als jemand anderes ausgeben |
+| `anmeldeversuche` | gehört zur Anmeldung |
+| `einladungen` | offene Einladungen mit Schlüssel |
+| `org_settings` | Zugangsdaten für Sprachmodell, Suche, SMTP, Postfach |
+| `webhook_sources` | Geheimnisse der verbundenen Programme |
+| `oeffentliche_links` | Schlüssel der Links in Mails |
+
+**Jede neue Tabelle muss entschieden werden.** `test_jede_tabelle_ist_frei_oder_gesperrt`
+bricht, sobald eine Tabelle weder in `FREI` noch in `GESPERRT` steht —
+dieselbe Wache wie beim Abzug. Sonst wäre die nächste Tabelle mit einem
+Geheimnis von selbst sichtbar.
+
+### Was protokolliert wird
+
+Jede SQL-Abfrage, auch eine abgewiesene (`action = 'sql'`, `entity =
+'datenbank'`, der Text im `diff`), und jede CSV-Ausfuhr (`action =
+'export'`). Das Blättern in einer Tabelle nicht: Es zeigt nichts, was die
+übrigen Seiten nicht auch zeigen.
+
 ## Dokumente am Datensatz
 
 Seit 0.6.8 kann an Firma, Kontakt, Geschäft und Ticket eine Datei liegen —

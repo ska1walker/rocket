@@ -1265,3 +1265,26 @@ export interface InsiloAblage {
   zuletzt: string | null;
   fehler: string | null;
 }
+
+/** Datenbank-Blick: was es an Tabellen gibt, und was nicht einsehbar ist. */
+export interface DbUebersicht {
+  frei: { name: string; zeilen: number; spalten: { name: string; typ: string }[] }[];
+  gesperrt: { name: string; grund: string }[];
+}
+
+/** Eine Seite einer Tabelle — Werte so, wie JSON sie trägt. */
+export interface DbSeite {
+  spalten: string[];
+  zeilen: unknown[][];
+  gesamt: number;
+  seite: number;
+  je_seite: number;
+}
+
+/** Das Ergebnis einer SQL-Abfrage, höchstens tausend Zeilen. */
+export interface DbErgebnis {
+  spalten: string[];
+  zeilen: unknown[][];
+  abgeschnitten: boolean;
+  dauer_ms: number;
+}

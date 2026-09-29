@@ -4529,3 +4529,60 @@ select,
 .besprechung-vorschlag p { margin: 0 0 3px; }
 
 .zeitleiste-link { display: inline-block; margin-top: var(--am-raum-1); font-size: 0.8125rem; font-weight: 500; }
+
+/* ── Datenbank-Blick ─────────────────────────────────────────────────
+   Die Zeilen sind nicht anklickbar — die Tabelle zeigt, sie führt
+   nirgendwohin. Lange Werte werden gekürzt, der ganze steht im Tooltip. */
+.db-tabelle tbody tr { cursor: default; }
+.db-tabelle td {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+}
+.db-tabelle td.db-leer { color: var(--am-text-deaktiviert); }
+.db-tabelle thead th button {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--am-raum-1);
+  cursor: pointer;
+}
+.db-tabelle thead th button:focus-visible {
+  outline: 2px solid var(--am-fokus-ring);
+  outline-offset: 2px;
+}
+.db-sql {
+  width: 100%;
+  min-height: 9rem;
+  padding: var(--am-raum-3) var(--am-raum-4);
+  border: 1px solid var(--am-rand);
+  border-radius: var(--am-radius-mittel);
+  background: var(--am-seite);
+  color: var(--am-text-primaer);
+  font-family: var(--am-schrift-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+.db-sql:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+.db-leiste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--am-raum-3);
+  margin-bottom: var(--am-raum-4);
+}
+.db-leiste .input, .db-leiste select { width: auto; min-width: 12rem; }
+.db-fuss {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--am-raum-3);
+  margin-top: var(--am-raum-3);
+  font-size: 0.8125rem;
+  color: var(--am-text-gedaempft);
+  font-variant-numeric: tabular-nums;
+}

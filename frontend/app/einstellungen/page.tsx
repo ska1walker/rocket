@@ -216,6 +216,7 @@ function Inhalt() {
           <>
             <Sicherungsblock />
             <Einfuhrverweis />
+            <Datenbankverweis />
             <Datenwege e={e} />
           </>
         )}
@@ -317,6 +318,31 @@ function Tresorhinweis({ e }: { e: OrgSettings }) {
         Dienste mit einem leeren Schlüssel hinaus und antworten mit 401.
       </span>
     </div>
+  );
+}
+
+/**
+ * Der Blick in die Datenbank hat eine eigene Seite: Eine Tabelle mit
+ * zwanzig Spalten passt nicht in die schmale Spalte der Einstellungen.
+ */
+function Datenbankverweis() {
+  return (
+    <section className="block">
+      <div className="block-kopf">
+        <h2>Datenbank ansehen</h2>
+      </div>
+      <div className="block-inhalt">
+        <Erklaerung
+          kurz="Die Tabellen Ihrer Organisation ansehen und lesend mit SQL abfragen — für Eigentümer und Verwalter."
+          lang={<>Es gilt dieselbe Zeilensicherheit wie überall in Rocket, geändert wird nichts, und jede Abfrage steht im Protokoll. Tabellen mit Zugangsdaten und Sitzungen sind gesperrt.</>}
+        />
+        <div className="btn-reihe">
+          <Link className="btn btn-sekundaer btn-klein" href="/datenbank">
+            Datenbank öffnen
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
 
