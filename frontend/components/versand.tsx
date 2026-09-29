@@ -81,7 +81,7 @@ export function Versandblock() {
         </span>
       </div>
       <div className="block-inhalt">
-        <Erklaerung kurz="Das E-Mail-Konto, aus dem Beacon Antworten und Bestätigungen schickt." lang={<>Das Konto, aus dem Antworten auf Tickets, Bestätigungsmails und die Ansprache aus dem
+        <Erklaerung kurz="Das E-Mail-Konto, aus dem Rocket Antworten und Bestätigungen schickt." lang={<>Das Konto, aus dem Antworten auf Tickets, Bestätigungsmails und die Ansprache aus dem
           Kontakt kommen. Ein gewöhnliches SMTP-Konto — dasselbe, das Relay oder Ihr Mailprogramm
           benutzt. Jede Mail steht danach im Verlauf des Kontakts, mit dem Faden zur Anfrage.</>} />
 
@@ -232,7 +232,7 @@ export function Marketingversandblock() {
       <div className="block-inhalt">
         <Erklaerung kurz="Marketing-Mails gehen nur an Kontakte mit Einwilligung und tragen immer einen Abmeldelink." lang={<>Marketing-Post geht nur an Kontakte mit belegter Einwilligung — Double-Opt-In oder
           Bestandskunde — und trägt immer einen Abmeldelink. Bestätigen und Abmelden laufen
-          über den öffentlichen Entrance von Beacon; alles andere bleibt hinter der Anmeldung.</>} />
+          über den öffentlichen Entrance von Rocket; alles andere bleibt hinter der Anmeldung.</>} />
 
         <div className="feld">
           <label htmlFor="mk-weg">Versandweg</label>

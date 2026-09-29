@@ -2,7 +2,7 @@
 
 Ohne Datenbank: Hier steht kein Fachwissen über Kontakte, nur die Frage,
 was aus einer Zelle wird und was in eine Zelle kommt. Der wichtigste Test
-ist der Rundlauf: Was Beacon schreibt, muss Beacon wieder lesen können.
+ist der Rundlauf: Was Rocket schreibt, muss Rocket wieder lesen können.
 """
 
 from datetime import date, datetime
@@ -193,7 +193,7 @@ def test_geschrieben_wird_was_ein_mensch_lesen_will():
     [(STUFE, "customer"), (NORMEN, ["iso9001", "tisax"]), (JANEIN, True), (ZAHL, 42), (BETRAG, 1_450_000)],
 )
 def test_rundlauf_geschrieben_und_wieder_gelesen(feld, wert):
-    """Was Beacon exportiert, muss Beacon importieren können."""
+    """Was Rocket exportiert, muss Rocket importieren können."""
     assert wert_lesen(feld, zelle_text(feld, wert, {})) == wert
 
 

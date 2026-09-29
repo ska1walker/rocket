@@ -61,7 +61,7 @@ export function Quellenblock() {
         <h2>Verbundene Programme</h2>
       </div>
       <div className="block-inhalt">
-        <Erklaerung kurz="Andere Programme, die Beacon etwas schicken dürfen — Protokolle, Tickets, Ereignisse." lang={<>Wer hier eingetragen ist, darf Ereignisse schicken: Insilo ein fertiges
+        <Erklaerung kurz="Andere Programme, die Rocket etwas schicken dürfen — Protokolle, Tickets, Ereignisse." lang={<>Wer hier eingetragen ist, darf Ereignisse schicken: Insilo ein fertiges
           Besprechungsprotokoll, eine Schnittstelle oder ein Bot ein Ticket. Jede Quelle
           bekommt eine eigene Adresse und ein eigenes Geheimnis; ohne gültige Signatur kommt
           nichts durch.</>} />
@@ -210,7 +210,7 @@ export function Quellenblock() {
 
 /**
  * Wo Insilo im Browser liegt — damit eine Besprechung auf den Wortlaut
- * verlinken kann, den Beacon bewusst nicht aufbewahrt. Insilos Nutzlast
+ * verlinken kann, den Rocket bewusst nicht aufbewahrt. Insilos Nutzlast
  * trägt keine Adresse; sie steht deshalb an der Quelle.
  */
 function InsiloAdresse({ quelle }: { quelle: Quelle }) {

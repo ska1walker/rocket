@@ -381,7 +381,7 @@ async def _sitzplatz_einnehmen(angemeldet: CurrentUser, sitzplatz_id: UUID) -> C
     stillschweigend ignoriert: Sonst schriebe die Oberfläche Arbeit der
     falschen Person zu und niemand würde es merken.
 
-    Die Abweisung trägt einen Kopf `X-Beacon-Sitzplatz: unbekannt`. Der
+    Die Abweisung trägt einen Kopf `X-Rocket-Sitzplatz: unbekannt`. Der
     Grund steht in `frontend/lib/api.ts`: Nach einer Neuinstallation ist
     die Datenbank neu, der Platz im Browser aber noch der alte — und dann
     scheitert **jeder** Aufruf, ohne dass ein Mensch den Zusammenhang
@@ -405,7 +405,7 @@ async def _sitzplatz_einnehmen(angemeldet: CurrentUser, sitzplatz_id: UUID) -> C
         raise HTTPException(
             status_code=403,
             detail="Dieser Sitzplatz gehört nicht zu Ihrer Organisation.",
-            headers={"X-Beacon-Sitzplatz": "unbekannt"},
+            headers={"X-Rocket-Sitzplatz": "unbekannt"},
         )
 
     return CurrentUser(
@@ -469,7 +469,7 @@ async def _noch_unbewohnt() -> bool:
 async def get_current_user(
     request: Request,
     x_bfl_user: str | None = Header(None, alias="X-Bfl-User"),
-    x_beacon_sitzplatz: str | None = Header(None, alias="X-Beacon-Sitzplatz"),
+    x_rocket_sitzplatz: str | None = Header(None, alias="X-Rocket-Sitzplatz"),
 ) -> CurrentUser:
     """Wer handelt — aus der eigenen Sitzung, sonst aus dem Olares-Kopf.
 
@@ -484,7 +484,7 @@ async def get_current_user(
     Nutzer, kein Passwort und keine Einladung. Ohne Ausnahme wäre eine aus
     dem Markt installierte App unbenutzbar — 401 auf alles, und niemand,
     der einen Zugang anlegen könnte. Genau das ist am 8. September einem
-    zweiten Nutzer passiert, der Beacon frisch auf seiner eigenen Box
+    zweiten Nutzer passiert, der Rocket frisch auf seiner eigenen Box
     installierte.
 
     Solange **niemand** ein Passwort hat, zählt der Kopf deshalb weiter;
@@ -508,7 +508,7 @@ async def get_current_user(
     if angemeldet is None:
         raise HTTPException(status_code=401, detail="Nicht angemeldet.")
 
-    gewaehlt = (x_beacon_sitzplatz or "").strip()
+    gewaehlt = (x_rocket_sitzplatz or "").strip()
     if not gewaehlt:
         return angemeldet
 

@@ -190,7 +190,7 @@ function Kontomenue({
 /**
  * Abmelden — nur, wenn es etwas abzumelden gibt.
  *
- * Im Modus `olares` prüft der Sidecar, und ein „Abmelden" in Beacon wäre
+ * Im Modus `olares` prüft der Sidecar, und ein „Abmelden" in Rocket wäre
  * eine Attrappe: Der nächste Aufruf käme mit demselben geprüften Kopf
  * zurück und wäre wieder drin. Deshalb fragt diese Zeile erst, wie die
  * Lage ist, und zeigt sich nur dann, wenn die Antwort eine eigene

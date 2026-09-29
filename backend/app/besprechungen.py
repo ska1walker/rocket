@@ -7,11 +7,11 @@ der Besprechung, kein Zustand einer Warteschlange.
 
 Zwei Regeln, beide mit Kai und Marc am 15.9.2026 festgelegt:
 
-* **Protokoll ja, Wortlaut nein.** Beacon behält Insilos Markdown ohne den
+* **Protokoll ja, Wortlaut nein.** Rocket behält Insilos Markdown ohne den
   Abschnitt „## Volltranskript" und ohne die rohe Nutzlast. Der Wortlaut
   bleibt in Insilo, die Oberfläche verlinkt dorthin. Ein Vertrieb liest das
   Protokoll; wer den genauen Satz braucht, geht an die Quelle.
-* **Nie automatisch zugeordnet.** Beacon schlägt vor, ein Mensch bestätigt.
+* **Nie automatisch zugeordnet.** Rocket schlägt vor, ein Mensch bestätigt.
   Insilo kennt von den Beteiligten nur Namen — keine E-Mail, keine Kennung
   —, und zwei Kontakte heißen Meyer. Ein Protokoll am falschen Kunden ist
   schlimmer als eines, das auf einen Klick wartet.
@@ -20,9 +20,9 @@ Und seit Insilo 0.1.102 eine dritte:
 
 * **Nur Kundengespräche.** Insilo legt an der Vorlage fest, was ins CRM
   gehört, und schreibt es als `crm: true|false` in die Datei und in den
-  Webhook. Beacon übernimmt nur `crm: true`. Gefiltert wird nicht am
+  Webhook. Rocket übernimmt nur `crm: true`. Gefiltert wird nicht am
   Vorlagennamen — den kann eine Organisation in Insilo umbenennen. Fehlt der
-  Schlüssel, stammt die Besprechung von einem älteren Insilo, und Beacon
+  Schlüssel, stammt die Besprechung von einem älteren Insilo, und Rocket
   übernimmt sie wie bisher (`nicht_fuers_crm`).
 """
 
@@ -512,7 +512,7 @@ async def vorschlagen(conn: asyncpg.Connection, besprechung_id: UUID) -> dict[st
 
 
 def braucht_modell(vorschlag: dict[str, Any]) -> bool:
-    """Das Modell fragt Beacon nur, wenn die Namen gar nichts ergaben.
+    """Das Modell fragt Rocket nur, wenn die Namen gar nichts ergaben.
 
     Bei einer Mehrdeutigkeit hilft es nicht: Es sähe dieselben zwei Meyers
     und müsste raten.
@@ -524,7 +524,7 @@ async def vorschlag_ueber_modell(conn: asyncpg.Connection, org_id: UUID, besprec
     """Stufe 2: das Modell, mit der Zusammenfassung und einer kurzen Kandidatenliste.
 
     Das Modell bekommt **nicht** den ganzen Bestand und nicht den Wortlaut
-    (den hat Beacon gar nicht), sondern höchstens `MODELL_KANDIDATEN`
+    (den hat Rocket gar nicht), sondern höchstens `MODELL_KANDIDATEN`
     Firmen, deren Namen mit dem Gespräch ein Wort teilen, und deren
     Kontakte. Jede Kennung in der Antwort muss aus dieser Liste stammen —
     sonst wäre ein erfundener Datensatz nur eine Kennung entfernt.

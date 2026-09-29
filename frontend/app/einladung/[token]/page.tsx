@@ -14,7 +14,7 @@ export default function EinladungsSeite({
   params: Promise<{ token: string }>;
 }) {
   const { token } = use(params);
-  // Welches Beacon? Auf dem Handy ist die Adresszeile abgeschnitten, und
+  // Welches Rocket? Auf dem Handy ist die Adresszeile abgeschnitten, und
   // ein Einladungslink von einer fremden Box sieht sonst aus wie einer von
   // der eigenen. Der Ursprung steht deshalb im Text.
   const [wo, setWo] = useState("");

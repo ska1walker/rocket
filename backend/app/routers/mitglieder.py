@@ -500,7 +500,7 @@ class Absenderkonto(BaseModel):
     smtp_sicherheit: str | None = None
     # Der Absender der Organisation — als Vergleich in der Oberfläche.
     haus_absender: str | None = None
-    # Liest Beacon ein Postfach? Nur dann trägt eine Mail `Reply-To` zurück,
+    # Liest Rocket ein Postfach? Nur dann trägt eine Mail `Reply-To` zurück,
     # und nur dann darf die Oberfläche das versprechen.
     postfach_aktiv: bool = False
 

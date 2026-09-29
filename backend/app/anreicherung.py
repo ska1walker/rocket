@@ -52,7 +52,7 @@ log = logging.getLogger(__name__)
 ZEITLIMIT_S = 12.0
 SEITE_MAX_BYTES = 600_000
 TEXT_MAX_ZEICHEN = 6_000
-KENNUNG = "beacon/0.1 (+https://aimighty.de)"
+KENNUNG = "rocket/0.1 (+https://aimighty.de)"
 
 # Welche Felder ein Lauf je Datensatz füllen darf. Was nicht hier steht,
 # erreicht die Datenbank nicht — egal, was das Modell zurückgibt.
@@ -142,7 +142,7 @@ class Suchdienst:
         return "searxng"
 
 
-# Welche Anbieter Beacon bei einer eigenen SearXNG-Instanz ausdrücklich
+# Welche Anbieter Rocket bei einer eigenen SearXNG-Instanz ausdrücklich
 # nennt — statt die Vorgabe der Instanz zu nehmen.
 #
 # **Warum das nötig ist.** Eine selbst betriebene Instanz wird mit der Zeit
@@ -181,7 +181,7 @@ def _suchantwort_pruefen(antwort: httpx.Response, suche: Suchdienst) -> None:
     """Was der Suchdienst geantwortet hat — in einem Satz, der weiterhilft.
 
     Vorher lief jeder Fehlschlag in `raise_for_status` und kam als „Der
-    Endpunkt hat mit 401 geantwortet" heraus. Beacon spricht aber mit
+    Endpunkt hat mit 401 geantwortet" heraus. Rocket spricht aber mit
     **zwei** Endpunkten, dem Sprachmodell und der Suche, und der Satz
     ließ offen, welcher gemeint war. Wer den Suchschlüssel gerade neu
     eingetragen hatte, suchte den Fehler zwangsläufig an der falschen
@@ -189,7 +189,7 @@ def _suchantwort_pruefen(antwort: httpx.Response, suche: Suchdienst) -> None:
 
     Tavily beantwortet außerdem jede Anfrage ohne gültigen Schlüssel mit
     401 — auch eine, die im falschen Format gestellt wurde. Deshalb steht
-    die aufgerufene Adresse mit im Satz: An ihr sieht man, ob Beacon
+    die aufgerufene Adresse mit im Satz: An ihr sieht man, ob Rocket
     überhaupt den richtigen Weg genommen hat.
     """
     if antwort.status_code not in (401, 403, 429):

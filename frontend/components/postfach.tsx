@@ -14,7 +14,7 @@ type Bilanz = { gelesen: number; tickets: number; uebergangen: number; doppelt: 
 /**
  * Das Postfach, aus dem Tickets entstehen.
  *
- * Beacon sitzt hier als **zweiter** Klient auf einem Postfach, vor dem
+ * Rocket sitzt hier als **zweiter** Klient auf einem Postfach, vor dem
  * schon ein Mensch sitzt — in diesem Haus Relay. Deshalb steht der Satz
  * über das Nichtanfassen so deutlich da: Wer eine Einrichtung vornimmt,
  * muss wissen, dass sein Posteingang danach genauso aussieht wie vorher.
@@ -85,7 +85,7 @@ export function Postfachblock() {
         {e?.imap_aktiv && <span className="pille pille-erfolg">holt ab</span>}
       </div>
       <div className="block-inhalt">
-        <Erklaerung kurz="Beacon liest Ihr Postfach mit und macht aus neuen Mails Tickets — ohne etwas zu verändern." lang={<>Beacon holt eingehende Post ab und macht Tickets daraus. Es <strong>fasst dabei nichts
+        <Erklaerung kurz="Rocket liest Ihr Postfach mit und macht aus neuen Mails Tickets — ohne etwas zu verändern." lang={<>Rocket holt eingehende Post ab und macht Tickets daraus. Es <strong>fasst dabei nichts
           an</strong>: keine Nachricht wird als gelesen markiert, nichts verschoben, nichts
           gelöscht. Ihr Posteingang sieht danach aus wie vorher — auch in Relay. Gemerkt wird
           nur, bis wohin gelesen wurde.</>} />

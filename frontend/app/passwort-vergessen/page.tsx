@@ -5,7 +5,7 @@
 // Bewusst **kein** Rücksetzlink per Mail: Auf einer frischen Box ist kein
 // Postfach eingerichtet, ein solcher Link käme nie an — und er verlagerte
 // das Vertrauen in ein Postfach, das wir nicht kennen. Stattdessen legt
-// Beacon den Code in seinen eigenen Datenordner. Wer an die Box kommt,
+// Rocket den Code in seinen eigenen Datenordner. Wer an die Box kommt,
 // liest ihn dort. Wer nicht, kommt auch nicht an den Bestand.
 //
 // Diese Seite verrät nie, ob es den eingegebenen Zugang gibt. Der erste
@@ -63,7 +63,7 @@ export default function PasswortVergessenSeite() {
         titel="Passwort vergessen"
         unter={
           <>
-            Beacon legt einen Code in seinen Datenordner auf dieser Box. Sie brauchen Zugriff
+            Rocket legt einen Code in seinen Datenordner auf dieser Box. Sie brauchen Zugriff
             auf die Box, um ihn zu lesen. Kennen Sie Ihren Namen nicht, tragen Sie
             irgendetwas ein — die Datei nennt dann die Zugänge dieser Box.
           </>

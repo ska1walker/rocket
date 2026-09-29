@@ -1,7 +1,7 @@
 """Besprechungen aus Insilo — empfangen, vorschlagen, zuordnen.
 
 Zwei Regeln halten diese Tests fest, beide mit Kai und Marc am 15.9.2026
-festgelegt: Beacon behält das Protokoll, **nicht** den Wortlaut. Und nichts
+festgelegt: Rocket behält das Protokoll, **nicht** den Wortlaut. Und nichts
 wird ungefragt einem Kunden zugeordnet — auch nicht bei einem eindeutigen
 Treffer, und schon gar nicht, wenn zwei Kontakte Meyer heißen.
 """
@@ -125,7 +125,7 @@ def test_sprecher_ohne_nummern_und_beteiligte_ohne_doppel():
         {"anwesende": ["Frau Lohse", "Herr Vogel"], "kunde": "Frau Schäfer (HR-Leitung)"},
     )
     # „Frau Lohse" ist nicht dieselbe Zeichenkette wie „Katrin Lohse",
-    # aber Beacon vergleicht erst später — hier wird nur Gleiches entfernt.
+    # aber Rocket vergleicht erst später — hier wird nur Gleiches entfernt.
     assert "Herr Vogel" in beteiligte
     assert "Frau Schäfer" in beteiligte
     assert beteiligte.count("Katrin Lohse") == 1

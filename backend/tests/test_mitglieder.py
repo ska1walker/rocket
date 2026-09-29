@@ -19,7 +19,7 @@ def mit_sitzplatz(login: str, sitzplatz: str) -> AsyncClient:
     return AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test",
-        headers={"X-Bfl-User": login, "X-Beacon-Sitzplatz": sitzplatz},
+        headers={"X-Bfl-User": login, "X-Rocket-Sitzplatz": sitzplatz},
     )
 
 
@@ -138,7 +138,7 @@ async def test_fremder_sitzplatz_wird_abgewiesen(datenbank):
     assert "nicht zu Ihrer Organisation" in antwort.json()["detail"]
     # Der Kopf ist das, woran die Oberfläche es erkennt. An der Meldung
     # dürfte sie es nicht festmachen — die ist Text für Menschen.
-    assert antwort.headers["x-beacon-sitzplatz"] == "unbekannt"
+    assert antwort.headers["x-rocket-sitzplatz"] == "unbekannt"
 
 
 async def test_ein_platz_aus_einer_geloeschten_installation_meldet_sich(datenbank):
@@ -158,7 +158,7 @@ async def test_ein_platz_aus_einer_geloeschten_installation_meldet_sich(datenban
         antwort = await versuch.get("/api/companies")
 
     assert antwort.status_code == 403
-    assert antwort.headers["x-beacon-sitzplatz"] == "unbekannt"
+    assert antwort.headers["x-rocket-sitzplatz"] == "unbekannt"
 
 
 async def test_unsinniger_sitzplatz_wird_abgewiesen(datenbank):

@@ -66,7 +66,7 @@ async function anfrage<T>(pfad: string, init?: RequestInit): Promise<T> {
 
   const koepfe: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(sitzplatz ? { "X-Beacon-Sitzplatz": sitzplatz } : {}),
+    ...(sitzplatz ? { "X-Rocket-Sitzplatz": sitzplatz } : {}),
     ...((init?.headers as Record<string, string>) ?? {}),
   };
   // Ein leerer Wert heißt „diesen Kopf nicht setzen" — siehe `postForm`.
@@ -75,7 +75,7 @@ async function anfrage<T>(pfad: string, init?: RequestInit): Promise<T> {
   const antwort = await fetch(pfad, { ...init, headers: koepfe });
 
   if (antwort.status === 401) zurZurAnmeldung(pfad);
-  if (antwort.headers.get("X-Beacon-Sitzplatz") === "unbekannt") platzRaeumen();
+  if (antwort.headers.get("X-Rocket-Sitzplatz") === "unbekannt") platzRaeumen();
 
   if (!antwort.ok) {
     // FastAPI legt den Grund unter `detail` ab. Steht dort nichts

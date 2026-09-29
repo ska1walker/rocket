@@ -318,7 +318,7 @@ async def test_ohne_schluessel_wie_bisher(datenbank, ordner):
 
 
 async def test_umgestellte_vorlage_zieht_zurueck_und_wieder_hervor(datenbank, ordner):
-    """In Insilo umgestellt: Insilo schreibt die Datei neu, Beacon folgt."""
+    """In Insilo umgestellt: Insilo schreibt die Datei neu, Rocket folgt."""
     async with klient_fuer("crm-c") as k:
         kennung = str(uuid4())
         name = "2026-09-16T08_00--umst0000.md"
@@ -393,15 +393,15 @@ async def test_webhook_uebernimmt_nur_markiertes(datenbank):
         assert titel == ["Kundentermin", "Von früher"]
 
 
-async def test_was_ein_aelteres_beacon_schon_gelesen_hat_wird_neu_geprueft(datenbank, ordner, monkeypatch):
+async def test_was_ein_aelteres_rocket_schon_gelesen_hat_wird_neu_geprueft(datenbank, ordner, monkeypatch):
     """Die Regression von Kais Box, 16.9.2026.
 
     Insilo 0.1.102 schrieb die Dateien mit `crm: false` neu. Das noch
-    laufende Beacon 0.11.0 las sie Minuten später, kannte die Markierung
-    nicht, übernahm sie und speicherte den neuen Stand. Beacon 0.12.0 hielt
+    laufende Rocket 0.11.0 las sie Minuten später, kannte die Markierung
+    nicht, übernahm sie und speicherte den neuen Stand. Rocket 0.12.0 hielt
     sie danach für unverändert und prüfte die Markierung nie — alle 14
     internen Besprechungen blieben stehen. Genau die empfohlene Reihenfolge:
-    erst Insilo, dann Beacon.
+    erst Insilo, dann Rocket.
     """
     import dataclasses
 
@@ -414,16 +414,16 @@ async def test_was_ein_aelteres_beacon_schon_gelesen_hat_wird_neu_geprueft(daten
         # Insilo schreibt die Datei mit der Markierung neu …
         _legen(ordner, name, ablagedatei(kennung, "Teamrunde", crm=False) + "\n")
 
-        # … und das alte Beacon liest sie: Markierung unbekannt, keine Fassung.
+        # … und das alte Rocket liest sie: Markierung unbekannt, keine Fassung.
         echt_lesen = insilo_ablage.lesen
         monkeypatch.setattr(
             insilo_ablage, "lesen", lambda text: dataclasses.replace(echt_lesen(text), crm=None)
         )
         monkeypatch.setattr(insilo_ablage, "LESEFASSUNG", None)
         alt = (await k.post("/api/besprechungen/ablage/lesen")).json()
-        assert alt["geaendert"] == 1, "das alte Beacon hat die neue Datei übernommen"
+        assert alt["geaendert"] == 1, "das alte Rocket hat die neue Datei übernommen"
 
-        # Jetzt läuft das neue Beacon.
+        # Jetzt läuft das neue Rocket.
         monkeypatch.setattr(insilo_ablage, "lesen", echt_lesen)
         monkeypatch.setattr(insilo_ablage, "LESEFASSUNG", 2)
         neu = (await k.post("/api/besprechungen/ablage/lesen")).json()

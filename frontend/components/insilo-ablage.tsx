@@ -13,7 +13,7 @@ import { Fehler, Laedt } from "@/components/zustaende";
  * Insilo auf derselben Box — über den gemeinsamen Ordner, wie Relay.
  *
  * Kein Webhook, kein Geheimnis: Insilo legt jedes fertige Protokoll in den
- * geteilten Ordner der Box, Beacon liest alle zwei Minuten mit. Dieser
+ * geteilten Ordner der Box, Rocket liest alle zwei Minuten mit. Dieser
  * Block sagt, ob das gerade geschieht, und beweist es mit „Jetzt lesen".
  */
 export function InsiloAblageblock() {
@@ -79,13 +79,13 @@ export function InsiloAblageblock() {
       </div>
       <div className="block-inhalt">
         <Erklaerung
-          kurz="Besprechungen aus Insilo, ohne Webhook: Beacon liest den Ordner, in den Insilo seine Protokolle legt."
+          kurz="Besprechungen aus Insilo, ohne Webhook: Rocket liest den Ordner, in den Insilo seine Protokolle legt."
           lang={
             <>
               Insilo legt jedes fertige Protokoll — ohne Wortlaut — in den gemeinsamen Ordner der Box.
-              Beacon sieht dort alle zwei Minuten nach; Relay liest denselben Ordner. Nichts wird
+              Rocket sieht dort alle zwei Minuten nach; Relay liest denselben Ordner. Nichts wird
               ungefragt einem Kunden zugeordnet. Den Ordner sehen alle Programme auf der Box, die
-              ihn anfordern — wer Protokolle nur an Beacon geben will, nimmt stattdessen einen Webhook.
+              ihn anfordern — wer Protokolle nur an Rocket geben will, nimmt stattdessen einen Webhook.
             </>
           }
         />
@@ -127,7 +127,7 @@ export function InsiloAblageblock() {
               hinweis={
                 s.einstellung === null
                   ? s.organisationen === 1
-                    ? "Von selbst an: Beacon hat auf dieser Box nur eine Organisation."
+                    ? "Von selbst an: Rocket hat auf dieser Box nur eine Organisation."
                     : "Von selbst aus: Auf dieser Box gibt es mehrere Organisationen — nur die, die hier einschaltet, bekommt die Gespräche."
                   : undefined
               }

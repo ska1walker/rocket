@@ -1,6 +1,6 @@
 """Die aktuelle Liste als CSV.
 
-Der wichtigste Test ist der letzte: Was Beacon exportiert, muss Beacon
+Der wichtigste Test ist der letzte: Was Rocket exportiert, muss Rocket
 wieder importieren können. Alles andere prüft, dass die Datei dieselbe
 Auswahl trägt wie der Bildschirm — Filter, Spalten, Sortierung.
 """
@@ -38,7 +38,7 @@ async def test_die_datei_ist_fuer_deutsches_excel_gemacht(datenbank):
     assert "\r\n" in antwort.text
     assert "Müller" in antwort.text
     assert antwort.headers["content-disposition"].startswith("attachment")
-    assert "beacon-kontakte-" in antwort.headers["content-disposition"]
+    assert "rocket-kontakte-" in antwort.headers["content-disposition"]
     assert antwort.headers["x-content-type-options"] == "nosniff"
 
 
@@ -173,7 +173,7 @@ async def test_jede_ausfuhr_steht_im_protokoll(datenbank):
 # ---- Der Rundlauf ------------------------------------------------------
 
 
-async def test_was_beacon_schreibt_kann_beacon_wieder_lesen(datenbank):
+async def test_was_rocket_schreibt_kann_rocket_wieder_lesen(datenbank):
     """Der Beweis, dass Ausfuhr und Einfuhr dieselbe Sprache sprechen."""
     async with klient_fuer("aus-rund-eins") as quelle:
         await _kontakt(

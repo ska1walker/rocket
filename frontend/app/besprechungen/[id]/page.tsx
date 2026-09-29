@@ -24,7 +24,7 @@ function Text({ text }: { text: string }) {
 /**
  * Eine Besprechung: links das Protokoll, rechts, wem sie gehört.
  *
- * Der Wortlaut steht nicht hier — Beacon bewahrt ihn bewusst nicht auf.
+ * Der Wortlaut steht nicht hier — Rocket bewahrt ihn bewusst nicht auf.
  * Wer den genauen Satz braucht, öffnet Insilo.
  */
 export default function BesprechungSeite() {

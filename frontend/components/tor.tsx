@@ -39,7 +39,7 @@ export function Tor({
       >
         <div className="tor-marke">
           <Marke />
-          <span className="marke-produkt">Beacon</span>
+          <span className="marke-produkt">Rocket</span>
         </div>
 
         <h1 className="tor-titel">{titel}</h1>

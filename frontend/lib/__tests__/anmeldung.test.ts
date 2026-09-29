@@ -9,7 +9,7 @@ describe("zielPfad", () => {
 
   it("schickt niemanden auf eine fremde Seite", () => {
     // Ohne diese Prüfung wäre der Parameter eine offene Weiterleitung:
-    // Der Link sieht aus wie Beacon und endet auf einer nachgebauten Maske.
+    // Der Link sieht aus wie Rocket und endet auf einer nachgebauten Maske.
     expect(zielPfad("https://boese.example/anmelden")).toBe("/");
     expect(zielPfad("//boese.example")).toBe("/");
     expect(zielPfad("javascript:alert(1)")).toBe("/");

@@ -823,7 +823,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   @media (min-width: 1024px) {
     .huelle {
-      /* 240 statt 220: Wappen, Wortmarke, „Beacon" und der Klappschalter
+      /* 240 statt 220: Wappen, Wortmarke, „Rocket" und der Klappschalter
          brauchen zusammen 227 px. Bei 220 lief die Beschriftung aus ihrem
          Kasten heraus und der Fokusring des Knopfes legte sich über das
          letzte Zeichen. */
@@ -1093,7 +1093,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   beacon — Bauteile der Anwendung
+   rocket — Bauteile der Anwendung
 
    Die Bedienung folgt HubSpot: linke Navigation, dichte Listenansicht,
    dreispaltige Datensatzseite, Pipeline als Board. Die Werte kommen aus
@@ -4337,7 +4337,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
    Deshalb steht sie in der Schrift, in der sich l und 1 unterscheiden. */
 .tor-kennung { font-family: var(--am-schrift-mono); }
 
-/* Welches Beacon. Auf dem Handy ist die Adresszeile abgeschnitten. */
+/* Welches Rocket. Auf dem Handy ist die Adresszeile abgeschnitten. */
 .tor-wo { font-family: var(--am-schrift-mono); overflow-wrap: anywhere; }
 
 .einladung-fuer .mono { font-family: var(--am-schrift-mono); }

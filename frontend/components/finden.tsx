@@ -12,7 +12,7 @@ import { Fehler } from "@/components/zustaende";
  * Beschreiben statt tippen.
  *
  * „Baustoffhandel im Tecklenburger Land, der Geschäftsführer heißt
- * vermutlich Sebastian“ — und Beacon sucht sich den Rest zusammen. Drei
+ * vermutlich Sebastian“ — und Rocket sucht sich den Rest zusammen. Drei
  * Schritte, an denen ein Mensch die Hand behält:
  *
  * 1. Kandidaten aus den Suchtreffern, ein Mensch wählt.
@@ -124,16 +124,16 @@ export function Finden({
           {festeFirma
             ? `Beschreiben, wen Sie bei ${firma.name} meinen`
             : art === "contact"
-              ? "Beschreiben, wen Sie meinen — Beacon sucht Firma und Person"
-              : "Beschreiben, welche Firma Sie meinen — Beacon sucht den Rest"}
+              ? "Beschreiben, wen Sie meinen — Rocket sucht Firma und Person"
+              : "Beschreiben, welche Firma Sie meinen — Rocket sucht den Rest"}
         </span>
       </div>
 
       {fehlt ? (
         <p className="erfassung-hinweis warnung">
           {!status.data!.llm_ready
-            ? "Dafür braucht Beacon ein Sprachmodell."
-            : "Dafür braucht Beacon einen Suchdienst — ohne ihn findet es keine Firma, die es noch nicht kennt."}{" "}
+            ? "Dafür braucht Rocket ein Sprachmodell."
+            : "Dafür braucht Rocket einen Suchdienst — ohne ihn findet es keine Firma, die es noch nicht kennt."}{" "}
           <Link href="/einstellungen?bereich=ki">Unter KI und Programme eintragen.</Link>
         </p>
       ) : (

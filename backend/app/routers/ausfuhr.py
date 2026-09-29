@@ -127,7 +127,7 @@ async def ausfuhr(
         media_type="text/csv; charset=utf-8",
         headers={
             "Content-Disposition":
-                f'attachment; filename="beacon-{dateiname}-{date.today().isoformat()}.csv"',
+                f'attachment; filename="rocket-{dateiname}-{date.today().isoformat()}.csv"',
             "X-Content-Type-Options": "nosniff",
         },
     )

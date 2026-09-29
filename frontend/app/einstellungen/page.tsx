@@ -83,7 +83,7 @@ function KIBlock({ e }: { e: OrgSettings }) {
       <div className="block-inhalt">
         <Erklaerung
           kurz="Der KI-Assistent braucht ein Sprachmodell — meist die LiteLLM-App auf dieser Box."
-          lang={<>Beacon bringt kein eigenes Modell mit. Es spricht einen OpenAI-kompatiblen Endpunkt an. Es gibt bewusst keine Vorgabe: Jede geratene Adresse wäre auf einer anderen Box falsch. Solange hier nichts steht, bleiben die KI-Funktionen gesperrt und sagen das — statt in einen Verbindungsfehler zu laufen.</>}
+          lang={<>Rocket bringt kein eigenes Modell mit. Es spricht einen OpenAI-kompatiblen Endpunkt an. Es gibt bewusst keine Vorgabe: Jede geratene Adresse wäre auf einer anderen Box falsch. Solange hier nichts steht, bleiben die KI-Funktionen gesperrt und sagen das — statt in einen Verbindungsfehler zu laufen.</>}
         />
         <form onSubmit={(ev) => { ev.preventDefault(); speichern.mutate(); }}>
           <div className="feld">
@@ -281,7 +281,7 @@ function Passworthinweis() {
         <strong>Sie haben noch kein Passwort.</strong> Solange niemand hier eines hat, kommt
         herein, wer an dieser Box angemeldet ist. Setzen Sie eines über das Schlüsselsymbol
         in Ihrer eigenen Zeile unter „Wer hier arbeitet" — damit gilt der Olares-Zugang für
-        Beacon nicht mehr.
+        Rocket nicht mehr.
       </span>
     </div>
   );

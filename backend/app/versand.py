@@ -40,7 +40,7 @@ from app.config import settings
 # Olares adressiert einen Entrance als <appid><index>.<nutzer>.<zone>, mit
 # appid = md5(<appname>)[:8]. Der öffentliche Entrance ist der zweite im
 # Manifest (Index 1). Gemessen am 5.9.2026, docs/BETRIEB.md.
-APP_NAME = "beacon"
+APP_NAME = "rocket"
 OEFFENTLICHER_INDEX = 1
 
 SICHERHEIT = ("starttls", "ssl", "keine")
@@ -112,7 +112,7 @@ def basis_url(einst: dict[str, Any] | None) -> str | None:
     """Wo Bestätigen, Abmelden und Klick erreichbar sind.
 
     Ein eigener Wert in den Einstellungen gewinnt. Sonst aus der Domain,
-    die Olares dem Chart mitgibt (`.Values.domain.beacon`, hier als
+    die Olares dem Chart mitgibt (`.Values.domain.rocket`, hier als
     APP_DOMAIN): erste Stufe abschneiden, den öffentlichen Entrance davor.
     """
     eigen = ((einst or {}).get("links_basis_url") or "").strip()
@@ -235,7 +235,7 @@ Sender = Callable[[Smtp, EmailMessage], Awaitable[None]]
 
 
 def neue_message_id(absender: str) -> str:
-    domain = absender.rsplit("@", 1)[-1] if "@" in absender else "beacon.local"
+    domain = absender.rsplit("@", 1)[-1] if "@" in absender else "rocket.local"
     return make_msgid(domain=domain)
 
 
@@ -255,7 +255,7 @@ def nachricht_bauen(
     m["From"] = konto.von
     m["To"] = an
     # Damit die Antwort im Bestand landet und nicht im privaten Postfach:
-    # Beacon liest genau ein Postfach je Organisation. Schickt jemand unter
+    # Rocket liest genau ein Postfach je Organisation. Schickt jemand unter
     # seiner eigenen Adresse, käme die Antwort dort an, wo niemand sie
     # einliest — und der Faden im CRM bliebe stumm.
     if antwort_an and antwort_an.strip().lower() != konto.absender.strip().lower():
@@ -263,7 +263,7 @@ def nachricht_bauen(
     m["Subject"] = betreff
     m["Message-ID"] = message_id
     m["Date"] = datetime.now().astimezone()
-    m["X-Mailer"] = "beacon"
+    m["X-Mailer"] = "rocket"
     if in_reply_to:
         m["In-Reply-To"] = in_reply_to
         m["References"] = referenzen or in_reply_to
@@ -436,7 +436,7 @@ async def versenden(
             text = f"{text.rstrip()}\n\n—\nKeine weiteren Mails? Hier abmelden: {abmelde_url}\n"
         text = rendern(text, {"abmeldelink": abmelde_url or ""})
 
-    # Beacon liest genau ein Postfach je Organisation. Schickt jemand unter
+    # Rocket liest genau ein Postfach je Organisation. Schickt jemand unter
     # eigener Adresse, käme die Antwort dort an, wo niemand sie einliest —
     # also zeigt `Reply-To` zurück auf das Postfach der Organisation.
     antwort_an = None

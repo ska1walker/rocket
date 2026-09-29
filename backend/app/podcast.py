@@ -20,7 +20,7 @@ Drei Schritte, alle auf der Box:
    MP3-Datei zusammengefügt und unter /app/data abgelegt.
 
 Nichts verlässt die Box: Modell und Sprachausgabe laufen dort, die Datei
-liegt dort, abgespielt wird sie in Beacon.
+liegt dort, abgespielt wird sie in Rocket.
 """
 
 from __future__ import annotations

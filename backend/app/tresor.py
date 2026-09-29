@@ -38,7 +38,7 @@ from app.config import settings
 # Die Marke sagt zweierlei: dass der Wert verschlüsselt ist, und mit
 # welchem Verfahren. Ohne sie ließe sich nicht unterscheiden, ob ein Wert
 # noch aus der Zeit davor stammt.
-MARKE = "beacon1:"
+MARKE = "rocket1:"
 DATEI = "tresor.key"
 
 _schluessel: bytes | None = None

@@ -1069,7 +1069,7 @@ export interface Absenderkonto {
   smtp_sicherheit: string | null;
   /** Der Absender der Organisation, als Vergleich. */
   haus_absender: string | null;
-  /** Liest Beacon ein Postfach? Nur dann trägt eine Mail `Reply-To` zurück. */
+  /** Liest Rocket ein Postfach? Nur dann trägt eine Mail `Reply-To` zurück. */
   postfach_aktiv: boolean;
 }
 

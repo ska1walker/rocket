@@ -195,7 +195,7 @@ export function HeuteVorbereitet() {
  * **Warum zwei Felder.** Bis 0.9.5 gab es nur eine Auswahl, beschriftet
  * „Stimme" — gespeichert wurde darin aber das *Modell*. Das ging auf,
  * solange am anderen Ende Speaches mit Piper-Modellen hängt: Dort ist die
- * Stimme das Modell, und Beacon erriet den Rest. Bei jedem anderen
+ * Stimme das Modell, und Rocket erriet den Rest. Bei jedem anderen
  * OpenAI-kompatiblen Dienst sind es zwei Dinge — Modell `tts-voxtral`,
  * Stimme `clone:new` —, und für das zweite gab es kein Feld. Marc meldete
  * das am 10.9.2026 von seiner Box mit Omnivoice.
@@ -266,7 +266,7 @@ export function Sprachausgabeblock({ e }: { e: OrgSettings }) {
   const [modell1, setModell1] = useState(e.tts_modell);
   const [modell2, setModell2] = useState(e.tts_modell_2);
   // Bei Speaches steht die Stimme am Modell und diese beiden bleiben leer;
-  // Beacon errät sie dann. Jeder andere Dienst braucht sie ausdrücklich.
+  // Rocket errät sie dann. Jeder andere Dienst braucht sie ausdrücklich.
   const [stimme1, setStimme1] = useState(e.tts_stimme ?? "");
   const [stimme2, setStimme2] = useState(e.tts_stimme_2 ?? "");
   const [automatisch, setAutomatisch] = useState(e.podcast_automatisch);
@@ -350,8 +350,8 @@ export function Sprachausgabeblock({ e }: { e: OrgSettings }) {
       </div>
       <div className="block-inhalt">
         <Erklaerung
-          kurz="Für „Gespräch vorbereiten“ als Podcast: Beacon spricht die Folgen über einen Sprachdienst auf dieser Box — meist Speaches."
-          lang={<>Beacon spricht einen OpenAI-kompatiblen Sprachdienst an (<code>/v1/audio/speech</code>). Auf der Box heißt die Adresse
+          kurz="Für „Gespräch vorbereiten“ als Podcast: Rocket spricht die Folgen über einen Sprachdienst auf dieser Box — meist Speaches."
+          lang={<>Rocket spricht einen OpenAI-kompatiblen Sprachdienst an (<code>/v1/audio/speech</code>). Auf der Box heißt die Adresse
             meist <code>http://speaches.&lt;namespace&gt;.svc.cluster.local:8000</code>; den Namespace nennt <code>kubectl get svc -A | grep speaches</code>.
             Deutsche Stimmen sind Piper-Modelle; beim Einrichten lädt der Sprachdienst sie selbst von Hugging Face — ohne Kundendaten,
             und nur dieses eine Mal. Thorsten klingt gut, die weiblichen Stimmen sind hörbar einfacher. Die fertigen Folgen liegen
@@ -361,7 +361,7 @@ export function Sprachausgabeblock({ e }: { e: OrgSettings }) {
           <div className="feld">
             <label htmlFor="tts-adresse">Adresse</label>
             <input id="tts-adresse" value={adresse} onChange={(ev) => setAdresse(ev.target.value)} placeholder="http://speaches.speachesv3-shared.svc.cluster.local:8000" />
-            <p className="feld-hinweis">Ohne <code>/v1</code> — das hängt Beacon selbst an.</p>
+            <p className="feld-hinweis">Ohne <code>/v1</code> — das hängt Rocket selbst an.</p>
           </div>
           <div className="feld">
             <label htmlFor="tts-schluessel">Zugangsschlüssel <span className="optional">optional</span></label>

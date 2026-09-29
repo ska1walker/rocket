@@ -6,7 +6,7 @@ wichtigste Entscheidung hier: Was der Mensch auf dem Bildschirm gesehen
 hat, ist genau das, was danach geschieht — keine zweite Bewertung, die
 sich anders entscheiden könnte.
 
-Weil dieselbe Datei zweimal hochgeladen wird, bewahrt Beacon zwischendurch
+Weil dieselbe Datei zweimal hochgeladen wird, bewahrt Rocket zwischendurch
 nichts auf. Kein Ablageordner, keine Ablauffrist, keine Frage, wem eine
 Datei auf der Platte gehört. Bei zehn Megabyte im eigenen Netz ist das ein
 Wimpernschlag.
@@ -216,7 +216,7 @@ def zuordnen(kopf: list[str], ziele: list[Ziel], entity: str) -> list[str | None
     """Für jede Dateispalte ein Ziel — oder nichts.
 
     Drei Anläufe je Spalte, in dieser Reihenfolge: der Schlüssel selbst
-    (so findet eine von Beacon geschriebene Datei zurück), die
+    (so findet eine von Rocket geschriebene Datei zurück), die
     Beschriftung, dann die Aliasliste fremder Systeme. Die eigene
     Benennung geht vor der fremden — wer eine Eigenschaft „Domain"
     nennt, meint seine eigene.

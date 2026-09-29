@@ -18,9 +18,9 @@ class Settings(BaseSettings):
     # --- Datenbank ---
     db_host: str = "localhost"
     db_port: int = 5432
-    db_name: str = "beacon"
-    db_user: str = "beacon"
-    db_password: str = "beacon_dev_only"
+    db_name: str = "rocket"
+    db_user: str = "rocket"
+    db_password: str = "rocket_dev_only"
 
     # --- Anwendung ---
     app_lang: str = "de"
@@ -70,7 +70,7 @@ class Settings(BaseSettings):
 
     # --- Öffentliche Links ---
     # Die Domain, unter der Olares den ersten Entrance führt
-    # (`.Values.domain.beacon`, z. B. 4d3bf559.kaivostudio.olares.de). Daraus
+    # (`.Values.domain.rocket`, z. B. fdfedc01.kaivostudio.olares.de). Daraus
     # leitet app/versand.py die Adresse des öffentlichen Entrance ab. Leer
     # heißt: nicht bekannt — dann muss sie in den Einstellungen stehen.
     app_domain: str = ""
@@ -78,7 +78,7 @@ class Settings(BaseSettings):
     # --- Anmeldung ---
     # "olares": Die Identität kommt aus dem Kopf X-Bfl-User, den der
     # Envoy-Sidecar setzt — der Weg, solange der Entrance `internal` ist.
-    # "eigen": Beacon meldet selbst an, der Kopf wird **vollständig
+    # "eigen": Rocket meldet selbst an, der Kopf wird **vollständig
     # ignoriert**. Ohne das wäre er bei offenem Entrance eine
     # Selbstbedienung: Jeder erfundene Name legte Nutzer, Organisation und
     # Owner-Rolle an.

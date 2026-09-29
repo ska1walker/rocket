@@ -1,9 +1,9 @@
 """Die eigene Anmeldung — Passwörter, Sitzungen, Einladungen, Bremse.
 
-Beacon baut hier zum ersten Mal eigene Authentifizierung, und das ist ein
+Rocket baut hier zum ersten Mal eigene Authentifizierung, und das ist ein
 bewusster Bruch mit der Hausregel „keine eigene Anmeldung, das macht
 Olares". Der Grund steht in der Migration 0026: Eine Olares-App wird je
-Nutzer installiert, ein zweites Konto bekäme ein zweites, leeres Beacon.
+Nutzer installiert, ein zweites Konto bekäme ein zweites, leeres Rocket.
 Für ein Team in **einem** Bestand gibt es keinen Olares-Weg.
 
 Was hier gilt, gilt ohne Ausnahme:
@@ -41,7 +41,7 @@ from app.config import settings
 # Angreifer sich wünscht.
 _hasher = PasswordHasher()
 
-KEKS = "beacon_sitzung"
+KEKS = "rocket_sitzung"
 # Je Name zehn Versuche. Je Adresse großzügiger: Hinter einer Adresse
 # sitzt oft ein ganzes Büro, und ein Tippfehler des Kollegen darf niemanden
 # sonst aussperren. Beide Grenzen gelten **getrennt** — zusammengezählt

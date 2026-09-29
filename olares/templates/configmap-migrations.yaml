@@ -11,15 +11,15 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: beacon-migrations
+  name: rocket-migrations
   namespace: {{ .Release.Namespace }}
   labels:
-    app: beacon
+    app: rocket
 data:
   0001_initial_schema.sql: |
     -- ========================================================================
     -- 0001_initial_schema.sql
-    -- Grundschema für Beacon auf Olares.
+    -- Grundschema für Rocket auf Olares.
     --
     -- Wie bei Insilo: keine eigene auth-Tabelle. Die Identität kommt aus dem
     -- Olares-Header X-Bfl-User; wir mappen den Olares-Namen auf eine interne
@@ -905,7 +905,7 @@ data:
     -- teilt also einen Olares-Zugang, und `X-Bfl-User` trägt für beide
     -- denselben Namen.
     --
-    -- Deshalb unterscheidet Beacon die Personen selbst. Ein Sitzplatz sagt,
+    -- Deshalb unterscheidet Rocket die Personen selbst. Ein Sitzplatz sagt,
     -- wer gerade arbeitet: Besitz, Zuordnung und Protokoll hängen daran.
     --
     -- **Das ist Zuschreibung, keine Anmeldung.** Wer den geteilten Zugang
@@ -935,7 +935,7 @@ data:
 
     comment on column public.users.zugang is
       'olares = meldet sich selbst an; sitzplatz = Person ohne eigenen Zugang, '
-      'gewählt über X-Beacon-Sitzplatz. Ein Sitzplatz ist Zuschreibung, keine Anmeldung.';
+      'gewählt über X-Rocket-Sitzplatz. Ein Sitzplatz ist Zuschreibung, keine Anmeldung.';
   0008_eigenschaften.sql: |
     -- ========================================================================
     -- 0008_eigenschaften.sql
@@ -1471,7 +1471,7 @@ data:
   0017_postfach.sql: |
     -- ========================================================================
     -- 0017_postfach.sql
-    -- Beacon holt Post ab — und fasst dabei nichts an.
+    -- Rocket holt Post ab — und fasst dabei nichts an.
     --
     -- ## Warum holen statt geschickt bekommen
     --
@@ -1485,7 +1485,7 @@ data:
     -- ## Warum eine UID und kein „ungelesen"
     --
     -- Auf demselben Postfach sitzt Relay, und dort liest ein Mensch. Würde
-    -- Beacon nach UNSEEN suchen und das Gelesene markieren, verschwände in
+    -- Rocket nach UNSEEN suchen und das Gelesene markieren, verschwände in
     -- Relay der Fettdruck von Post, die niemand geöffnet hat. Ein zweiter
     -- Klient hat sich still zu verhalten: Er merkt sich, bis wohin er
     -- gekommen ist, und fasst keine Markierung an.
@@ -1522,7 +1522,7 @@ data:
     --
     -- Drei Dinge muss ein Empfänger von außen auslösen können, aus seinem
     -- Mailprogramm, ohne Konto: eine Einwilligung bestätigen, sich abmelden,
-    -- einen Link anklicken. Beacon ist `internal` und hat keine öffentliche
+    -- einen Link anklicken. Rocket ist `internal` und hat keine öffentliche
     -- Adresse (gemessen, docs/BETRIEB.md). Deshalb bekommt es einen zweiten,
     -- öffentlichen Entrance, hinter dem **nur** diese drei Wege liegen —
     -- eine eigene Anwendung auf einem eigenen Port, die nichts anderes kann.
@@ -2004,12 +2004,12 @@ data:
     -- Eine eigene Anmeldung — weil Olares' Konten das nicht leisten können.
     --
     -- Bisher liefert der Envoy-Sidecar die Identität im Kopf `X-Bfl-User`,
-    -- und Beacon glaubt ihm. Das trägt genau so weit, wie der Entrance
+    -- und Rocket glaubt ihm. Das trägt genau so weit, wie der Entrance
     -- `internal` ist: Vor dem Pod steht Authelia, ungeprüft kommt niemand
     -- herein. Soll das CRM aber von außen von einem **Team** genutzt werden,
     -- endet dieser Weg. Eine Olares-App wird je Nutzer installiert
-    -- (Namensraum `beacon-<nutzer>`); ein zweites Olares-Konto bekäme ein
-    -- eigenes, leeres Beacon mit eigener Datenbank. Der einzige geteilte
+    -- (Namensraum `rocket-<nutzer>`); ein zweites Olares-Konto bekäme ein
+    -- eigenes, leeres Rocket mit eigener Datenbank. Der einzige geteilte
     -- Modus, die *shared app*, hat laut Olares ausdrücklich keinen Entrance
     -- und keine URL. Für mehrere Menschen in **einem** Bestand führt kein
     -- Weg an einer eigenen Anmeldung vorbei.
@@ -2179,7 +2179,7 @@ data:
     -- Dateien am Datensatz — Angebot als PDF, Lageplan, unterschriebener
     -- Vertrag, das Foto vom Zählerstand.
     --
-    -- Bisher konnte ein Mensch alles in Beacon schreiben, aber nichts
+    -- Bisher konnte ein Mensch alles in Rocket schreiben, aber nichts
     -- hineinlegen. Wer einem Kontakt ein Dokument zuordnen wollte, hängte es
     -- an eine Mail und hoffte, dass der Faden es festhält.
     --
@@ -2261,7 +2261,7 @@ data:
     --
     -- `zuordnung` hält fest, welche Dateispalte auf welches Feld gelegt wurde.
     -- Ohne sie ließe sich ein Import mit falscher Zuordnung später nicht mehr
-    -- erklären — die Datei selbst bewahrt Beacon nicht auf.
+    -- erklären — die Datei selbst bewahrt Rocket nicht auf.
     -- ========================================================================
 
     create table if not exists public.einfuhren (
@@ -2424,7 +2424,7 @@ data:
     on conflict (org_id, external_id) do nothing;
 
     -- Der Wortlaut kommt auch aus den Aktivitäten, die schon angelegt waren —
-    -- dieselbe Regel für alles, was Beacon von Insilo hat.
+    -- dieselbe Regel für alles, was Rocket von Insilo hat.
     update public.activities a
        set body = split_part(a.body, E'\n## Volltranskript', 1),
            payload = coalesce(a.payload, '{}'::jsonb) || jsonb_build_object('besprechung_id', b.id)
@@ -2450,7 +2450,7 @@ data:
     -- Besprechungen aus Insilos gemeinsamem Ordner — der Weg, den Relay geht.
     --
     -- Auf derselben Box legt Insilo jede fertige Zusammenfassung als Datei in
-    -- den geteilten Olares-Ordner (appCommon). Beacon liest dort mit, ohne
+    -- den geteilten Olares-Ordner (appCommon). Rocket liest dort mit, ohne
     -- Webhook und ohne Geheimnis (backend/app/insilo_ablage.py).
     --
     -- Nur `add column if not exists`: Der Migrationslauf auf der Box führt
@@ -2480,19 +2480,19 @@ data:
     -- 0032_ablage_lesefassung.sql
     -- Mit welcher Fassung der Leseregeln eine Datei zuletzt gelesen wurde.
     --
-    -- Anlass (0.12.1): Beacon liest eine Datei aus Insilos Ordner nicht neu,
+    -- Anlass (0.12.1): Rocket liest eine Datei aus Insilos Ordner nicht neu,
     -- solange ihr Stand (Änderungszeit:Größe) gleich ist. Mit 0.12.0 kam eine
     -- neue Regel dazu — nur, was Insilo als Kundengespräch markiert
     -- (`crm: true`). Auf Kais Box am 16.9.2026: Insilo 0.1.102 schrieb die
-    -- Dateien mit der Markierung neu, das **noch laufende Beacon 0.11.0** las
+    -- Dateien mit der Markierung neu, das **noch laufende Rocket 0.11.0** las
     -- sie Minuten später, kannte die Markierung nicht, übernahm sie und
-    -- speicherte den neuen Stand. Beacon 0.12.0 hielt sie danach für
+    -- speicherte den neuen Stand. Rocket 0.12.0 hielt sie danach für
     -- „unverändert" und prüfte die Markierung nie. Genau die empfohlene
-    -- Reihenfolge — erst Insilo, dann Beacon — führte hinein.
+    -- Reihenfolge — erst Insilo, dann Rocket — führte hinein.
     --
     -- „Unverändert" heißt deshalb seit 0.12.1: gleicher Stand **und** mit der
     -- jetzigen Fassung gelesen (`insilo_ablage.LESEFASSUNG`). Eine Zeile ohne
-    -- Fassung stammt von einem älteren Beacon und wird einmal neu gelesen.
+    -- Fassung stammt von einem älteren Rocket und wird einmal neu gelesen.
     -- Ändern sich die Leseregeln wieder, hebt man die Zahl im Code — eine
     -- neue Migration braucht es dafür nicht.
     --

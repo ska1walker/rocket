@@ -58,7 +58,7 @@ export function AnreicherungEinstellungen({ einstellungen }: { einstellungen: Or
         </span>
       </div>
       <div className="block-inhalt">
-        <Erklaerung kurz="Beacon ergänzt Firmen und Kontakte aus öffentlichen Quellen und findet beim Anlegen, wen Sie beschreiben — nie wird etwas überschrieben." lang={<>Neue Firmen und Kontakte werden aus öffentlichen Quellen ergänzt: Impressum, Kontakt- und
+        <Erklaerung kurz="Rocket ergänzt Firmen und Kontakte aus öffentlichen Quellen und findet beim Anlegen, wen Sie beschreiben — nie wird etwas überschrieben." lang={<>Neue Firmen und Kontakte werden aus öffentlichen Quellen ergänzt: Impressum, Kontakt- und
           Team-Seiten der Firmen-Website, dazu die Treffer eines Suchdienstes — darüber auch
           LinkedIn-Seiten und -Profile, ohne LinkedIn selbst abzurufen. Jeder Wert nennt seine
           Quelle; Kontaktdaten müssen wörtlich dort stehen. Was schon eingetragen ist, wird nie
@@ -81,7 +81,7 @@ export function AnreicherungEinstellungen({ einstellungen }: { einstellungen: Or
               placeholder="https://searxng-beispiel.olares.com"
             />
             <p className="feld-hinweis">
-              Drei Adressen, die Beacon am Namen erkennt: eine SearXNG-Instanz auf dieser Box,{" "}
+              Drei Adressen, die Rocket am Namen erkennt: eine SearXNG-Instanz auf dieser Box,{" "}
               <code>https://api.tavily.com/search</code> oder{" "}
               <code>https://api.search.brave.com/res/v1/web/search</code>. Ohne Suchdienst wird nur
               die Website der Firma gelesen — Firmennamen verlassen die Box dann nicht.

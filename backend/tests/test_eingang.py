@@ -148,9 +148,9 @@ async def _schicken(quelle_id: str, secret: str, koerper: bytes, *, event: str =
             f"/api/eingang/{quelle_id}",
             content=koerper,
             headers={
-                "X-Beacon-Event": event,
-                "X-Beacon-Delivery-Id": lieferung or uuid4().hex,
-                "X-Beacon-Signature": signiere(secret, koerper),
+                "X-Rocket-Event": event,
+                "X-Rocket-Delivery-Id": lieferung or uuid4().hex,
+                "X-Rocket-Signature": signiere(secret, koerper),
             },
         )
 

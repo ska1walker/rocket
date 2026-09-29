@@ -1,5 +1,5 @@
 # ============================================================================
-# values.yaml — Vorgabewerte für Beacon
+# values.yaml — Vorgabewerte für Rocket
 #
 # Olares injiziert zur Laufzeit zusätzlich:
 #   .Values.bfl.username, .Values.user.zone
@@ -12,11 +12,11 @@
 # (Installation, Anhalten, Fortsetzen). Die Templates lesen ausschließlich
 # von hier, nie eine feste Zahl — sonst läuft der Lebenslauf ins Leere.
 workloads:
-  "beacon":
+  "rocket":
     replicaCount: 1
-  "beacon-backend":
+  "rocket-backend":
     replicaCount: 1
-  "beacon-links":
+  "rocket-links":
     replicaCount: 1
 
 # ---- Abbilder --------------------------------------------------------------
@@ -34,11 +34,11 @@ workloads:
 # ändert sich das Chart allein, und der alte Tag muss festgehalten werden.
 images:
   frontend:
-    repository: ghcr.io/ska1walker/beacon-frontend
+    repository: ghcr.io/ska1walker/rocket-frontend
     tag: ""
     pullPolicy: IfNotPresent
   backend:
-    repository: ghcr.io/ska1walker/beacon-backend
+    repository: ghcr.io/ska1walker/rocket-backend
     tag: ""
     pullPolicy: IfNotPresent
 

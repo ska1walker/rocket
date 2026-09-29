@@ -11,13 +11,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: beacon-backend
+  name: rocket-backend
   namespace: {{ .Release.Namespace }}
   labels:
-    app: beacon
+    app: rocket
     component: backend
 spec:
-  replicas: {{ (index .Values.workloads "beacon-backend").replicaCount }}
+  replicas: {{ (index .Values.workloads "rocket-backend").replicaCount }}
   # Recreate statt RollingUpdate: Dieses Deployment hängt /app/data per
   # hostPath ein. Bei RollingUpdate liefen kurzzeitig zwei Pods auf
   # demselben Verzeichnis und könnten sich beim Sichern in die Quere
@@ -27,12 +27,12 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: beacon
+      app: rocket
       component: backend
   template:
     metadata:
       labels:
-        app: beacon
+        app: rocket
         component: backend
     spec:
       initContainers:
@@ -71,14 +71,14 @@ spec:
             - name: DB_PASSWORD
               value: "{{ .Values.postgres.password }}"
             - name: DB_NAME
-              value: "{{ .Values.postgres.databases.beacon }}"
-            # Die Domain des ersten Entrance (z. B. 4d3bf559.<nutzer>.olares.de).
+              value: "{{ .Values.postgres.databases.rocket }}"
+            # Die Domain des ersten Entrance (z. B. fdfedc01.<nutzer>.olares.de).
             # Daraus leitet app/versand.py die Adresse des öffentlichen
             # Entrance ab, unter der Bestätigen und Abmelden erreichbar sind.
             - name: APP_DOMAIN
-              value: "{{ (.Values.domain).beacon | default "" }}"
+              value: "{{ (.Values.domain).rocket | default "" }}"
             # Wer die Identität liefert. `olares`: der Envoy-Sidecar prüft,
-            # und `X-Bfl-User` gilt. `eigen`: Beacons eigene Anmeldung prüft,
+            # und `X-Bfl-User` gilt. `eigen`: Rockets eigene Anmeldung prüft,
             # und der Kopf gilt **nicht mehr** und legt auch niemanden an.
             #
             # **Die Reihenfolge ist die Sicherheit.** Erst `eigen`, dann den
@@ -181,14 +181,14 @@ spec:
             - name: DB_PASSWORD
               value: "{{ .Values.postgres.password }}"
             - name: DB_NAME
-              value: "{{ .Values.postgres.databases.beacon }}"
-            # Die Domain des ersten Entrance (z. B. 4d3bf559.<nutzer>.olares.de).
+              value: "{{ .Values.postgres.databases.rocket }}"
+            # Die Domain des ersten Entrance (z. B. fdfedc01.<nutzer>.olares.de).
             # Daraus leitet app/versand.py die Adresse des öffentlichen
             # Entrance ab, unter der Bestätigen und Abmelden erreichbar sind.
             - name: APP_DOMAIN
-              value: "{{ (.Values.domain).beacon | default "" }}"
+              value: "{{ (.Values.domain).rocket | default "" }}"
             # Wer die Identität liefert. `olares`: der Envoy-Sidecar prüft,
-            # und `X-Bfl-User` gilt. `eigen`: Beacons eigene Anmeldung prüft,
+            # und `X-Bfl-User` gilt. `eigen`: Rockets eigene Anmeldung prüft,
             # und der Kopf gilt **nicht mehr** und legt auch niemanden an.
             #
             # **Die Reihenfolge ist die Sicherheit.** Erst `eigen`, dann den
@@ -233,7 +233,7 @@ spec:
             {{- if (.Values.userspace).appCommon }}
             # Insilos Besprechungen im gemeinsamen Ordner der Box
             # (backend/app/insilo_ablage.py). Bedingt, weil eine Box, die
-            # Beacon vor dieser Berechtigung installiert hat, den Wert beim
+            # Rocket vor dieser Berechtigung installiert hat, den Wert beim
             # Upgrade nicht zwingend bekommt — dann bleibt der Weg aus,
             # statt dass der Pod an einem leeren hostPath scheitert.
             - name: INSILO_ABLAGE_DIR
@@ -274,7 +274,7 @@ spec:
             type: DirectoryOrCreate
         {{- if (.Values.userspace).appCommon }}
         # Nur Insilos Unterordner, nicht der ganze gemeinsame Ordner: Was
-        # andere Apps dort ablegen, geht Beacon nichts an.
+        # andere Apps dort ablegen, geht Rocket nichts an.
         - name: insilo-ablage
           hostPath:
             path: {{ .Values.userspace.appCommon }}/insilo-meetings
@@ -282,4 +282,4 @@ spec:
         {{- end }}
         - name: sql
           configMap:
-            name: beacon-migrations
+            name: rocket-migrations

@@ -119,7 +119,7 @@ async def test_anmelden_setzt_einen_keks_den_javascript_nicht_sieht(datenbank):
         r = await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})
         assert r.status_code == 200, r.text
         keks = r.headers["set-cookie"]
-        assert "beacon_sitzung=" in keks
+        assert "rocket_sitzung=" in keks
         assert "HttpOnly" in keks and "SameSite=lax" in keks and "Path=/" in keks
         # `Secure` hängt an der Verbindung, nicht am Modus: Der Testklient
         # spricht https, also muss es dastehen.
@@ -128,7 +128,7 @@ async def test_anmelden_setzt_einen_keks_den_javascript_nicht_sieht(datenbank):
         # Vom Token steht nichts im Klartext in der Datenbank — und die
         # Zeile ist nur zu sehen, wenn die Verbindung ihren Hash nennt
         # (Policy `sitzungen_token`, Migration 0026).
-        wert = keks.split("beacon_sitzung=")[1].split(";")[0]
+        wert = keks.split("rocket_sitzung=")[1].split(";")[0]
         h = anmeldung.token_hash(wert)
         async with acquire() as conn:
             blind = await conn.fetchval("select count(*) from public.sitzungen")
@@ -196,12 +196,12 @@ async def test_abmelden_macht_die_sitzung_auf_dem_server_wertlos(datenbank, monk
         name, _ = await _konto(k, "Abmelde Person")
         eigen_an(monkeypatch)
         assert (await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})).status_code == 200
-        gestohlen = k.cookies.get("beacon_sitzung")
+        gestohlen = k.cookies.get("rocket_sitzung")
         # Mit Sitzung geht es — der Olares-Kopf des Klienten zählt hier nicht mehr.
         assert (await k.get("/api/companies")).status_code == 200
         assert (await k.post("/api/abmeldung")).status_code == 204
         # Danach nicht mehr, auch wenn jemand den Kekswert noch hat.
-        k.cookies.set("beacon_sitzung", gestohlen)
+        k.cookies.set("rocket_sitzung", gestohlen)
         assert (await k.get("/api/companies")).status_code == 401
 
 
@@ -211,7 +211,7 @@ async def test_abgelaufene_sitzung_gilt_nicht(datenbank, monkeypatch):
         eigen_an(monkeypatch)
         await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})
         async with acquire() as conn, conn.transaction():
-            await _pinnen(conn, k.cookies.get("beacon_sitzung"))
+            await _pinnen(conn, k.cookies.get("rocket_sitzung"))
             await conn.execute("update public.sitzungen set laeuft_ab = now() - interval '1 hour'")
         assert (await k.get("/api/companies")).status_code == 401
 
@@ -222,7 +222,7 @@ async def test_zu_lange_stille_beendet_die_sitzung(datenbank, monkeypatch):
         eigen_an(monkeypatch)
         await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})
         async with acquire() as conn, conn.transaction():
-            await _pinnen(conn, k.cookies.get("beacon_sitzung"))
+            await _pinnen(conn, k.cookies.get("rocket_sitzung"))
             await conn.execute("update public.sitzungen set zuletzt_am = now() - interval '30 days'")
         assert (await k.get("/api/companies")).status_code == 401
 
@@ -231,7 +231,7 @@ async def test_aufraeumen_nimmt_nur_das_laengst_abgelaufene(datenbank):
     async with klient_fuer("anm-aufraeumen") as k:
         name, _ = await _konto(k, "Aufraeum Person")
         await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})
-        keks = k.cookies.get("beacon_sitzung")
+        keks = k.cookies.get("rocket_sitzung")
         async with acquire() as conn:
             # Eine frische Sitzung rührt die Schleife nicht an.
             assert await anmeldung.sitzungen_aufraeumen(conn) == 0
@@ -477,7 +477,7 @@ async def test_ein_mitglied_kann_sich_nicht_auf_den_platz_des_eigentuemers_setze
         eigen_an(monkeypatch)
         assert (await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})).status_code == 200
 
-        kopf = {"X-Beacon-Sitzplatz": eigner}
+        kopf = {"X-Rocket-Sitzplatz": eigner}
         # Der Kopf wird still übergangen — nicht befolgt, aber auch nicht
         # zum Fehler gemacht: Ein altes Feld im Browser soll nichts kaputt machen.
         wer = (await k.get("/api/mitglieder/wer", headers=kopf)).json()
@@ -497,7 +497,7 @@ async def test_der_sitzplatz_nimmt_dem_eigentuemer_seine_rechte_nicht(datenbank)
     """
     async with klient_fuer("anm-platzrechte") as k:
         m = (await k.post("/api/mitglieder", json={"display_name": "Zugeschriebene Person"})).json()
-        kopf = {"X-Beacon-Sitzplatz": m["id"]}
+        kopf = {"X-Rocket-Sitzplatz": m["id"]}
         # Die Arbeit wird der Person zugeschrieben …
         wer = (await k.get("/api/mitglieder/wer", headers=kopf)).json()
         assert wer["display_name"] == "Zugeschriebene Person"
@@ -596,9 +596,9 @@ async def test_die_eigene_seite_darf_es_auch_hinter_dem_proxy(datenbank):
             "/api/anmeldung",
             json={"name": name, "passwort": GUT},
             headers={
-                "Origin": "https://41b89d100.kaivostudio.olares.de",
-                "Host": "beacon-backend.beacon-kaivostudio.svc.cluster.local:8000",
-                "X-Forwarded-Host": "41b89d100.kaivostudio.olares.de",
+                "Origin": "https://fdfedc010.kaivostudio.olares.de",
+                "Host": "rocket-backend.rocket-kaivostudio.svc.cluster.local:8000",
+                "X-Forwarded-Host": "fdfedc010.kaivostudio.olares.de",
             },
         )
         assert durch.status_code == 200, durch.text
@@ -609,7 +609,7 @@ async def test_die_eigene_seite_darf_es_auch_hinter_dem_proxy(datenbank):
             json={"name": name, "passwort": GUT},
             headers={
                 "Origin": "https://boese.example",
-                "X-Forwarded-Host": "41b89d100.kaivostudio.olares.de",
+                "X-Forwarded-Host": "fdfedc010.kaivostudio.olares.de",
             },
         )
         assert fremd.status_code == 403

@@ -43,7 +43,7 @@ export function passwortAendern(alt: string, neu: string) {
 
 /** Wo der Rücksetzcode liegt. Der Code selbst kommt nie über die Leitung. */
 export type Ablageort = {
-  /** Der Klickweg in der Dateien-App, etwa „Data › beacon › …". */
+  /** Der Klickweg in der Dateien-App, etwa „Data › rocket › …". */
   ordner: string;
   minuten: number;
 };
@@ -69,7 +69,7 @@ export function einladungEinloesen(token: string, passwort: string) {
  *
  * Ohne diese Prüfung wäre `?weiter=` eine offene Weiterleitung: Ein Link
  * `…/anmelden?weiter=https://boese.example` führte nach erfolgreicher
- * Anmeldung auf eine fremde Seite, die aussieht wie Beacon. Erlaubt ist
+ * Anmeldung auf eine fremde Seite, die aussieht wie Rocket. Erlaubt ist
  * deshalb nur ein Pfad, der mit genau einem Schrägstrich beginnt —
  * `//fremd.example` ist protokollrelativ und damit auch auswärts.
  */
