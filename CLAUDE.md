@@ -76,7 +76,8 @@ Sequenzen (Kampagnen ja, automatische Folgen nein), Kalender-Anbindung,
 mobile Ansicht über das Responsive hinaus.
 
 **Geplant für Teams:** `docs/PLAN-TEAM.md` — zweiter Faktor, persönliches
-Postfach über IMAP/SMTP (Microsoft/Google per OAuth), SSO, feinere Rechte.
+Postfach über IMAP/SMTP mit Anbieter-Voreinstellungen (Microsoft 365 nur
+per OAuth-Freigabe des Postfachs, kein SSO), feinere Rechte.
 
 **Offen:** zweiter Faktor bei der Anmeldung (`users.totp_geheimnis`
 steht bereit), „alle Geräte abmelden" als Knopf, Anmeldungen im
@@ -302,7 +303,7 @@ python3 scripts/seed-dev.py                           # Beispieldaten
 
 ## Was NICHT gebaut wird
 
-- ❌ Eine eigene Anmeldung **neben** der vorhandenen — sie wird ausgebaut (zweiter Faktor, SSO), nicht ersetzt; siehe `docs/PLAN-TEAM.md`
+- ❌ Anmeldung an Rocket über Microsoft oder Google (SSO) — die Anmeldung bleibt Rocket-Passwort plus zweiter Faktor; siehe `docs/PLAN-TEAM.md`
 - ❌ Cloud-Sync zwischen Boxen
 - ❌ Telemetrie, Tracking, Phone-Home
 - ❌ Schriften vom CDN — auch nicht zur Bauzeit
