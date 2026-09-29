@@ -115,17 +115,18 @@ Nach jeder Änderung an `supabase/migrations/`:
 python3 scripts/regen-migrations.py
 ```
 
-## Was noch nie passiert ist
+## Was auf der Box bewiesen ist
 
-**Das Chart ist auf keiner echten Olares-Box installiert worden.** Es
-lintet, es rendert, und das eingebettete SQL kommt nachweislich
-unversehrt heraus. Aber alles, was erst zur Laufzeit auffällt — das
+Bis zum 3. September 2026 stand hier, das Chart sei nie auf einer echten
+Olares-Box gelaufen. Das gilt nicht mehr: Beacon läuft seit dem 3.9. auf
+Kais Box, seit dem 5.9. aus dem Aimighty-Katalog (siehe oben). Das
 Zusammenspiel mit dem injizierten Postgres, das Zeitfenster bis zum
-`ns-owner`-Label, der Envoy vor der Oberfläche, der Weg der Kopfzeile
-`X-Bfl-User` durch die Next.js-Weiterleitung — ist ungeprüft.
+`ns-owner`-Label, der Envoy vor der Oberfläche und der Weg von
+`X-Bfl-User` durch die Next.js-Weiterleitung sind damit im Betrieb
+geprüft — die Stolpersteine dabei stehen in den jeweiligen Abschnitten.
 
-Die Reihenfolge bei der ersten Installation: erst die Abbilder bauen und
-nach GHCR schieben, dann das Chart hochladen. Für den Ablauf gibt es im
+Die Reihenfolge bei jeder Veröffentlichung bleibt: erst die Abbilder
+bauen und nach GHCR schieben, dann das Chart. Für den Ablauf gibt es im
 Insilo-Repo den Skill `olares-release`.
 
 ## Was unter /app/data liegt
@@ -135,7 +136,7 @@ zusichert — er überlebt eine Deinstallation, die **Datenbank nicht**.
 
 | | Was |
 |---|---|
-| `sicherungen/` | Der Abzug als JSON, stündlich neu, die letzten Stände nebeneinander |
+| `sicherungen/` | Der Abzug als JSON, nach jeder Änderung neu (spätestens alle sechs Stunden), die letzten 14 Stände nebeneinander |
 | `podcasts/` | Die erzeugten Gesprächsvorbereitungen als MP3 |
 | `tresor.key` | Der Schlüssel für die Zugangsdaten, 0600 |
 
@@ -1970,9 +1971,10 @@ sha256-gleich, `/api/v1/appstore/hash` hat sich bewegt. Insilos
 Einreichung (PR #1 dort) ist die Vorlage; die Regeln stehen im Skill
 `insilo/.claude/skills/olares-release/SKILL.md`.
 
-**Was auf der Box noch offen ist:** die Empfangspfade
-`/api/eingang/…` und `/api/post/eingang/…` liegen hinter dem
-Envoy-Sidecar des Frontends. Insilo und Relay rufen sie ohne
-Authelia-Keks — dafür braucht es voraussichtlich eine `options.policies`-
-Regel mit `level: public` für genau diese Pfade. Das lässt sich nur auf
-einer echten Box messen.
+**Die Empfangspfade** `/api/eingang/…` und `/api/post/eingang/…` liegen
+hinter dem Envoy-Sidecar des Frontends. Solange der Entrance `internal`
+war, leitete er Insilo und Relay ohne Authelia-Keks zur Anmeldung um.
+Seit 0.6.9 steht er auf `public`; am 15.9.2026 kam ein Aufruf aus dem
+Insilo-Pod bis in Beacons eigenen Code durch (401 „Unbekannte oder
+abgeschaltete Quelle", siehe „Insilo anschließen"). Eine
+`options.policies`-Regel ist nicht mehr nötig — das Tor ist die Signatur.
