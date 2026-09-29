@@ -541,7 +541,7 @@ async def test_die_absenderadresse_ueberlebt_eine_neuinstallation(datenbank, eig
         gesetzt = await c.put(
             "/api/mitglieder/wer/absender",
             json={"absender_email": "absender.person@aimighty.de", "absender_name": "Absender Person"},
-            headers={"X-Beacon-Sitzplatz": m["id"]},
+            headers={"X-Rocket-Sitzplatz": m["id"]},
         )
         assert gesetzt.status_code == 200, gesetzt.text
 

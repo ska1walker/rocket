@@ -3,12 +3,12 @@
 -- Eine eigene Anmeldung — weil Olares' Konten das nicht leisten können.
 --
 -- Bisher liefert der Envoy-Sidecar die Identität im Kopf `X-Bfl-User`,
--- und Beacon glaubt ihm. Das trägt genau so weit, wie der Entrance
+-- und Rocket glaubt ihm. Das trägt genau so weit, wie der Entrance
 -- `internal` ist: Vor dem Pod steht Authelia, ungeprüft kommt niemand
 -- herein. Soll das CRM aber von außen von einem **Team** genutzt werden,
 -- endet dieser Weg. Eine Olares-App wird je Nutzer installiert
--- (Namensraum `beacon-<nutzer>`); ein zweites Olares-Konto bekäme ein
--- eigenes, leeres Beacon mit eigener Datenbank. Der einzige geteilte
+-- (Namensraum `rocket-<nutzer>`); ein zweites Olares-Konto bekäme ein
+-- eigenes, leeres Rocket mit eigener Datenbank. Der einzige geteilte
 -- Modus, die *shared app*, hat laut Olares ausdrücklich keinen Entrance
 -- und keine URL. Für mehrere Menschen in **einem** Bestand führt kein
 -- Weg an einer eigenen Anmeldung vorbei.

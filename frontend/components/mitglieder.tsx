@@ -106,9 +106,9 @@ export function Mitgliederblock() {
         )}
       </div>
       <div className="block-inhalt">
-        <Erklaerung kurz="Wer mit Ihnen in Beacon arbeitet. Alle sehen und ändern alles." lang={<>Olares installiert Apps pro Nutzer und lässt an einem Zugang keinen zweiten
+        <Erklaerung kurz="Wer mit Ihnen in Rocket arbeitet. Alle sehen und ändern alles." lang={<>Olares installiert Apps pro Nutzer und lässt an einem Zugang keinen zweiten
           Menschen zusätzlich herein. Wer zu zweit dasselbe CRM benutzt, teilt deshalb einen
-          Olares-Zugang — und Beacon unterscheidet die Personen selbst.</>} />
+          Olares-Zugang — und Rocket unterscheidet die Personen selbst.</>} />
         <div className="hinweis" data-art="achtung" style={{ marginBottom: "var(--am-raum-4)" }}>
           <span>
             Der Sitzplatz ist <strong>Zuschreibung, keine Anmeldung.</strong> Wer den
@@ -350,7 +350,7 @@ export function Mitgliederblock() {
  * Das eigene Passwort ändern.
  *
  * Steht nur da, wenn es ein Passwort gibt — im Modus `olares` prüft der
- * Sidecar, und Beacon hätte nichts zu ändern. Das alte wird verlangt:
+ * Sidecar, und Rocket hätte nichts zu ändern. Das alte wird verlangt:
  * Sonst genügte ein fremder, offener Browser, um jemanden auszusperren.
  */
 export function Passwortblock() {

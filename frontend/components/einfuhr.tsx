@@ -163,7 +163,7 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
           lang={
             <>
               CSV mit Semikolon, Komma oder Tabulator; Umlaute in UTF-8 oder Windows-1252. Bis
-              10 MB und 20.000 Zeilen. Erkannt werden die Spaltennamen von Beacon und die
+              10 MB und 20.000 Zeilen. Erkannt werden die Spaltennamen von Rocket und die
               gängigen aus anderen Systemen. Importierte Datensätze werden <strong>nicht</strong>{" "}
               automatisch angereichert — der Knopf am Datensatz bleibt.
             </>
@@ -256,7 +256,7 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
                   <tr>
                     <th>Spalte in der Datei</th>
                     <th>Beispiele</th>
-                    <th>Feld in Beacon</th>
+                    <th>Feld in Rocket</th>
                   </tr>
                 </thead>
                 <tbody>

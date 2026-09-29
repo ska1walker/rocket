@@ -9,7 +9,7 @@
 // Kontakt brauchte, musste erst wechseln.
 //
 // Bewusst **nur** diese zwei. HubSpots Leiste ist voll, weil dort acht
-// Produkte, Telefonie und Hinweise unterzubringen sind. Beacon ist ein
+// Produkte, Telefonie und Hinweise unterzubringen sind. Rocket ist ein
 // Produkt für ein kleines Team; wer den Behälter kopiert, ohne den
 // Inhalt zu haben, bekommt eine leere Leiste.
 //
@@ -99,9 +99,9 @@ export function Kopfleiste({
       {/* Die Marke sitzt über der Spalte, nicht darin: So beginnt die
           Navigation mit Navigation, und die Leiste hat einen Anfang. */}
       <div className="kopfleiste-marke">
-        <Link href="/" className="marke" aria-label="AImighty Beacon — zur Startseite">
+        <Link href="/" className="marke" aria-label="AImighty Rocket — zur Startseite">
           <Marke />
-          <span className="marke-produkt" aria-hidden="true">Beacon</span>
+          <span className="marke-produkt" aria-hidden="true">Rocket</span>
         </Link>
         <Klappschalter eingeklappt={eingeklappt} umschalten={klappen} />
       </div>

@@ -33,7 +33,7 @@ for wert in \
   "$(grep -E '^  name: ' olares/OlaresManifest.yaml | head -1 | awk '{print $2}')" \
   "$(grep -E '^  appid:' olares/OlaresManifest.yaml | awk '{print $2}')"
 do
-  [ "$wert" = "beacon" ] || melde "Name weicht ab: '$wert' (erwartet: beacon)"
+  [ "$wert" = "rocket" ] || melde "Name weicht ab: '$wert' (erwartet: rocket)"
 done
 
 # Kommentarzeilen zählen nicht: Dieselben Wörter stehen in den Templates
@@ -97,7 +97,7 @@ fi
 
 echo "→ helm lint und helm template"
 helm lint olares -f olares/values-olares-stub.yaml > /dev/null || melde "helm lint fehlgeschlagen"
-helm template beacon olares -f olares/values-olares-stub.yaml > /dev/null || melde "helm template fehlgeschlagen"
+helm template rocket olares -f olares/values-olares-stub.yaml > /dev/null || melde "helm template fehlgeschlagen"
 
 if [ "$FEHLER" -eq 0 ]; then
   echo "Alles in Ordnung."

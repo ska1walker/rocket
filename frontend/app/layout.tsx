@@ -25,7 +25,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Beacon — Vertrieb",
+  title: "Rocket — Vertrieb",
   description: "KI-gestütztes CRM für den AImighty-Vertrieb. Läuft auf der eigenen Box.",
 };
 

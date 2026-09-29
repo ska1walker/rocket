@@ -77,7 +77,7 @@ TABELLEN: list[str] = [
     "oeffentliche_links",
     "mails",
     # Was eine Einfuhr getan und übersprungen hat. Die Datei selbst
-    # bewahrt Beacon nicht auf — ohne diese Zeile ließe sich ein Import
+    # bewahrt Rocket nicht auf — ohne diese Zeile ließe sich ein Import
     # nach einer Neuinstallation nicht mehr erklären.
     "einfuhren",
     "audit_log",
@@ -264,7 +264,7 @@ def abzug_schreiben(daten: dict[str, Any], slug: str | None = None) -> pathlib.P
     eine ganze.
     """
     marke = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    name = f"beacon-{slug or 'org'}-{marke}.json"
+    name = f"rocket-{slug or 'org'}-{marke}.json"
     ziel = ablage() / name
     vorlaeufig = ziel.with_suffix(".json.teil")
 
@@ -281,7 +281,7 @@ def abzug_schreiben(daten: dict[str, Any], slug: str | None = None) -> pathlib.P
 def _abzuege() -> list[pathlib.Path]:
     """Alle Abzüge — auch die, die noch `aicrm-` heißen: Eine Umbenennung
     des Produkts darf keinen Bestand verlieren."""
-    return [*ablage().glob("beacon-*.json"), *ablage().glob("aicrm-*.json")]
+    return [*ablage().glob("rocket-*.json"), *ablage().glob("aicrm-*.json")]
 
 
 def aufraeumen() -> None:

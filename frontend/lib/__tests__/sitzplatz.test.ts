@@ -67,7 +67,7 @@ describe("Ein unbekannter Platz räumt sich selbst weg", () => {
       vi.fn(async () =>
         new Response(JSON.stringify({ detail: "Dieser Sitzplatz gehört nicht zu Ihrer Organisation." }), {
           status: 403,
-          headers: { "Content-Type": "application/json", "X-Beacon-Sitzplatz": "unbekannt" },
+          headers: { "Content-Type": "application/json", "X-Rocket-Sitzplatz": "unbekannt" },
         }),
       ),
     );

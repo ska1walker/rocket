@@ -24,8 +24,8 @@ export function Postausgangblock() {
         <span className="stufe" data-art={einst.data?.mail_endpoint_url ? "won" : undefined}>{einst.data?.mail_endpoint_url ? "eingerichtet" : "nicht eingerichtet"}</span>
       </div>
       <div className="block-inhalt">
-        <Erklaerung kurz="Optional: E-Mails über Relay statt über das eigene E-Mail-Konto verschicken." lang={<>E-Mails gehen nicht aus Beacon selbst hinaus, sondern an einen Dienst auf der Box — Relay, die Outlook-Alternative.
-          Beacon schickt je Nachricht einen signierten POST mit <code>to</code>, <code>subject</code>, <code>text</code>; eingehende Mails
+        <Erklaerung kurz="Optional: E-Mails über Relay statt über das eigene E-Mail-Konto verschicken." lang={<>E-Mails gehen nicht aus Rocket selbst hinaus, sondern an einen Dienst auf der Box — Relay, die Outlook-Alternative.
+          Rocket schickt je Nachricht einen signierten POST mit <code>to</code>, <code>subject</code>, <code>text</code>; eingehende Mails
           nimmt es unter <code>/api/post/eingang/&lt;Quelle&gt;</code> entgegen (Quelle unter „Eingehende Quellen" anlegen).
           Der Vertrag steht in <code>backend/app/routers/post.py</code>.</>} />
         <form onSubmit={(e) => { e.preventDefault(); speichern.mutate(); }}>

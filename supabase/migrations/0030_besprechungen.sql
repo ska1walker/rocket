@@ -121,7 +121,7 @@ order by e.org_id, e.external_id, e.created_at desc
 on conflict (org_id, external_id) do nothing;
 
 -- Der Wortlaut kommt auch aus den Aktivitäten, die schon angelegt waren —
--- dieselbe Regel für alles, was Beacon von Insilo hat.
+-- dieselbe Regel für alles, was Rocket von Insilo hat.
 update public.activities a
    set body = split_part(a.body, E'\n## Volltranskript', 1),
        payload = coalesce(a.payload, '{}'::jsonb) || jsonb_build_object('besprechung_id', b.id)

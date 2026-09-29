@@ -1,7 +1,7 @@
 """CSV hereinholen — Vorlage, Vorschau, Anwenden, Protokoll.
 
 Zwei Schritte, nicht vier: sehen, was passieren würde, und es dann tun.
-Die Datei kommt beide Male mit; dazwischen bewahrt Beacon nichts auf
+Die Datei kommt beide Male mit; dazwischen bewahrt Rocket nichts auf
 (siehe `app/einfuhr.py`).
 
 Nur Eigentümer und Verwalter dürfen einführen. Ein Import schreibt
@@ -172,7 +172,7 @@ async def vorlage(
         csvform.csv_zeilen([z.text for z in ziele], []),
         media_type="text/csv; charset=utf-8",
         headers={
-            "Content-Disposition": f'attachment; filename="beacon-vorlage-{name}.csv"',
+            "Content-Disposition": f'attachment; filename="rocket-vorlage-{name}.csv"',
             "X-Content-Type-Options": "nosniff",
         },
     )

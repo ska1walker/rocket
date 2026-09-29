@@ -3,7 +3,7 @@
 **Warum es das neben dem Webhook gibt.** Auf derselben Box braucht es
 keinen Webhook: Insilo legt jede fertige Zusammenfassung als Datei in den
 geteilten Olares-Ordner `appCommon` (`insilo/backend/app/relay_drop.py`,
-seit Insilo 0.1.93), und Beacon liest dort mit — ohne Quelle, ohne
+seit Insilo 0.1.93), und Rocket liest dort mit — ohne Quelle, ohne
 Geheimnis, ohne dass jemand in Insilo etwas einstellt. Relay, die
 Mail-App, liest denselben Ordner; beide lesen nur, geschrieben wird er
 allein von Insilo.
@@ -30,7 +30,7 @@ nicht als Ereignis; eine Datei, die nicht mehr da ist, heißt: in Insilo
 gelöscht.
 
 **Welche Organisation.** Der Ordner gehört der Box, nicht einer
-Organisation in Beacon. Eine Organisation liest ihn, wenn sie es
+Organisation in Rocket. Eine Organisation liest ihn, wenn sie es
 eingeschaltet hat (`org_settings.insilo_ablage = true`) — oder, solange
 niemand etwas eingestellt hat, wenn sie die einzige auf der Box ist. So
 braucht der Normalfall keine Einrichtung, und auf einer Box mit zwei
@@ -59,7 +59,7 @@ SCHEMA = 1
 
 # Welche Fassung der Leseregeln eine Zeile zuletzt gelesen hat. Eine Datei
 # gilt nur als unverändert, wenn Stand **und** Fassung passen — sonst liest
-# ein neues Beacon nach einem Update nie, was ein altes schon gesehen hat
+# ein neues Rocket nach einem Update nie, was ein altes schon gesehen hat
 # (Migration 0032). Bei jeder Änderung daran, *wie* eine Datei gelesen
 # wird, um eins heben.
 #
@@ -148,7 +148,7 @@ def _wert(roh: str) -> Any:
 def lesen(text: str) -> Datei | None:
     """Eine Ablagedatei, oder `None`, wenn sie nicht dem Vertrag entspricht.
 
-    Ein unbekanntes Schema wird nicht geraten: Liest Beacon ein Format
+    Ein unbekanntes Schema wird nicht geraten: Liest Rocket ein Format
     falsch, stünde ein falsches Protokoll am Kunden — dann lieber gar keins
     und eine Zeile im Protokoll.
     """

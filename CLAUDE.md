@@ -1,9 +1,9 @@
-# Beacon — Projekt-Briefing für Claude Code
+# Rocket — Projekt-Briefing für Claude Code
 
-> **Produkt:** Beacon — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
+> **Produkt:** Rocket — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 0.12.1 — Vertrieb, Versand und Service durchgängig, läuft auf Kais Box aus dem Katalog
+> **Status:** 0.13.0 — Vertrieb, Versand und Service durchgängig. Bis 0.12.1 hieß das Produkt **Beacon**; der Umzug auf Kais Box unter dem neuen Namen steht aus
 > **Letzte Aktualisierung:** 29. September 2026
 
 ---
@@ -27,7 +27,7 @@ Produktleiter Assistent / Analyst / Experte, Servicetage, Kaufrollen.
 
 Seit 0.8.0 gibt es eine **CSV-Einfuhr** für Kontakte und Firmen und eine
 **CSV-Ausfuhr** der aktuellen Liste. Das widerspricht dem nicht: Beides
-folgt Beacons eigenen Feldern, HubSpots Kopfzeilen werden nur als Aliase
+folgt Rockets eigenen Feldern, HubSpots Kopfzeilen werden nur als Aliase
 erkannt. Eine Messe-Liste hereinzuholen ist Einfuhr von Daten, kein Umzug
 eines Systems — Verlauf, Aktivitäten und Einwilligungen bleiben draußen.
 Siehe `docs/BETRIEB.md`, „CSV hinein und hinaus".
@@ -53,7 +53,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anmeldung | eigene Anmeldung seit 0.6.0 (`ANMELDUNG_MODUS=eigen`, Entrance `public` seit 0.6.9): Einladung, Sitzungen, Geräteübersicht, Bremse nach Fehlversuchen, Rückweg per Datei unter `/app/data` wenn niemand mehr hereinkommt |
 | Zusammenarbeit | jede Person mit eigenem Zugang; Rollen `owner`/`admin`/`member`/`viewer`, Eigentümerin vergibt `admin` (seit 0.9.2); Besitz, Filter „Nur meine"; Sitzplätze nur noch im Modus `olares` |
 | Tresor | SMTP/IMAP-Passwörter, API-Schlüssel und Geheimnisse AES-GCM-verschlüsselt, Schlüssel `tresor.key` unter `/app/data` (seit 0.6.6) |
-| Versand | SMTP/IMAP je Organisation, Absenderadresse je Person, Einwilligung am Kontakt, öffentliche Links (Einwilligung, Abmelden, Klick) über eigenen Entrance `beaconlinks`; Listen (statisch/aktiv) und Kampagnen |
+| Versand | SMTP/IMAP je Organisation, Absenderadresse je Person, Einwilligung am Kontakt, öffentliche Links (Einwilligung, Abmelden, Klick) über eigenen Entrance `rocketlinks`; Listen (statisch/aktiv) und Kampagnen |
 | Tickets | eigene Pipeline, SLA-Uhr ab Absendezeit; Eingang aus API, Bot oder Formular über einen gemeinsamen Weg (`ticketeingang.py`) |
 | Dokumente | Dateien am Datensatz, wie in HubSpot |
 | Eigene Eigenschaften | je Objekt: Text, Zahl, Datum, Ja/Nein, Auswahl — geprüft beim Schreiben |
@@ -66,9 +66,9 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | rund 570 Backend, 57 Frontend |
-| Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert, läuft auf Kais Box — seit 5.9.2026 aus dem Aimighty-Katalog installiert, Updates über Markt → *Updates* |
-| Veröffentlichung | Repo `github.com/ska1walker/beacon` (öffentlich), Abbilder `ghcr.io/ska1walker/beacon-{frontend,backend}` per Tag (zuletzt `v0.12.0`), Katalogeintrag in `bayerhazard/aimighty-market`; Icon nach Marcs Idee 6 (`docs/icon/`) |
+| Tests | 624 Backend, 57 Frontend |
+| Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; als Beacon seit 5.9.2026 aus dem Aimighty-Katalog auf Kais Box. Die Umbenennung in Rocket (0.13.0) ist auf Olares eine Neuinstallation — Umzug ohne Alias, Schritte in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
+| Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}` per Tag (zuletzt `v0.12.0`, damals noch als `beacon-*`), Katalogeintrag in `bayerhazard/aimighty-market` (noch unter `beacon`, Rocket braucht einen neuen); Icon nach Marcs Idee 6 (`docs/icon/`) |
 
 **Nicht gebaut, bewusst:** Mehrsprachigkeit (internes Werkzeug),
 Sequenzen (Kampagnen ja, automatische Folgen nein), Kalender-Anbindung,
@@ -82,11 +82,11 @@ Audit-Log (`docs/BETRIEB.md`, „Noch offen").
 
 Dieselben Constraints wie bei Insilo. Die wichtigsten für dieses Repo:
 
-1. **Anmeldung: Beacon macht es selbst — mit Grund.** Die Hausregel
-   „Olares meldet an" gilt für Insilo, nicht mehr für Beacon: Olares
+1. **Anmeldung: Rocket macht es selbst — mit Grund.** Die Hausregel
+   „Olares meldet an" gilt für Insilo, nicht mehr für Rocket: Olares
    installiert eine App je Nutzer, ein Team kann sich keinen Bestand
    teilen. Deshalb steht `ANMELDUNG_MODUS=eigen` als Literal im
-   Deployment und der Entrance `beacon` auf `public`. In diesem Modus
+   Deployment und der Entrance `rocket` auf `public`. In diesem Modus
    gilt `X-Bfl-User` **nicht** und legt nichts an. Reihenfolge ist die
    Sicherheit: erst `eigen`, dann den Entrance öffnen, nie umgekehrt —
    sonst ist ein gefälschter Kopf der Eigentümer. Im Modus `olares`
@@ -114,10 +114,10 @@ Dieselben Constraints wie bei Insilo. Die wichtigsten für dieses Repo:
    **Ein Entrance bringt einen Envoy-Sidecar**, der jeden Aufruf an den
    Pod gegen Authelia prüft. Deshalb hat das Backend keinen Entrance;
    die öffentlichen Mail-Links laufen über ein eigenes Deployment
-   (`beaconlinks`, `app/oeffentlich.py`).
+   (`rocketlinks`, `app/oeffentlich.py`).
 
 6. **Namensregel:** Ordnername, `Chart.yaml.name`, `metadata.name` und
-   `metadata.appid` müssen alle exakt `beacon` sein.
+   `metadata.appid` müssen alle exakt `rocket` sein.
 
 7. **Keine Helm-Hooks, kein `.Files.Get`.** Ersteres läuft vor dem
    `ns-owner`-Label und kommt nie durch, Zweiteres lehnt der Markt-Linter
@@ -219,7 +219,7 @@ der Lieferung und liest die Token über `var(--am-*)`.
    **Zwei Menschen, ein Zugang.** Olares installiert eine App pro Nutzer;
    ein zweites Olares-Konto kommt nicht an den Entrance. Kai und Marc
    teilen deshalb einen Zugang, und der *Sitzplatz* (Cookie, Kopf
-   `X-Beacon-Sitzplatz`) sagt, wem die Arbeit zugeschrieben wird. Das ist
+   `X-Rocket-Sitzplatz`) sagt, wem die Arbeit zugeschrieben wird. Das ist
    Zuschreibung, keine Anmeldung — ein Sitzplatz greift nur innerhalb
    derselben Organisation, sonst 403.
 
@@ -269,7 +269,7 @@ der Lieferung und liest die Token über `var(--am-*)`.
 9. **Beim Veröffentlichen:** `docs/BETRIEB.md`, Abschnitt
    „Veröffentlichen". Version an drei Stellen, Tag `vX.Y.Z` baut die
    Abbilder (`release.yml`), das Chart wird immer als Paket geprüft
-   (`olares-cli chart lint dist/beacon-X.Y.Z.tgz`), und **erst nach einer
+   (`olares-cli chart lint dist/rocket-X.Y.Z.tgz`), und **erst nach einer
    laufenden Installation auf einer Box** geht der Eintrag per PR in
    `bayerhazard/aimighty-market`. Die Regeln dahinter stehen im Skill
    `insilo/.claude/skills/olares-release/SKILL.md`.

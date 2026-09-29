@@ -398,7 +398,7 @@ async def test_ohne_region_nennt_tavily_kein_land():
 async def test_abgelehnter_schluessel_nennt_dienst_und_adresse(adresse, name):
     """„Der Endpunkt hat mit 401 geantwortet" half niemandem.
 
-    Beacon spricht mit zwei Endpunkten — Sprachmodell und Suche. Wer den
+    Rocket spricht mit zwei Endpunkten — Sprachmodell und Suche. Wer den
     Suchschlüssel gerade eingetragen hatte, suchte den Fehler an der
     falschen Stelle. Tavily antwortet zudem auf **jede** Anfrage ohne
     gültigen Schlüssel mit 401, auch auf eine im falschen Format; darum
@@ -447,7 +447,7 @@ async def test_ohne_lesbaren_schluessel_geht_gar_keine_anfrage_hinaus():
     """Ein leerer Bearer sieht am anderen Ende aus wie ein falscher Schlüssel.
 
     Marc hatte die richtige Adresse und laut Maske einen hinterlegten
-    Schlüssel; nur ließ der sich nicht mehr entschlüsseln. Beacon schickte
+    Schlüssel; nur ließ der sich nicht mehr entschlüsseln. Rocket schickte
     `Authorization: Bearer ` hinaus, Tavily antwortete mit 401, und der
     Satz auf dem Bildschirm zeigte auf den Schlüssel statt auf den Tresor.
     """

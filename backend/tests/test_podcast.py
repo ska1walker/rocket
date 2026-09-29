@@ -332,7 +332,7 @@ async def test_oberflaechenfehler_landen_im_protokoll(datenbank, capsys):
 async def test_eingetragene_stimme_wird_genommen_und_nicht_erraten(sprachausgabe):
     """Für jeden Dienst, der nicht Speaches ist.
 
-    Bei Speaches steht die Stimme am Modell, und Beacon errät sie durch
+    Bei Speaches steht die Stimme am Modell, und Rocket errät sie durch
     Probieren. Bei einem anderen OpenAI-kompatiblen Dienst sind Modell und
     Stimme zwei Angaben — Marc am 10.9.2026 auf seiner Box mit Omnivoice:
     Modell `tts-voxtral`, Stimme `clone:new`. In der Maske gab es dafür

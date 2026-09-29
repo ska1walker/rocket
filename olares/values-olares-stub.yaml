@@ -3,17 +3,17 @@
 postgres:
   host: postgres-cluster.os-platform
   port: "5432"
-  username: beacon
+  username: rocket
   password: nur-zum-pruefen
   databases:
-    beacon: beacon-db
+    rocket: rocket-db
 bfl:
   username: pruefer
 user:
   zone: pruefer.olares.com
 userspace:
-  appData: /olares/userdata/Cache/pruefer/beacon
-  appCache: /olares/userdata/Cache/pruefer/beacon-cache
+  appData: /olares/userdata/Cache/pruefer/rocket
+  appCache: /olares/userdata/Cache/pruefer/rocket-cache
   appCommon: /olares/rootfs/Common
 cluster:
   arch: amd64

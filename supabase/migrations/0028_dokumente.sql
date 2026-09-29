@@ -3,7 +3,7 @@
 -- Dateien am Datensatz — Angebot als PDF, Lageplan, unterschriebener
 -- Vertrag, das Foto vom Zählerstand.
 --
--- Bisher konnte ein Mensch alles in Beacon schreiben, aber nichts
+-- Bisher konnte ein Mensch alles in Rocket schreiben, aber nichts
 -- hineinlegen. Wer einem Kontakt ein Dokument zuordnen wollte, hängte es
 -- an eine Mail und hoffte, dass der Faden es festhält.
 --

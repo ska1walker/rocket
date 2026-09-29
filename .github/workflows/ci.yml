@@ -95,12 +95,12 @@ jobs:
       - name: create application role
         run: |
           PGPASSWORD=postgres psql -h localhost -U postgres -c \
-            "create role beacon login password 'beacon_dev_only' createdb;"
+            "create role rocket login password 'rocket_dev_only' createdb;"
 
       - name: pytest
         working-directory: backend
         run: python -m pytest -q
         env:
           TEST_DB_HOST: localhost
-          TEST_DB_USER: beacon
-          TEST_DB_PASSWORD: beacon_dev_only
+          TEST_DB_USER: rocket
+          TEST_DB_PASSWORD: rocket_dev_only

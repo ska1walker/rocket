@@ -71,7 +71,7 @@ def anfordern(
     """
     code = code_neu() if bekannt else None
 
-    kopf = "Beacon — Passwort zurücksetzen\n==============================\n\n"
+    kopf = "Rocket — Passwort zurücksetzen\n==============================\n\n"
     if code is not None:
         # **Keine absolute Uhrzeit.** Der Container läuft auf UTC, die
         # Box steht in Deutschland: „gültig bis 11:09" las sich um 13:20
@@ -84,7 +84,7 @@ def anfordern(
             f"Gültig {GUELTIG_MINUTEN} Minuten, gerechnet ab dem Zeitpunkt, an dem\n"
             "diese Datei entstanden ist. Ist sie abgelaufen, einfach auf der\n"
             "Seite noch einmal „Code erzeugen\" drücken.\n\n"
-            "Diesen Code auf der Anmeldeseite von Beacon eingeben, zusammen\n"
+            "Diesen Code auf der Anmeldeseite von Rocket eingeben, zusammen\n"
             "mit dem Zugang oben und dem neuen Passwort.\n"
         )
     elif zugaenge:
@@ -100,7 +100,7 @@ def anfordern(
         # zu einer Organisation gehört. Dann lässt weder die Anmeldung
         # jemanden herein noch die Olares-Sitzung — die Tür gilt als
         # geschlossen, sobald irgendwo ein Passwort steht. Hier „öffnen Sie
-        # Beacon einfach von der Olares-Oberfläche" zu schreiben, wäre eine
+        # Rocket einfach von der Olares-Oberfläche" zu schreiben, wäre eine
         # Sackgasse mit Wegweiser.
         teil = (
             "Auf dieser Box gibt es Zugänge mit Passwort, aber **keiner davon\n"
@@ -112,7 +112,7 @@ def anfordern(
     else:
         teil = (
             "Auf dieser Box hat noch niemand ein Passwort gesetzt.\n\n"
-            "Solange das so ist, brauchen Sie keines: Öffnen Sie Beacon von\n"
+            "Solange das so ist, brauchen Sie keines: Öffnen Sie Rocket von\n"
             "der Olares-Oberfläche dieser Box aus, dann sind Sie drin. Setzen\n"
             "Sie dort unter Einstellungen ein Passwort — erst das schließt\n"
             "die Tür.\n"
@@ -200,7 +200,7 @@ def verbrauchen() -> None:
 #
 # Der Ordnername ist der Olares-App-Name, und der ist gleich dem
 # Chart-Namen — `scripts/check-chart.sh` erzwingt das.
-ORDNER_IN_DATEIEN = ("Data", "beacon")
+ORDNER_IN_DATEIEN = ("Data", "rocket")
 
 
 def wo_liegt_die_datei() -> str:

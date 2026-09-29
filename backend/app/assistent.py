@@ -1,12 +1,12 @@
 """Der Assistent — Aufträge in Worten, Handlungen mit Karte.
 
 „Leg für Brinkmann eine Aufgabe an: Angebot nachfassen, Freitag.“ Das Modell
-bekommt Beacons Funktionen als Werkzeuge und plant; Beacon führt aus.
+bekommt Rockets Funktionen als Werkzeuge und plant; Rocket führt aus.
 Drei Regeln machen den Unterschied zwischen nützlich und gefährlich:
 
 - **Lesen sofort, Schreiben mit Karte.** Suchen und Nachsehen läuft
   direkt. Alles, was anlegt oder ändert, kommt als Vorschlag zurück:
-  Beacon baut die Anfrage fertig (Pfad, Körper), zeigt sie als Karte, und
+  Rocket baut die Anfrage fertig (Pfad, Körper), zeigt sie als Karte, und
   ein Mensch drückt „Ausführen“. Das Modell schreibt nie selbst.
 - **Keine erfundenen Kennungen.** Das Modell nennt „Brinkmann“; ein
   Werkzeug sucht im Bestand. Ein Treffer wird verwendet, bei mehreren
@@ -39,7 +39,7 @@ SEITEN = {
 }
 
 SYSTEM = (
-    "Du bist der Assistent im CRM Beacon und hilfst einer Vertriebsperson. Du antwortest kurz, "
+    "Du bist der Assistent im CRM Rocket und hilfst einer Vertriebsperson. Du antwortest kurz, "
     "auf Deutsch, in der Sie-Form. Für alles, was im Bestand steht oder verändert werden soll, "
     "nutzt du Werkzeuge — du erfindest keine Firmen, Personen oder Kennungen. Nenne Datensätze "
     "beim Namen, wie das Werkzeug sie liefert. Änderungen legst du als Vorschlag an; sie werden "
@@ -61,7 +61,7 @@ WERKZEUGE: list[dict[str, Any]] = [
     }},
     {"type": "function", "function": {
         "name": "seite_oeffnen",
-        "description": "Öffnet einen Bereich von Beacon oder einen gefundenen Datensatz.",
+        "description": "Öffnet einen Bereich von Rocket oder einen gefundenen Datensatz.",
         "parameters": {"type": "object", "properties": {
             "bereich": {"type": "string", "enum": sorted(SEITEN), "description": "Ein Bereich — oder leer, wenn ein Pfad gegeben ist"},
             "pfad": {"type": "string", "description": "Pfad eines Treffers aus `suchen`, z. B. /firmen/<id>"},

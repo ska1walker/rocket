@@ -143,7 +143,7 @@ async def datei_holen(
     """Liefert die Datei aus — als Anhang, außer bei Bild und PDF.
 
     Warum das zählt: Eine hochgeladene HTML-Datei, die der Browser im
-    Ursprung von Beacon anzeigt, wäre eingeschleustes Skript mit allen
+    Ursprung von Rocket anzeigt, wäre eingeschleustes Skript mit allen
     Rechten des Angemeldeten. Sie wird deshalb heruntergeladen und nicht
     dargestellt — und SVG ebenso, das kann Skript enthalten.
     """

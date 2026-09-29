@@ -123,7 +123,7 @@ async def kandidaten(client: httpx.AsyncClient, cfg: LLMConfig, einr: Einrichtun
     beschreibung = " ".join(beschreibung.split())[:300]
     if not einr.suche.eingerichtet:
         raise an.SucheNichtEingerichtet(
-            "Ohne Suchdienst findet Beacon keine Firma, die es noch nicht kennt — "
+            "Ohne Suchdienst findet Rocket keine Firma, die es noch nicht kennt — "
             "unter Einstellungen → KI und Programme einen eintragen."
         )
 

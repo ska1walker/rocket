@@ -1,5 +1,47 @@
 # Betrieb und Entwicklung
 
+## Seit 0.13.0: Rocket, vorher Beacon
+
+Am 29. September 2026 wurde das Produkt von **Beacon** in **Rocket**
+umbenannt — Repo (`ska1walker/rocket`), Abbilder
+(`ghcr.io/ska1walker/rocket-*`), Olares-Name und `appid`, Namespace
+(`rocket-<nutzer>`), Datenbank, Kopfzeilen (`X-Rocket-*`), Kekse und
+lokale Einstellungen im Browser, Dateinamen der Abzüge (`rocket-*.json`)
+und Katalogeintrag.
+
+**Diesmal ohne Alias, mit Absicht.** Anders als beim Schritt von aicrm zu
+Beacon versteht Rocket die alten Namen nicht mehr: keine
+`X-Beacon-*`-Kopfzeilen, keine Abzüge `beacon-*.json`, kein Keks
+`beacon_sitzung`. Die Kopfzeilen `X-Aicrm-*` und Abzüge `aicrm-*.json`
+aus der Zeit davor bleiben lesbar. Wer den Bestand mitnehmen will, muss
+deshalb die Abzüge von Hand umbenennen — sonst startet Rocket leer.
+
+**Eine Umbenennung ist auf Olares eine Neuinstallation.** Die Kennung
+ist `md5(<appname>)[:8]`, für Rocket `fdfedc01`; die App heißt dann
+`https://fdfedc010.<nutzer>.<zone>`, der öffentliche Pfad (Links aus
+Mails) `…011.`. Der Umzug, in dieser Reihenfolge:
+
+1. In Beacon einen frischen Abzug schreiben (`POST /api/sicherung` oder
+   *Einstellungen › Sicherung*).
+2. In *Dateien* den Ordner `Data/rocket/sicherungen` anlegen (uid 1000),
+   den neuesten Abzug aus `Data/beacon/sicherungen` hineinkopieren und
+   dabei von `beacon-….json` in `rocket-….json` umbenennen.
+   **`Data/beacon/tresor.key` nach `Data/rocket/tresor.key`
+   mitkopieren** (0600) — ohne ihn sind die Zugangsdaten im Abzug nicht
+   zu lesen, und SMTP, IMAP, Sprachmodell und Suche müssen neu
+   eingetragen werden.
+3. Rocket über den Markt installieren (neuer Katalogeintrag, siehe
+   „Veröffentlichen").
+4. Erste Anmeldung — sie spielt den neuesten Abzug zurück
+   (`auth._einrichten`). Bestand nachmessen (siehe unten).
+5. Was von außen auf Beacon zeigt, auf die neue Adresse umstellen: die
+   Webhook-Adresse in Insilo (`https://fdfedc010.…/api/eingang/<quelle>`),
+   Relay, und wer `X-Beacon-*`-Kopfzeilen schickt, schickt jetzt
+   `X-Rocket-*`. Links in bereits verschickten Mails (Abmelden,
+   Einwilligung) zeigen weiter auf `…41b89d101.` und laufen ins Leere,
+   sobald Beacon weg ist.
+6. Erst dann Beacon deinstallieren.
+
 ## Seit 0.2.0: Beacon, vorher aicrm
 
 Seit dem Abend des 5. September ist die Box aus dem **Aimighty-Katalog**
@@ -18,7 +60,7 @@ Kopfzeilen `X-Aicrm-*` am Eingang (Alias) und die Lesbarkeit alter
 Abzüge `aicrm-*.json`.
 
 **Eine Umbenennung ist auf Olares eine Neuinstallation.** Die Kennung
-ist `md5(<appname>)[:8]`, also `41b89d10`; die App heißt jetzt
+ist `md5(<appname>)[:8]`, für Beacon `41b89d10`; die App hieß
 `https://41b89d100.<nutzer>.<zone>`, der öffentliche Pfad `…101.`. So
 lief der Umzug auf Kais Box, in dieser Reihenfolge: frischer Abzug über
 `POST /api/sicherung`; Ablage `Data/beacon/sicherungen` von Hand angelegt
@@ -39,9 +81,9 @@ Voraussetzungen: PostgreSQL 16, Python 3.11+, Node 22+.
 ```bash
 # 1. Datenbank
 brew services start postgresql@16
-psql -d postgres -c "create role beacon login password 'beacon_dev_only';"
-psql -d postgres -c "alter role beacon createdb;"   # nur für die Tests
-createdb -O beacon beacon
+psql -d postgres -c "create role rocket login password 'rocket_dev_only';"
+psql -d postgres -c "alter role rocket createdb;"   # nur für die Tests
+createdb -O rocket rocket
 ```
 
 **Die Rolle darf kein Superuser sein, und die Migrationen laufen mit
@@ -58,9 +100,9 @@ genau dieser Rolle.** Beides ist keine Förmlichkeit:
 
 ```bash
 # 2. Schema
-PGPASSWORD=beacon_dev_only psql -h localhost -U beacon -d beacon \
+PGPASSWORD=rocket_dev_only psql -h localhost -U rocket -d rocket \
   -f supabase/migrations/0001_initial_schema.sql
-PGPASSWORD=beacon_dev_only psql -h localhost -U beacon -d beacon \
+PGPASSWORD=rocket_dev_only psql -h localhost -U rocket -d rocket \
   -f supabase/migrations/0002_rls_policies.sql
 
 # 3. Backend
@@ -87,7 +129,7 @@ Anlass, jemanden zu erfinden.
 cd backend && .venv/bin/python -m pytest
 ```
 
-Die Tests legen eine eigene Datenbank `beacon_test` an, spielen die
+Die Tests legen eine eigene Datenbank `rocket_test` an, spielen die
 Migrationen ein und werfen sie danach weg. Sie laufen gegen echtes
 Postgres, nicht gegen Attrappen — die Zeilensicherheit ist der Kern
 dessen, was geprüft wird, und die gibt es nur in einer echten Datenbank.
@@ -118,7 +160,7 @@ python3 scripts/regen-migrations.py
 ## Was auf der Box bewiesen ist
 
 Bis zum 3. September 2026 stand hier, das Chart sei nie auf einer echten
-Olares-Box gelaufen. Das gilt nicht mehr: Beacon läuft seit dem 3.9. auf
+Olares-Box gelaufen. Das gilt nicht mehr: Rocket läuft seit dem 3.9. auf
 Kais Box, seit dem 5.9. aus dem Aimighty-Katalog (siehe oben). Das
 Zusammenspiel mit dem injizierten Postgres, das Zeitfenster bis zum
 `ns-owner`-Label, der Envoy vor der Oberfläche und der Weg von
@@ -140,7 +182,7 @@ zusichert — er überlebt eine Deinstallation, die **Datenbank nicht**.
 | `podcasts/` | Die erzeugten Gesprächsvorbereitungen als MP3 |
 | `tresor.key` | Der Schlüssel für die Zugangsdaten, 0600 |
 
-**Der Abzug enthält alles, was ein Mensch in Beacon ändert.** Gemessen am
+**Der Abzug enthält alles, was ein Mensch in Rocket ändert.** Gemessen am
 9. September: 21 Tabellen mit Inhalt (Firmen, Kontakte, Geschäfte,
 Aufgaben, Tickets, Angebote, Kampagnen, Mails, Eigenschaftsdefinitionen,
 Webhook-Quellen, Protokoll), dazu die 66 Felder der Organisation
@@ -189,7 +231,7 @@ verlässt die Box.
 Von Hand geht weiterhin:
 
 ```bash
-pg_dump -h <box> -U beacon beacon > beacon-$(date +%F).sql
+pg_dump -h <box> -U rocket rocket > rocket-$(date +%F).sql
 ```
 
 **Seit 0.3.2: Sicherung nach jeder Änderung, samt Einstellungen.**
@@ -227,9 +269,9 @@ es eines:
 
 | | Gemeinsamer Ordner (seit 0.11.0) | Webhook (seit 0.10.0) |
 |---|---|---|
-| Wann | Insilo auf **derselben** Box | Insilo auf einer anderen Box, oder Protokolle nur für Beacon |
+| Wann | Insilo auf **derselben** Box | Insilo auf einer anderen Box, oder Protokolle nur für Rocket |
 | Einrichtung | keine | Quelle anlegen, in Insilo eintragen, auf automatisch stellen |
-| Wer die Protokolle sieht | jede App der Box mit `appCommon` (Relay, ComfyUI, Ollama …) | nur Beacon, signiert |
+| Wer die Protokolle sieht | jede App der Box mit `appCommon` (Relay, ComfyUI, Ollama …) | nur Rocket, signiert |
 | Löschen, Ändern | Datei weg bzw. neu geschrieben | eigene Ereignisse |
 | Tempo | alle 2 Minuten | sofort |
 
@@ -237,7 +279,7 @@ es eines:
 
 Insilo legt seit 0.1.93 jedes fertige Protokoll als Datei in den geteilten
 Olares-Ordner, `/olares/rootfs/Common/insilo-meetings` auf der Box
-(`insilo/backend/app/relay_drop.py`). Relay liest dort mit, Beacon seit
+(`insilo/backend/app/relay_drop.py`). Relay liest dort mit, Rocket seit
 0.11.0 auch (`app/insilo_ablage.py`). Das Chart hängt **nur diesen
 Unterordner** ein, **nur lesend**, unter `/app/insilo`; geschrieben wird
 er allein von Insilo.
@@ -246,12 +288,12 @@ er allein von Insilo.
   `<YYYY-MM-DD>T<HH>_<MM>--<id8>.md`. Vorne ein Kopf (`insilo_id`, Titel,
   Aufnahmezeit, Dauer, Teilnehmer, Schlagworte, Vorlage), dahinter Insilos
   Markdown **ohne Wortlaut** mit eigenem Kopf. Ein anderes Schema liest
-  Beacon nicht und zählt die Datei als „unbekanntes Format".
+  Rocket nicht und zählt die Datei als „unbekanntes Format".
 - **Nur Kundengespräche (seit 0.12.0, Insilo ab 0.1.102).** Der Kopf trägt
   `crm: true|false`, festgelegt in Insilo an der Vorlage (*Einstellungen ›
   Vorlagen für Zusammenfassungen*, Voreinstellung: Mandanten-, Vertriebs-
   und Jahresgespräch ja; Allgemeine Besprechung, Schnellnotiz und eigene
-  Vorlagen nein). Beacon übernimmt nur `true`; der Webhook trägt dasselbe
+  Vorlagen nein). Rocket übernimmt nur `true`; der Webhook trägt dasselbe
   als `meeting.crm`. Gefiltert wird **nicht am Vorlagennamen** — den kann
   eine Organisation in Insilo umbenennen. Fehlt der Schlüssel (älteres
   Insilo), wird wie bisher übernommen; ein unbekannter Wert gilt nicht als
@@ -266,17 +308,17 @@ er allein von Insilo.
   `_zusammenfassung_aus` zurück — genug für den Vorschlag über Namen.
 - **Welche Organisation liest.** Der Ordner gehört der Box.
   `org_settings.insilo_ablage` = an/aus; nicht eingestellt heißt: an, wenn
-  Beacon auf der Box genau eine Organisation hat, sonst aus. So braucht
+  Rocket auf der Box genau eine Organisation hat, sonst aus. So braucht
   der Normalfall nichts, und bei zwei Organisationen landen die Gespräche
   nicht still bei beiden.
 - **Unverändert wird nicht neu gelesen** (`ablage_stand` =
   Änderungszeit:Größe) — **seit 0.12.1 nur, wenn auch die Lesefassung
   passt** (`ablage_fassung`, `insilo_ablage.LESEFASSUNG`). Auf Kais Box am
   16.9.2026: Insilo 0.1.102 schrieb die Dateien mit `crm:` neu, das noch
-  laufende Beacon 0.11.0 las sie, kannte die Markierung nicht und
+  laufende Rocket 0.11.0 las sie, kannte die Markierung nicht und
   speicherte den neuen Stand; 0.12.0 hielt sie danach für unverändert und
   zog keine der 14 internen Besprechungen zurück. Wer ändert, *wie* eine
-  Datei gelesen wird, hebt `LESEFASSUNG` — dann liest das neue Beacon nach
+  Datei gelesen wird, hebt `LESEFASSUNG` — dann liest das neue Rocket nach
   dem Update einmal alles. **Eine Datei, die fehlt, heißt „in Insilo
   gelöscht"** — Besprechung und Aktivität werden weich gelöscht. **Ein
   leerer Ordner löscht nichts**: Er sieht genauso aus wie einer, der nach
@@ -295,7 +337,7 @@ er allein von Insilo.
   Relay hängt `…/Common/insilo-meetings` lesend ein. Dass eine
   Bestandsinstallation die neue Berechtigung per Markt-Upgrade bekommt,
   spricht Insilos Helm-Historie (Upgrade von 0.1.88 bis 0.1.98 ohne
-  Neuinstallation, danach `appCommon` gesetzt); belegt ist es für Beacon
+  Neuinstallation, danach `appCommon` gesetzt); belegt ist es für Rocket
   erst nach dem Upgrade auf 0.11.0. Das Chart liest den Wert deshalb
   bedingt: Fehlt er, bleibt der Weg aus und der Block sagt es.
 
@@ -303,13 +345,13 @@ er allein von Insilo.
 
 Nach einer Besprechung schickt Insilo ein signiertes Ereignis mit dem
 fertigen Protokoll. Der Vertrag steht in `insilo/docs/WEBHOOKS.md` und
-wird eingehalten, nicht neu erfunden. Im Insilo-Pod löst Beacons Adresse
+wird eingehalten, nicht neu erfunden. Im Insilo-Pod löst Rockets Adresse
 auf die LAN-Adresse der Box auf (`192.168.1.17`), der Aufruf geht also
 nicht über den FRP-Server nach draußen (gemessen 15.9.2026).
 
 #### Einrichten
 
-1. In Beacon unter *Einstellungen › KI und Programme › Verbundene
+1. In Rocket unter *Einstellungen › KI und Programme › Verbundene
    Programme* eine Quelle der Art „Insilo — Besprechungen" anlegen.
    Adresse und Geheimnis werden **einmal** gezeigt.
 2. In Insilo unter *Einstellungen › Webhooks* beides eintragen, Ereignis
@@ -317,24 +359,24 @@ nicht über den FRP-Server nach draußen (gemessen 15.9.2026).
    neuer Webhook in Insilo auf „manuell" (`trigger_mode = 'manual'`,
    Migration 0008) — dann kommt nur an, was jemand in Insilo mit „An
    externe Systeme senden" losschickt. Schnellnotizen gehen immer.
-3. Zurück in Beacon die **Adresse von Insilo** an der Quelle eintragen
+3. Zurück in Rocket die **Adresse von Insilo** an der Quelle eintragen
    (`https://e5d605f30.<nutzer>.olares.de`). Dann führt jede Besprechung
    mit „In Insilo öffnen" nach `/m/<kennung>`.
-4. In Insilo „Test" drücken — Beacon antwortet 200 und legt nichts an.
+4. In Insilo „Test" drücken — Rocket antwortet 200 und legt nichts an.
 
 #### Gemessen am 15. September 2026
 
 Der Webhook scheiterte am 5.9. an der Login-Umleitung des
-`internal`-Eingangs (siehe unten). Seit 0.6.9 ist Beacons Eingang
+`internal`-Eingangs (siehe unten). Seit 0.6.9 ist Rockets Eingang
 `public`, und die Umleitung ist weg:
 
 | Weg | Antwort |
 |---|---|
-| Beacon-Pod → `insilo-backend.insilo-kaivostudio:8000` im Cluster | Zeitüberschreitung — NetworkPolicy |
-| Insilo-Pod → `https://41b89d100.kaivostudio.olares.de/api/eingang/<quelle>` | **401 „Unbekannte oder abgeschaltete Quelle"** — Beacon selbst |
-| Insilo-Pod → `…41b89d101…` (`beaconlinks`) | 404 — der Links-Dienst kennt den Eingang nicht |
+| Rocket-Pod → `insilo-backend.insilo-kaivostudio:8000` im Cluster | Zeitüberschreitung — NetworkPolicy |
+| Insilo-Pod → `https://41b89d100.kaivostudio.olares.de/api/eingang/<quelle>` | **401 „Unbekannte oder abgeschaltete Quelle"** — Rocket selbst |
+| Insilo-Pod → `…41b89d101…` (`rocketlinks`) | 404 — der Links-Dienst kennt den Eingang nicht |
 
-Die 401 kommt aus Beacons Code, nicht vom Gateway. Der Weg ist also offen,
+Die 401 kommt aus Rockets Code, nicht vom Gateway. Der Weg ist also offen,
 und die Signatur ist das Tor. Kein neuer Transport, kein
 Service-Provider, kein Abholen nötig.
 
@@ -350,7 +392,7 @@ und Meldungen.
 
 ### Zwei Regeln
 
-**Protokoll ja, Wortlaut nein.** Beacon behält Insilos Markdown ohne
+**Protokoll ja, Wortlaut nein.** Rocket behält Insilos Markdown ohne
 Frontmatter und ohne den Abschnitt `## Volltranskript`
 (`besprechungen.protokoll_aus`), dazu die strukturierte Zusammenfassung
 und die genannten Namen. Die rohe Nutzlast wird **nicht** abgelegt — sie
@@ -361,7 +403,7 @@ Wortlaut auch aus den Aktivitäten entfernt, die vorher schon angelegt
 waren.
 
 **Nie automatisch zugeordnet.** Bis 0.9.9 legte ein Firmenname im Titel
-das Protokoll ungefragt an den Lead. Jetzt schlägt Beacon vor, ein Mensch
+das Protokoll ungefragt an den Lead. Jetzt schlägt Rocket vor, ein Mensch
 bestätigt — ein eindeutiger Treffer ist vorausgewählt, Bestätigen ist ein
 Klick. Insilo kennt von den Beteiligten nur Namen, keine E-Mail, und zwei
 Kontakte heißen Meyer.
@@ -382,7 +424,7 @@ Zweistufig (`app/besprechungen.py`):
    ergaben. Es bekommt die Zusammenfassung und höchstens 40 Firmen, deren
    Name mit dem Gespräch ein Wort teilt, samt deren Kontakten. Jede
    Kennung in der Antwort muss aus dieser Liste stammen. Bei einer
-   Mehrdeutigkeit fragt Beacon das Modell nicht — es sähe dieselben zwei
+   Mehrdeutigkeit fragt Rocket das Modell nicht — es sähe dieselben zwei
    Meyers und müsste raten.
 
 Zugeordnet wird als **eine** Aktivität `meeting` mit Firma, Lead und dem
@@ -398,10 +440,10 @@ vorschlagen" nur über den Titel.
 > **Geprüft am 5. September 2026, zweimal — die erste Messung war
 > falsch, und zwar am Hostnamen.** Olares adressiert einen Entrance nicht
 > unter seinem Namen, sondern als `<appid><index>.<nutzer>.<zone>`:
-> `appid` ist `md5(<appname>)[:8]` (für Beacon `4d3bf559`, auf jeder Box
+> `appid` ist `md5(<appname>)[:8]` (damals für aicrm `4d3bf559`, auf jeder Box
 > gleich), `index` die Position im Manifest, null-basiert. Systemapps wie
 > `files.` oder `market.` tragen Namen — Nutzerapps nicht. Alles, was
-> vorher unter `beacon.kaivostudio.olares.de` gemessen wurde, traf einen
+> vorher unter `rocket.kaivostudio.olares.de` gemessen wurde, traf einen
 > Hostnamen, den es nie gab; das 421 war die Antwort des Gateways auf
 > einen unbekannten Host, keine Aussage über `authLevel`.
 >
@@ -409,8 +451,8 @@ vorschlagen" nur über den Titel.
 >
 > | Entrance | authLevel | Adresse | Antwort |
 > |---|---|---|---|
-> | `beacon` (Index 0) | `internal` | `4d3bf5590.kaivostudio.olares.de` | **302** zur Anmeldung |
-> | `beaconlinks` (Index 1) | `public` | `4d3bf5591.kaivostudio.olares.de` | **200** `{"status":"ok","teil":"oeffentlich"}` |
+> | `rocket` (Index 0) | `internal` | `4d3bf5590.kaivostudio.olares.de` | **302** zur Anmeldung |
+> | `rocketlinks` (Index 1) | `public` | `4d3bf5591.kaivostudio.olares.de` | **200** `{"status":"ok","teil":"oeffentlich"}` |
 > | litellm `litellmapi` | `public` | `6aead52a1.…` und `llm.…` (eigener Name) | 401 von LiteLLM — durchgereicht |
 >
 > Über den öffentlichen Entrance: unbekanntes Token → 404, `/api/contacts`
@@ -424,7 +466,7 @@ vorschlagen" nur über den Titel.
 > fehlenden Tür.
 >
 > **Der zweite Entrance verschiebt die Adresse der App.** Mit nur einem
-> Entrance hieß Beacon `4d3bf559.kaivostudio.olares.de` (ohne Index — so
+> Entrance hieß die App `4d3bf559.kaivostudio.olares.de` (ohne Index — so
 > stand es auch in den eingefrorenen Helm-Werten der Erstinstallation).
 > Seit dem zweiten Entrance heißt der erste `4d3bf5590.…`, und die alte
 > Adresse antwortet 421 (gemessen 5.9.2026). Ein Lesezeichen auf die
@@ -434,17 +476,17 @@ vorschlagen" nur über den Titel.
 >
 > **Ein Entrance am Backend-Pod legt die App lahm.** Der Sidecar, den
 > ein Entrance mitbringt, prüft *jeden* eingehenden Aufruf gegen Authelia
-> — auch die des Frontends an `beacon-backend:8000/api`. Mit 0.1.10 hing
-> `beaconlinks` am Backend-Pod; nach dem Markt-Upgrade antwortete jede
+> — auch die des Frontends an `rocket-backend:8000/api`. Mit 0.1.10 hing
+> `rocketlinks` am Backend-Pod; nach dem Markt-Upgrade antwortete jede
 > API-Anfrage 401 (`ext_authz_denied` im Sidecar-Log), die Oberfläche
 > zeigte „Anfrage fehlgeschlagen (401)“. Seit 0.1.12 hat der öffentliche
-> Pfad sein eigenes Deployment `beacon-links`; das Backend bleibt ohne
+> Pfad sein eigenes Deployment `rocket-links`; das Backend bleibt ohne
 > Entrance und ohne Sidecar. Regel: **Ein Entrance zeigt nur auf Pods, die
 > sonst niemand aus dem Cluster aufruft.**
 >
 > **Was ein neuer Entrance bei einem Upgrade braucht.** `helm upgrade`
 > tauscht die Workloads, liest aber das Manifest nicht neu ein: Nach dem
-> Ausrollen von 0.1.10 per Helm fehlte `beaconlinks` in `spec.entrances`,
+> Ausrollen von 0.1.10 per Helm fehlte `rocketlinks` in `spec.entrances`,
 > und der Backend-Pod hatte keinen Envoy-Sidecar. Erst das Upgrade über
 > den Markt (Upload-Quelle) trug den Entrance ins Application-Objekt, in
 > `spec.settings.policy` und injizierte den Sidecar in den nächsten Pod.
@@ -463,14 +505,14 @@ vorschlagen" nur über den Titel.
 > Markts. Auf Kais Box wurde der Eintrag von Hand nachgetragen, so wie
 > eine Neuinstallation ihn schreiben würde.
 
-> Bis 0.6.9 standen hier zwei Auswege — Service-Provider und „Beacon holt
+> Bis 0.6.9 standen hier zwei Auswege — Service-Provider und „Rocket holt
 > selbst". Beide braucht es nicht mehr: Mit dem öffentlichen Eingang kommt
 > Insilos Webhook an (Messung vom 15.9.2026 oben).
 
 
 ## Versand — SMTP, Einwilligung, öffentliche Links
 
-Seit 0.1.11 schickt Beacon selbst: über ein gewöhnliches SMTP-Konto
+Seit 0.1.11 schickt Rocket selbst: über ein gewöhnliches SMTP-Konto
 (*Einstellungen → Versand*). Daraus kommen Ticket-Antworten, die
 Bestätigungsmail (Double-Opt-In) und die Ansprache aus dem Kontakt.
 Marketing-Post ist davon getrennt (*Marketing-Versand*: dasselbe Konto
@@ -502,7 +544,7 @@ in `List-Unsubscribe` und im Text; der Link funktioniert immer.
 
 **Die Adresse der öffentlichen Links** (Bestätigen, Abmelden, Klick) ist
 `https://<appid>1.<nutzer>.<zone>` — der zweite Entrance. Das Chart reicht
-`.Values.domain.beacon` als `APP_DOMAIN` ins Backend, das Backend leitet
+`.Values.domain.rocket` als `APP_DOMAIN` ins Backend, das Backend leitet
 daraus ab; *Einstellungen → Marketing-Versand* zeigt, was gilt, und
 erlaubt einen eigenen Wert (eigene Domain, oder eine Box, die ihre
 Domain nicht mitteilt). Ohne Adresse geht keine Bestätigungsmail hinaus,
@@ -555,7 +597,7 @@ derselben Adresse.
 
 ### Die Antwort soll im Bestand landen
 
-Beacon liest genau **ein** Postfach je Organisation. Schickt jemand unter
+Rocket liest genau **ein** Postfach je Organisation. Schickt jemand unter
 eigener Adresse, käme die Antwort dort an, wo niemand sie einliest — der
 Faden im CRM bliebe stumm. Deshalb trägt jede Mail `Reply-To` auf das
 Postfach der Organisation, **sofern eines eingerichtet ist**. Ist keines
@@ -621,7 +663,7 @@ Symbol (`components/erklaerung.tsx`).
 > Die `message_id` aus der Antwort des Dienstes steht am Verlaufseintrag
 > (`payload.message_id`) — die Grundlage für jedes spätere `in_reply_to`.
 
-E-Mails gehen nicht aus Beacon selbst hinaus und kommen nicht direkt
+E-Mails gehen nicht aus Rocket selbst hinaus und kommen nicht direkt
 herein. Beides läuft über einen Dienst auf der Box — Marcs Relay, die
 Outlook-Alternative. Weil dessen Schnittstelle beim Bau nicht vorlag,
 gilt ein **eigener, kleiner Vertrag**, denselben Bauplan wie beim
@@ -637,10 +679,10 @@ Quelle wird unter *Einstellungen → Eingehende Quellen* angelegt (Art
 Absenderadresse, liegt die Mail als Verlaufseintrag am Kontakt; sonst
 wartet sie im Eingang.
 
-**Hinaus** — Beacon schickt an die unter *Einstellungen → Postausgang*
+**Hinaus** — Rocket schickt an die unter *Einstellungen → Postausgang*
 eingetragene Adresse einen signierten POST mit
 `{"to","from","subject","text","in_reply_to","sent_at"}` und der
-Kopfzeile `X-Post-Signature`. Der Dienst verschickt; Beacon hält die
+Kopfzeile `X-Post-Signature`. Der Dienst verschickt; Rocket hält die
 Nachricht im Verlauf fest. Nichts geht von allein hinaus — das Modell
 entwirft, ein Mensch drückt auf Senden.
 
@@ -663,7 +705,7 @@ Für alles darüber hinaus braucht sie einen **Suchdienst** unter
 
 | Dienst | Adresse | Schlüssel |
 |---|---|---|
-| SearXNG (läuft auf der Box) | `http://searxngv2.searxngv2server-shared.svc.cluster.local:8080` — Beacon hängt `/search?format=json` an | meist keiner; sonst als `Authorization: Bearer` |
+| SearXNG (läuft auf der Box) | `http://searxngv2.searxngv2server-shared.svc.cluster.local:8080` — Rocket hängt `/search?format=json` an | meist keiner; sonst als `Authorization: Bearer` |
 | Tavily | `https://api.tavily.com/search` | Pflicht, geht als `Authorization: Bearer` |
 | Brave Search | `https://api.search.brave.com/res/v1/web/search` | Pflicht, geht als `X-Subscription-Token` |
 
@@ -698,7 +740,7 @@ sieht am anderen Ende aus wie ein falscher.
 **Ein Schlüssel gehört zu seiner Adresse.** Bis 0.9.6 stand er in einer
 Spalte, die den Dienst nicht kannte. Wer die Adresse von Brave auf Tavily
 umstellte und das Schlüsselfeld leer ließ — es zeigt „hinterlegt" und
-lädt genau dazu ein —, behielt den Brave-Schlüssel, und Beacon schickte
+lädt genau dazu ein —, behielt den Brave-Schlüssel, und Rocket schickte
 ihn als Bearer an Tavily. Antwort: 401, und im Bildschirm stand weiter
 „hinterlegt". Marc am 10.9.2026: „Musste nur aufpassen wenn du wechselst,
 weil der dann die Secret Keys durcheinander bringt." Er hatte es sich in
@@ -722,23 +764,23 @@ und Art, das Ende unterscheidet zwei Schlüssel desselben Kontos
 Das gilt **nur für API-Schlüssel**, nicht für Passwörter: Ein Schlüssel
 ist eine Kennung, die der Dienst selbst anzeigt; ein Postfachpasswort ist
 keine. Und die Einstellungen darf jedes Mitglied lesen, nicht nur die
-Verwaltung. Unter sechzehn Zeichen zeigt Beacon nur die Länge — von
+Verwaltung. Unter sechzehn Zeichen zeigt Rocket nur die Länge — von
 „Anfang und Ende" wären sonst fast alle übrig.
 
 Nebenbei nachgezogen: `tts_api_key_set` meldete noch Anwesenheit statt
 Lesbarkeit; das war beim Tresorumbau in 0.9.1 übersehen worden.
 
-**Wenn der Suchdienst den Schlüssel ablehnt**, sagt Beacon seit 0.9.0,
+**Wenn der Suchdienst den Schlüssel ablehnt**, sagt Rocket seit 0.9.0,
 *welcher* Dienst das war und *welche Adresse* gefragt wurde
 (`anreicherung._suchantwort_pruefen`). Vorher stand da „Der Endpunkt hat
-mit 401 geantwortet" — und Beacon spricht mit **zwei** Endpunkten,
+mit 401 geantwortet" — und Rocket spricht mit **zwei** Endpunkten,
 Sprachmodell und Suche. Wer den Suchschlüssel gerade eingetragen hatte,
 suchte den Fehler zwangsläufig an der falschen Stelle (Marc, 10.9.2026).
 
 Bei Tavily ist die Adresse im Satz wichtig: Der Dienst antwortet auf
 **jede** Anfrage ohne gültigen Schlüssel mit 401 — auch auf eine im
 falschen Format, auch auf ein GET (nachgemessen am 10.9.2026). Ein 401
-allein sagt also nicht, ob Beacon überhaupt den Tavily-Weg genommen hat.
+allein sagt also nicht, ob Rocket überhaupt den Tavily-Weg genommen hat.
 Die Adresse muss genau `https://api.tavily.com/search` lauten; ein 401
 bei richtiger Adresse ist wirklich der Schlüssel.
 
@@ -765,7 +807,7 @@ Anbieter:
 SearXNG-Konfiguration **abgeschaltet** — und der Parameter `engines`
 weckt auch Abgeschaltete. Dieselbe Frage, dieselbe Instanz: mit der
 Vorgabe der Instanz null Treffer, mit einer ausdrücklichen Liste zehn.
-Seit 0.9.4 nennt Beacon die Anbieter deshalb selbst
+Seit 0.9.4 nennt Rocket die Anbieter deshalb selbst
 (`anreicherung.SEARXNG_ANBIETER`): bing, duckduckgo, brave, startpage,
 qwant, mojeek, wikipedia.
 
@@ -838,10 +880,10 @@ wenn man Tecklenburg meint.
 **SearXNG ist auf einer Heim-Box nicht verlässlich.** Es fragt Google,
 Bing, DuckDuckGo und Startpage ohne Schlüssel — und die sperren einen
 Selbstbetreiber mit fester IP nach wenigen Anfragen für Stunden bis
-Tage. Gemessen am 6. September 2026 aus Beacons Namespace heraus: JSON
+Tage. Gemessen am 6. September 2026 aus Rockets Namespace heraus: JSON
 in 0,4 s, aber null Treffer, alle Maschinen `Suspended` oder `CAPTCHA`;
 Bing lieferte für drei verschiedene Anfragen dieselben zehn Treffer, also
-eine Abwehrseite. Beacon erkennt das seit 0.3.0 am Feld
+eine Abwehrseite. Rocket erkennt das seit 0.3.0 am Feld
 `unresponsive_engines` und meldet *„Der Suchdienst ist gerade gesperrt“*
 statt „nichts gefunden“ (`SucheGestoert` in `anreicherung.py`). Für ein
 CRM, das je Anlegen fünf bis zehn Anfragen stellt, ist Brave der
@@ -970,7 +1012,7 @@ Navigation in der Seitenspalte, und Anlegen gab es nur je Seite — wer auf
 dem Lead-Brett stand und einen Kontakt brauchte, musste erst wechseln.
 
 **Warum nur diese drei.** HubSpots Leiste ist voll, weil dort acht
-Produkte, Telefonie und Hinweise unterzubringen sind. Beacon ist ein
+Produkte, Telefonie und Hinweise unterzubringen sind. Rocket ist ein
 Produkt für ein kleines Team; wer den Behälter kopiert, ohne den Inhalt
 zu haben, bekommt eine leere Leiste. Konto und Datenweg-Nachweis bleiben
 deshalb unten in der Spalte: Der Nachweis ist kein Bedienelement, sondern
@@ -1091,11 +1133,11 @@ Wiederanlauf nur gefüllt, wo es leer ist.
 **Die Kopfecke gibt es seit 0.9.0 nicht mehr** — Marke, Klappschalter und
 Suche sind in die Kopfleiste gezogen, und die Spalte beginnt mit
 Navigation. Ihre Breite von 240 px (`--huelle-nav-breite`) bleibt: Wappen,
-Wortmarke, „Beacon“ und der Klappschalter brauchen zusammen 227 px, und
+Wortmarke, „Rocket“ und der Klappschalter brauchen zusammen 227 px, und
 bei 220 lief die Beschriftung elf Pixel aus ihrem Kasten (0.5.7).
 
 **Einklappen** auf Symbole: Knopf in der Kopfleiste oder ⌘B / Strg+B. Zustand
-je Browser im Cookie `beacon-navigation`, vor dem ersten Anstrich per
+je Browser im Cookie `rocket-navigation`, vor dem ersten Anstrich per
 Inline-Script als `html[data-navigation="eingeklappt"]` gesetzt
 (`components/navigation.tsx`, wie die Darstellung). Eingeklappt zeigt jeder
 Eintrag seinen Namen als Tooltip; „Mehr“ öffnet auch dann das volle Feld.
@@ -1120,7 +1162,7 @@ jeden eingetragenen Endpunkt (Sprachmodell, Sprachausgabe, Suchdienst,
 SMTP, Postausgang, Brevo). Als **auf dieser Box** gelten Kubernetes-
 Dienstname, `localhost`, privates Netz — und die **eigene Olares-Zone**,
 abgeleitet aus der Adresse der öffentlichen Links
-(`41b89d101.kaivostudio.olares.de` → `kaivostudio.olares.de`). Alles
+(`fdfedc011.kaivostudio.olares.de` → `kaivostudio.olares.de`). Alles
 andere wird gezählt und im Tooltip beim Namen genannt. Also „Alles auf
 dieser Box“ oder „2 Ziele außerhalb“; ohne geladene Einstellungen steht
 dort **nichts**.
@@ -1134,9 +1176,9 @@ Alarm zerstört das Vertrauen in den Nachweis so zuverlässig wie eine
 falsche Beruhigung.
 
 **Warum die Zonen-Adresse und nicht der Dienstname?** Weil ein Dienst im
-eigenen Namensraum von Beacon aus nicht erreichbar ist. Gemessen: der
+eigenen Namensraum von Rocket aus nicht erreichbar ist. Gemessen: der
 Aufruf von `litellm-svc.litellm-kaivostudio.svc.cluster.local` aus
-`beacon-kaivostudio` läuft in eine Zeitüberschreitung. Im LiteLLM-
+`rocket-kaivostudio` läuft in eine Zeitüberschreitung. Im LiteLLM-
 Namensraum steht nur `app-np`; Olares riegelt Namensräume gegeneinander
 ab (Constraint 4). Nur als **shared** installierte Apps tragen die
 Regeln, die andere hereinlassen — Speaches (`speachesv3-shared`) hat
@@ -1160,10 +1202,10 @@ allen übrigen Bereichen samt Einstellungen. Der Fuß ist dort ausgeblendet.
 Seit 0.4.0 sitzt unten rechts ein Knopf mit dem Schild (`components/assistent.tsx`).
 Ein Auftrag wie „Leg für Brinkmann eine Aufgabe an: Angebot nachfassen,
 Freitag“ geht an `POST /api/assistent` (`backend/app/assistent.py`). Das
-Modell bekommt Beacons Funktionen als Werkzeuge im OpenAI-Format
+Modell bekommt Rockets Funktionen als Werkzeuge im OpenAI-Format
 (`llm.chat_werkzeuge`; auf der Box geprüft: `chat` über LiteLLM liefert
 saubere Aufrufe samt aufgelöstem Datum, rund zehn Sekunden je Schritt),
-plant, und Beacon führt aus — höchstens fünf Schritte je Auftrag.
+plant, und Rocket führt aus — höchstens fünf Schritte je Auftrag.
 
 **Lesen sofort, Schreiben mit Karte.** `suchen`, `aufgaben_offen` und
 `seite_oeffnen` laufen direkt (Öffnen navigiert die Oberfläche). Die
@@ -1204,7 +1246,7 @@ Aufgaben und Angebote. Das Sprachmodell schreibt daraus ein Skript in
 acht bis vierzehn Segmenten mit Sprecherwechsel — als JSON, mit dem
 Auftrag, nichts zu erfinden und Fehlendes als Frage zu benennen. Dann
 spricht die Sprachausgabe jedes Segment mit der Stimme seines Sprechers,
-und Beacon fügt die MP3-Teile zu einer Datei zusammen (ID3-Kopf und
+und Rocket fügt die MP3-Teile zu einer Datei zusammen (ID3-Kopf und
 Xing-Rahmen nur einmal). Die Folge liegt unter
 `/app/data/podcasts/<org>/<id>.mp3` mit Rechten 0600, die Zeile in
 `podcasts` (0025) geht in der Sicherung mit — der Pfad steht in der
@@ -1225,7 +1267,7 @@ Leitung einige Minuten, und die Seite fragt alle drei Sekunden nach.
 beweisen die Einrichtung, bevor jemand eine Folge wartet. Ehrlich gesagt:
 Thorsten klingt gut, die weiblichen Piper-Stimmen hörbar einfacher.
 
-Die Stimme (`voice`) je Modell muss man nicht eintragen: Beacon fragt
+Die Stimme (`voice`) je Modell muss man nicht eintragen: Rocket fragt
 `GET /v1/audio/speech/voices`, sonst probiert es die Kennung aus dem
 Modellnamen und merkt sich, was der Dienst annahm (`STIMMEN_ERMITTELT`).
 Ein eingetragener Wert (`tts_stimme`, `tts_stimme_2`) geht vor.
@@ -1266,7 +1308,7 @@ die Stimme längst mit (`podcast.TTSConfig.fuer`), nur konnte sie niemand
 eintragen.
 
 Seit 0.9.6 hat jeder Sprecher beides, in einem eigenen Feldsatz. Die
-Stimme ist **optional**: Bleibt sie leer, errät Beacon sie wie bisher —
+Stimme ist **optional**: Bleibt sie leer, errät Rocket sie wie bisher —
 der Piper-Weg ändert sich nicht.
 
 Das Modellfeld ist ein **Textfeld mit Vorschlagsliste**, keine Auswahl.
@@ -1275,16 +1317,16 @@ auf deutsche Piper-Modelle gefiltert; an einem Dienst ohne solche war sie
 leer, und dann ließ sich nichts eintragen. Mit `<datalist>` bleiben die
 Vorschläge, wo es welche gibt, und tippen geht immer.
 
-## Anmeldung — warum Beacon das doch selbst macht
+## Anmeldung — warum Rocket das doch selbst macht
 
 Die Hausregel lautet „keine eigene Authentifizierung, das macht Olares".
 Sie gilt weiter für den Normalfall, und der Bruch hier hat einen
 gemessenen Grund.
 
 **Olares kann es für ein Team nicht.** Eine Olares-App wird je Nutzer
-installiert — auf der Box liegt Beacon im Namensraum `beacon-kaivostudio`
+installiert — auf der Box liegt Rocket im Namensraum `rocket-kaivostudio`
 mit `owner: kaivostudio`. Ein zweites Olares-Konto bekäme ein eigenes,
-leeres Beacon mit eigener Datenbank; Marc sähe Kais Bestand nicht. Der
+leeres Rocket mit eigener Datenbank; Marc sähe Kais Bestand nicht. Der
 einzige geteilte Modus ist die *shared app*, und die hat laut Olares'
 Plattformdokumentation ausdrücklich **keinen Entrance und keine URL** —
 sie ist für Hintergrunddienste wie Speaches gedacht. Für mehrere Menschen
@@ -1296,7 +1338,7 @@ geteilten Zugang hat, kann jeden Platz einnehmen.
 
 ### Stand: offen seit dem 8. September 2026
 
-Der Entrance `beacon` steht auf `public`, der Modus auf `eigen`. Von außen
+Der Entrance `rocket` steht auf `public`, der Modus auf `eigen`. Von außen
 ohne jede Box-Sitzung gemessen: Startseite 200, Anmeldemaske 200, und mit
 gefälschtem `X-Bfl-User` überall 401 — Firmen, Einstellungen, Mitglieder,
 Sicherung anlegen, Sicherung zurückspielen, Einstellungen ändern, Person
@@ -1313,7 +1355,7 @@ Ein offener Entrance bei `olares` ist die vollständige Preisgabe: Der Kopf
 mit Lesezugriff auf den ganzen Bestand und offener Sicherung daneben.
 
 Der `authLevel` lässt sich **auch in den Olares-Einstellungen** umstellen
-(Settings › Applications › beacon › Authentication level), nicht nur über
+(Settings › Applications › rocket › Authentication level), nicht nur über
 das Manifest. Das ist ein Klick und wirkt sofort. Wer ihn drückt, bevor
 der Modus steht, öffnet genau dieses Fenster. Deshalb steht `eigen` seit
 0.6.2 im Deployment, während das Manifest den Entrance noch auf `internal`
@@ -1322,7 +1364,7 @@ lässt: Das kostet einen zusätzlichen Anmeldeschritt und schließt die Lücke.
 Prüfen lässt sich der wirksame Stand nur an der Box, nicht am Bildschirm:
 
 ```bash
-kubectl get applications.app.bytetrade.io beacon-kaivostudio-beacon \
+kubectl get applications.app.bytetrade.io rocket-kaivostudio-rocket \
   -o jsonpath='{range .spec.entrances[*]}{.name}{"  "}{.authLevel}{"\n"}{end}'
 ```
 
@@ -1335,7 +1377,7 @@ käme dort nie an):
 | Modus | Wer prüft | `X-Bfl-User` | Entrance |
 |---|---|---|---|
 | `olares` (heute) | Envoy-Sidecar mit Authelia | gilt, legt beim ersten Aufruf Nutzer und Organisation an | `internal` |
-| `eigen` | Beacons Sitzung | **gilt nicht** und legt **nichts** an | `public` möglich |
+| `eigen` | Rockets Sitzung | **gilt nicht** und legt **nichts** an | `public` möglich |
 
 Der zweite Modus ist die Voraussetzung dafür, den Eingang zu öffnen. Ohne
 ihn genügte ein `curl -H 'X-Bfl-User: kaivostudio'`, um Eigentümer zu
@@ -1346,7 +1388,7 @@ sein und den ganzen Bestand zu lesen.
 Aus dem Markt installiert steht `ANMELDUNG_MODUS=eigen` von Anfang an. Eine
 frische Datenbank hat aber keinen Nutzer, kein Passwort und keine
 Einladung — und ohne Ausnahme auch keinen Weg, das zu ändern. Genau das ist
-am 8. September einem zweiten Nutzer passiert, der Beacon auf seiner
+am 8. September einem zweiten Nutzer passiert, der Rocket auf seiner
 eigenen Box installierte: 401 auf alles, Sackgasse, App unbrauchbar.
 
 Deshalb gilt seit 0.6.3: **Solange in dieser Datenbank niemand ein Passwort
@@ -1390,7 +1432,7 @@ gingen dabei schief, und alle drei lagen an der Seite, nicht am Menschen:
 - **Der Anzeigename führte.** Er ist nur ein Etikett und kann auf jemand
   anderen zeigen. Entscheidend ist die Kennung; sie steht jetzt oben, in
   der Schrift, in der sich `l` und `1` unterscheiden.
-- **Die Seite sagte nicht, zu welchem Beacon der Link gehört.** Jetzt nennt
+- **Die Seite sagte nicht, zu welchem Rocket der Link gehört.** Jetzt nennt
   sie den Ursprung im Text, nicht nur in der Adresszeile.
 - **Eine Einladung auf ein Konto mit Passwort sah aus wie eine Erstanlage.**
   Sie ist aber ein **Zurücksetzen**: Der bisherige Inhaber ist danach
@@ -1410,7 +1452,7 @@ Verraten wird dadurch nichts, was der Linkinhaber nicht ohnehin erführe.
 - Die Sitzung lebt auf dem Server. Ein selbstsigniertes Token im Keks wäre
   nach „Abmelden" weiter gültig, bis es abläuft; eine Zeile in `sitzungen`
   lässt sich wirklich beenden.
-- Der Keks `beacon_sitzung` trägt `HttpOnly` (kein JavaScript sieht ihn),
+- Der Keks `rocket_sitzung` trägt `HttpOnly` (kein JavaScript sieht ihn),
   `SameSite=Lax` und `Secure`, sobald die Verbindung über TLS kam.
 - Absolut 30 Tage, im Leerlauf 7. Eine Schleife räumt Abgelaufenes weg.
 
@@ -1535,11 +1577,11 @@ Der Rettungsweg hängt stattdessen am **Zugang zur Box**, und das ist die
 richtige Hürde: Wer an der Box sitzt, kommt ohnehin an alles heran.
 
 Seit 0.7.0 braucht dieser Weg kein Terminal mehr. Auf der Anmeldeseite
-steht „Passwort vergessen?". Wer dort seinen Zugang nennt, lässt Beacon
+steht „Passwort vergessen?". Wer dort seinen Zugang nennt, lässt Rocket
 einen Code in den eigenen Datenordner schreiben. In der **Dateien**-App
 von Olares liegt er hier:
 
-    Data › beacon › passwort-zuruecksetzen.txt
+    Data › rocket › passwort-zuruecksetzen.txt
 
 Code, Zugang und neues Passwort auf der Seite eingeben — fertig.
 Fünfzehn Minuten gültig, danach wertlos.
@@ -1552,7 +1594,7 @@ sagen, sie steht öffentlich im Netz. Die Datei darf es, denn sie liegt
 hinter derselben Hürde wie der Code selbst.
 
 Hat auf der Box **noch niemand** ein Passwort gesetzt, sagt die Datei das
-und nennt den anderen Weg: Beacon von der Olares-Oberfläche der Box aus
+und nennt den anderen Weg: Rocket von der Olares-Oberfläche der Box aus
 öffnen. Solange kein Passwort gesetzt ist, lässt die Anwendung die
 Box-Sitzung durch (`_noch_unbewohnt()`), und unter Einstellungen wird das
 erste gesetzt.
@@ -1597,8 +1639,8 @@ dass die Oberfläche selbst nicht mehr hochkommt:
 ```bash
 ssh olares@192.168.1.17
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-POD=$(kubectl get pods -n beacon-kaivostudio --no-headers | grep beacon-backend | awk '{print $1}')
-kubectl exec -it -n beacon-kaivostudio $POD -c backend -- python3 -c "
+POD=$(kubectl get pods -n rocket-kaivostudio --no-headers | grep rocket-backend | awk '{print $1}')
+kubectl exec -it -n rocket-kaivostudio $POD -c backend -- python3 -c "
 import asyncio, getpass, os, asyncpg
 from app.anmeldung import hash_passwort, passwort_pruefen
 neu = getpass.getpass('Neues Passwort: ')
@@ -1663,7 +1705,7 @@ und prüft, wo die Datei landet.
 
 **Ausgeliefert wird als Anhang, nicht als Seite.** Nur Bild und PDF darf
 der Browser im Fenster zeigen. **SVG gehört ausdrücklich nicht dazu**: Es
-ist ein Dokument mit Skriptfähigkeit, und im Ursprung von Beacon
+ist ein Dokument mit Skriptfähigkeit, und im Ursprung von Rocket
 angezeigt liefe fremdes Skript mit allen Rechten des Angemeldeten. Dazu
 kommen an jeder Auslieferung `X-Content-Type-Options: nosniff` (sonst
 könnte eine als PNG deklarierte HTML-Datei doch als Seite laufen) und
@@ -1711,10 +1753,10 @@ der Datenbank. Eine Neuinstallation legt die Datenbank neu an — der
 Platz zeigt danach auf jemanden, den es nicht mehr gibt, und **jeder**
 Aufruf scheitert mit dieser Meldung. Die Oberfläche lädt, aber nichts
 geht, und an den Sitzplatz denkt in dem Moment niemand. Marc saß am
-9. September 2026 genau darin fest, nachdem er Beacon samt Datenordner
+9. September 2026 genau darin fest, nachdem er Rocket samt Datenordner
 gelöscht und neu installiert hatte.
 
-Seit 0.8.3 trägt die Abweisung den Kopf `X-Beacon-Sitzplatz: unbekannt`.
+Seit 0.8.3 trägt die Abweisung den Kopf `X-Rocket-Sitzplatz: unbekannt`.
 Die Oberfläche erkennt daran genau diesen Fall, räumt den Platz weg und
 lädt einmal neu — danach ist man schlicht man selbst. **Am Meldungstext
 darf sie es nicht festmachen:** der ist für Menschen und ändert sich.
@@ -1723,7 +1765,7 @@ Ohne Platz verliert niemand Rechte. Der Sitzplatz ist Zuschreibung, keine
 Anmeldung; ihn wegzuräumen gibt nur die Zuschreibung auf.
 
 Von Hand geht es weiterhin: unten links im Konto-Menü einen Platz wählen,
-oder im Browser den Keks `beacon-sitzplatz` löschen.
+oder im Browser den Keks `rocket-sitzplatz` löschen.
 
 ### Rollen — wer auf einer fremden Box helfen darf
 
@@ -1875,13 +1917,13 @@ Ausfuhr → Einfuhr in eine zweite Organisation).
 ## Oberflächenfehler stehen im Pod-Log
 
 Zerbricht die Oberfläche („Application error: a client-side exception“),
-zeigt Beacon seit 0.5.0 eine deutsche Fehlerseite (`app/error.tsx`) mit
+zeigt Rocket seit 0.5.0 eine deutsche Fehlerseite (`app/error.tsx`) mit
 „Neu laden“ — und schickt Meldung, Stack, Pfad und Browser an
 `POST /api/fehler` (`routers/fehler.py`). Der Endpunkt schreibt sie ins
 Protokoll des Backend-Pods, nichts sonst:
 
 ```bash
-ssh olares@192.168.1.17 "KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl logs -n beacon-kaivostudio deploy/beacon-backend -c backend --since=24h | grep -A12 Oberflächenfehler"
+ssh olares@192.168.1.17 "KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl logs -n rocket-kaivostudio deploy/rocket-backend -c backend --since=24h | grep -A12 Oberflächenfehler"
 ```
 
 `components/fehlermelder.tsx` hört außerdem auf `error` und
@@ -1918,7 +1960,7 @@ bricht sonst ab:
 Das Proxy-Ziel des Frontends (`BACKEND_URL`) wird **beim Bau**
 eingebrannt — `next.config.mjs` liest es in `rewrites()`, und das
 Standalone-Abbild kennt zur Laufzeit keine Rewrites mehr. Das
-Dockerfile setzt es auf `http://beacon-backend:8000`; 0.1.1 lief ohne
+Dockerfile setzt es auf `http://rocket-backend:8000`; 0.1.1 lief ohne
 diese Zeile gegen `localhost` und jede API-Anfrage endete mit 500.
 
 Zwei Manifest-Angaben, die auf der Box den Unterschied machen:
@@ -1940,20 +1982,20 @@ kommen frisch an (Insilo v0.1.80, ausführlich in
 bash scripts/check-chart.sh
 git commit -am "release: v0.1.1"
 
-# 2. Tag pushen — release.yml baut ghcr.io/ska1walker/beacon-{frontend,backend}:0.1.1
-#    (öffentlich, amd64) und legt dist/beacon-0.1.1.tgz als Artefakt ab
+# 2. Tag pushen — release.yml baut ghcr.io/ska1walker/rocket-{frontend,backend}:0.1.1
+#    (öffentlich, amd64) und legt dist/rocket-0.1.1.tgz als Artefakt ab
 git tag v0.1.1 && git push origin main v0.1.1
 gh run watch
 
 # 3. Chart packen und mit dem Olares-Prüfer ansehen — immer das Paket,
 #    nie den Ordner (der Prüfer verlangt Ordnername == Chart-Name)
 helm package olares -d dist
-olares-cli chart lint dist/beacon-0.1.1.tgz --with-rbac --with-security-context
+olares-cli chart lint dist/rocket-0.1.1.tgz --with-rbac --with-security-context
 
 # 4. Auf der eigenen Box installieren, bevor irgendetwas in einen Markt geht
 olares-cli profile login --olares-id <id>       # macht Kai selbst (Browser, TOTP)
-olares-cli market upload dist/beacon-0.1.1.tgz
-olares-cli market install beacon
+olares-cli market upload dist/rocket-0.1.1.tgz
+olares-cli market install rocket
 ```
 
 **Erst ausrollen, dann hochladen.** Eine App, die nie `running`
@@ -1962,11 +2004,11 @@ erreicht hat, gehört in keinen Katalog.
 **Der Markt** ist die eigene Quelle von aimighty
 (`bayerhazard/aimighty-market`, Cloudflare Pages). Ein Eintrag besteht
 aus dem Block in `functions/_apps.ts` und dem base64-gepackten Chart
-unter dem Schlüssel `beacon-<version>.tgz` in `functions/_lib.ts`. Kai
+unter dem Schlüssel `rocket-<version>.tgz` in `functions/_lib.ts`. Kai
 hat dort nur Leserechte — der Weg ist Fork, Branch, Pull Request an
 Marc. Vor dem PR alle vier Endpunkte lokal beweisen
 (`npx wrangler pages dev functions --port 8788`): `/api/v1/appstore/info`
-listet die App, `/api/v1/applications/beacon/chart` liefert die Bytes
+listet die App, `/api/v1/applications/rocket/chart` liefert die Bytes
 sha256-gleich, `/api/v1/appstore/hash` hat sich bewegt. Insilos
 Einreichung (PR #1 dort) ist die Vorlage; die Regeln stehen im Skill
 `insilo/.claude/skills/olares-release/SKILL.md`.
@@ -1975,6 +2017,6 @@ Einreichung (PR #1 dort) ist die Vorlage; die Regeln stehen im Skill
 hinter dem Envoy-Sidecar des Frontends. Solange der Entrance `internal`
 war, leitete er Insilo und Relay ohne Authelia-Keks zur Anmeldung um.
 Seit 0.6.9 steht er auf `public`; am 15.9.2026 kam ein Aufruf aus dem
-Insilo-Pod bis in Beacons eigenen Code durch (401 „Unbekannte oder
+Insilo-Pod bis in Rockets eigenen Code durch (401 „Unbekannte oder
 abgeschaltete Quelle", siehe „Insilo anschließen"). Eine
 `options.policies`-Regel ist nicht mehr nötig — das Tor ist die Signatur.

@@ -13,7 +13,7 @@ const LEER = {
   mail_endpoint_url: null,
   marketing_versand: "smtp",
   brevo_api_key_set: false,
-  links_basis_wirksam: "https://41b89d101.kaivostudio.olares.de",
+  links_basis_wirksam: "https://fdfedc011.kaivostudio.olares.de",
 } as unknown as OrgSettings;
 
 function mit(mehr: Partial<OrgSettings>): OrgSettings {
@@ -48,7 +48,7 @@ describe("istIntern", () => {
   });
 
   it("zählt die eigene Zone als Box — gemessen, nicht vermutet", () => {
-    // Aus Beacons Pod löst llm.kaivostudio.olares.de auf 192.168.1.17 auf.
+    // Aus Rockets Pod löst llm.kaivostudio.olares.de auf 192.168.1.17 auf.
     expect(istIntern("https://llm.kaivostudio.olares.de/v1", "kaivostudio.olares.de")).toBe(true);
     expect(istIntern("https://kaivostudio.olares.de", "kaivostudio.olares.de")).toBe(true);
     // Eine fremde Zone bleibt fremd — auch wenn sie ähnlich endet.

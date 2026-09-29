@@ -16,7 +16,7 @@
 --
 -- `zuordnung` hält fest, welche Dateispalte auf welches Feld gelegt wurde.
 -- Ohne sie ließe sich ein Import mit falscher Zuordnung später nicht mehr
--- erklären — die Datei selbst bewahrt Beacon nicht auf.
+-- erklären — die Datei selbst bewahrt Rocket nicht auf.
 -- ========================================================================
 
 create table if not exists public.einfuhren (

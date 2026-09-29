@@ -52,7 +52,7 @@ export function Sicherungsblock() {
       </div>
       <div className="block-inhalt">
         <Erklaerung
-          kurz="Beacon sichert Ihren Bestand regelmäßig auf dieser Box — und stellt ihn nach einer Neuinstallation von selbst wieder her."
+          kurz="Rocket sichert Ihren Bestand regelmäßig auf dieser Box — und stellt ihn nach einer Neuinstallation von selbst wieder her."
           lang={<>Sobald sich etwas ändert, entsteht ein Abzug unter <code>/app/data</code> — auch die Einstellungen; die letzten vierzehn bleiben. Die Ausfuhr unten ist derselbe Stand als Datei — ohne den Zugangsschlüssel zum Sprachmodell.</>}
         />
         <div className="hinweis" data-art="achtung">

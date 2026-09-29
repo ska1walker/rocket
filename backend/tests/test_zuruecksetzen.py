@@ -227,9 +227,9 @@ def test_leerzeichen_statt_bindestriche_gehen_auch():
 
 
 def test_der_ort_ist_der_klickweg_in_der_dateien_app():
-    """`/app/data` gibt es in der Dateien-App nicht — dort heißt es Data › beacon."""
+    """`/app/data` gibt es in der Dateien-App nicht — dort heißt es Data › rocket."""
     ort = zuruecksetzen.wo_liegt_die_datei()
-    assert ort == f"Data › beacon › {zuruecksetzen.DATEI}"
+    assert ort == f"Data › rocket › {zuruecksetzen.DATEI}"
     assert "/app/data" not in ort
     # Für die Kommandozeile bleibt der Pfad im Container erreichbar.
     assert zuruecksetzen.wo_liegt_die_datei_im_container().endswith(zuruecksetzen.DATEI)
@@ -261,7 +261,7 @@ def test_zugaenge_ohne_organisation_bekommen_keine_sackgasse():
 
     Dann kommt niemand mehr herein — auch nicht über die Olares-Sitzung,
     denn die Tür gilt als geschlossen, sobald irgendwo ein Passwort steht.
-    „Öffnen Sie Beacon einfach von der Olares-Oberfläche" wäre hier ein
+    „Öffnen Sie Rocket einfach von der Olares-Oberfläche" wäre hier ein
     Wegweiser in eine Sackgasse.
     """
     assert zuruecksetzen.anfordern(

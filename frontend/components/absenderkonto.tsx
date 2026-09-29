@@ -90,7 +90,7 @@ export function Absenderkontoblock() {
           kurz="Unter welcher Adresse Ihre Mails hinausgehen."
           lang={
             <>
-              Ohne Eintrag schickt Beacon unter dem Absender der Organisation. Wer hier
+              Ohne Eintrag schickt Rocket unter dem Absender der Organisation. Wer hier
               eine eigene Adresse einträgt, erscheint beim Empfänger unter seinem Namen —
               angemeldet wird trotzdem mit dem Konto der Organisation. Ob Ihr Anbieter das
               durchlässt, entscheidet er selbst: Manche weisen eine Absenderadresse
@@ -144,13 +144,13 @@ export function Absenderkontoblock() {
             <span>
               {konto.data!.postfach_aktiv ? (
                 <>
-                  Antworten laufen weiter in das Postfach der Organisation, das Beacon
+                  Antworten laufen weiter in das Postfach der Organisation, das Rocket
                   einliest. Sonst läge die Antwort in Ihrem privaten Postfach und im
                   Bestand stünde nichts.
                 </>
               ) : (
                 <>
-                  Beacon liest noch kein Postfach ein. Antworten auf Ihre Mails kommen
+                  Rocket liest noch kein Postfach ein. Antworten auf Ihre Mails kommen
                   deshalb in <strong>Ihrem eigenen</strong> Postfach an und tauchen im
                   Bestand nicht auf. Das Postfach richtet der Eigentümer weiter oben
                   unter „Posteingang“ ein.

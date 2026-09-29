@@ -6,15 +6,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: beacon
+  name: rocket
   namespace: {{ .Release.Namespace }}
   labels:
-    app: beacon
+    app: rocket
     component: frontend
 spec:
   type: ClusterIP
   selector:
-    app: beacon
+    app: rocket
     component: frontend
   ports:
     - name: http
@@ -25,15 +25,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: beacon-backend
+  name: rocket-backend
   namespace: {{ .Release.Namespace }}
   labels:
-    app: beacon
+    app: rocket
     component: backend
 spec:
   type: ClusterIP
   selector:
-    app: beacon
+    app: rocket
     component: backend
   ports:
     - name: http
@@ -44,15 +44,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: beacon-links
+  name: rocket-links
   namespace: {{ .Release.Namespace }}
   labels:
-    app: beacon
+    app: rocket
     component: links
 spec:
   type: ClusterIP
   selector:
-    app: beacon
+    app: rocket
     component: links
   ports:
     - name: http

@@ -57,9 +57,9 @@ def objekt() -> dict:
     ).stdout
     d = json.loads(roh)
     for it in d["items"]:
-        if it["metadata"]["name"].endswith("-beacon"):
+        if it["metadata"]["name"].endswith("-rocket"):
             return it
-    raise SystemExit("Kein beacon-Application-Objekt auf der Box.")
+    raise SystemExit("Kein rocket-Application-Objekt auf der Box.")
 
 
 def zone(owner: str) -> str:

@@ -9,7 +9,7 @@
 //
 // „Auf dieser Box" heißt: Kubernetes-Dienstname, localhost, ein privates
 // Netz — **oder die eigene Olares-Zone**. Letzteres ist gemessen, nicht
-// vermutet: Aus Beacons Backend-Pod löst `llm.kaivostudio.olares.de` auf
+// vermutet: Aus Rockets Backend-Pod löst `llm.kaivostudio.olares.de` auf
 // 192.168.1.17 auf, die Box selbst (8.9.2026). Olares führt seine Zone
 // intern auf den eigenen Knoten; ein Aufruf dorthin verlässt das Haus
 // nicht. Ohne diese Regel hätte die Zeile „außerhalb" behauptet, wo nichts
@@ -17,7 +17,7 @@
 // Nachweis genauso zuverlässig wie eine falsche Beruhigung.
 //
 // Nötig ist die Ausnahme, weil ein Dienst im eigenen Namensraum (etwa
-// LiteLLM unter `litellm-kaivostudio`) von Beacon aus **nicht** direkt
+// LiteLLM unter `litellm-kaivostudio`) von Rocket aus **nicht** direkt
 // erreichbar ist: Dort steht nur `app-np`, und Olares riegelt Namensräume
 // gegeneinander ab. Nur als *shared* installierte Apps (Speaches) tragen
 // die Regeln, die andere hereinlassen. Für alles andere ist die
@@ -42,8 +42,8 @@ export function host(adresse: string | null | undefined): string {
 
 /**
  * Die Zone dieser Box — abgeleitet aus der Adresse der öffentlichen Links
- * (`41b89d101.kaivostudio.olares.de` → `kaivostudio.olares.de`). Sie ist
- * die einzige Stelle, an der Beacon den eigenen Namen kennt.
+ * (`fdfedc011.kaivostudio.olares.de` → `kaivostudio.olares.de`). Sie ist
+ * die einzige Stelle, an der Rocket den eigenen Namen kennt.
  */
 export function zone(e: OrgSettings | undefined): string {
   const teile = host(e?.links_basis_wirksam).split(".");

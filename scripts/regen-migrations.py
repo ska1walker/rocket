@@ -29,10 +29,10 @@ KOPF = """# ====================================================================
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: beacon-migrations
+  name: rocket-migrations
   namespace: {{ .Release.Namespace }}
   labels:
-    app: beacon
+    app: rocket
 data:
 """
 

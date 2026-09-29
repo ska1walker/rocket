@@ -3,7 +3,7 @@
 -- Besprechungen aus Insilos gemeinsamem Ordner — der Weg, den Relay geht.
 --
 -- Auf derselben Box legt Insilo jede fertige Zusammenfassung als Datei in
--- den geteilten Olares-Ordner (appCommon). Beacon liest dort mit, ohne
+-- den geteilten Olares-Ordner (appCommon). Rocket liest dort mit, ohne
 -- Webhook und ohne Geheimnis (backend/app/insilo_ablage.py).
 --
 -- Nur `add column if not exists`: Der Migrationslauf auf der Box führt

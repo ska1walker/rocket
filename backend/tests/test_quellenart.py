@@ -59,8 +59,8 @@ async def test_post_geheimnis_oeffnet_den_ereignis_endpunkt_nicht(datenbank):
     koerper = json.dumps({"id": uuid4().hex, "event": "ticket.erstellt", "ticket": {"betreff": "x"}}).encode()
     async with await _draussen() as d:
         r = await d.post(f"/api/eingang/{post['id']}", content=koerper, headers={
-            "Content-Type": "application/json", "X-Beacon-Event": "ticket.erstellt",
-            "X-Beacon-Delivery-Id": uuid4().hex, "X-Beacon-Signature": sig(post["secret"], koerper)})
+            "Content-Type": "application/json", "X-Rocket-Event": "ticket.erstellt",
+            "X-Rocket-Delivery-Id": uuid4().hex, "X-Rocket-Signature": sig(post["secret"], koerper)})
         assert r.status_code == 401, r.text
 
 

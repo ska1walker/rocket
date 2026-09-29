@@ -101,7 +101,7 @@ def test_nur_bild_und_pdf_duerfen_ins_fenster(typ, im_fenster):
 
 
 async def test_html_und_svg_werden_heruntergeladen_nicht_angezeigt(datenbank):
-    """Sonst liefe fremdes Skript im Ursprung von Beacon."""
+    """Sonst liefe fremdes Skript im Ursprung von Rocket."""
     async with klient_fuer("dok-skript") as k:
         kontakt = await _kontakt(k, "Skript")
         for name, typ in (("boese.html", "text/html"), ("boese.svg", "image/svg+xml")):

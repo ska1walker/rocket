@@ -75,9 +75,9 @@ def test_anrede_ohne_namen_bleibt_hoeflich():
 def test_basis_url_aus_der_box_domain(monkeypatch):
     """Olares nennt dem Chart die Domain des ersten Entrance; der
     öffentliche ist Index 1 derselben Kennung (gemessen, docs/BETRIEB.md)."""
-    monkeypatch.setattr(settings, "app_domain", "41b89d100.kaivostudio.olares.de")
-    assert versand.basis_url({}) == "https://41b89d101.kaivostudio.olares.de"
-    assert versand.appid() == "41b89d10"
+    monkeypatch.setattr(settings, "app_domain", "fdfedc010.kaivostudio.olares.de")
+    assert versand.basis_url({}) == "https://fdfedc011.kaivostudio.olares.de"
+    assert versand.appid() == "fdfedc01"
     # Ein eigener Wert gewinnt, ohne Schrägstrich am Ende.
     assert versand.basis_url({"links_basis_url": "https://links.firma.de/"}) == "https://links.firma.de"
 
@@ -367,7 +367,7 @@ def test_ohne_hauskonto_hilft_eine_eigene_adresse_allein_nicht():
 
 
 def test_die_antwort_geht_ans_postfach_der_organisation():
-    """Beacon liest ein Postfach. Ohne Reply-To liefe die Antwort auf Marcs
+    """Rocket liest ein Postfach. Ohne Reply-To liefe die Antwort auf Marcs
     eigene Adresse und wäre im Bestand nie zu sehen."""
     konto = versand.Smtp(host="h", port=587, benutzer=None, passwort=None, sicherheit="starttls",
                          absender="marc.bayer@aimighty.de", absender_name="Marc Bayer")
@@ -402,7 +402,7 @@ async def test_marc_schickt_unter_seinem_namen_kai_unter_seinem(datenbank, brief
         gesetzt = await k.put(
             "/api/mitglieder/wer/absender",
             json={"absender_email": "marc.bayer@aimighty.de", "absender_name": "Marc Bayer"},
-            headers={"X-Beacon-Sitzplatz": m["id"]},
+            headers={"X-Rocket-Sitzplatz": m["id"]},
         )
         assert gesetzt.status_code == 200, gesetzt.text
         assert gesetzt.json()["haus_absender"] == SMTP["smtp_absender"]
@@ -419,7 +419,7 @@ async def test_marc_schickt_unter_seinem_namen_kai_unter_seinem(datenbank, brief
     absender = {n["Subject"]: (n["From"], n["Reply-To"]) for _, n in briefkasten.nachrichten}
     assert absender["Angebot"][0] == "Marc Bayer <marc.bayer@aimighty.de>"
     assert absender["Nachfrage"][0] == f'Kai Böhm <{SMTP["smtp_absender"]}>'
-    # Beide Antworten laufen in das Postfach, das Beacon einliest.
+    # Beide Antworten laufen in das Postfach, das Rocket einliest.
     assert absender["Angebot"][1] == SMTP["smtp_absender"]
     assert absender["Nachfrage"][1] is None
 

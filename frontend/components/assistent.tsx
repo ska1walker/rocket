@@ -13,7 +13,7 @@ import { Schild } from "@/components/schild";
  * Der Assistent — unten rechts, wie in Relay, mit dem Schild als Zeichen.
  *
  * Ein Auftrag in Worten: „Leg für Brinkmann eine Aufgabe an: Angebot
- * nachfassen, Freitag.“ Das Modell plant mit Beacons Werkzeugen, Beacon
+ * nachfassen, Freitag.“ Das Modell plant mit Rockets Werkzeugen, Rocket
  * führt aus. Lesen sofort, Schreiben mit Karte: Jede Änderung kommt als
  * fertige Anfrage zurück und wird erst auf „Ausführen“ geschrieben — mit
  * den Rechten der Person, wie ein Klick.

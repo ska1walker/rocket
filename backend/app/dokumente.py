@@ -10,7 +10,7 @@ Drei Dinge, die deshalb nicht verhandelbar sind:
   Datei nach ihrer Kennung. `../../etc/passwd` ist damit nur ein
   hässlicher Anzeigename und kein Angriff.
 - **Ausgeliefert wird als Anhang, nicht als Seite.** Eine hochgeladene
-  HTML- oder SVG-Datei, die der Browser im Ursprung von Beacon anzeigt,
+  HTML- oder SVG-Datei, die der Browser im Ursprung von Rocket anzeigt,
   wäre eingeschleustes Skript mit allen Rechten des Angemeldeten. Nur
   Bilder und PDF dürfen im Fenster erscheinen — und SVG gehört nicht
   dazu, das ist ein Dokument mit Skriptfähigkeit.
@@ -38,7 +38,7 @@ MAX_BYTES = 25 * 1024 * 1024
 
 # Was der Browser im Fenster zeigen darf. Alles andere lädt herunter.
 # SVG fehlt mit Absicht: Es kann Skript enthalten und liefe dann im
-# Ursprung von Beacon.
+# Ursprung von Rocket.
 INLINE = frozenset({
     "application/pdf",
     "image/png", "image/jpeg", "image/gif", "image/webp", "image/avif",

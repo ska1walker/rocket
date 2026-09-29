@@ -1,6 +1,6 @@
 -- ========================================================================
 -- 0001_initial_schema.sql
--- Grundschema für Beacon auf Olares.
+-- Grundschema für Rocket auf Olares.
 --
 -- Wie bei Insilo: keine eigene auth-Tabelle. Die Identität kommt aus dem
 -- Olares-Header X-Bfl-User; wir mappen den Olares-Namen auf eine interne

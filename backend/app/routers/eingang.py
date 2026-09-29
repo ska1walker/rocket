@@ -49,7 +49,7 @@ class QuelleIn(BaseModel):
     # halten, und was von dort kommt, wartet im Eingang.
     tickets_direkt: bool = True
     # Wo Insilo im Browser erreichbar ist — damit eine Besprechung auf den
-    # Wortlaut verlinken kann, den Beacon bewusst nicht aufbewahrt.
+    # Wortlaut verlinken kann, den Rocket bewusst nicht aufbewahrt.
     oberflaeche_url: str | None = Field(default=None, max_length=300)
 
 
@@ -146,9 +146,9 @@ def _zeitpunkt(wert: object) -> datetime | None:
 async def empfangen(
     source_id: UUID,
     request: Request,
-    x_beacon_event: str | None = Header(None, alias="X-Beacon-Event"),
-    x_beacon_delivery_id: str | None = Header(None, alias="X-Beacon-Delivery-Id"),
-    x_beacon_signature: str | None = Header(None, alias="X-Beacon-Signature"),
+    x_rocket_event: str | None = Header(None, alias="X-Rocket-Event"),
+    x_rocket_delivery_id: str | None = Header(None, alias="X-Rocket-Delivery-Id"),
+    x_rocket_signature: str | None = Header(None, alias="X-Rocket-Signature"),
     x_insilo_event: str | None = Header(None, alias="X-Insilo-Event"),
     x_insilo_delivery_id: str | None = Header(None, alias="X-Insilo-Delivery-ID"),
     x_insilo_signature: str | None = Header(None, alias="X-Insilo-Signature"),
@@ -161,7 +161,7 @@ async def empfangen(
 ) -> dict:
     """Nimmt ein Ereignis einer eingetragenen Quelle entgegen.
 
-    Die Kopfzeilen heißen `X-Beacon-*`; die `X-Insilo-*` bleiben als Alias
+    Die Kopfzeilen heißen `X-Rocket-*`; die `X-Insilo-*` bleiben als Alias
     gültig, weil Insilo seinen Vertrag nicht unsertwegen ändert. Wer neu
     anschließt, nimmt die neutralen — eine Schnittstelle, die von jedem
     Absender verlangt, sich für Insilo auszugeben, ist eine schlechte
@@ -172,9 +172,9 @@ async def empfangen(
     Auslieferung, die nie ankommen kann, soll nicht dreimal versucht
     werden.
     """
-    ereignis_kopf = x_beacon_event or x_insilo_event or x_aicrm_event
-    lieferung_kopf = x_beacon_delivery_id or x_insilo_delivery_id or x_aicrm_delivery_id
-    signatur_kopf = x_beacon_signature or x_insilo_signature or x_aicrm_signature
+    ereignis_kopf = x_rocket_event or x_insilo_event or x_aicrm_event
+    lieferung_kopf = x_rocket_delivery_id or x_insilo_delivery_id or x_aicrm_delivery_id
+    signatur_kopf = x_rocket_signature or x_insilo_signature or x_aicrm_signature
 
     roh = await request.body()
 

@@ -27,7 +27,7 @@ export function FirmaAnlegen({
   // Was das Modell noch gelesen hat und wofür die Maske kein Feld führt.
   // Es geht trotzdem mit — sonst wäre es zweimal getippt.
   const [weitere, setWeitere] = useState<Record<string, string>>({});
-  // Die Firma, die über „Beschreiben“ gewählt wurde — dann sucht Beacon
+  // Die Firma, die über „Beschreiben“ gewählt wurde — dann sucht Rocket
   // gleich die Personen dazu, und die gewählten entstehen mit der Firma.
   const [gefunden, setGefunden] = useState<{ name: string; website: string | null } | null>(null);
   const [personen, setPersonen] = useState<Personenvorschlag[]>([]);

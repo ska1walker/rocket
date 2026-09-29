@@ -12,13 +12,13 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export const NAVIGATION_COOKIE = "beacon-navigation";
+export const NAVIGATION_COOKIE = "rocket-navigation";
 const EINGEKLAPPT = "eingeklappt";
 
 export const NAVIGATION_SCRIPT = `
 (function () {
   try {
-    var m = document.cookie.match(/(?:^|;\\s*)beacon-navigation=([^;]*)/);
+    var m = document.cookie.match(/(?:^|;\\s*)rocket-navigation=([^;]*)/);
     if (m && m[1] === "eingeklappt") document.documentElement.setAttribute("data-navigation", "eingeklappt");
   } catch (e) {}
 })();
@@ -32,7 +32,7 @@ function setzeCookie(eingeklappt: boolean) {
 
 function liesCookie(): boolean {
   if (typeof document === "undefined") return false;
-  const m = document.cookie.match(/(?:^|;\s*)beacon-navigation=([^;]*)/);
+  const m = document.cookie.match(/(?:^|;\s*)rocket-navigation=([^;]*)/);
   return m?.[1] === EINGEKLAPPT;
 }
 
