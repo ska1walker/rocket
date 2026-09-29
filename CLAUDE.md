@@ -3,8 +3,8 @@
 > **Produkt:** Beacon — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** Der Vertriebsprozess ist durchgängig abgebildet
-> **Letzte Aktualisierung:** 3. September 2026
+> **Status:** 0.12.1 — Vertrieb, Versand und Service durchgängig, läuft auf Kais Box aus dem Katalog
+> **Letzte Aktualisierung:** 29. September 2026
 
 ---
 
@@ -36,19 +36,26 @@ Siehe `docs/BETRIEB.md`, „CSV hinein und hinaus".
 
 ## Stand
 
-Der Weg vom ersten Kontakt bis zum Abschluss ist durchgängig da.
+Der Weg vom ersten Kontakt bis zum Abschluss ist durchgängig da, dazu
+Versand, Kampagnen und Tickets. Die ausführliche, stets aktuellere
+Begründung jedes Teils steht in `docs/BETRIEB.md`.
 
 | Teil | Zustand |
 |---|---|
-| Schema + Zeilensicherheit | 12 Migrationen, alle Fachtabellen unter FORCE |
-| Backend | rund 100 API-Pfade, FastAPI + asyncpg |
-| Oberfläche | Start, Board, Angebote, Prognose, Firmen, Kontakte, Aufgaben, Fragen, Eingang, Besprechungen, Einstellungen |
+| Schema + Zeilensicherheit | 32 Migrationen, alle Fachtabellen unter FORCE |
+| Backend | rund 210 API-Pfade, FastAPI + asyncpg |
+| Oberfläche | Start, Board, Angebote, Prognose, Firmen, Kontakte, Listen, Kampagnen, Tickets, Aufgaben, Fragen, Erkenntnisse, Eingang, Besprechungen, Einfuhr, Einstellungen; Kopfleiste zum Suchen und Anlegen von überall; kurze Navigation mit „Mehr" und Favoriten |
 | Angebote | Katalog, Positionen, Summen, Druckfassung mit Briefkopf |
 | Qualifizierung | sechs Felder, gerechnete Punktzahl, Verlustgründe |
 | Prognose | gewichtet, Trefferquote, Verlustanalyse, nach Produkt |
-| KI | Notiz→Struktur, Tagesbriefing, Fragen an den Bestand, Angebotsvorschlag, Qualifizierung aus dem Verlauf, Anschreiben |
+| KI | Notiz→Struktur, Tagesbriefing, Fragen an den Bestand, Angebotsvorschlag, Qualifizierung aus dem Verlauf, Anschreiben, Erkenntnisse aus Gesprächsnotizen, Firma/Kontakt aus Beschreibung finden, Assistent (Aufträge in Worten, Handlung nur über Karte), Gesprächsvorbereitung als Podcast (zwei Stimmen, gesprochen auf der Box) |
 | Insilo-Kopplung | auf derselben Box über Insilos gemeinsamen Ordner wie Relay (seit 0.11.0, `app/insilo_ablage.py`), sonst signierter Webhook; Besprechungen als eigener Bereich mit Vorschlag, nie automatisch zugeordnet; Protokoll ohne Wortlaut (`docs/BETRIEB.md` „Insilo anschließen") |
-| Zusammenarbeit | Sitzplätze am geteilten Olares-Zugang, Besitz, Filter „Nur meine" |
+| Anmeldung | eigene Anmeldung seit 0.6.0 (`ANMELDUNG_MODUS=eigen`, Entrance `public` seit 0.6.9): Einladung, Sitzungen, Geräteübersicht, Bremse nach Fehlversuchen, Rückweg per Datei unter `/app/data` wenn niemand mehr hereinkommt |
+| Zusammenarbeit | jede Person mit eigenem Zugang; Rollen `owner`/`admin`/`member`/`viewer`, Eigentümerin vergibt `admin` (seit 0.9.2); Besitz, Filter „Nur meine"; Sitzplätze nur noch im Modus `olares` |
+| Tresor | SMTP/IMAP-Passwörter, API-Schlüssel und Geheimnisse AES-GCM-verschlüsselt, Schlüssel `tresor.key` unter `/app/data` (seit 0.6.6) |
+| Versand | SMTP/IMAP je Organisation, Absenderadresse je Person, Einwilligung am Kontakt, öffentliche Links (Einwilligung, Abmelden, Klick) über eigenen Entrance `beaconlinks`; Listen (statisch/aktiv) und Kampagnen |
+| Tickets | eigene Pipeline, SLA-Uhr ab Absendezeit; Eingang aus API, Bot oder Formular über einen gemeinsamen Weg (`ticketeingang.py`) |
+| Dokumente | Dateien am Datensatz, wie in HubSpot |
 | Eigene Eigenschaften | je Objekt: Text, Zahl, Datum, Ja/Nein, Auswahl — geprüft beim Schreiben |
 | Pipelines | mehrere nebeneinander, Stufen anlegen/ändern/ordnen/löschen mit Zielangabe |
 | Kontakte | anlegen, bearbeiten, löschen; Hauptfirma plus weitere Firmen |
@@ -57,22 +64,34 @@ Der Weg vom ersten Kontakt bis zum Abschluss ist durchgängig da.
 | Katalog, Verlustgründe, Aufgaben, Verlauf | vollständig pflegbar; Systemeinträge bleiben Geschichte |
 | Post | Vertrag für Relay: signiert hinein und hinaus, Entwurf → Senden nur durch Menschen |
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
-| Sicherung | alle sechs Stunden, Wiederanlauf nach Deinstallation |
-| Tests | 184 Backend, 11 Frontend |
-| Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert, **läuft seit 3.9.2026 auf Kais Box** (0.1.4, Upload-Quelle) |
-| Veröffentlichung | Repo `github.com/ska1walker/beacon` (öffentlich), Abbilder `ghcr.io/ska1walker/beacon-{frontend,backend}` per Tag, Katalogeintrag **live** in `bayerhazard/aimighty-market` (0.1.4); Icon nach Marcs Idee 6 (`docs/icon/`) |
+| Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
+| CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
+| Tests | rund 570 Backend, 57 Frontend |
+| Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert, läuft auf Kais Box — seit 5.9.2026 aus dem Aimighty-Katalog installiert, Updates über Markt → *Updates* |
+| Veröffentlichung | Repo `github.com/ska1walker/beacon` (öffentlich), Abbilder `ghcr.io/ska1walker/beacon-{frontend,backend}` per Tag (zuletzt `v0.12.0`), Katalogeintrag in `bayerhazard/aimighty-market`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
 **Nicht gebaut, bewusst:** Mehrsprachigkeit (internes Werkzeug),
-E-Mail-Versand aus der Anwendung, Kampagnen und Sequenzen, Kalender-
-Anbindung, mobile Ansicht über das Responsive hinaus.
+Sequenzen (Kampagnen ja, automatische Folgen nein), Kalender-Anbindung,
+mobile Ansicht über das Responsive hinaus.
+
+**Offen:** zweiter Faktor bei der Anmeldung (`users.totp_geheimnis`
+steht bereit), „alle Geräte abmelden" als Knopf, Anmeldungen im
+Audit-Log (`docs/BETRIEB.md`, „Noch offen").
 
 ## Plattform-Kontext: Olares OS
 
 Dieselben Constraints wie bei Insilo. Die wichtigsten für dieses Repo:
 
-1. **Keine eigene Anmeldung.** Der Envoy-Sidecar prüft den
-   Authelia-Token, bevor ein Request ankommt. Die Identität steht im Kopf
-   `X-Bfl-User`. Fehlt er, wird abgewiesen — nie geraten.
+1. **Anmeldung: Beacon macht es selbst — mit Grund.** Die Hausregel
+   „Olares meldet an" gilt für Insilo, nicht mehr für Beacon: Olares
+   installiert eine App je Nutzer, ein Team kann sich keinen Bestand
+   teilen. Deshalb steht `ANMELDUNG_MODUS=eigen` als Literal im
+   Deployment und der Entrance `beacon` auf `public`. In diesem Modus
+   gilt `X-Bfl-User` **nicht** und legt nichts an. Reihenfolge ist die
+   Sicherheit: erst `eigen`, dann den Entrance öffnen, nie umgekehrt —
+   sonst ist ein gefälschter Kopf der Eigentümer. Im Modus `olares`
+   (lokal, Altbestand) gilt weiter: Identität aus `X-Bfl-User`, fehlt er,
+   wird abgewiesen. Einzelheiten: `docs/BETRIEB.md`, „Anmeldung".
 
 2. **Nur ClusterIP.** Kein NodePort, kein LoadBalancer, kein
    hostNetwork. Von außen führt der Weg nur über den deklarierten
@@ -92,6 +111,11 @@ Dieselben Constraints wie bei Insilo. Die wichtigsten für dieses Repo:
 5. **Eine Deinstallation löscht die Datenbank.** `/app/data` überlebt,
    die Datenbank nicht. Siehe unten.
 
+   **Ein Entrance bringt einen Envoy-Sidecar**, der jeden Aufruf an den
+   Pod gegen Authelia prüft. Deshalb hat das Backend keinen Entrance;
+   die öffentlichen Mail-Links laufen über ein eigenes Deployment
+   (`beaconlinks`, `app/oeffentlich.py`).
+
 6. **Namensregel:** Ordnername, `Chart.yaml.name`, `metadata.name` und
    `metadata.appid` müssen alle exakt `beacon` sein.
 
@@ -102,21 +126,30 @@ Dieselben Constraints wie bei Insilo. Die wichtigsten für dieses Repo:
 
 ---
 
-## Das größte offene Risiko
+## Deinstallation und Sicherung
 
-**Eine Deinstallation löscht sämtliche Vertriebsdaten, ohne Weg zurück.**
+**Eine Deinstallation löscht die Datenbank.** Olares legt sie bei einer
+Neuinstallation frisch an; Firmen, Kontakte, Geschäfte und Verlauf leben
+nur dort.
 
-Olares legt die Datenbank bei einer Neuinstallation frisch an. Für Insilo
-war das verschmerzbar, weil die Tonaufnahmen unter `/app/data` liegen und
-`backend/app/konfiguration.py` einen Abzug der Einrichtung danebenlegt.
-Beacon hat nichts dergleichen: Firmen, Kontakte, Geschäfte und der ganze
-Verlauf leben ausschließlich in der Datenbank.
+Dagegen steht die Sicherung (`app/sicherung.py`): Seit 0.3.2 nach jeder
+Änderung, spätestens alle sechs Stunden, liegt ein vollständiger Abzug
+unter `/app/data/sicherungen/` (0600, die letzten 14). Die erste
+Anmeldung in eine leere Datenbank spielt den neuesten Abzug samt
+Einstellungen zurück — nur in die erste Organisation der Box, und ohne
+etwas zu überschreiben. So lief am 5.9.2026 der Umzug von aicrm zu
+Beacon.
 
-Der Ausfuhrpfad ist deshalb der **erste Punkt der nächsten Ausbaustufe**.
-`permission.appData` steht bereits im Manifest, damit der Ablageort da
-ist, wenn es so weit ist. Bis dahin: nicht auf einer Box betreiben, auf
-der die App wieder entfernt werden könnte, ohne dass vorher jemand
-`pg_dump` laufen lässt.
+Zwei Dinge, die man dabei nicht vergessen darf:
+
+- **Abzug und `tresor.key` gehören zusammen.** Die Zugangsdaten stehen
+  verschlüsselt im Abzug; wer nur die JSON-Dateien sichert, hat sie nicht.
+- **Jede neue Tabelle muss in den Abzug** (`TABELLEN`) oder ausdrücklich
+  heraus (`AUSGENOMMEN`) — `test_jede_tabelle_ist_im_abzug_oder_ausdruecklich_nicht`
+  bricht sonst. Für Spalten an `users` gibt es eine zweite Wache.
+
+Nachzählen nie ohne Nutzerkontext: Unter FORCE liefert `count(*)` ohne
+`acquire_as` immer 0.
 
 ---
 
