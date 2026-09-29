@@ -75,6 +75,9 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 Sequenzen (Kampagnen ja, automatische Folgen nein), Kalender-Anbindung,
 mobile Ansicht über das Responsive hinaus.
 
+**Geplant für Teams:** `docs/PLAN-TEAM.md` — zweiter Faktor, persönliches
+Postfach über IMAP/SMTP (Microsoft/Google per OAuth), SSO, feinere Rechte.
+
 **Offen:** zweiter Faktor bei der Anmeldung (`users.totp_geheimnis`
 steht bereit), „alle Geräte abmelden" als Knopf, Anmeldungen im
 Audit-Log (`docs/BETRIEB.md`, „Noch offen").
@@ -299,7 +302,7 @@ python3 scripts/seed-dev.py                           # Beispieldaten
 
 ## Was NICHT gebaut wird
 
-- ❌ Eigene Anmeldung (Olares macht das)
+- ❌ Eine eigene Anmeldung **neben** der vorhandenen — sie wird ausgebaut (zweiter Faktor, SSO), nicht ersetzt; siehe `docs/PLAN-TEAM.md`
 - ❌ Cloud-Sync zwischen Boxen
 - ❌ Telemetrie, Tracking, Phone-Home
 - ❌ Schriften vom CDN — auch nicht zur Bauzeit
