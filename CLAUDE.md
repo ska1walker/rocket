@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 0.13.0 — Vertrieb, Versand und Service durchgängig. Bis 0.12.1 hieß das Produkt **Beacon**; der Umzug auf Kais Box unter dem neuen Namen steht aus
+> **Status:** 0.14.0 — Vertrieb, Versand und Service durchgängig. Bis 0.12.1 hieß das Produkt **Beacon**; der Umzug auf Kais Box unter dem neuen Namen steht aus
 > **Letzte Aktualisierung:** 29. September 2026
 
 ---
@@ -56,6 +56,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Versand | SMTP/IMAP je Organisation, Absenderadresse je Person, Einwilligung am Kontakt, öffentliche Links (Einwilligung, Abmelden, Klick) über eigenen Entrance `rocketlinks`; Listen (statisch/aktiv) und Kampagnen |
 | Tickets | eigene Pipeline, SLA-Uhr ab Absendezeit; Eingang aus API, Bot oder Formular über einen gemeinsamen Weg (`ticketeingang.py`) |
 | Dokumente | Dateien am Datensatz, wie in HubSpot |
+| Datenbank-Blick | `/datenbank` für Verwalter: Tabellen blättern, lesendes SQL, CSV — unter Zeilensicherheit; jede Abfrage vorher mit pglast geprüft (nur SELECT, Tabellen aus `FREI`, Funktionen aus einer Erlaubnisliste), `READ ONLY`, 10 s, protokolliert (`app/datenbank.py`, BETRIEB.md „Datenbank ansehen") |
 | Eigene Eigenschaften | je Objekt: Text, Zahl, Datum, Ja/Nein, Auswahl — geprüft beim Schreiben |
 | Pipelines | mehrere nebeneinander, Stufen anlegen/ändern/ordnen/löschen mit Zielangabe |
 | Kontakte | anlegen, bearbeiten, löschen; Hauptfirma plus weitere Firmen |
@@ -66,7 +67,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | 624 Backend, 57 Frontend |
+| Tests | 657 Backend, 57 Frontend |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; als Beacon seit 5.9.2026 aus dem Aimighty-Katalog auf Kais Box. Die Umbenennung in Rocket (0.13.0) ist auf Olares eine Neuinstallation — Umzug ohne Alias, Schritte in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}` per Tag (zuletzt `v0.12.0`, damals noch als `beacon-*`), Katalogeintrag in `bayerhazard/aimighty-market` (noch unter `beacon`, Rocket braucht einen neuen); Icon nach Marcs Idee 6 (`docs/icon/`) |
 
@@ -222,6 +223,11 @@ der Lieferung und liest die Token über `var(--am-*)`.
    `X-Rocket-Sitzplatz`) sagt, wem die Arbeit zugeschrieben wird. Das ist
    Zuschreibung, keine Anmeldung — ein Sitzplatz greift nur innerhalb
    derselben Organisation, sonst 403.
+
+   **Neue Tabelle:** in `app/datenbank.py` entweder in `FREI` oder mit
+   Grund in `GESPERRT` eintragen, und im Abzug (`sicherung.py`) ebenso —
+   zwei Wachen-Tests brechen sonst. Enthält sie ein Geheimnis, gehört sie
+   nach `GESPERRT`.
 
    **Eigene Eigenschaften** liegen als `custom jsonb` an Firma, Kontakt
    und Geschäft; die Datenbank sieht nur JSON. Geprüft wird beim Schreiben
