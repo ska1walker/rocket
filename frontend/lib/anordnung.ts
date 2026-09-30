@@ -101,3 +101,19 @@ export function passt(suche: string, label: string, key: string): boolean {
   const s = suche.trim().toLowerCase();
   return !s || label.toLowerCase().includes(s) || key.toLowerCase().includes(s);
 }
+
+/**
+ * Felder nach ihrer Gruppe, in der Reihenfolge, in der sie kommen — für
+ * Spaltenwahl und Filterbau. Felder ohne Gruppe (Tickets, Aufgaben, oder
+ * bevor jemand die Eigenschaften geöffnet hat) bilden eine Gruppe `null`.
+ */
+export function gruppieren<T extends { gruppe?: string | null }>(felder: T[]): { gruppe: string | null; felder: T[] }[] {
+  const ergebnis: { gruppe: string | null; felder: T[] }[] = [];
+  for (const f of felder) {
+    const g = f.gruppe ?? null;
+    const letzte = ergebnis.find((e) => e.gruppe === g);
+    if (letzte) letzte.felder.push(f);
+    else ergebnis.push({ gruppe: g, felder: [f] });
+  }
+  return ergebnis;
+}
