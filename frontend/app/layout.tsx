@@ -27,6 +27,9 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Rocket — Vertrieb",
   description: "KI-gestütztes CRM für den AImighty-Vertrieb. Läuft auf der eigenen Box.",
+  // Symbole: app/icon.png, app/apple-icon.png und app/manifest.ts (Next hängt
+  // sie selbst an). Unter dem Symbol auf dem Home-Bildschirm steht „Rocket".
+  appleWebApp: { title: "Rocket" },
 };
 
 export const viewport: Viewport = {
