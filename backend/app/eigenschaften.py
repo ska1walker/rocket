@@ -14,7 +14,14 @@ from uuid import UUID
 import asyncpg
 
 ENTITAETEN = ("companies", "contacts", "deals")
-ARTEN = ("text", "number", "date", "bool", "select", "multiselect")
+ARTEN = (
+    "text", "number", "date", "bool", "select", "multiselect",
+    # Seit 0035 (Stufe C):
+    "textarea", "url", "email", "phone", "currency", "user",
+)
+
+_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+_TELEFON = re.compile(r"^[+0-9][0-9 ()/.\-]{2,40}$")
 
 
 def schluessel_aus(label: str) -> str:
@@ -96,13 +103,48 @@ def pruefen(werte: dict[str, Any], defs: list[asyncpg.Record]) -> dict[str, Any]
                 ergebnis[key] = str(wert)
             elif art == "multiselect":
                 ergebnis[key] = _mehrfach(wert, d, label)
+            elif art == "textarea":
+                ergebnis[key] = str(wert)
+            elif art == "url":
+                s = str(wert).strip()
+                # Nur, was ein Browser gefahrlos öffnet — `javascript:` nie.
+                if not re.match(r"^https?://[^\s]+$", s, re.I):
+                    raise Ungueltig(f"„{label}“ erwartet eine Adresse mit http:// oder https://.")
+                ergebnis[key] = s
+            elif art == "email":
+                s = str(wert).strip()
+                if not _EMAIL.match(s):
+                    raise Ungueltig(f"„{label}“ erwartet eine E-Mail-Adresse.")
+                ergebnis[key] = s
+            elif art == "phone":
+                s = str(wert).strip()
+                if not _TELEFON.match(s):
+                    raise Ungueltig(f"„{label}“ erwartet eine Telefonnummer.")
+                ergebnis[key] = s
+            elif art == "currency":
+                # Ganze Cent. Gerundet wird nie: Ein Betrag mit halbem Cent
+                # ist ein Fehler im Aufrufer, kein Wert.
+                if isinstance(wert, bool) or not isinstance(wert, int | str):
+                    if isinstance(wert, float) and wert.is_integer():
+                        wert = int(wert)
+                    else:
+                        raise ValueError
+                cent = int(str(wert))
+                if cent < 0:
+                    raise Ungueltig(f"„{label}“ darf nicht negativ sein.")
+                ergebnis[key] = cent
+            elif art == "user":
+                # Dass die Person zur Organisation gehört, prüft
+                # `pruefen_voll` — hier nur die Form.
+                ergebnis[key] = str(UUID(str(wert)))
             else:
                 raise Ungueltig(f"„{label}“ hat einen unbekannten Typ.")
         except Ungueltig:
             raise
         except (TypeError, ValueError):
             erwartet = {"number": "eine Zahl", "date": "ein Datum (JJJJ-MM-TT)",
-                        "bool": "ja oder nein"}.get(art, "einen Text")
+                        "bool": "ja oder nein", "currency": "einen Betrag in ganzen Cent",
+                        "user": "eine Person"}.get(art, "einen Text")
             raise Ungueltig(f"„{label}“ erwartet {erwartet}.") from None
 
     return ergebnis
@@ -378,3 +420,83 @@ async def vorgaben_sicherstellen(conn: asyncpg.Connection, org_id: UUID, entity:
         "where org_id = $1 and entity = $2 and group_id is null",
         org_id, entity, gruppen[WEITERE],
     )
+
+
+async def pruefen_voll(conn: asyncpg.Connection, entity: str, werte: dict[str, Any]) -> dict[str, Any]:
+    """`pruefen` plus das, wofür es die Datenbank braucht: Eine Person muss
+    zur Organisation gehören.
+
+    Ausdrücklich über `current_user_orgs()` eingegrenzt: `user_org_roles`
+    steht nicht unter FORCE (die Anmeldung liest sie ohne Nutzerkontext),
+    und als Tabelleneigentümer sähe die Verbindung sonst jede Organisation
+    der Box. Der Test dafür hat genau das gezeigt.
+    """
+    defs = await definitionen(conn, entity)
+    geprueft = pruefen(werte, defs)
+    personen = [d for d in defs if d["kind"] == "user" and geprueft.get(d["key"])]
+    if personen:
+        bekannt = {
+            str(z["user_id"]) for z in await conn.fetch(
+                "select user_id from public.user_org_roles "
+                "where org_id in (select public.current_user_orgs())"
+            )
+        }
+        for d in personen:
+            if geprueft[d["key"]] not in bekannt:
+                raise Ungueltig(f"„{d['label']}“: Diese Person gehört nicht zu Ihrer Organisation.")
+    return geprueft
+
+
+async def pflicht_pruefen(
+    conn: asyncpg.Connection, entity: str, daten: dict[str, Any], *, neu: bool
+) -> None:
+    """Pflichtfelder — beim Anlegen gefüllt, beim Ändern nicht geleert.
+
+    Beim Ändern zählt nur, was die Anfrage anfasst: Ein alter Datensatz, dem
+    ein Pflichtwert fehlt, lässt sich weiter bearbeiten. Rückwirkend
+    gesperrt wird nichts; die Datensatzseite markiert, was fehlt.
+
+    Nur für Menschen an der Oberfläche und die API. Einfuhr, Anreicherung
+    und KI legen über eigene Wege an und sind ausgenommen — sonst scheiterte
+    jede Messeliste an einem Feld, das auf ihr nicht steht.
+    """
+    zeilen = await conn.fetch(
+        "select key, label, is_system from public.property_definitions "
+        "where entity = $1 and required and is_active",
+        entity,
+    )
+    custom = daten.get("custom") or {}
+    fehlend: list[str] = []
+    for z in zeilen:
+        quelle = daten if z["is_system"] else custom
+        if neu:
+            if _leer(quelle.get(z["key"])):
+                fehlend.append(z["label"])
+        elif z["key"] in quelle and _leer(quelle[z["key"]]):
+            fehlend.append(z["label"])
+    if fehlend:
+        namen = ", ".join(f"„{n}“" for n in fehlend)
+        raise Ungueltig(
+            f"Pflichtfeld {namen} fehlt." if len(fehlend) == 1 else f"Pflichtfelder {namen} fehlen."
+        )
+
+
+def _leer(v: Any) -> bool:
+    return v is None or (isinstance(v, str) and not v.strip()) or (isinstance(v, list) and not v)
+
+
+# Feste Felder, die nie Pflicht werden können, obwohl man sie bearbeiten
+# kann: Der Absagegrund entsteht beim Verlieren, nicht beim Anlegen.
+NIE_PFLICHT = {("deals", "lost_reason")}
+
+
+async def pflicht_oder_422(
+    conn: asyncpg.Connection, entity: str, daten: dict[str, Any], *, neu: bool
+) -> None:
+    """`pflicht_pruefen` für die Routen: 422 mit dem Satz für Menschen."""
+    from fastapi import HTTPException
+
+    try:
+        await pflicht_pruefen(conn, entity, daten, neu=neu)
+    except Ungueltig as exc:
+        raise HTTPException(422, str(exc)) from exc

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, Eye, EyeOff, Pencil, Trash2, X } from "lucide-react";
+import { AlertCircle, Check, ChevronDown, Eye, EyeOff, Pencil, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api, suchparameter } from "@/lib/api";
@@ -362,6 +362,13 @@ function Wert({
   optionen?: Auswahl[];
 }) {
   if (sonder?.zeige && (sonder.auchLeer || !istLeer(wert))) return <>{sonder.zeige(wert)}</>;
+  // Ein leeres Pflichtfeld sagt es — mit Zeichen und Wort, nicht nur Farbe.
+  if (istLeer(wert) && feld.required)
+    return (
+      <span className="fg-fehlt">
+        <AlertCircle size={12} aria-hidden="true" /> fehlt
+      </span>
+    );
   if (istLeer(wert)) return <span className="fg-leer">—</span>;
   const text = anzeige(feld, wert, personen, optionen);
   if (feld.art === "url") {
@@ -501,7 +508,10 @@ function Formular({
             <legend>{g.label}</legend>
             {hier.map((f) => (
               <div className="feld" key={f.id}>
-                <label htmlFor={`fga-${f.key}`}>{f.label}</label>
+                <label htmlFor={`fga-${f.key}`}>
+                  {f.label}
+                  {f.required && <span className="optional"> Pflicht</span>}
+                </label>
                 <Eingabe
                   feld={f}
                   id={`fga-${f.key}`}

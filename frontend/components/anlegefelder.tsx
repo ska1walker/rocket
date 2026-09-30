@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, suchparameter } from "@/lib/api";
-import { ausEingabe, type Auswahl, istLeer, patchFuer } from "@/lib/feldwerte";
+import { ausEingabe, type Auswahl, Eingabefehler, istLeer, patchFuer } from "@/lib/feldwerte";
 import type { Anordnung, Mitglied, PropertyEntity } from "@/lib/typen";
 import { Eingabe } from "@/components/feldgruppen";
 
@@ -27,7 +27,9 @@ export function useAnlegefelder(entity: PropertyEntity, vorhanden: string[]) {
   });
   const felder = (anordnung.data?.gruppen ?? [])
     .flatMap((g) => g.felder)
-    .filter((f) => f.im_anlegen && f.bearbeitbar && !vorhanden.includes(f.key));
+    // Pflichtfelder erscheinen immer — wie in HubSpot, wo sie sich im
+    // Anlegen-Formular gar nicht abwählen lassen.
+    .filter((f) => (f.im_anlegen || f.required) && f.bearbeitbar && !vorhanden.includes(f.key));
   const brauchtPersonen = felder.some((f) => f.art === "user");
   const mitglieder = useQuery({
     queryKey: ["mitglieder"],
@@ -42,7 +44,10 @@ export function useAnlegefelder(entity: PropertyEntity, vorhanden: string[]) {
       <div className="anlege-zusatz">
         {felder.map((f) => (
           <div className="feld" key={f.id}>
-            <label htmlFor={`anl-${entity}-${f.key}`}>{f.label}</label>
+            <label htmlFor={`anl-${entity}-${f.key}`}>
+              {f.label}
+              {!f.required && <span className="optional"> optional</span>}
+            </label>
             <Eingabe
               feld={f}
               id={`anl-${entity}-${f.key}`}
@@ -58,6 +63,13 @@ export function useAnlegefelder(entity: PropertyEntity, vorhanden: string[]) {
 
   /** Was mit dem Anlegen mitgeht. Wirft `Eingabefehler` bei Unsinn. */
   function nutzlast(): Record<string, unknown> {
+    // Vorher prüfen, was Pflicht ist: Der Satz steht dann im Dialog, bevor
+    // etwas angelegt wird.
+    const fehlend = felder.filter((f) => f.required && istLeer(entwurf[f.key] ?? ""));
+    if (fehlend.length)
+      throw new Eingabefehler(
+        `Bitte füllen Sie ${fehlend.map((f) => `„${f.label}“`).join(", ")} aus — ${fehlend.length === 1 ? "das ist ein Pflichtfeld" : "das sind Pflichtfelder"}.`,
+      );
     const werte = felder
       .filter((f) => f.key in entwurf)
       .map((f) => ({ feld: f, wert: ausEingabe(f, entwurf[f.key]) }))

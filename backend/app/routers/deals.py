@@ -14,7 +14,7 @@ import orjson
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from app import audit
+from app import audit, eigenschaften
 from app.auth import CurrentUser, get_current_user
 from app.db import acquire_as
 from app.patching import build_update
@@ -68,7 +68,7 @@ async def _custom_pruefen(conn, entity: str, werte: dict | None) -> str:
     from app import eigenschaften
 
     try:
-        geprueft = eigenschaften.pruefen(werte or {}, await eigenschaften.definitionen(conn, entity))
+        geprueft = await eigenschaften.pruefen_voll(conn, entity, werte or {})
     except eigenschaften.Ungueltig as exc:
         raise HTTPException(400, str(exc)) from exc
     return json.dumps(geprueft)
@@ -211,6 +211,7 @@ async def get_deal(deal_id: UUID, user: CurrentUser = Depends(get_current_user))
 @router.post("/deals", response_model=Deal, status_code=201)
 async def create_deal(payload: DealIn, user: CurrentUser = Depends(get_current_user)) -> Deal:
     async with acquire_as(user.user_id) as conn:
+        await eigenschaften.pflicht_oder_422(conn, "deals", payload.model_dump(), neu=True)
         pid = payload.pipeline_id or await _standard_pipeline(conn, user.org_id)
         stage_id = payload.stage_id
         if stage_id is None:
@@ -264,6 +265,10 @@ async def update_deal(
         raise HTTPException(
             400,
             "Die Stufe wird über /deals/{id}/stage verschoben — dort wird der Wechsel protokolliert.",
+        )
+    async with acquire_as(user.user_id) as conn:
+        await eigenschaften.pflicht_oder_422(
+            conn, "deals", payload.model_dump(exclude_unset=True), neu=False
         )
     if "custom" in payload.model_fields_set:
         async with acquire_as(user.user_id) as conn:

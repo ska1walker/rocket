@@ -31,18 +31,16 @@ const TYPEN: { wert: PropertyKind; text: string; hinweis?: string }[] = [
   { wert: "bool", text: "Ja / Nein" },
   { wert: "select", text: "Auswahl", hinweis: "genau ein Wert" },
   { wert: "multiselect", text: "Mehrfachauswahl", hinweis: "beliebig viele Werte" },
+  { wert: "textarea", text: "Langer Text", hinweis: "mehrere Zeilen" },
+  { wert: "url", text: "Adresse (URL)", hinweis: "mit https://" },
+  { wert: "email", text: "E-Mail" },
+  { wert: "phone", text: "Telefon" },
+  { wert: "currency", text: "Betrag", hinweis: "in Euro, gespeichert in Cent" },
+  { wert: "user", text: "Person", hinweis: "jemand aus Ihrem Team" },
 ];
 
 /** Wie eine Art heißt — auch die, die bisher nur feste Felder haben. */
-export const TYP_TEXT: Record<string, string> = {
-  ...Object.fromEntries(TYPEN.map((t) => [t.wert, t.text])),
-  textarea: "Langer Text",
-  url: "Adresse (URL)",
-  email: "E-Mail",
-  phone: "Telefon",
-  currency: "Betrag",
-  user: "Person",
-};
+export const TYP_TEXT: Record<string, string> = Object.fromEntries(TYPEN.map((t) => [t.wert, t.text]));
 
 /** Beide Typen führen eine Werteliste. */
 const MIT_OPTIONEN: string[] = ["select", "multiselect"];
@@ -463,7 +461,8 @@ function Feldzeile({
         </span>
         <span className="eig-art">
           {TYP_TEXT[feld.art] ?? feld.art}
-          {feld.im_anlegen && <span className="eig-anlegen" title="Erscheint im Anlegen-Dialog">im Anlegen</span>}
+          {feld.required && <span className="eig-anlegen">Pflicht</span>}
+          {feld.im_anlegen && !feld.required && <span className="eig-anlegen" title="Erscheint im Anlegen-Dialog">im Anlegen</span>}
         </span>
         <span className="eig-zahl">{zahlText(feld.anzahl)}</span>
         <span className="eig-knoepfe">
@@ -499,6 +498,7 @@ function Feldpflege({ feld, fertig, geaendert }: { feld: Feldeintrag; fertig: ()
   const [label, setLabel] = useState(feld.label);
   const [hilfe, setHilfe] = useState(feld.description ?? "");
   const [imAnlegen, setImAnlegen] = useState(feld.im_anlegen);
+  const [pflicht, setPflicht] = useState(feld.required);
   // Gerechnetes und Felder mit eigenem Weg haben im Anlegen nichts zu tun.
   const anlegbar = feld.bearbeitbar && !(feld.is_system && feld.key === "lost_reason");
 
@@ -507,7 +507,7 @@ function Feldpflege({ feld, fertig, geaendert }: { feld: Feldeintrag; fertig: ()
       api.patch(`/api/eigenschaften/${feld.id}`, {
         label: label.trim(),
         description: hilfe.trim() || null,
-        ...(anlegbar ? { im_anlegen: imAnlegen } : {}),
+        ...(anlegbar ? { im_anlegen: imAnlegen, required: pflicht } : {}),
       }),
     onSuccess: () => {
       geaendert();
@@ -548,6 +548,15 @@ function Feldpflege({ feld, fertig, geaendert }: { feld: Feldeintrag; fertig: ()
           <label className="faktor-bestaetigung">
             <input type="checkbox" checked={imAnlegen} onChange={(e) => setImAnlegen(e.target.checked)} />
             <span>Im Anlegen-Dialog zeigen — zusätzlich zu dem, was der Dialog ohnehin fragt.</span>
+          </label>
+        )}
+        {anlegbar && (
+          <label className="faktor-bestaetigung">
+            <input type="checkbox" checked={pflicht} onChange={(e) => setPflicht(e.target.checked)} />
+            <span>
+              Pflichtfeld — beim Anlegen auszufüllen und nicht zu leeren. Bestehende Datensätze
+              ohne Wert bleiben bearbeitbar; die Einfuhr ist ausgenommen.
+            </span>
           </label>
         )}
         <div className="btn-reihe">

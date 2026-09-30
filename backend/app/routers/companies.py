@@ -7,7 +7,7 @@ import orjson
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from app import anreicherung, audit, segmente
+from app import anreicherung, audit, eigenschaften, segmente
 from app.auth import CurrentUser, get_current_user
 from app.db import acquire_as
 from app.patching import build_update
@@ -40,7 +40,7 @@ async def _custom_pruefen(conn, entity: str, werte: dict | None) -> str:
     from app import eigenschaften
 
     try:
-        geprueft = eigenschaften.pruefen(werte or {}, await eigenschaften.definitionen(conn, entity))
+        geprueft = await eigenschaften.pruefen_voll(conn, entity, werte or {})
     except eigenschaften.Ungueltig as exc:
         raise HTTPException(400, str(exc)) from exc
     return json.dumps(geprueft)
@@ -243,6 +243,7 @@ async def create_company(
     user: CurrentUser = Depends(get_current_user),
 ) -> Company:
     async with acquire_as(user.user_id) as conn:
+        await eigenschaften.pflicht_oder_422(conn, "companies", payload.model_dump(), neu=True)
         new_id = await einfuegen(
             conn, user, payload, await _custom_pruefen(conn, "companies", payload.custom)
         )
@@ -259,6 +260,10 @@ async def update_company(
     payload: CompanyPatch,
     user: CurrentUser = Depends(get_current_user),
 ) -> Company:
+    async with acquire_as(user.user_id) as conn:
+        await eigenschaften.pflicht_oder_422(
+            conn, "companies", payload.model_dump(exclude_unset=True), neu=False
+        )
     if "custom" in payload.model_fields_set:
         async with acquire_as(user.user_id) as conn:
             import json

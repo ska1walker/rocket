@@ -4639,6 +4639,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 @media (hover: none) { .fg-stift { opacity: 1; } }
 
 .fg-leer { color: var(--am-text-gedaempft); }
+.fg-fehlt { display: inline-flex; align-items: center; gap: 4px; color: var(--am-achtung); font-size: 0.8125rem; }
 .fg-lang { white-space: pre-wrap; }
 .fg-verweis { text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
 .fg-ueberfaellig { color: var(--am-fehler); }

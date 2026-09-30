@@ -630,7 +630,9 @@ export interface NutzerEinstellungen {
   leere_ausblenden?: boolean;
 }
 
-export type PropertyKind = "text" | "number" | "date" | "bool" | "select" | "multiselect";
+export type PropertyKind =
+  | "text" | "number" | "date" | "bool" | "select" | "multiselect"
+  | "textarea" | "url" | "email" | "phone" | "currency" | "user";
 export type PropertyEntity = "companies" | "contacts" | "deals";
 
 /**
