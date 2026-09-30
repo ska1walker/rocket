@@ -78,6 +78,8 @@ class DefinitionPatch(BaseModel):
     description: str | None = None
     position: int | None = None
     is_active: bool | None = None
+    # Im Anlegen-Dialog zeigen (Stufe B).
+    im_anlegen: bool | None = None
 
 
 class Definition(BaseModel):
@@ -209,11 +211,20 @@ async def aendern(
     args.append(definition_id)
 
     async with acquire_as(user.user_id) as conn:
-        system = await conn.fetchval(
-            "select is_system from public.property_definitions where id = $1", definition_id
+        zeile_alt = await conn.fetchrow(
+            "select is_system, entity, key from public.property_definitions where id = $1",
+            definition_id,
         )
-        if system is None:
+        if zeile_alt is None:
             raise HTTPException(404, "Eigenschaft nicht gefunden")
+        system = zeile_alt["is_system"]
+        if system and felder.get("im_anlegen"):
+            sf = eigenschaften.systemfeld(zeile_alt["entity"], zeile_alt["key"])
+            # Der Absagegrund entsteht beim Verlieren, nicht beim Anlegen.
+            if sf is None or not sf.bearbeitbar or (zeile_alt["entity"], sf.key) == ("deals", "lost_reason"):
+                raise HTTPException(
+                    400, "Dieses Feld wird gerechnet oder hat einen eigenen Weg — im Anlegen-Dialog hätte es nichts zu tun."
+                )
         if system and ({"options", "is_active"} & set(felder)):
             raise HTTPException(
                 400,

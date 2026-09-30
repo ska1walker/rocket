@@ -12,8 +12,8 @@ import { Stufenpille, Dealstufe } from "@/components/stufe";
 import { Zeitleiste } from "@/components/zeitleiste";
 import { KiKnopf } from "@/components/ki-knopf";
 import { Notizkasten } from "@/components/notizkasten";
-import { Eigenschaftswerteblock } from "@/components/eigenschaften";
-import { Stammdaten } from "@/components/stammdaten";
+import { Feldgruppen } from "@/components/feldgruppen";
+import { sichereUrl } from "@/lib/feldwerte";
 import { Anreicherungsblock } from "@/components/anreicherung";
 import { KontaktAnlegen } from "@/components/kontakt-anlegen";
 import { PersonenFinden } from "@/components/personen-finden";
@@ -21,7 +21,6 @@ import { DealAnlegen } from "@/components/deal-anlegen";
 import { Podcastblock } from "@/components/podcast";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Pipeline } from "@/lib/typen";
-import { STUFEN_TEXT } from "@/lib/format";
 import { useState } from "react";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { Dokumente } from "@/components/dokumente";
@@ -91,7 +90,8 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
       <div className="datensatz">
         {/* Links: was die Firma ist */}
         <div>
-          <Stammdaten
+          <Feldgruppen
+            entity="companies"
             titel="Über diese Firma"
             pfad={`/api/companies/${id}`}
             abfrageSchluessel={["firma", id]}
@@ -99,26 +99,17 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
             loeschtext="Die Firma wird aus allen Listen genommen. Kontakte und Leads bleiben bestehen und lassen sich 30 Tage wiederherstellen."
             kopfrechts={<Stufenpille stufe={f.lifecycle_stage} />}
             werte={f as unknown as Record<string, unknown>}
-            felder={[
-              { key: "name", text: "Name" },
-              { key: "domain", text: "Domain", zeige: (v) => <a href={`https://${String(v)}`} target="_blank" rel="noreferrer noopener" style={{ textDecoration: "underline", textUnderlineOffset: "2px" }}>{String(v)}</a> },
-              { key: "industry", text: "Branche" },
-              { key: "employee_count", text: "Mitarbeiter", art: "number" },
-              { key: "street", text: "Straße" },
-              { key: "postal_code", text: "PLZ" },
-              { key: "city", text: "Ort" },
-              { key: "phone", text: "Telefon" },
-              { key: "website", text: "Website", zeige: (v) => <a href={String(v)} target="_blank" rel="noreferrer noopener" style={{ textDecoration: "underline", textUnderlineOffset: "2px" }}>{String(v).replace(/^https?:\/\//, "")}</a> },
-              { key: "linkedin_url", text: "LinkedIn", zeige: (v) => <a href={String(v)} target="_blank" rel="noreferrer noopener" style={{ textDecoration: "underline", textUnderlineOffset: "2px" }}>{String(v).replace(/^https?:\/\/(www\.)?/, "")}</a> },
-              { key: "lifecycle_stage", text: "Stufe", art: "select", optionen: Object.entries(STUFEN_TEXT).map(([wert, text]) => ({ wert, text })) },
-              { key: "source", text: "Herkunft" },
-              { key: "description", text: "Beschreibung", art: "textarea" },
-            ]}
+            sonder={{
+              domain: {
+                zeige: (v) => {
+                  const ziel = sichereUrl(String(v));
+                  return ziel ? <a href={ziel} target="_blank" rel="noreferrer noopener" className="fg-verweis">{String(v)}</a> : String(v);
+                },
+              },
+            }}
           />
 
           <Anreicherungsblock entity="companies" id={id} werte={f as unknown as Record<string, unknown>} abfrageSchluessel={["firma", id]} />
-
-          <Eigenschaftswerteblock entity="companies" id={id} werte={f.custom} abfrageSchluessel={["firma", id]} />
 
           {f.ai_summary && (
             <section className="block">

@@ -11,14 +11,12 @@ import { Seitenkopf } from "@/components/seitenkopf";
 import { Stufenpille } from "@/components/stufe";
 import { Zeitleiste } from "@/components/zeitleiste";
 import { Fehler, Laedt } from "@/components/zustaende";
-import { Eigenschaftswerteblock } from "@/components/eigenschaften";
-import { Stammdaten } from "@/components/stammdaten";
+import { Feldgruppen } from "@/components/feldgruppen";
 import { Anreicherungsblock } from "@/components/anreicherung";
 import { KontaktFirmen } from "@/components/kontakt-firmen";
 import { Einwilligungsblock } from "@/components/einwilligung";
 import { KontaktListen } from "@/components/kontakt-listen";
 import { Dokumente } from "@/components/dokumente";
-import { STUFEN_TEXT } from "@/lib/format";
 
 /** Entwurf für eine Ansprache. Er wird hingelegt, nie versendet. */
 function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
@@ -145,7 +143,8 @@ export default function KontaktSeite({ params }: { params: Promise<{ id: string 
 
       <div className="datensatz">
         <div>
-          <Stammdaten
+          <Feldgruppen
+            entity="contacts"
             titel="Über diesen Kontakt"
             pfad={`/api/contacts/${id}`}
             abfrageSchluessel={["kontakt", id]}
@@ -153,26 +152,22 @@ export default function KontaktSeite({ params }: { params: Promise<{ id: string 
             loeschtext="Der Kontakt wird aus allen Listen genommen. Verlauf und Zuordnungen bleiben 30 Tage wiederherstellbar."
             kopfrechts={<Stufenpille stufe={k.lifecycle_stage} />}
             werte={k as unknown as Record<string, unknown>}
-            felder={[
-              { key: "first_name", text: "Vorname" },
-              { key: "last_name", text: "Nachname" },
-              { key: "email", text: "E-Mail", art: "email", zeige: (v) => <a href={`mailto:${String(v)}`}>{String(v)}</a> },
-              { key: "phone", text: "Telefon" },
-              { key: "mobile", text: "Mobil" },
-              { key: "job_title", text: "Position" },
-              { key: "buying_role", text: "Kaufrolle" },
-              { key: "lifecycle_stage", text: "Stufe", art: "select", optionen: Object.entries(STUFEN_TEXT).map(([wert, text]) => ({ wert, text })) },
-              { key: "source", text: "Herkunft" },
-              { key: "linkedin_url", text: "LinkedIn" },
-              { key: "notes", text: "Notizen", art: "textarea" },
-            ]}
+            sonder={{
+              company_name: {
+                zeige: (v) =>
+                  k.company_id ? (
+                    <Link href={`/firmen/${k.company_id}`} className="fg-verweis">{String(v)}</Link>
+                  ) : (
+                    String(v)
+                  ),
+              },
+            }}
           />
 
           <Anreicherungsblock entity="contacts" id={id} werte={k as unknown as Record<string, unknown>} abfrageSchluessel={["kontakt", id]} />
 
           <KontaktFirmen kontaktId={id} />
 
-          <Eigenschaftswerteblock entity="contacts" id={id} werte={k.custom} abfrageSchluessel={["kontakt", id]} />
         </div>
 
         <Zeitleiste bezug={{ contact_id: id }} />

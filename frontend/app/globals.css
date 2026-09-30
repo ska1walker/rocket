@@ -4532,7 +4532,16 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   color: var(--am-text-sekundaer);
 }
 
-.eig-art { font-size: 0.8125rem; color: var(--am-text-sekundaer); }
+.eig-art { font-size: 0.8125rem; color: var(--am-text-sekundaer); display: flex; flex-direction: column; }
+.eig-anlegen { font-size: 0.6875rem; color: var(--am-text-gedaempft); }
+
+/* Zusatzfelder im Anlegen-Dialog: abgesetzt, damit klar ist, dass sie aus
+   den Einstellungen kommen und nicht zum festen Dialog gehören. */
+.anlege-zusatz {
+  margin-top: var(--am-raum-2);
+  padding-top: var(--am-raum-3);
+  border-top: 1px solid var(--am-trennlinie);
+}
 .eig-zahl { font-size: 0.75rem; color: var(--am-text-gedaempft); text-align: right; }
 .eig-knoepfe { display: flex; gap: var(--am-raum-1); justify-content: flex-end; }
 
@@ -4566,6 +4575,98 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 .eig-volle-breite { grid-column: 1 / -1; }
+
+/* Die Datensatzseite in Gruppen (components/feldgruppen.tsx). Der Kopf
+   einer Gruppe ist ein Knopf über die volle Breite: Zielgröße und
+   Tastatur ohne Umweg. Zugeklappt sagt er, wie viel darin gefüllt ist. */
+.fg-kopf-rechts { display: inline-flex; gap: var(--am-raum-1); align-items: center; }
+
+.fg-gruppe + .fg-gruppe { margin-top: var(--am-raum-2); }
+
+.fg-gruppe-kopf {
+  display: flex;
+  align-items: center;
+  gap: var(--am-raum-2);
+  width: 100%;
+  min-height: var(--am-ziel-zeiger);
+  padding: 0 var(--am-raum-1);
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--am-trennlinie);
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--am-text-primaer);
+  text-align: left;
+  cursor: pointer;
+}
+
+.fg-gruppe-kopf:hover { background: var(--am-flaeche-1); }
+.fg-gruppe-kopf:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: -2px; }
+.fg-pfeil { flex: none; color: var(--am-text-gedaempft); transition: transform var(--am-dauer-kurz); }
+.fg-gruppe-kopf[aria-expanded="false"] .fg-pfeil { transform: rotate(-90deg); }
+.fg-stand { margin-left: auto; font-size: 0.6875rem; font-weight: 500; color: var(--am-text-gedaempft); }
+.fg-archiv { cursor: default; color: var(--am-text-sekundaer); }
+.fg-archiv:hover { background: transparent; }
+
+.fg-felder { margin: 0 0 0 var(--am-raum-1); }
+
+.fg-zeile dd { display: flex; align-items: flex-start; gap: var(--am-raum-2); }
+
+.fg-stift {
+  flex: none;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  border-radius: var(--am-radius-klein);
+  background: transparent;
+  color: var(--am-text-gedaempft);
+  cursor: pointer;
+  opacity: 0;
+}
+
+/* Sichtbar bei Zeiger oder Fokus; auf Berührungsgeräten immer, denn dort
+   gibt es kein Überfahren. */
+.fg-zeile:hover .fg-stift,
+.fg-stift:focus-visible { opacity: 1; }
+.fg-stift:hover { background: var(--am-flaeche-2); color: var(--am-text-primaer); }
+.fg-stift:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+@media (hover: none) { .fg-stift { opacity: 1; } }
+
+.fg-leer { color: var(--am-text-gedaempft); }
+.fg-lang { white-space: pre-wrap; }
+.fg-verweis { text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.fg-ueberfaellig { color: var(--am-fehler); }
+
+.fg-einzeln { display: flex; gap: var(--am-raum-1); align-items: flex-start; }
+.fg-einzeln .input,
+.fg-einzeln .mehrfachauswahl { flex: 1; min-width: 0; }
+
+.fg-abschnitt {
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--am-raum-4);
+}
+
+.fg-abschnitt legend {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 0 0 var(--am-raum-2);
+  margin-bottom: var(--am-raum-2);
+  border-bottom: 1px solid var(--am-trennlinie);
+  width: 100%;
+}
+
+.fg-loeschknopf { margin-left: auto; color: var(--am-fehler); }
+
+.fg-loeschen { max-width: 420px; width: 100%; }
+.fg-loeschen h2 { font-size: 1.125rem; margin-bottom: var(--am-raum-3); }
+.fg-loeschen p { font-size: 0.875rem; color: var(--am-text-sekundaer); margin-bottom: var(--am-raum-4); }
 
 .eig-archiv { margin-top: var(--am-raum-4); }
 .eig-archiv summary { cursor: pointer; font-size: 0.875rem; font-weight: 500; margin-bottom: var(--am-raum-2); }

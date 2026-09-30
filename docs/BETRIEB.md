@@ -1731,6 +1731,71 @@ Zugang bringt noch einen Nutzer anlegt. Der zweite Faktor und das
 Rücksetzen per Mail stehen in `test_zweiter_faktor.py` (22 Fälle, mit den
 Testvektoren aus RFC 6238).
 
+## Eigenschaften in Gruppen (seit 26.9.3)
+
+Nach HubSpots Muster: Jedes Objekt (Firma, Kontakt, Lead) hat Gruppen —
+„Firmeninformationen", „Adresse", „Kontaktwege", „Vertrieb" … —, und
+jedes Feld steht in genau einer, **die festen ebenso wie die eigenen**.
+Plan und Begründung: `docs/PLAN-EIGENSCHAFTEN.md`; umgesetzt sind dort
+die Stufen A und B.
+
+### Einrichten: Einstellungen › Eigenschaften
+
+- Reiter je Objekt, Suche, Gruppen als Kästen. **Ziehen** ordnet Felder
+  innerhalb und zwischen Gruppen; ohne Maus den Griff nehmen und die
+  Pfeiltasten — am Ende einer Gruppe geht es in die nächste.
+- Gespeichert wird nach jedem Zug die **ganze** Anordnung
+  (`PUT /api/eigenschaften/reihenfolge`). Fehlt darin ein Feld, das es
+  inzwischen gibt, antwortet der Server 409 — eine veraltete Seite
+  verschiebt nicht blind die Arbeit eines anderen.
+- **Feste Felder** tragen ein Schloss: verschieben, umbenennen, Hilfetext
+  ja; löschen, Typ ändern nein. Der Schlüssel (`city`) bleibt immer.
+- **Vorgabegruppen** lassen sich umbenennen, nicht löschen. Eigene Gruppen
+  löschen geht; stehen Felder darin, nur mit Zielgruppe.
+- Je Feld: „Im Anlegen-Dialog zeigen" (wie HubSpots „Show in create
+  form") und die Zahl der Datensätze mit Wert.
+- Eigene Eigenschaften werden **archiviert**, nicht gelöscht; die Werte
+  bleiben in `custom` und die Eigenschaft lässt sich wiederherstellen.
+- Anlegen, Ändern, Ordnen: nur `owner` und `admin` (vorher durfte jedes
+  Mitglied eigene Eigenschaften anlegen).
+
+### Die Datensatzseite
+
+„Über diese Firma" zeigt die Gruppen als aufklappbare Abschnitte. Was
+zugeklappt ist und ob leere Felder ausgeblendet sind, merkt sich Rocket
+**je Person** (`users.einstellungen`: `zugeklappt`, `leere_ausblenden`).
+
+Zwei Wege zu ändern, beide gewollt (Kai, 30.9.2026): der **Stift an einem
+Feld** (Enter speichert, Escape bricht ab) und der **Stift im Kopf** für
+alles auf einmal. Gerechnetes (Anzahl Kontakte, Wahrscheinlichkeit,
+Angelegt) und Felder mit eigenem Weg (Marketing-Einwilligung, Firma am
+Kontakt, Stufe am Lead) zeigen keinen Stift.
+
+**Kein `type="url"` im Formular.** Der Browser nähme „gruppe.de" nicht an
+und verhinderte das Absenden lautlos — auch wenn nur die Straße geändert
+wurde. So ist es im ersten Browserlauf aufgefallen. Die Formulare tragen
+`noValidate`; geprüft wird in `lib/feldwerte.ts` und im Backend.
+
+### Wie es gespeichert ist
+
+- `property_groups` (Migration 0034, FORCE) je Organisation und Objekt.
+- Feste Felder sind Zeilen in `property_definitions` mit `is_system`. Ihr
+  Wert bleibt in der Spalte; Typ und Auswahlwerte kommen aus dem Katalog
+  im Code (`eigenschaften.SYSTEMFELDER`), die Zeile trägt nur Gruppe,
+  Platz, Beschriftung, Hilfetext und die Schalter.
+- **Die Vorgaben entstehen nicht in der Migration**, sondern beim ersten
+  Lesen, im Kontext der handelnden Person (`vorgaben_sicherstellen`,
+  wiederholbar, `on conflict do nothing`). Unter FORCE sähe eine
+  Migration ohne Nutzerkontext keine Organisation und schriebe lautlos
+  nichts. Kommt mit einer neuen Version ein festes Feld dazu, erscheint es
+  von selbst am Ende seiner Gruppe.
+- `GET /api/eigenschaften` liefert weiterhin **nur eigene** Eigenschaften
+  — die Einfuhr und `custom` erwarten genau das. Die ganze Anordnung gibt
+  `GET /api/eigenschaften/anordnung?entity=`.
+- Im Abzug stehen Gruppen vor den Eigenschaften. Gibt es eine
+  Vorgabegruppe am Ziel schon (andere id), schreibt das Zurückspielen die
+  Verweise der Eigenschaften um.
+
 ## Datenbank ansehen — lesend, unter Zeilensicherheit
 
 Seit 26.9.1 unter *Einstellungen › Daten › Datenbank öffnen* (`/datenbank`),

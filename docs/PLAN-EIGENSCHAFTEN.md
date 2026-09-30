@@ -1,11 +1,14 @@
 # Plan: Eigenschaften in Gruppen, nach HubSpots Muster
 
-> **Stand:** 30. September 2026 · **Status:** Plan, nicht umgesetzt
+> **Stand:** 30. September 2026 · **Status:** Stufen A und B umgesetzt (26.9.3), C und D geplant
 > **Entschieden von Kai am 30.9.2026:**
 > - **Alle Felder in Gruppen**: Auch die festen (Name, Adresse, Telefon …)
 >   gehören einer Gruppe an und lassen sich verschieben. Löschen lassen sie
 >   sich nicht.
 > - Auf der Datensatzseite als **aufklappbare Abschnitte**.
+> - Beschriftung fester Felder **änderbar**, Schlüssel fest; **einzeln
+>   bearbeiten** per Stift und alles auf einmal; **Tickets und Aufgaben**
+>   vorerst ohne Gruppen.
 > - Dazu kommen **Pflichtfelder**, **Ordnen per Ziehen**, **neue Feldarten**,
 >   **Gruppen in Spaltenwahl und Filterbau**. Das Vorbild ist HubSpot.
 
@@ -44,7 +47,7 @@ Nicht übernommen wird HubSpots Bedingungslogik („Dependent properties“)
 und die Berechtigung pro Eigenschaft. Beides wäre Stufe 3 aus
 `PLAN-TEAM.md`.
 
-## Stufe A — Gruppen und Systemeigenschaften (Datenmodell)
+## Stufe A — Gruppen und Systemeigenschaften (Datenmodell) ✅ 26.9.3
 
 **Migration 0034_eigenschaftsgruppen.sql**
 
@@ -105,7 +108,7 @@ um.
   bleibt ein Ziehen atomar.
 - Alles nur für `owner`/`admin`, protokolliert mit `audit.log_fuer`.
 
-## Stufe B — Datensatzseite und Anlegen-Dialoge
+## Stufe B — Datensatzseite und Anlegen-Dialoge ✅ 26.9.3
 
 - **Datensatzseite:** Die linke Spalte von Firma, Kontakt und Geschäft
   zeigt die Gruppen als Abschnitte.
@@ -206,12 +209,16 @@ Formel, die jemand in den Einstellungen tippt.
 
 | Stufe | Inhalt | Version |
 |---|---|---|
-| A | Gruppen, Systemeigenschaften, API, Verwaltung mit Ziehen | 26.10.1 |
-| B | Datensatzseite in Abschnitten, Anlegen-Dialoge | 26.10.1 (zusammen mit A, sonst sieht man die Gruppen nirgends) |
-| C | Pflichtfelder, neue Arten | 26.10.2 |
-| D | Spaltenwahl und Filter nach Gruppen | 26.10.3 |
+| A | Gruppen, Systemeigenschaften, API, Verwaltung mit Ziehen | 26.9.3 ✅ |
+| B | Datensatzseite in Abschnitten, Anlegen-Dialoge | 26.9.3 ✅ (zusammen mit A, sonst sieht man die Gruppen nirgends) |
+| C | Pflichtfelder, neue Arten | nächste Version |
+| D | Spaltenwahl und Filter nach Gruppen | danach |
 
-## Offene Fragen an Kai
+## Entschieden (30.9.2026)
+
+Alle drei Vorschläge wie unten angenommen.
+
+## Offene Fragen an Kai (beantwortet)
 
 1. **Beschriftung fester Felder:** änderbar (HubSpot erlaubt es bei
    vielen) oder fest? Vorschlag: änderbar, der Schlüssel bleibt; Einfuhr

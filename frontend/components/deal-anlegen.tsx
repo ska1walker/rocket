@@ -8,6 +8,7 @@ import { PRODUKT_TEXT } from "@/lib/format";
 import type { Company, Contact, Deal, DealProduct, Stage } from "@/lib/typen";
 import { Mehrfachauswahl } from "@/components/mehrfachauswahl";
 import { Fehler } from "@/components/zustaende";
+import { useAnlegefelder } from "@/components/anlegefelder";
 
 // Die Listenpreise aus claude/Produkte.md. Sie füllen den Betrag vor,
 // wenn ein Produkt gewählt wird — überschreibbar, denn beim Experten
@@ -55,9 +56,12 @@ export function DealAnlegen({
     queryFn: () => api.get<Contact[]>("/api/contacts?limit=200"),
   });
 
+  const zusatz = useAnlegefelder("deals", ["name", "product", "amount_cents", "company_id", "close_date"]);
+
   const anlegen = useMutation({
     mutationFn: async () => {
       const lead = await api.post<Deal>("/api/deals", {
+        ...zusatz.nutzlast(),
         name,
         product: produkt,
         pipeline_id: pipelineId ?? null,
@@ -200,6 +204,7 @@ export function DealAnlegen({
             />
           </div>
 
+          {zusatz.element}
           {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
           </div>
 

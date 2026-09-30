@@ -307,7 +307,9 @@ SYSTEMFELDER: dict[str, list[Systemfeld]] = {
         S("product", "Produkt", "select", "geschaeftsinformationen", optionen=_PRODUKTE),
         S("service_days", "Servicetage", "number", "geschaeftsinformationen"),
         S("close_date", "Abschluss geplant", "date", "geschaeftsinformationen"),
-        S("company_name", "Firma", "text", "geschaeftsinformationen", bearbeitbar=False),
+        # Bearbeitet wird die Zuordnung, gezeigt der Name — die Seite reicht
+        # die Firmenliste als Auswahl herein.
+        S("company_id", "Firma", "company", "geschaeftsinformationen"),
         S("created_at", "Angelegt", "date", "geschaeftsinformationen", bearbeitbar=False),
         S("updated_at", "Zuletzt geändert", "date", "geschaeftsinformationen", bearbeitbar=False),
         S("pipeline_id", "Pipeline", "text", "vertrieb", bearbeitbar=False),
@@ -315,7 +317,7 @@ SYSTEMFELDER: dict[str, list[Systemfeld]] = {
         S("probability", "Wahrscheinlichkeit", "number", "vertrieb", bearbeitbar=False),
         S("owner_id", "Besitzer", "user", "vertrieb"),
         S("next_step", "Nächster Schritt", "textarea", "vertrieb"),
-        S("lost_reason", "Verlustgrund", "text", "vertrieb", bearbeitbar=False),
+        S("lost_reason", "Grund für die Absage", "textarea", "vertrieb"),
     ],
 }
 del S
