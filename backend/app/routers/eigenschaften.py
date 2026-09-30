@@ -15,7 +15,10 @@ from app.db import acquire_as
 router = APIRouter(prefix="/api/eigenschaften", tags=["eigenschaften"])
 
 Entity = Literal["companies", "contacts", "deals"]
-Kind = Literal["text", "number", "date", "bool", "select", "multiselect"]
+Kind = Literal[
+    "text", "number", "date", "bool", "select", "multiselect",
+    "textarea", "url", "email", "phone", "currency", "user",
+]
 # Beide führen eine Optionsliste; nur die Anzahl gleichzeitiger Werte
 # unterscheidet sie.
 MIT_OPTIONEN = ("select", "multiselect")
@@ -80,6 +83,8 @@ class DefinitionPatch(BaseModel):
     is_active: bool | None = None
     # Im Anlegen-Dialog zeigen (Stufe B).
     im_anlegen: bool | None = None
+    # Pflichtfeld (Stufe C): beim Anlegen gefüllt, beim Ändern nicht geleert.
+    required: bool | None = None
 
 
 class Definition(BaseModel):
@@ -218,6 +223,12 @@ async def aendern(
         if zeile_alt is None:
             raise HTTPException(404, "Eigenschaft nicht gefunden")
         system = zeile_alt["is_system"]
+        if system and felder.get("required"):
+            sf = eigenschaften.systemfeld(zeile_alt["entity"], zeile_alt["key"])
+            if sf is None or not sf.bearbeitbar or (zeile_alt["entity"], sf.key) in eigenschaften.NIE_PFLICHT:
+                raise HTTPException(
+                    400, "Dieses Feld wird gerechnet oder hat einen eigenen Weg — Pflicht kann es nicht sein."
+                )
         if system and felder.get("im_anlegen"):
             sf = eigenschaften.systemfeld(zeile_alt["entity"], zeile_alt["key"])
             # Der Absagegrund entsteht beim Verlieren, nicht beim Anlegen.

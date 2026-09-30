@@ -268,6 +268,14 @@ async def felder_fuer(conn: asyncpg.Connection, entity: str) -> list[dict[str, A
         "bool": "jaNein",
         "select": "auswahl",
         "multiselect": "mehrfachauswahl",
+        # Seit 0035. Ein Betrag steht in Cent — gefiltert wird vorerst in
+        # Cent; Stufe D (docs/PLAN-EIGENSCHAFTEN.md) rechnet in Euro um.
+        "textarea": "text",
+        "url": "text",
+        "email": "text",
+        "phone": "text",
+        "currency": "zahl",
+        "user": "person",
     }
 
     liste = [
