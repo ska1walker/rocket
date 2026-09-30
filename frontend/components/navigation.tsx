@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-NAVIGATION — docs/MODULE.md
+
 /**
  * Die Leiste einklappen — auf Symbole, mit ⌘B.
  *

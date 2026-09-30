@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-ANLEGEN — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useState } from "react";

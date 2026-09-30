@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-DATENBANK — docs/MODULE.md
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Download, Lock, Play } from "lucide-react";
 import { useState } from "react";

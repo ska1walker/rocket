@@ -1,3 +1,5 @@
+// Modul RK-FELDGRUPPEN — docs/MODULE.md
+
 // Werte eines Feldes — anzeigen, in eine Eingabe verwandeln und zurück.
 //
 // Ohne React, damit es sich prüfen lässt. Dieselben Regeln gelten für die

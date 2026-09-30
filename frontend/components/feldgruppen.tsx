@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-FELDGRUPPEN — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, Check, ChevronDown, Eye, EyeOff, Pencil, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";

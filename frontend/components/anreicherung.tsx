@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-ANREICHERUNG — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";

@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-EIGENSCHAFTEN — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive, ArchiveRestore, ArrowDown, ArrowUp, GripVertical, Lock, Pencil, Plus, Trash2, X,

@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-DARSTELLUNG — docs/MODULE.md
+
 /**
  * Hell / Dunkel / Wie das System.
  *

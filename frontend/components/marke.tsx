@@ -1,3 +1,5 @@
+// Modul HB-MARKE — docs/MODULE.md
+
 import Image from "next/image";
 
 /**

@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-STAMMDATEN — docs/MODULE.md
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";

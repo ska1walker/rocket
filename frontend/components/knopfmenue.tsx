@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-KNOPFMENUE — docs/MODULE.md
+
 // Ein Knopf, der mehr als eine Sache kann.
 //
 // Gedacht für den Fall, dass eine Seite **einen** offensichtlichen

@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-NAVIGATION — docs/MODULE.md
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {

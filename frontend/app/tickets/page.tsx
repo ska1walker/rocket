@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-TICKET — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Columns3, Table2 } from "lucide-react";
 import Link from "next/link";

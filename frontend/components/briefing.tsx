@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-BRIEFING — docs/MODULE.md
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Clock, FileClock, Inbox, MessageSquareOff, MessagesSquare, Sparkles, Target } from "lucide-react";
 import Link from "next/link";

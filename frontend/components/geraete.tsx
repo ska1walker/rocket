@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-EINSTELLUNGEN — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Laptop, Smartphone, Monitor } from "lucide-react";
 import { api } from "@/lib/api";

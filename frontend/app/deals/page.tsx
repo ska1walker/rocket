@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-BOARD — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";

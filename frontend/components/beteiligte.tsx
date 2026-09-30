@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-LEAD — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
 import Link from "next/link";

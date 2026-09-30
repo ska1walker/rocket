@@ -1,3 +1,5 @@
+// Modul HB-SEITENKOPF — docs/MODULE.md
+
 import Link from "next/link";
 
 export function Seitenkopf({

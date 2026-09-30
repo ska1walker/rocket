@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-WISSEN — docs/MODULE.md
+
 import { useMutation } from "@tanstack/react-query";
 import { Search, Sparkles } from "lucide-react";
 import Link from "next/link";

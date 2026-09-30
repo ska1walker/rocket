@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-ANGEBOT — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { Plus, Printer, Trash2 } from "lucide-react";

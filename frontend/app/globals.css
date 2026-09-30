@@ -2,7 +2,7 @@
 @config "../tailwind.config.ts";
 
 /* ═══════════════════════════════════════════════════════════════════════
-   AImighty-Designsystem — Quelle der Werte
+   AImighty-Designsystem — Quelle der Werte [AM-TOKEN]
    Übernommen aus dem InSilo_Design-Paket (tokens/globals.css), abgeleitet
    aus AImighty claude/Marke-Regeln.md und claude/Anwendung.md.
 
@@ -268,7 +268,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
    ═══════════════════════════════════════════════════════════════════════ */
 
 @layer components {
-  /* ── Buttons ──────────────────────────────────────────────────────
+  /* ── Buttons [AM-KNOPF] ──────────────────────────────────────────────────────
      Primär genau eine Handlung je Ansicht. Sekundär und still beliebig
      oft. Höhe ist die Zielgröße, nicht Padding-Zufall. */
   .btn-reihe {
@@ -369,7 +369,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     .btn-reihe { gap: var(--am-ziel-abstand-beruehrung); }
   }
 
-  /* ── Formularfelder ───────────────────────────────────────────────── */
+  /* ── Formularfelder [AM-FELD] ───────────────────────────────────────────────── */
   .feld { margin-bottom: var(--am-raum-6); }
 
   .feld label {
@@ -440,7 +440,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     .feld textarea { min-height: var(--am-ziel-beruehrung); }
   }
 
-  /* ── Häkchen und Schalter ─────────────────────────────────────────
+  /* ── Häkchen und Schalter [AM-HAKEN] ─────────────────────────────────────────
      Das Browser-Häkchen ist in keinem System zu Hause. Eines in den
      Farben des Hauses: ruhend ein Rahmen, gewählt Hanseatenblau mit
      weißem Haken — im Dunkeln Gold, weil Blau auf Blau nicht trägt. */
@@ -589,7 +589,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: var(--am-auswahl-flaeche);
   }
 
-  /* ── Karte ────────────────────────────────────────────────────────── */
+  /* ── Karte [AM-KARTE] ────────────────────────────────────────────────────────── */
   .karte {
     background: var(--am-flaeche-1);
     border: 1px solid var(--am-rand);
@@ -630,7 +630,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   table.am-tabelle tr:last-child td { border-bottom: none; }
 
-  /* ── Die Hülle ────────────────────────────────────────────────────
+  /* ── Die Hülle [AM-HUELLE] ────────────────────────────────────────────────────
      Zeiger (≥1024px): Navigation links, Inhalt, Ablage rechts.
      Berührung (<1024px): Navigation als untere Leiste, Ablage unter dem
      Inhalt. Der mobile Fall steht nicht im Referenzblatt — Insilo ist
@@ -647,7 +647,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: var(--am-seite);
   }
 
-  /* ── Kopfleiste ───────────────────────────────────────────────────
+  /* ── Kopfleiste [AM-HUELLE] ───────────────────────────────────────────────────
      Die zwei Dinge, die man von überall tut: suchen und anlegen. Sie
      spannt über beide Spalten, damit die Marke einen Anfang hat und die
      Navigationsspalte mit Navigation beginnt. */
@@ -1071,7 +1071,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     }
   }
 
-  /* ── Leerzustand ──────────────────────────────────────────────────── */
+  /* ── Leerzustand [AM-LEER] ──────────────────────────────────────────────────── */
   .leerzustand {
     text-align: center;
     padding: var(--am-raum-16) var(--am-raum-8);
@@ -1103,7 +1103,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 @layer components {
 
-  /* ── Nur für Vorleser ─────────────────────────────────────────────── */
+  /* ── Nur für Vorleser [HB-TABELLE] ─────────────────────────────────────────────── */
   .nur-vorleser {
     position: absolute;
     width: 1px;
@@ -1125,7 +1125,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     margin: 0 auto var(--am-raum-2);
   }
 
-  /* ── Felder nebeneinander ─────────────────────────────────────────
+  /* ── Felder nebeneinander [HB-FELDREIHE] ─────────────────────────────────────────
      Server, Port und Verschlüsselung in einer Zeile — auf dem Handy
      schnitt das Beschriftung und Auswahl ab. Die Spalten kommen vom
      Bauteil (--spalten), unter 40rem steht alles untereinander. */
@@ -1138,7 +1138,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     .feldreihe { grid-template-columns: minmax(0, 1fr); }
   }
 
-  /* ── Marke in der Kopfecke ────────────────────────────────────────── */
+  /* ── Marke in der Kopfecke [HB-MARKE] ────────────────────────────────────────── */
   .marke {
     display: inline-flex;
     align-items: center;
@@ -1176,7 +1176,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     border-left: 1px solid var(--am-trennlinie);
   }
 
-  /* ── Darstellungsschalter ─────────────────────────────────────────── */
+  /* ── Darstellungsschalter [HB-DARSTELLUNG] ─────────────────────────────────────────── */
   .darstellung-schalter {
     display: inline-flex;
     gap: 2px;
@@ -1210,7 +1210,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     outline-offset: 1px;
   }
 
-  /* ── Seitenkopf ───────────────────────────────────────────────────
+  /* ── Seitenkopf [HB-SEITENKOPF] ───────────────────────────────────────────────────
      Bleibt beim Rollen stehen. In einer Liste mit 200 Zeilen ist die
      Frage „wo bin ich und was kann ich hier tun" sonst nach dem dritten
      Bildschirm unbeantwortet. */
@@ -1262,7 +1262,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     text-underline-offset: 2px;
   }
 
-  /* ── Werkzeugleiste über der Liste ────────────────────────────────── */
+  /* ── Werkzeugleiste über der Liste [HB-TABELLE] ────────────────────────────────── */
   .werkzeugleiste {
     display: flex;
     align-items: center;
@@ -1316,7 +1316,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     font-size: 0.875rem;
   }
 
-  /* ── Datentabelle ─────────────────────────────────────────────────
+  /* ── Datentabelle [HB-TABELLE] ─────────────────────────────────────────────────
      Dicht, ohne Zebrastreifen: Die Trennlinie reicht, und Streifen
      kämpfen bei jeder Auswahlfarbe gegen die Auszeichnung. */
   /* Oben dieselbe Luft wie beim Datensatz — sonst klebt die erste Karte
@@ -1383,7 +1383,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
      seitlich rollen lässt — dann soll man sehen, wo man steht. */
   .rollbar:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 
-  /* ── Stufen-Pille ─────────────────────────────────────────────────
+  /* ── Stufen-Pille [HB-PILLE] ─────────────────────────────────────────────────
      Farbe trägt die Aussage nie allein: Der Text steht daneben, immer. */
   .stufe {
     display: inline-flex;
@@ -1443,7 +1443,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: var(--am-hinweis-flaeche);
   }
 
-  /* ── Datensatzseite — drei Bereiche ───────────────────────────────
+  /* ── Datensatzseite — drei Bereiche [HB-BLOCK] ───────────────────────────────
      Links die Eigenschaften, Mitte der Verlauf, rechts was daranhängt.
      Auf schmalen Geräten untereinander, Verlauf zuerst: dort steht,
      was zuletzt passiert ist, und danach wird zuerst gefragt. */
@@ -1512,7 +1512,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     overflow-x: auto;
   }
 
-  /* ── Eigenschaftsliste ────────────────────────────────────────────── */
+  /* ── Eigenschaftsliste [RK-STAMMDATEN] ────────────────────────────────────────────── */
   .eigenschaft {
     display: grid;
     grid-template-columns: 1fr;
@@ -1535,7 +1535,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     word-break: break-word;
   }
 
-  /* ── Zeitleiste ───────────────────────────────────────────────────── */
+  /* ── Zeitleiste [HB-ZEITLEISTE] ───────────────────────────────────────────────────── */
   .zeitleiste { list-style: none; margin: 0; padding: 0; }
 
   .zeitleiste li {
@@ -1603,7 +1603,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     margin: var(--am-raum-1) 0 0;
   }
 
-  /* ── Board ────────────────────────────────────────────────────────
+  /* ── Board [HB-BOARD] ────────────────────────────────────────────────────────
      Waagerecht rollbar, Spalten fester Breite. Eine Spalte, die mit dem
      Fenster mitwächst, wird bei sieben Stufen unlesbar schmal. */
   .board {
@@ -1741,7 +1741,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .deal-karte-datum[data-ueberfaellig="true"] { color: var(--am-fehler); }
 
-  /* ── Kennzahlen auf der Startseite ────────────────────────────────── */
+  /* ── Kennzahlen auf der Startseite [HB-KENNZAHL] ────────────────────────────────── */
   .kennzahlen {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -1783,7 +1783,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     margin-top: var(--am-raum-1);
   }
 
-  /* ── KI-Block ─────────────────────────────────────────────────────
+  /* ── KI-Block [HB-KI] ─────────────────────────────────────────────────────
      Ergebnisse eines Modells stehen abgesetzt und beschriftet. Wer in
      einem Jahr auf diese Seite sieht, muss erkennen, was ein Mensch
      geschrieben hat und was nicht. */
@@ -1818,7 +1818,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     margin: 0;
   }
 
-  /* ── Eingabefeld für Notizen ──────────────────────────────────────── */
+  /* ── Eingabefeld für Notizen [RK-NOTIZ] ──────────────────────────────────────── */
   .notiz-feld textarea {
     width: 100%;
     min-height: 5rem;
@@ -1838,7 +1838,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     outline-offset: 1px;
   }
 
-  /* ── Wer gerade arbeitet ──────────────────────────────────────────
+  /* ── Wer gerade arbeitet [HB-KONTO] ──────────────────────────────────────────
      Unten in der Navigation, immer sichtbar — auch allein. Die Frage
      „unter welchem Namen schreibe ich das gerade" hängt an Besitz,
      Zuordnung und Protokoll. Es ist trotzdem kein Benutzermenü:
@@ -1908,7 +1908,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .person-pfeil { margin-left: auto; flex: none; color: var(--am-text-gedaempft); }
 
-  /* ── Import einer CSV ─────────────────────────────────────────────
+  /* ── Import einer CSV [RK-EINFUHR] ─────────────────────────────────────────────
      Eine Seite, die eine Aufgabe ist, keine Einstellung. Deshalb keine
      Block-Kachel um alles herum: Der Seitentitel sagt schon, worum es
      geht, ein zweiter Rahmen mit derselben Überschrift wäre nur eine
@@ -2022,7 +2022,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     color: var(--am-text-gedaempft);
   }
 
-  /* ── Knopf mit zweitem Weg ────────────────────────────────────────
+  /* ── Knopf mit zweitem Weg [HB-KNOPFMENUE] ────────────────────────────────────────
      Ein geteilter Knopf: links die Vorgabe, rechts der Pfeil. Die
      Trennlinie dazwischen ist kein Zierrat — ohne sie sieht es aus wie
      ein Knopf mit einem Pfeil darauf, und niemand klickt den Pfeil. */
@@ -2133,7 +2133,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .person-eintrag-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 
-  /* ── Tagesbriefing ────────────────────────────────────────────────
+  /* ── Tagesbriefing [RK-BRIEFING] ────────────────────────────────────────────────
      Gruppen mit einer Erklärzeile. Ohne sie wüsste niemand, warum ein
      Geschäft in der Liste steht — und eine Liste, deren Regel man nicht
      kennt, glaubt man nicht. */
@@ -2195,7 +2195,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     color: var(--am-text-sekundaer);
   }
 
-  /* ── Fundstellen ──────────────────────────────────────────────────
+  /* ── Fundstellen [RK-WISSEN] ──────────────────────────────────────────────────
      Nummeriert, weil die Antwort auf die Nummern verweist. Ohne die
      Zuordnung wäre die Belegkette nur eine Behauptung. */
   .fundstellen {
@@ -2237,7 +2237,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     text-underline-offset: 2px;
   }
 
-  /* ── Balken ───────────────────────────────────────────────────────
+  /* ── Balken [HB-KENNZAHL] ───────────────────────────────────────────────────────
      Sechs Balken rechtfertigen keine Diagrammbibliothek. Eine Breite in
      Prozent sagt dasselbe und kostet nichts. */
   .balken {
@@ -2259,7 +2259,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: var(--am-gold-500);
   }
 
-  /* ── Bearbeitbare Tabelle ─────────────────────────────────────────
+  /* ── Bearbeitbare Tabelle [RK-ANGEBOT] ─────────────────────────────────────────
      Zahlenfelder in einer engen Spalte zeigen sonst nichts an: Der
      Drehregler des Browsers frisst die Breite, und übrig bleibt ein
      leeres Kästchen. Also weg mit ihm und eine Mindestbreite setzen. */
@@ -2296,7 +2296,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     margin: 0;
   }
 
-  /* ── Druckfassung eines Angebots ──────────────────────────────────
+  /* ── Druckfassung eines Angebots [HB-DRUCK] ──────────────────────────────────
      Ein Dokument, kein Bildschirm. Deshalb feste Maße statt fließender:
      Ein Angebot ist ein A4-Blatt, und ein Betrag, der je nach Fenster
      woanders steht, sieht nach Zufall aus. */
@@ -2442,7 +2442,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
 }
 
-/* ── Beim Drucken bleibt nur das Dokument ──────────────────────────────
+/* ── Beim Drucken bleibt nur das Dokument [HB-DRUCK] ──────────────────────────────
    Ohne das nimmt der Druck die Navigation und die Bedienleiste mit aufs
    Papier — der häufigste Fehler bei Druckansichten in Anwendungen. */
 @media print {
@@ -2480,7 +2480,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 @layer components {
-  /* ── Dialogschicht ────────────────────────────────────────────────
+  /* ── Dialogschicht [HB-DIALOG] ────────────────────────────────────────────────
      Das Paket liefert mit .deckschicht nur die Farbe. Die Lage ist
      Sache der Anwendung, deshalb steht sie hier und nicht dort. */
   .dialog-schicht {
@@ -2495,7 +2495,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     overflow-y: auto;
   }
 
-  /* ── Hinweiszeile ─────────────────────────────────────────────────── */
+  /* ── Hinweiszeile [HB-ZUSTAND] ─────────────────────────────────────────────────── */
   .hinweis {
     display: flex;
     align-items: flex-start;
@@ -2530,7 +2530,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
 }
 
-/* ── Eingabefeld, aus dem Paket übernommen ──────────────────────────── */
+/* ── Eingabefeld, aus dem Paket übernommen [AM-FELD] ──────────────────────────── */
 @layer components {
   .input {
     padding: 0 var(--am-raum-4);
@@ -2585,7 +2585,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     color: var(--am-text-sekundaer);
   }
 
-  /* ── Segmentierung: Ansichten, Filter, Stapel ─────────────────────
+  /* ── Segmentierung: Ansichten, Filter, Stapel [RK-SEGMENTLISTE] ─────────────────────
      Der Kern der Listenarbeit. Eine Liste ist nie „alle“, sondern eine
      Frage an den Bestand — die Reiter sind die gespeicherten Fragen. */
   .ansichtsleiste {
@@ -2834,7 +2834,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     text-underline-offset: 2px;
   }
 
-  /* ── Tickets ──────────────────────────────────────────────────────
+  /* ── Tickets [RK-TICKET] ──────────────────────────────────────────────────────
      Die Dringlichkeit trägt Punkt UND Wort: Farbe allein unterscheidet
      vier Stufen nicht für jeden. */
   .prio {
@@ -2974,7 +2974,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     outline-offset: 1px;
   }
 
-  /* ── Aufgabenliste ────────────────────────────────────────────────
+  /* ── Aufgabenliste [RK-AUFGABEN] ────────────────────────────────────────────────
      Eine Zeile je Aufgabe: abhaken, sehen worum es geht, Phase setzen.
      Alles ohne die Zeile zu verlassen — sonst plant niemand damit. */
   .aufgabe {
@@ -3093,7 +3093,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 @layer components {
-  /* ── Mehrfachauswahl ────────────────────────────────────────────────
+  /* ── Mehrfachauswahl [HB-MEHRFACH] ────────────────────────────────────────────────
      Ein Feld, das aussieht wie eine Eingabe und sich verhält wie eine
      Liste. Die Plättchen sitzen *im* Feld, damit die Antwort sichtbar
      ist, ohne dass jemand aufklappen muss. */
@@ -3282,7 +3282,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .leerwert { color: var(--am-text-gedaempft); }
 
-  /* ── Werteliste im Eigenschafts-Editor ─────────────────────────────
+  /* ── Werteliste im Eigenschafts-Editor [RK-EIGENSCHAFTEN] ─────────────────────────────
      Eine Zeile je Option: Beschriftung links, gespeicherter Wert daneben,
      Reihenfolge und Archiv rechts. */
 
@@ -3338,11 +3338,11 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 @layer components {
-  /* ── Erfassung aus Hingeworfenem ──────────────────────────────────
+  /* ── Erfassung aus Hingeworfenem [RK-ANLEGEN] ──────────────────────────────────
      Sitzt oben im Anlegen-Dialog. Bewusst abgesetzt, aber nicht laut:
      Es ist eine Abkürzung, kein Assistent, der etwas von einem will. */
 
-  /* ── Dialoge ──────────────────────────────────────────────────────
+  /* ── Dialoge [HB-DIALOG] ──────────────────────────────────────────────────────
      Ein Dialog ist ein Rahmen mit drei Teilen, nicht eine lange Rolle:
      Kopf und Fuß stehen fest, nur die Mitte rollt. Vorher wanderte
      „Anlegen“ mit dem Inhalt nach unten aus dem Bild — bei der Firma mit
@@ -3541,7 +3541,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .erfassung-hinweis.warnung { color: var(--am-achtung); }
   .erfassung-hinweis a { color: inherit; font-weight: 500; }
 
-  /* ── Assistent ────────────────────────────────────────────────────
+  /* ── Assistent [HB-ASSISTENT] ────────────────────────────────────────────────────
      Unten rechts, wie in Relay: ein Knopf mit dem Schild, darüber das
      Panel. Karten sind Vorschläge — Ausführen drückt ein Mensch. */
 
@@ -3729,7 +3729,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .dunkel .assistent-nachricht { background: var(--am-flaeche-2); }
   .dunkel .assistent-karte { background: var(--am-flaeche-2); }
 
-  /* ── Erkenntnisse ─────────────────────────────────────────────────
+  /* ── Erkenntnisse [RK-WISSEN] ─────────────────────────────────────────────────
      Themen aus Gesprächsnotizen. Farbe trägt die Art nie allein — das
      Wort steht immer daneben. */
 
@@ -3790,7 +3790,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .thema-beleg-quelle { grid-area: quelle; font-size: 0.75rem; color: var(--am-text-gedaempft); }
   .thema-beleg-quelle a { color: inherit; font-weight: 500; }
 
-  /* ── Beschreiben statt tippen ─────────────────────────────────────
+  /* ── Beschreiben statt tippen [RK-ANLEGEN] ─────────────────────────────────────
      Zwei Wege in dieselbe Maske; die Wegwahl sitzt über dem Kasten. */
 
   .wegwahl {
@@ -3993,7 +3993,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 @layer components {
-  /* ── Beteiligte am Lead ────────────────────────────────────────────
+  /* ── Beteiligte am Lead [RK-LEAD] ────────────────────────────────────────────
      Eine Zeile je Person: Name, Rolle und Herkunft darunter, E-Mail
      rechts. Keine Tabelle — es sind selten mehr als eine Handvoll. */
 
@@ -4093,7 +4093,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .quelle-freigabe input { margin-top: 2px; flex: none; }
 }
 
-/* ── Erklärung: ein Satz, der Rest hinter dem Symbol ─────────────────── */
+/* ── Erklärung: ein Satz, der Rest hinter dem Symbol [HB-ERKLAERUNG] ─────────────────── */
 .erklaerung { margin-bottom: var(--am-raum-4); }
 .erklaerung-kurz { font-size: 0.875rem; color: var(--am-text-sekundaer); margin: 0; display: inline; }
 .erklaerung-knopf {
@@ -4110,7 +4110,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 .erklaerung-lang code { font-size: 0.75rem; }
 
-/* ── Unterpunkte der Einstellungen ───────────────────────────────────── */
+/* ── Unterpunkte der Einstellungen [HB-EINSTELLUNGEN] ───────────────────────────────────── */
 /* Kein --am-raum-5 in der Skala: Mit einer unbekannten Variable fiel die
    ganze padding-Angabe weg, und die Leiste klebte links am Rand und an
    der Trennlinie des Kopfes. Oben raum-6 wie der Datensatz darunter. */
@@ -4127,7 +4127,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   font: inherit; font-size: 0.6875rem; color: var(--am-text-gedaempft);
   border: var(--am-rand-ruhend) solid var(--am-rand); border-radius: var(--am-radius-klein); padding: 0 6px; line-height: 1.6;
 }
-/* ── Suchen oder fragen ───────────────────────────────────────────────
+/* ── Suchen oder fragen [HB-SUCHE] ───────────────────────────────────────────────
    Das Feld sitzt in der Kopfleiste und ist das echte Feld. Bis 0.9.2 war
    es ein Knopf, der ein Fenster in der Bildmitte öffnete — man klickte
    auf ein Feld, es verschwand, und ein zweites erschien woanders. */
@@ -4220,7 +4220,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .kopfsuche-feld { padding-right: var(--am-raum-3); }
 }
 
-/* ── Gespräch vorbereiten — Podcast ──────────────────────────────────── */
+/* ── Gespräch vorbereiten — Podcast [RK-PODCAST] ──────────────────────────────────── */
 .podcast-folge + .podcast-folge { margin-top: var(--am-raum-4); padding-top: var(--am-raum-4); border-top: var(--am-rand-ruhend) solid var(--am-trennlinie); }
 .podcast-folge-kopf { display: flex; align-items: flex-start; gap: var(--am-raum-2); margin-bottom: var(--am-raum-2); }
 .podcast-folge-kopf svg { color: var(--am-gold-beschriftung); flex: none; margin-top: 0.15em; }
@@ -4239,7 +4239,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 .podcast-heute .podcast-meta { margin-bottom: var(--am-raum-1); }
 .podcast-einrichtung { margin-top: var(--am-raum-4); padding-top: var(--am-raum-4); border-top: var(--am-rand-ruhend) solid var(--am-trennlinie); }
 
-/* ── Das Tor ────────────────────────────────────────────────────────────
+/* ── Das Tor [HB-TOR] ────────────────────────────────────────────────────────────
    Die Anmelde- und die Einladungsseite. Eine Karte, mittig, sonst nichts:
    Wer hier steht, hat genau eine Aufgabe, und jedes weitere Element wäre
    eine Ablenkung davon — oder eine Auskunft an jemanden, der keine
@@ -4854,7 +4854,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   overflow-wrap: anywhere;
 }
 
-/* ── Auswahlfelder haben ein Zeichen ──────────────────────────────────
+/* ── Auswahlfelder haben ein Zeichen [AM-FELD] ──────────────────────────────────
    Irgendwo in der Grundlage steht `appearance: none` auf Formularfeldern.
    Damit verlor **jedes** Auswahlfeld der Anwendung sein Zeichen und sah
    aus wie ein Textfeld: Man sah der Rolle in der Mitgliederliste nicht
@@ -4884,7 +4884,7 @@ select,
   padding-right: calc(var(--am-raum-3) + 1.25rem);
 }
 
-/* ── Ein Sprecher der Podcast-Folge ───────────────────────────────────
+/* ── Ein Sprecher der Podcast-Folge [RK-PODCAST] ───────────────────────────────────
    Modell und Stimme gehören zusammen und sind trotzdem zwei Angaben. Ein
    Feldsatz sagt das, ohne eine Überschrift zu brauchen: Die Beschriftung
    steht am Rahmen, nicht über einem Feld, das sie nicht allein meint. */
@@ -4904,7 +4904,7 @@ select,
 
 .sprecherwahl-hinweis { margin: 0 0 var(--am-raum-3); }
 
-/* ── Besprechungen ────────────────────────────────────────────────────
+/* ── Besprechungen [RK-WISSEN] ────────────────────────────────────────────────────
    Ein Archiv, keine Warteschlange: Datum vorn, damit man nach Zeit liest,
    und die Kundenspalte trägt entweder die Zuordnung oder den Vorschlag —
    gedämpft, mit Grund und Knopf, nie als Tatsache. */
@@ -4989,7 +4989,7 @@ select,
 
 .zeitleiste-link { display: inline-block; margin-top: var(--am-raum-1); font-size: 0.8125rem; font-weight: 500; }
 
-/* ── Datenbank-Blick ─────────────────────────────────────────────────
+/* ── Datenbank-Blick [RK-DATENBANK] ─────────────────────────────────────────────────
    Die Zeilen sind nicht anklickbar — die Tabelle zeigt, sie führt
    nirgendwohin. Lange Werte werden gekürzt, der ganze steht im Tooltip. */
 .db-tabelle tbody tr { cursor: default; }

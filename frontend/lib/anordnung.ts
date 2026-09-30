@@ -1,3 +1,5 @@
+// Modul RK-FELDGRUPPEN — docs/MODULE.md
+
 // Felder zwischen Gruppen verschieben — ohne React, damit es sich prüfen lässt.
 //
 // Die Oberfläche hält die Anordnung als Liste von Gruppen mit ihren Feldern

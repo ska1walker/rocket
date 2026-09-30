@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-FEHLERMELDER — docs/MODULE.md
+
 import { useEffect } from "react";
 import { HOECHSTENS_JE_SEITE, fehlerMeldung } from "@/lib/fehlermeldung";
 

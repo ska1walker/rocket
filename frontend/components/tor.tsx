@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-TOR — docs/MODULE.md
+
 // Das Tor — die einzige Seite, die jemand ohne Zugang zu sehen bekommt.
 //
 // Deshalb sagt sie so wenig wie möglich: keine Liste von Konten, kein

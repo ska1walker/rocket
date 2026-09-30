@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-DIALOG — docs/MODULE.md
+
 // Was jeder Dialog können muss und keiner konnte: Der Fokus geht beim
 // Öffnen hinein, Tab bleibt drin, Escape schließt, und danach steht der
 // Fokus wieder dort, wo er vorher war. Ohne das landete, wer mit der

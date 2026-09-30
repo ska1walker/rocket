@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-ZEITLEISTE — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Sparkles, Trash2 } from "lucide-react";
 import Link from "next/link";

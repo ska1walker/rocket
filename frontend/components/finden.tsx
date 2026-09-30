@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-ANLEGEN — docs/MODULE.md
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Search, Sparkles } from "lucide-react";
 import Link from "next/link";

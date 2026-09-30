@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-AUFGABEN — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Circle } from "lucide-react";
 import Link from "next/link";

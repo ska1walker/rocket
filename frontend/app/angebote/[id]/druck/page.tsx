@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-ANGEBOT — docs/MODULE.md
+
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Printer } from "lucide-react";
 import Link from "next/link";
