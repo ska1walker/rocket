@@ -650,23 +650,6 @@ export interface Eigenschaftsoption {
   verborgen: boolean;
 }
 
-export interface PropertyDefinition {
-  id: string;
-  entity: PropertyEntity;
-  key: string;
-  label: string;
-  kind: PropertyKind;
-  options: Eigenschaftsoption[];
-  description: string | null;
-  position: number;
-  is_active: boolean;
-  group_id: string | null;
-  is_system: boolean;
-  required: boolean;
-  im_anlegen: boolean;
-  created_at: string;
-}
-
 /** Ein Feld in der Anordnung — fest oder eigen, in derselben Form. */
 export interface Feldeintrag {
   id: string;

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { use, useState } from "react";
 import { api } from "@/lib/api";
-import { datum, personName } from "@/lib/format";
+import { personName } from "@/lib/format";
 import type { Activity, Contact, KIErgebnis, KIStatus } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Stufenpille } from "@/components/stufe";

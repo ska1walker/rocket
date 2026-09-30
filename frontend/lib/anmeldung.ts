@@ -9,8 +9,6 @@
 
 import { api } from "@/lib/api";
 
-export const ANMELDEPFAD = "/anmelden";
-
 export type Lage = {
   angemeldet: boolean;
   name: string | null;

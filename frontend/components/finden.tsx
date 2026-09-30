@@ -288,7 +288,7 @@ function Fundbericht({ fund, beiPerson }: { fund: Fund; beiPerson: (a: NonNullab
   const felder = Object.keys(fund.felder).length;
 
   return (
-    <div className="erfassung-ergebnis">
+    <div>
       <p className="erfassung-hinweis">
         {felder === 0 ? "Nichts gefunden" : felder === 1 ? "Ein Feld gefüllt" : `${felder} Felder gefüllt`} · gelesen von{" "}
         <span className="mono">{fund.modell}</span>. Bitte nachsehen, bevor Sie anlegen.

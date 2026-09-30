@@ -259,7 +259,8 @@ function Rollenhinweis() {
     <div className="hinweis" data-art="achtung" style={{ maxWidth: 640, marginBottom: "var(--am-raum-4)" }}>
       <span>
         Sie können hier alles <strong>ansehen</strong>. Ändern lassen sich Einstellungen,
-        Zugangsdaten, Team und Sicherung nur von der Person, der diese Organisation gehört.
+        Zugangsdaten, Team und Sicherung nur von der Eigentümerin oder einer Person, die sie
+        zur Verwaltung berechtigt hat.
       </span>
     </div>
   );

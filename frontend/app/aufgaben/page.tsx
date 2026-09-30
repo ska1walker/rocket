@@ -13,7 +13,6 @@ import {
   anzahl as anzahlText,
   datumZeit,
   frist,
-  PRIORITAET_TEXT,
 } from "@/lib/format";
 import type { AufgabenArt, Aufgabenuebersicht, Deal, Mitglied, Task } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";

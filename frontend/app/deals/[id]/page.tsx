@@ -69,14 +69,6 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
   const pipelineName = (pid: string) => pipelines.data?.find((p) => p.id === pid)?.name ?? "—";
 
 
-  const zustaendig = useMutation({
-    mutationFn: (owner_id: string | null) => api.patch<Deal>(`/api/deals/${id}`, { owner_id }),
-    onSuccess: () => {
-      client.invalidateQueries({ queryKey: ["deal", id] });
-      client.invalidateQueries({ queryKey: ["board"] });
-    },
-  });
-
   const verlustgruende = useQuery({
     queryKey: ["verlustgruende"],
     queryFn: () => api.get<Verlustgrund[]>("/api/verlustgruende"),

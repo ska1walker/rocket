@@ -724,15 +724,6 @@ function sauber(werte: Eigenschaftsoption[]): Eigenschaftsoption[] {
     .filter((o) => o.text);
 }
 
-/** Was in der Übersichtszeile steht. */
-function zusammenfassung(optionen: Eigenschaftsoption[]): string {
-  if (optionen.length === 0) return "Werte festlegen";
-  const offen = optionen.filter((o) => !o.verborgen);
-  const archiviert = optionen.length - offen.length;
-  const liste = offen.map((o) => o.text).join(", ") || "alle archiviert";
-  return archiviert > 0 ? `${liste} · ${archiviert} archiviert` : liste;
-}
-
 /**
  * Die Werteliste als Zeilen, nicht als Komma-Text.
  *

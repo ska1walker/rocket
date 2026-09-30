@@ -232,7 +232,7 @@ function Kundenzelle({
   if (v?.company) {
     const wer = [v.company.name, ...v.kontakte.map((k) => k.name)].join(" · ");
     return (
-      <div className="kundenzelle vorschlag">
+      <div className="kundenzelle">
         <span className="kundenzelle-vorschlag">
           <span className="kundenzelle-marke">{v.quelle === "modell" ? "Vorschlag des Modells" : "Vorschlag"}</span>
           {wer}

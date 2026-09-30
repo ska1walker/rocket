@@ -181,7 +181,7 @@ export function Erfassung({
       {lesen.isError && <Fehler text={(lesen.error as Error).message} />}
 
       {gelesen && !lesen.isPending && (
-        <div className="erfassung-ergebnis">
+        <div>
           <p className="erfassung-hinweis">
             {Object.keys(gelesen.felder).length === 1
               ? "Ein Feld gefüllt"
