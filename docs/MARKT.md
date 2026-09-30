@@ -148,6 +148,10 @@ Zweiter Durchlauf: Rocket 26.9.4, PR #83, 30.9.2026 — Fork-Branch `rocket-26.9
 
 Dritter Durchlauf: Rocket 26.9.5, PR #84, 30.9.2026 — auf Kais Auftrag vor einer Installation auf der Box eingereicht (die Regel „erst nach laufender Installation" hat er damit bewusst übergangen). Fork-Branch `rocket-26.9.5`, alle vier Endpunkte lokal mit wrangler bewiesen, von der Standard-Sitzung gemergt, auf `main` byte-gleich geprüft (sha256 `e7f50cc2…6545d`). Keine Datenbankänderung gegenüber 26.9.4.
 
+Vierter Durchlauf: Rocket 26.9.7, PR #85, 30.9.2026 — auf Kais Auftrag vor einer Installation auf der Box. Der Eintrag für 26.9.6 (Fork-Branch `rocket-26.9.6`) kam nie an, weil die Markt-Sitzung auf eine Bestätigung wartete; 26.9.7 baut auf Marcs frischem `main` auf (dort hatte sich inzwischen `appModifyTime` geändert) und nimmt 26.9.6 in die Notizen mit. Fork-Branch `rocket-26.9.7`, lokal mit wrangler bewiesen, in einer Standard-Sitzung erst nach Kais Bestätigung dort gemergt, auf `main` byte-gleich geprüft (sha256 `c471aed4…0931`, keine alten Schlüssel). Keine Datenbankänderung gegenüber 26.9.5.
+
+**Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
+
 ## Bekannte Fallen im Markt
 
 | Symptom | Ursache | Abhilfe |
