@@ -47,6 +47,32 @@ Olares (`olares-cli market get rocket -s market.AImighty`).
 | Entrances `authLevel: internal` | **Ausnahme:** `public` — siehe „Entschieden" |
 | „Kein gesetzter Markenname / kein Logo" | **Ausnahme:** AImighty-Wortmarke bleibt — siehe „Entschieden" |
 
+## Der Markt bewegt sich auch ohne uns
+
+Marc veröffentlicht im selben Repo eigene Apps und ändert den Markt
+selbst — am 30.9.2026 zum Beispiel, wie `_lib.ts` die Änderungszeit der
+Apps rechnet (`appModifyTime` nach Deploy-Zeitpunkt statt nach Version).
+Ein Rocket-Eintrag, der auf einem älteren `main` gebaut ist, kann dadurch
+veraltet sein, ohne dass Git einen Konflikt meldet. Deshalb gilt
+**vor jedem Markt-Eintrag** (festgelegt von Kai am 30.9.2026):
+
+1. **`upstream/main` frisch holen und den Zweig darauf bauen**, nie auf
+   einem Zweig eines früheren Eintrags oder einem alten Stand.
+2. **Nachlesen, was sich seit dem letzten Rocket-Eintrag geändert hat**
+   (`git log` und `git diff` auf `functions/` seit dem letzten
+   `rocket`-Commit). Betrifft es mehr als fremde App-Einträge — `_lib.ts`,
+   die API unter `functions/api/`, Felder in `_apps.ts`, Regeln in
+   `CLAUDE.md` des Markt-Repos —, dann erst verstehen, ob Rocket etwas
+   nachziehen muss, und das hier unter den Regeln festhalten.
+3. **Mit wrangler gegen genau diesen Stand beweisen**, nicht gegen den
+   vom letzten Mal.
+4. **Unmittelbar vor dem Merge erneut prüfen**, ob `main` weitergelaufen
+   ist; wenn ja, konfliktfrei (`git merge-tree`) und die Änderung
+   verstanden, sonst neu aufbauen.
+5. Ist ein Rocket-Eintrag nicht durchgekommen und ein neuer folgt, **baut
+   der neue auf `main` auf und nimmt den alten in seine Notizen mit** —
+   den alten Zweig nicht nachträglich einreichen.
+
 ## Regeln, die bei jedem Markt-PR gelten
 
 - **Jede Änderung braucht eine neue Version** — auch reine Texte,

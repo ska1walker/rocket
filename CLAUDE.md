@@ -315,7 +315,12 @@ der Lieferung und liest die Token über `var(--am-*)`.
    dafür nichts mehr von Hand tun. Das Chart wird immer als Paket geprüft
    (`olares-cli chart lint dist/rocket-YY.M.n.tgz`), und **erst nach einer
    laufenden Installation auf einer Box** geht der Eintrag per PR in
-   `bayerhazard/aimighty-market`. Die Regeln dahinter stehen im Skill
+   `bayerhazard/aimighty-market`. **Marc veröffentlicht dort selbst Apps
+   und ändert den Markt** — vor jedem Eintrag `upstream/main` frisch
+   holen, darauf bauen, nachlesen, was sich seit dem letzten
+   Rocket-Eintrag an `functions/` geändert hat, und gegen genau diesen
+   Stand mit wrangler beweisen (`docs/MARKT.md`, „Der Markt bewegt sich
+   auch ohne uns", festgelegt 30.9.2026). Die Regeln dahinter stehen im Skill
    `insilo/.claude/skills/olares-release/SKILL.md`; was der Markt selbst
    verlangt (Version an 5 Stellen, frisches base64, jede Änderung = neue
    Version) und wo Rocket bewusst abweicht, steht in `docs/MARKT.md`.
