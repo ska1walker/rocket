@@ -4390,6 +4390,194 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   border-top: 1px solid var(--am-trennlinie);
 }
 
+/* Eigenschaften einrichten (Einstellungen › Eigenschaften). Gruppen als
+   ruhige Kästen, Felder als dichte Zeilen wie in einer Tabelle — aber als
+   Liste, weil sich Zeilen einer Tabelle nicht zwischen Tabellen ziehen
+   lassen. Das Ziel beim Ziehen ist eine Linie über der Zeile, nicht eine
+   Farbe allein: Die Linie sagt „hierhin", die Farbe nur „etwas". */
+.eig-leiste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--am-raum-3);
+  align-items: center;
+  margin-bottom: var(--am-raum-4);
+}
+
+.eig-leiste .wegwahl { margin-bottom: 0; }
+.eig-suche { flex: 1 1 12rem; max-width: 20rem; }
+
+.eig-gruppe {
+  margin-bottom: var(--am-raum-4);
+  border: 1px solid var(--am-rand);
+  border-radius: var(--am-radius-mittel);
+  background: var(--am-seite);
+}
+
+.eig-gruppe-kopf {
+  display: flex;
+  align-items: center;
+  gap: var(--am-raum-2);
+  padding: var(--am-raum-2) var(--am-raum-3);
+  border-bottom: 1px solid var(--am-trennlinie);
+  background: var(--am-flaeche-1);
+  border-radius: var(--am-radius-mittel) var(--am-radius-mittel) 0 0;
+}
+
+.eig-gruppe-kopf h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--am-raum-2);
+}
+
+.eig-anzahl {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--am-text-gedaempft);
+}
+
+.eig-gruppe-knoepfe { margin-left: auto; display: flex; gap: var(--am-raum-1); }
+
+.eig-umbenennen { display: flex; gap: var(--am-raum-2); align-items: center; flex: 1; }
+.eig-umbenennen .input { max-width: 18rem; }
+
+.eig-loeschen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--am-raum-2);
+  align-items: center;
+  padding: var(--am-raum-2) var(--am-raum-3);
+  font-size: 0.8125rem;
+  border-bottom: 1px solid var(--am-trennlinie);
+  background: var(--am-fehler-flaeche);
+}
+
+.eig-loeschen .input { width: auto; }
+
+.eig-felder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-height: var(--am-ziel-zeiger);
+}
+
+.eig-felder[data-ziel="true"] { box-shadow: inset 0 -2px 0 var(--am-fokus-ring); }
+
+.eig-leer {
+  padding: var(--am-raum-3);
+  font-size: 0.8125rem;
+  color: var(--am-text-gedaempft);
+}
+
+.eig-feld { border-top: 1px solid var(--am-trennlinie); }
+.eig-feld:first-child { border-top: 0; }
+.eig-feld[data-gezogen="true"] { opacity: 0.45; }
+.eig-feld[data-ziel="true"] { box-shadow: inset 0 2px 0 var(--am-fokus-ring); }
+
+.eig-zeile,
+.eig-archiv .eig-feld {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 7.5rem 7rem auto;
+  gap: var(--am-raum-3);
+  align-items: center;
+  padding: var(--am-raum-1) var(--am-raum-3);
+  min-height: var(--am-ziel-zeiger);
+  font-size: 0.875rem;
+}
+
+.eig-archiv .eig-feld { grid-template-columns: minmax(0, 1fr) 7.5rem 7rem auto; }
+
+.eig-griff {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: var(--am-radius-klein);
+  background: transparent;
+  color: var(--am-text-gedaempft);
+  cursor: grab;
+}
+
+.eig-griff:hover:not(:disabled) { background: var(--am-flaeche-2); color: var(--am-text-primaer); }
+.eig-griff:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+.eig-griff:disabled { cursor: default; opacity: 0.35; }
+
+.eig-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--am-raum-2);
+  min-width: 0;
+  font-weight: 500;
+}
+
+.eig-schluessel {
+  font-family: var(--am-schrift-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--am-text-gedaempft);
+  overflow-wrap: anywhere;
+}
+
+.eig-fest {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--am-text-sekundaer);
+}
+
+.eig-art { font-size: 0.8125rem; color: var(--am-text-sekundaer); }
+.eig-zahl { font-size: 0.75rem; color: var(--am-text-gedaempft); text-align: right; }
+.eig-knoepfe { display: flex; gap: var(--am-raum-1); justify-content: flex-end; }
+
+.eig-pflege {
+  padding: var(--am-raum-3) var(--am-raum-3) var(--am-raum-3) calc(var(--am-raum-3) + 1.75rem + var(--am-raum-3));
+  background: var(--am-flaeche-1);
+  border-top: 1px solid var(--am-trennlinie);
+}
+
+.eig-pflege .input { max-width: 26rem; }
+
+.eig-hinweis { font-size: 0.8125rem; color: var(--am-text-gedaempft); margin: 0 0 var(--am-raum-3); }
+
+.eig-neu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--am-raum-3);
+  align-items: flex-end;
+  margin: var(--am-raum-4) 0;
+}
+
+.eig-neu .feld { margin-bottom: 0; flex: 0 1 18rem; }
+
+.eig-neue-eigenschaft {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0 var(--am-raum-4);
+  align-items: end;
+  padding-top: var(--am-raum-4);
+  border-top: 1px solid var(--am-trennlinie);
+}
+
+.eig-volle-breite { grid-column: 1 / -1; }
+
+.eig-archiv { margin-top: var(--am-raum-4); }
+.eig-archiv summary { cursor: pointer; font-size: 0.875rem; font-weight: 500; margin-bottom: var(--am-raum-2); }
+
+@media (max-width: 40rem) {
+  .eig-zeile { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .eig-art, .eig-zahl { display: none; }
+  .eig-archiv .eig-feld { grid-template-columns: minmax(0, 1fr) auto; }
+  .eig-neue-eigenschaft { grid-template-columns: 1fr; }
+  .eig-pflege { padding-left: var(--am-raum-3); }
+}
+
 /* Wo bin ich überall angemeldet. Eine Liste, keine Kartensammlung — die
    Zeilen unterscheiden sich nur durch Gerät und Zeit. */
 .geraeteliste {

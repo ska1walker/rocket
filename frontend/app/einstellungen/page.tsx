@@ -28,7 +28,7 @@ import { AnreicherungEinstellungen } from "@/components/anreicherung-einstellung
 import { Sprachausgabeblock } from "@/components/podcast";
 
 /**
- * Die Einstellungen in fünf Unterpunkten.
+ * Die Einstellungen in sechs Unterpunkten.
  *
  * Eine Seite mit vierzehn Blöcken untereinander liest niemand. Jeder
  * Unterpunkt trägt, was zusammengehört; jeder Block sagt in einem Satz,
@@ -37,6 +37,7 @@ import { Sprachausgabeblock } from "@/components/podcast";
 const BEREICHE = [
   { schluessel: "firma", text: "Firma und Team" },
   { schluessel: "vertrieb", text: "Vertrieb" },
+  { schluessel: "eigenschaften", text: "Eigenschaften" },
   { schluessel: "email", text: "E-Mail" },
   { schluessel: "ki", text: "KI und Programme" },
   { schluessel: "daten", text: "Daten" },
@@ -193,9 +194,9 @@ function Inhalt() {
             <Pipelinesblock />
             <Katalogblock />
             <Verlustgruendeblock />
-            <Eigenschaftenblock />
           </>
         )}
+        {bereich === "eigenschaften" && <Eigenschaftenblock />}
         {bereich === "email" && (
           <>
             <Versandblock />
