@@ -1,7 +1,7 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronsUpDown, Globe, KeyRound, LogOut, Server } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronsUpDown, Globe, KeyRound, LogOut, Server } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -9,8 +9,7 @@ import { api } from "@/lib/api";
 import { abmelden, lage } from "@/lib/anmeldung";
 import { nachweis } from "@/lib/datenwege";
 import { initialenAusName } from "@/lib/format";
-import { setzeSitzplatz } from "@/lib/sitzplatz";
-import type { Mitglied, OrgSettings } from "@/lib/typen";
+import type { OrgSettings } from "@/lib/typen";
 import { useWer } from "@/lib/wer";
 import { Darstellungsschalter } from "@/components/darstellung";
 
@@ -25,24 +24,15 @@ import { Darstellungsschalter } from "@/components/darstellung";
  * trifft; und der Satz war eine Zusage ohne Beleg, die seit dem ersten
  * fremden Endpunkt schlicht nicht mehr stimmte.
  *
- * Jetzt: eine ruhige Zeile, die ein Menü öffnet (Sitzplatz, Darstellung),
+ * Jetzt: eine ruhige Zeile, die ein Menü öffnet (Darstellung, Zugang),
  * und darunter der gemessene Stand — oder nichts.
  */
 
-function useMitglieder() {
-  return useQuery({
-    queryKey: ["mitglieder"],
-    queryFn: () => api.get<Mitglied[]>("/api/mitglieder"),
-  });
-}
-
 export function Kontozeile() {
-  const client = useQueryClient();
   const aktuell = usePathname();
   const [offen, setOffen] = useState(false);
   const knopf = useRef<HTMLButtonElement>(null);
-  const { wer, setGewaehlt } = useWer();
-  const mitglieder = useMitglieder();
+  const { wer } = useWer();
 
   useEffect(() => {
     setOffen(false);
@@ -50,14 +40,6 @@ export function Kontozeile() {
 
   const person = wer.data;
   const name = person?.display_name ?? person?.login_username ?? "…";
-
-  function waehle(id: string) {
-    setzeSitzplatz(id);
-    setGewaehlt(id);
-    setOffen(false);
-    // Alles neu holen: Besitz, Zuordnung und „nur meine" hängen an der Person.
-    client.invalidateQueries();
-  }
 
   function schliessen(fokus = true) {
     setOffen(false);
@@ -81,22 +63,12 @@ export function Kontozeile() {
         </span>
         <span className="person-text">
           <span className="person-name">{name}</span>
-          {/* Nur wenn ein Sitzplatz gewählt ist, sagt die zweite Zeile etwas. */}
-          {person?.sitzplatz_gewaehlt && (
-            <span className="person-rolle">Sitzplatz · {person.login_username}</span>
-          )}
         </span>
         <ChevronsUpDown size={14} aria-hidden="true" className="person-pfeil" />
       </button>
 
       {offen && (
-        <Kontomenue
-          mitglieder={mitglieder.data ?? []}
-          aktuellId={person?.user_id}
-          waehle={waehle}
-          schliessen={schliessen}
-          knopf={knopf}
-        />
+        <Kontomenue schliessen={schliessen} knopf={knopf} />
       )}
     </div>
   );
@@ -110,24 +82,13 @@ export function Kontozeile() {
  * wurde sie nicht mehr los.
  */
 function Kontomenue({
-  mitglieder,
-  aktuellId,
-  waehle,
   schliessen,
   knopf,
 }: {
-  mitglieder: Mitglied[];
-  aktuellId: string | undefined;
-  waehle: (id: string) => void;
   schliessen: (fokus?: boolean) => void;
   knopf: React.RefObject<HTMLButtonElement | null>;
 }) {
   const wurzel = useRef<HTMLDivElement>(null);
-  const stand = useQuery({ queryKey: ["anmeldelage"], queryFn: lage, staleTime: 60_000 });
-  // Wer sich selbst angemeldet hat, ist bereits er selbst — der Sitzplatz
-  // ist dann sinnlos und wird vom Server ohnehin übergangen. Ihn trotzdem
-  // anzubieten wäre ein Knopf, der nichts tut.
-  const mehrere = mitglieder.length > 1 && !stand.data?.angemeldet;
 
   useEffect(() => {
     wurzel.current?.querySelector<HTMLElement>("button")?.focus();
@@ -149,35 +110,7 @@ function Kontomenue({
 
   return (
     <div className="person-liste" id="konto-menue" role="dialog" aria-label="Konto" ref={wurzel}>
-      {mehrere && (
-        <>
-          <p className="konto-abschnitt">Sitzplatz</p>
-          <p className="person-erklaerung">
-            Wer arbeitet gerade an diesem Rechner? Besitz, Zuordnung und Protokoll hängen
-            daran. Es ist <strong>keine Anmeldung</strong> — der Olares-Zugang bleibt
-            derselbe.
-          </p>
-          {mitglieder.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              className={`person-eintrag${aktuellId === m.id ? " aktiv" : ""}`}
-              onClick={() => waehle(m.id)}
-            >
-              <span className="person-kreis klein" aria-hidden="true">
-                {initialenAusName(m.display_name ?? m.olares_username)}
-              </span>
-              <span className="person-eintrag-text">
-                <span>{m.display_name ?? m.olares_username}</span>
-                {m.zugang === "olares" && <span className="person-art">eigener Zugang</span>}
-              </span>
-              {aktuellId === m.id && <Check size={13} aria-hidden="true" />}
-            </button>
-          ))}
-        </>
-      )}
-
-      <div className={mehrere ? "konto-teil" : undefined}>
+      <div>
         <p className="konto-abschnitt">Darstellung</p>
         <Darstellungsschalter />
       </div>
@@ -205,7 +138,7 @@ function Abmeldeteil() {
       <p className="konto-abschnitt">Zugang</p>
       <Link href="/einstellungen?bereich=firma" className="person-eintrag">
         <KeyRound size={14} aria-hidden="true" />
-        <span className="person-eintrag-text">Passwort ändern</span>
+        <span className="person-eintrag-text">Passwort und zweiter Faktor</span>
       </Link>
       <button
         type="button"

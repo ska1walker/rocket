@@ -603,6 +603,8 @@ export interface Mitglied {
   last_seen_at: string | null;
   /** Hat diese Person ein eigenes Passwort? Nur ob, nie was. */
   passwort_gesetzt: boolean;
+  /** Hat sie einen zweiten Faktor eingerichtet? */
+  zweiter_faktor: boolean;
 }
 
 export interface Wer {
@@ -610,7 +612,8 @@ export interface Wer {
   display_name: string | null;
   org_id: string;
   login_username: string;
-  sitzplatz_gewaehlt: boolean;
+  /** Die Organisation verlangt den zweiten Faktor, und er fehlt noch. */
+  zweiter_faktor_fehlt: boolean;
   /** `owner` | `admin` | `member` | `viewer`. */
   rolle: string;
   /** Hat diese Person ein eigenes Passwort? */

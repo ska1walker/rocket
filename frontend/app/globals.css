@@ -797,7 +797,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   /* Herkunftsvermerk — wie der Nachweis nur in der Seitenspalte
      sichtbar; Farbe und Schnitt gelten unabhängig davon. */
-  /* Der Fuß der Navigation: Sitzplatz über der Herkunftszeile. Auf der
+  /* Der Fuß der Navigation: Kontozeile über der Herkunftszeile. Auf der
      schmalen Leiste unten am Bildschirm ist dafür kein Platz — dort ist
      beides ausgeblendet, wie schon vorher der Nachweis. */
   .huelle-fuss,
@@ -1800,7 +1800,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   /* Eine Zeile, kein Kasten: Wer hier steht, ist eine Auskunft, keine
      Handlung — der Rahmen wog früher schwerer als jeder Eintrag darüber.
-     Bedienbar bleibt sie trotzdem, sie öffnet Sitzplatz und Darstellung. */
+     Bedienbar bleibt sie trotzdem, sie öffnet Darstellung und Zugang. */
   .person-knopf {
     display: flex;
     align-items: center;
@@ -1854,14 +1854,6 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .person-name {
     font-size: 0.8125rem;
     font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .person-rolle {
-    font-size: 0.6875rem;
-    color: var(--am-text-gedaempft);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2074,15 +2066,6 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .person-liste .darstellung-schalter { margin: 0 var(--am-raum-2) var(--am-raum-1); }
 
-  .person-erklaerung {
-    font-size: 0.6875rem;
-    line-height: 1.5;
-    color: var(--am-text-sekundaer);
-    margin: 0 0 var(--am-raum-2);
-    padding-bottom: var(--am-raum-2);
-    border-bottom: 1px solid var(--am-trennlinie);
-  }
-
   .person-eintrag {
     display: flex;
     align-items: center;
@@ -2100,11 +2083,8 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
 
   .person-eintrag:hover { background: var(--am-flaeche-2); }
-  .person-eintrag.aktiv { font-weight: 600; }
 
   .person-eintrag-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-
-  .person-art { font-size: 0.625rem; color: var(--am-text-gedaempft); }
 
   /* ── Tagesbriefing ────────────────────────────────────────────────
      Gruppen mit einer Erklärzeile. Ohne sie wüsste niemand, warum ein
@@ -4341,6 +4321,74 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 .tor-wo { font-family: var(--am-schrift-mono); overflow-wrap: anywhere; }
 
 .einladung-fuer .mono { font-family: var(--am-schrift-mono); }
+
+/* Der zweite Faktor. Der QR-Code braucht hellen Grund und Ruhezone, auch
+   im Dunkelmodus — Kameras lesen hell auf dunkel schlecht. Deshalb die
+   feste Palettenstufe statt der wechselnden Fläche. */
+.faktor-einrichtung {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--am-raum-4);
+  align-items: flex-start;
+  margin-bottom: var(--am-raum-4);
+}
+
+.faktor-qr {
+  flex: none;
+  width: 11rem;
+  height: 11rem;
+  padding: var(--am-raum-2);
+  background: var(--am-blau-25);
+  border: 1px solid var(--am-rand);
+  border-radius: var(--am-radius-mittel);
+}
+
+.faktor-geheimnis {
+  font-family: var(--am-schrift-mono);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+/* Wiederherstellungscodes: einmal gezeigt, zum Abschreiben. Monospace,
+   damit sich 2 und Z, 5 und S unterscheiden lassen. */
+.faktor-codes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--am-raum-2);
+  margin: var(--am-raum-3) 0;
+  padding: var(--am-raum-3);
+  list-style: none;
+  font-family: var(--am-schrift-mono);
+  font-size: 0.875rem;
+  border: 1px solid var(--am-rand);
+  border-radius: var(--am-radius-mittel);
+  background: var(--am-flaeche-2);
+}
+
+.faktor-zeile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--am-raum-2);
+  align-items: flex-end;
+  margin-top: var(--am-raum-3);
+}
+
+.faktor-zeile .feld { margin-bottom: 0; flex: 1 1 10rem; }
+
+.faktor-bestaetigung {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--am-raum-2);
+  margin-bottom: var(--am-raum-3);
+  font-size: 0.875rem;
+}
+
+.faktor-pflicht {
+  margin-top: var(--am-raum-4);
+  padding-top: var(--am-raum-3);
+  border-top: 1px solid var(--am-trennlinie);
+}
 
 /* Wo bin ich überall angemeldet. Eine Liste, keine Kartensammlung — die
    Zeilen unterscheiden sich nur durch Gerät und Zeit. */
