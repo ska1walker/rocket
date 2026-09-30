@@ -83,7 +83,7 @@ export function Absenderkontoblock() {
     <section className="block">
       <div className="block-kopf">
         <h2>Ihre Absenderadresse</h2>
-        <span style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+        <span className="text-leise-klein">
           schickt als {wirkt}
         </span>
       </div>

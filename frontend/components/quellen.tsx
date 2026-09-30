@@ -134,14 +134,14 @@ export function Quellenblock() {
               {quellen.data
                 .filter((q) => q.is_active)
                 .map((q) => (
-                  <tr key={q.id} style={{ cursor: "default" }}>
+                  <tr key={q.id}>
                     <td className="haupt">{q.name}</td>
                     <td>{ART_TEXT[q.kind] ?? q.kind}</td>
                     <td style={{ fontSize: "0.8125rem" }}>
                       {q.kind === "insilo" ? "Besprechungen" : q.tickets_direkt ? "legt Tickets an" : "wartet im Eingang"}
                     </td>
                     <td>{q.last_seen_at ? datumZeit(q.last_seen_at) : "noch nie"}</td>
-                    <td style={{ textAlign: "right" }}>
+                    <td className="rechts">
                       <button
                         type="button"
                         className="btn btn-still btn-klein"

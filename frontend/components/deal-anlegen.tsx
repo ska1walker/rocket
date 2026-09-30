@@ -3,7 +3,6 @@
 // Modul RK-ANLEGEN — docs/MODULE.md
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { PRODUKT_TEXT } from "@/lib/format";
@@ -11,7 +10,7 @@ import type { Company, Contact, Deal, DealProduct, Stage } from "@/lib/typen";
 import { Mehrfachauswahl } from "@/components/mehrfachauswahl";
 import { Fehler } from "@/components/zustaende";
 import { useAnlegefelder } from "@/components/anlegefelder";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Dialog } from "@/components/dialog";
 
 // Die Listenpreise aus claude/Produkte.md. Sie füllen den Betrag vor,
 // wenn ein Produkt gewählt wird — überschreibbar, denn beim Experten
@@ -37,7 +36,6 @@ export function DealAnlegen({
   beiSchliessen: () => void;
   beiErfolg: () => void;
 }) {
-  const falle = useDialogfalle(beiSchliessen);
   const [name, setName] = useState("");
   const [produkt, setProdukt] = useState<DealProduct>("assistent");
   const [betrag, setBetrag] = useState(String(LISTENPREIS.assistent));
@@ -86,22 +84,7 @@ export function DealAnlegen({
   });
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Lead anlegen" ref={falle}>
-      <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
-        <div className="dialog-kopf">
-          <h2>Lead anlegen</h2>
-          <button type="button" className="dialog-zu" aria-label="Schließen" onClick={beiSchliessen}>
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-
-        <form
-          className="dialog-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            anlegen.mutate();
-          }}
-        >
+    <Dialog titel="Lead anlegen" beiSchliessen={beiSchliessen} beiSenden={() => anlegen.mutate()}>
           <div className="dialog-koerper">
           <div className="feld">
             <label htmlFor="deal-name">Bezeichnung</label>
@@ -220,8 +203,6 @@ export function DealAnlegen({
               Abbrechen
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+    </Dialog>
   );
 }

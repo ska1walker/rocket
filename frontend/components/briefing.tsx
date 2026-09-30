@@ -111,7 +111,7 @@ export function Tagesbriefing() {
           <h2>Heute</h2>
         </div>
         <div className="block-inhalt">
-          <p style={{ fontSize: "0.875rem", color: "var(--am-text-sekundaer)" }}>
+          <p className="text-zweit">
             Nichts liegt an. Ein guter Tag, um jemanden anzurufen.
           </p>
         </div>

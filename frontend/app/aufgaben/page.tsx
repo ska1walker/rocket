@@ -20,6 +20,7 @@ import { Prioritaetspille } from "@/components/prioritaet";
 import { Segmentliste } from "@/components/segmentliste";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
 import { useNeuGewuenscht } from "@/lib/neu";
+import { reiterTaste } from "@/lib/tasten";
 
 type Reiter = "heute" | "ueberfaellig" | "bevorstehend" | "alle" | "erledigt";
 
@@ -137,7 +138,6 @@ export default function AufgabenSeite() {
       {tabelle ? (
         <Segmentliste
           entity="tasks"
-          basisPfad="/aufgaben"
           suchePlatzhalter="Titel oder Notiz"
           leerTitel="Keine Aufgabe gefunden"
           leerText="Entweder ist der Filter zu eng, oder es ist gerade nichts offen."
@@ -151,7 +151,7 @@ export default function AufgabenSeite() {
         />
       ) : (
         <>
-          <div className="ansichtsleiste" role="tablist" aria-label="Ansichten">
+          <div className="ansichtsleiste" role="tablist" onKeyDown={reiterTaste} aria-label="Ansichten">
             {REITER.map((r) => (
               <button
                 key={r.wert}
@@ -230,7 +230,7 @@ export default function AufgabenSeite() {
           </div>
 
           {anlegen.isError && (
-            <div style={{ padding: "0 var(--am-raum-8)" }}>
+            <div className="seitenrand">
               <Fehler text={(anlegen.error as Error).message} />
             </div>
           )}

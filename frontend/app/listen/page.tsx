@@ -2,6 +2,7 @@
 
 // Modul RK-VERSAND — docs/MODULE.md
 
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import { datum } from "@/lib/format";
 import type { Liste } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
+import { Dialog } from "@/components/dialog";
 
 /** Eine Liste anlegen — statisch von Hand, aktiv als Frage an den Bestand. */
 function ListeAnlegen({ beiSchliessen, beiErfolg }: { beiSchliessen: () => void; beiErfolg: (id: string) => void }) {
@@ -21,10 +23,8 @@ function ListeAnlegen({ beiSchliessen, beiErfolg }: { beiSchliessen: () => void;
     onSuccess: (l) => beiErfolg(l.id),
   });
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Liste anlegen">
-      <div className="karte dialog-karte" style={{ maxWidth: "480px", width: "100%" }}>
-        <h2 style={{ marginBottom: "var(--am-raum-4)", fontSize: "1.125rem" }}>Liste anlegen</h2>
-        <form onSubmit={(e) => { e.preventDefault(); anlegen.mutate(); }}>
+    <Dialog titel="Liste anlegen" breite="schmal" beiSchliessen={beiSchliessen} beiSenden={() => anlegen.mutate()}>
+          <div className="dialog-koerper">
           <div className="feld">
             <label htmlFor="liste-name">Name</label>
             <input id="liste-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Messe Hannover 2026" />
@@ -46,15 +46,14 @@ function ListeAnlegen({ beiSchliessen, beiErfolg }: { beiSchliessen: () => void;
             <input id="liste-beschreibung" value={beschreibung} onChange={(e) => setBeschreibung(e.target.value)} />
           </div>
           {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
-          <div className="btn-reihe" style={{ marginTop: "var(--am-raum-6)" }}>
+          </div>
+          <div className="dialog-fuss">
             <button type="submit" className="btn btn-primaer" disabled={anlegen.isPending || !name.trim()}>
               {anlegen.isPending ? "Wird angelegt …" : "Anlegen"}
             </button>
             <button type="button" className="btn btn-still" onClick={beiSchliessen}>Abbrechen</button>
           </div>
-        </form>
-      </div>
-    </div>
+    </Dialog>
   );
 }
 
@@ -90,15 +89,15 @@ export default function ListenSeite() {
                 <tr>
                   <th>Liste</th>
                   <th>Art</th>
-                  <th style={{ textAlign: "right" }}>Gemeint</th>
-                  <th style={{ textAlign: "right" }}>Darf Post</th>
+                  <th className="rechts">Gemeint</th>
+                  <th className="rechts">Darf Post</th>
                   <th>Geändert</th>
                 </tr>
               </thead>
               <tbody>
                 {listen.data.map((l) => (
-                  <tr key={l.id} onClick={() => router.push(`/listen/${l.id}`)}>
-                    <td className="haupt">{l.name}{l.beschreibung && <div style={{ fontSize: "0.8125rem", color: "var(--am-text-gedaempft)" }}>{l.beschreibung}</div>}</td>
+                  <tr key={l.id} data-ziel onClick={() => router.push(`/listen/${l.id}`)}>
+                    <td className="haupt"><Link href={`/listen/${l.id}`} className="zeilen-ziel" onClick={(e) => e.stopPropagation()}>{l.name}</Link>{l.beschreibung && <div className="zeile-unter">{l.beschreibung}</div>}</td>
                     <td><span className="stufe">{l.art === "aktiv" ? "aktiv" : "statisch"}</span></td>
                     <td className="zahl">{l.gemeint}</td>
                     <td className="zahl">{l.berechtigt}</td>

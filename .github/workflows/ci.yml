@@ -104,3 +104,93 @@ jobs:
           TEST_DB_HOST: localhost
           TEST_DB_USER: rocket
           TEST_DB_PASSWORD: rocket_dev_only
+
+  # Der Rundgang im Browser (frontend/e2e): jede Seite auf Desktop und Handy
+  # ohne API-Fehler, Skriptfehler, Überbreite und schwere axe-Befunde, dazu
+  # die Tastaturwege. Gebaut aus der GUI-Prüfung vom 30.9.2026 — jeder
+  # dieser Prüfpunkte hat dort einen echten Fehler gefunden.
+  oberflaeche:
+    name: oberfläche · Rundgang im Browser
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: backend/pyproject.toml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      # Wie auf der Box und in den Backend-Tests: Die Migrationen laufen mit
+      # der Rolle der Anwendung, die dadurch Eigentümerin der Tabellen wird.
+      - name: database and migrations
+        run: |
+          PGPASSWORD=postgres psql -U postgres -c "create role rocket login password 'rocket_dev_only' createdb;"
+          PGPASSWORD=postgres psql -U postgres -c "create database rocket owner rocket;"
+          for f in supabase/migrations/*.sql; do
+            PGPASSWORD=rocket_dev_only psql -q -v ON_ERROR_STOP=1 -U rocket -d rocket -f "$f"
+          done
+
+      - name: start backend
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          mkdir -p "$RUNNER_TEMP/rocketdaten"
+          DEV_USER=ci APP_DATA_DIR="$RUNNER_TEMP/rocketdaten" \
+            nohup uvicorn app.main:app --port 8000 > "$RUNNER_TEMP/backend.log" 2>&1 &
+          for i in $(seq 30); do curl -sf localhost:8000/health && break; sleep 1; done
+
+      - name: build and start frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+          nohup npx next start -p 3011 > "$RUNNER_TEMP/frontend.log" 2>&1 &
+          for i in $(seq 30); do curl -sf -o /dev/null localhost:3011/ && break; sleep 1; done
+
+      - name: sample data
+        run: python scripts/seed-dev.py http://localhost:8000
+
+      - name: install browser
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: tour
+        working-directory: frontend
+        run: npx playwright test
+
+      - name: logs and report on failure
+        if: failure()
+        run: |
+          echo "── backend"; tail -80 "$RUNNER_TEMP/backend.log" || true
+          echo "── frontend"; tail -40 "$RUNNER_TEMP/frontend.log" || true
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rundgang-bericht
+          path: |
+            frontend/e2e-bericht
+            frontend/test-results
+          retention-days: 7

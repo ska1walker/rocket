@@ -3,13 +3,12 @@
 // Modul RK-ANLEGEN — docs/MODULE.md
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { PRIORITAET_TEXT } from "@/lib/format";
 import type { Company, Contact, Ticket, Ticketkategorie, Ticketprioritaet } from "@/lib/typen";
 import { Fehler } from "@/components/zustaende";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Dialog } from "@/components/dialog";
 
 /**
  * Ein Anliegen aufnehmen.
@@ -29,7 +28,6 @@ export function TicketAnlegen({
   beiSchliessen: () => void;
   beiErfolg: (id: string) => void;
 }) {
-  const falle = useDialogfalle(beiSchliessen);
   const [betreff, setBetreff] = useState("");
   const [beschreibung, setBeschreibung] = useState("");
   const [prioritaet, setPrioritaet] = useState<Ticketprioritaet>("mittel");
@@ -68,21 +66,7 @@ export function TicketAnlegen({
   });
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Ticket anlegen" ref={falle}>
-      <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
-        <div className="dialog-kopf">
-          <h2>Ticket anlegen</h2>
-          <button type="button" className="dialog-zu" aria-label="Schließen" onClick={beiSchliessen}>
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-        <form
-          className="dialog-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (betreff.trim()) anlegen.mutate();
-          }}
-        >
+    <Dialog titel="Ticket anlegen" beiSchliessen={beiSchliessen} beiSenden={() => { if (betreff.trim()) anlegen.mutate(); }}>
           <div className="dialog-koerper">
           <div className="feld">
             <label htmlFor="t-betreff">Betreff</label>
@@ -184,8 +168,6 @@ export function TicketAnlegen({
               Abbrechen
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+    </Dialog>
   );
 }

@@ -50,7 +50,7 @@ export function Ticketantwort({ ticket }: { ticket: Ticket }) {
       </div>
       <div className="block-inhalt">
         {!an && (
-          <p style={{ fontSize: "0.875rem", color: "var(--am-text-sekundaer)" }}>
+          <p className="text-zweit">
             Dieses Ticket hat keine Adresse, an die eine Antwort gehen könnte. Kontakt zuordnen,
             dann geht es hier weiter.
           </p>
@@ -84,7 +84,7 @@ export function Ticketantwort({ ticket }: { ticket: Ticket }) {
             </div>
             {senden.isError && <Fehler text={(senden.error as Error).message} />}
             {senden.isSuccess && (
-              <p style={{ fontSize: "0.8125rem", color: "var(--am-erfolg)" }}>
+              <p className="text-gelungen">
                 Gesendet — steht im Verlauf, das Ticket wartet jetzt auf den Kontakt.
               </p>
             )}

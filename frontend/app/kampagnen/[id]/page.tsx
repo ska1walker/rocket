@@ -195,7 +195,7 @@ export default function KampagneSeite({ params }: { params: Promise<{ id: string
             <section className="block">
               <div className="block-kopf"><h2>Läuft</h2></div>
               <div className="block-inhalt">
-                <p style={{ fontSize: "0.875rem", color: "var(--am-text-sekundaer)" }}>Gestartet {datumZeit(k.gestartet_am)}. Die Mails gehen nach und nach hinaus; die Zahlen oben laufen mit.</p>
+                <p className="text-zweit">Gestartet {datumZeit(k.gestartet_am)}. Die Mails gehen nach und nach hinaus; die Zahlen oben laufen mit.</p>
                 {abbrechen.isError && <Fehler text={(abbrechen.error as Error).message} />}
                 <div className="btn-reihe" style={{ marginTop: "var(--am-raum-3)" }}>
                   <button type="button" className="btn btn-gefahr" disabled={abbrechen.isPending} onClick={() => abbrechen.mutate()}>Anhalten — Rest nicht senden</button>

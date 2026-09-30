@@ -19,6 +19,7 @@ import type {
 } from "@/lib/typen";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { Erklaerung } from "@/components/erklaerung";
+import { reiterTaste } from "@/lib/tasten";
 
 const OBJEKTE: { wert: PropertyEntity; text: string }[] = [
   { wert: "companies", text: "Firmen" },
@@ -144,7 +145,7 @@ export function Eigenschaftenblock() {
         />
 
         <div className="eig-leiste">
-          <div className="wegwahl" role="tablist" aria-label="Objekt">
+          <div className="wegwahl" role="tablist" onKeyDown={reiterTaste} aria-label="Objekt">
             {OBJEKTE.map((o) => (
               <button
                 key={o.wert}

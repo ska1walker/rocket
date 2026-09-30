@@ -17,7 +17,7 @@ import type {
   QuoteItemIn,
 } from "@/lib/typen";
 import { Fehler } from "@/components/zustaende";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Dialog } from "@/components/dialog";
 
 /**
  * Legt ein Angebot zu einem Lead an — leer oder aus einem
@@ -31,7 +31,6 @@ export function AngebotAnlegen({
   dealId: string;
   beiSchliessen: () => void;
 }) {
-  const falle = useDialogfalle(beiSchliessen);
   const router = useRouter();
   const [positionen, setPositionen] = useState<QuoteItemIn[]>([]);
   const [anschreiben, setAnschreiben] = useState("");
@@ -87,9 +86,10 @@ export function AngebotAnlegen({
   const bereit = kiStatus.data?.ready ?? false;
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Angebot anlegen" ref={falle}>
-      <div className="karte" style={{ maxWidth: "620px", width: "100%" }}>
-        <h2 style={{ marginBottom: "var(--am-raum-4)", fontSize: "1.125rem" }}>Angebot anlegen</h2>
+    // Der Knopf „Als Entwurf anlegen" bleibt type=button: Enter in einer
+    // Positionszeile soll kein Angebot anlegen.
+    <Dialog titel="Angebot anlegen" breite="breit" beiSchliessen={beiSchliessen} beiSenden={() => {}}>
+      <div className="dialog-koerper">
 
         <div className="btn-reihe" style={{ marginBottom: "var(--am-raum-4)" }}>
           <button
@@ -117,7 +117,7 @@ export function AngebotAnlegen({
         </div>
 
         {!bereit && kiStatus.data?.hint && (
-          <p style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+          <p className="text-leise-klein">
             {kiStatus.data.hint}
           </p>
         )}
@@ -147,7 +147,7 @@ export function AngebotAnlegen({
             </thead>
             <tbody>
               {positionen.map((p, i) => (
-                <tr key={i} style={{ cursor: "default" }}>
+                <tr key={i}>
                   <td>
                     <input
                       className="input"
@@ -233,8 +233,9 @@ export function AngebotAnlegen({
         </div>
 
         {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
+      </div>
 
-        <div className="btn-reihe">
+        <div className="dialog-fuss">
           <button
             type="button"
             className="btn btn-primaer"
@@ -247,8 +248,7 @@ export function AngebotAnlegen({
             Abbrechen
           </button>
         </div>
-      </div>
-    </div>
+    </Dialog>
   );
 }
 

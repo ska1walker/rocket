@@ -66,7 +66,7 @@ export default function FragenSeite() {
         </form>
       </div>
 
-      <div className="datensatz" style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
+      <div className="datensatz datensatz-einzeln">
         {!stellen.data && !stellen.isPending && (
           <section className="block">
             <div className="block-kopf">
@@ -104,7 +104,7 @@ export default function FragenSeite() {
         )}
 
         {stellen.isError && (
-          <div style={{ padding: "0 var(--am-raum-8)" }}>
+          <div className="seitenrand">
             <Fehler text={(stellen.error as Error).message} />
           </div>
         )}
@@ -115,7 +115,7 @@ export default function FragenSeite() {
               <section className="block">
                 <div className="block-kopf">
                   <h2>Antwort</h2>
-                  <span style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+                  <span className="text-leise-klein">
                     {stellen.data.modell}
                   </span>
                 </div>
@@ -131,7 +131,7 @@ export default function FragenSeite() {
             )}
 
             {stellen.data.hinweis && (
-              <div style={{ padding: "0 var(--am-raum-8)" }}>
+              <div className="seitenrand">
                 <div className="hinweis" data-art={stellen.data.fundstellen.length ? undefined : "achtung"}>
                   <span>{stellen.data.hinweis}</span>
                 </div>

@@ -35,7 +35,7 @@ export function Postausgangblock() {
           <div className="feld"><label htmlFor="po-von">Absenderadresse</label><input id="po-von" type="email" value={absender} onChange={(e) => setAbsender(e.target.value)} placeholder="kai@aimighty.de" /></div>
           <div className="feld"><label htmlFor="po-geheim">Geheimnis für die Signatur</label><input id="po-geheim" type="password" autoComplete="off" value={geheim} onChange={(e) => setGeheim(e.target.value)} placeholder={einst.data?.mail_endpoint_secret_set ? "hinterlegt — leer lassen, um es zu behalten" : "keines hinterlegt"} /></div>
           {speichern.isError && <Fehler text={(speichern.error as Error).message} />}
-          <div className="btn-reihe"><button type="submit" className="btn btn-primaer" disabled={speichern.isPending}>Speichern</button>{speichern.isSuccess && <span style={{ fontSize: "0.8125rem", color: "var(--am-erfolg)" }}>Gespeichert.</span>}</div>
+          <div className="btn-reihe"><button type="submit" className="btn btn-primaer" disabled={speichern.isPending}>Speichern</button>{speichern.isSuccess && <span className="text-gelungen">Gespeichert.</span>}</div>
         </form>
       </div>
     </section>

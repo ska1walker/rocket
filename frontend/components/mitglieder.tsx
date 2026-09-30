@@ -102,7 +102,7 @@ export function Mitgliederblock() {
       <div className="block-kopf">
         <h2>Wer hier arbeitet</h2>
         {wer.data && (
-          <span style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+          <span className="text-leise-klein">
             Zugang: {wer.data.login_username}
           </span>
         )}
@@ -124,7 +124,7 @@ export function Mitgliederblock() {
           </thead>
           <tbody>
             {mitglieder.data!.map((m) => (
-              <tr key={m.id} style={{ cursor: "default" }}>
+              <tr key={m.id}>
                 <td className="haupt">
                   {bearbeitet === m.id ? (
                     <form

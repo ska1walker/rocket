@@ -12,6 +12,7 @@ import { Seitenkopf } from "@/components/seitenkopf";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { DealAnlegen } from "@/components/deal-anlegen";
 import { useNeuGewuenscht } from "@/lib/neu";
+import { BRETT_HINWEIS_ID, BrettHinweis, useBrettTastatur } from "@/components/brett";
 
 export default function BoardSeite() {
   const client = useQueryClient();
@@ -53,6 +54,7 @@ export default function BoardSeite() {
       api.post<Deal>(`/api/deals/${dealId}/stage`, { stage_id: stageId }),
     onSuccess: () => client.invalidateQueries({ queryKey: ["board"] }),
   });
+  const brettTasten = useBrettTastatur(abfrage.data);
 
   if (abfrage.isPending) return <Laedt />;
   if (abfrage.isError) return <Fehler text={(abfrage.error as Error).message} />;
@@ -130,13 +132,14 @@ export default function BoardSeite() {
       )}
 
       {verschieben.isError && (
-        <div style={{ padding: "0 var(--am-raum-8)" }}>
+        <div className="seitenrand">
           <Fehler text={(verschieben.error as Error).message} />
         </div>
       )}
 
+      <BrettHinweis ansage={brettTasten.ansage} />
       <div className="board">
-        {board.columns.map((spalte) => (
+        {board.columns.map((spalte, si) => (
           <div
             key={spalte.stage.id}
             className="board-spalte"
@@ -173,8 +176,18 @@ export default function BoardSeite() {
                 key={deal.id}
                 href={`/deals/${deal.id}`}
                 className="deal-karte"
+                data-karte={deal.id}
                 draggable
                 onDragStart={(e) => e.dataTransfer.setData("text/plain", deal.id)}
+                aria-describedby={BRETT_HINWEIS_ID}
+                aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
+                onKeyDown={(e) =>
+                  brettTasten.taste(e, deal.id, si, board.columns.length, (z) => {
+                    const neu = board.columns[z].stage;
+                    verschieben.mutate({ dealId: deal.id, stageId: neu.id });
+                    return neu.name;
+                  })
+                }
               >
                 <div className="deal-karte-name">{deal.name}</div>
                 <div className="deal-karte-firma">

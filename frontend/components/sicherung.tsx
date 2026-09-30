@@ -47,7 +47,7 @@ export function Sicherungsblock() {
       <div className="block-kopf">
         <h2>Sicherung</h2>
         {letzte && (
-          <span style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+          <span className="text-leise-klein">
             zuletzt {datumZeit(letzte.erstellt_am)}
           </span>
         )}
@@ -110,16 +110,16 @@ export function Sicherungsblock() {
               <thead>
                 <tr>
                   <th>Stand</th>
-                  <th style={{ textAlign: "right" }}>Größe</th>
+                  <th className="rechts">Größe</th>
                   <th><span className="nur-vorleser">Aktionen</span></th>
                 </tr>
               </thead>
               <tbody>
                 {staende.data.map((s) => (
-                  <tr key={s.name} style={{ cursor: "default" }}>
+                  <tr key={s.name}>
                     <td className="haupt">{datumZeit(s.erstellt_am)}</td>
                     <td className="zahl">{Math.round(s.groesse_bytes / 1024)} kB</td>
-                    <td style={{ textAlign: "right" }}>
+                    <td className="rechts">
                       {bestaetigt === s.name ? (
                         <span className="btn-reihe" style={{ justifyContent: "flex-end" }}>
                           <button

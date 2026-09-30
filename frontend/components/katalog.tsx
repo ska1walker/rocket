@@ -29,7 +29,7 @@ export function Katalogblock() {
       <div className="block-inhalt">
         <Erklaerung kurz="Ihre Produkte mit Listenpreis — die Grundlage jedes Angebots." lang={<>Die Listenpreise für Angebote. Ein Angebot kopiert den Preis beim Anlegen — spätere Änderungen hier ändern kein liegendes Angebot.</>} />
         <table className="tabelle" style={{ marginBottom: "var(--am-raum-4)" }}>
-          <thead><tr><th>Produkt</th><th>Art</th><th style={{ textAlign: "right" }}>Netto €</th><th style={{ textAlign: "right" }}>Servicetage</th><th><span className="nur-vorleser">Aktionen</span></th></tr></thead>
+          <thead><tr><th>Produkt</th><th>Art</th><th className="rechts">Netto €</th><th className="rechts">Servicetage</th><th><span className="nur-vorleser">Aktionen</span></th></tr></thead>
           <tbody>
             {produkte.data!.map((p) => (
               <tr key={p.id} style={{ cursor: "default", opacity: p.is_active ? 1 : 0.5 }}>
@@ -37,7 +37,7 @@ export function Katalogblock() {
                 <td>{ART[p.kind] ?? p.kind}</td>
                 <td className="zahl"><input className="input" type="number" min="0" step="100" aria-label="Preis" defaultValue={p.list_price_cents / 100} onBlur={(e) => { const c = Math.round(Number(e.target.value) * 100); if (c !== p.list_price_cents) aendern.mutate({ id: p.id, list_price_cents: c }); }} /></td>
                 <td className="zahl"><input className="input" type="number" min="0" aria-label="Servicetage" defaultValue={p.default_service_days ?? ""} onBlur={(e) => { const t = e.target.value === "" ? null : Number(e.target.value); if (t !== p.default_service_days) aendern.mutate({ id: p.id, default_service_days: t }); }} /></td>
-                <td style={{ textAlign: "right" }}><button type="button" className="btn btn-still btn-klein" onClick={() => aendern.mutate({ id: p.id, is_active: !p.is_active })}>{p.is_active ? "Abschalten" : "Einschalten"}</button></td>
+                <td className="rechts"><button type="button" className="btn btn-still btn-klein" onClick={() => aendern.mutate({ id: p.id, is_active: !p.is_active })}>{p.is_active ? "Abschalten" : "Einschalten"}</button></td>
               </tr>
             ))}
           </tbody>
@@ -70,9 +70,9 @@ export function Verlustgruendeblock() {
         <table className="tabelle" style={{ marginBottom: "var(--am-raum-4)" }}>
           <tbody>
             {gruende.data?.map((g) => (
-              <tr key={g.id} style={{ cursor: "default" }}>
+              <tr key={g.id}>
                 <td><input className="input" aria-label="Grund" defaultValue={g.name} onBlur={(e) => e.target.value.trim() && e.target.value !== g.name && aendern.mutate({ id: g.id, name: e.target.value.trim() })} /></td>
-                <td style={{ textAlign: "right" }}><button type="button" className="btn btn-still btn-klein" onClick={() => aendern.mutate({ id: g.id, is_active: false })}>Abschalten</button></td>
+                <td className="rechts"><button type="button" className="btn btn-still btn-klein" onClick={() => aendern.mutate({ id: g.id, is_active: false })}>Abschalten</button></td>
               </tr>
             ))}
           </tbody>

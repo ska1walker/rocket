@@ -14,6 +14,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { api, suchparameter } from "@/lib/api";
@@ -34,6 +35,7 @@ import { Stufenpille } from "@/components/stufe";
 import { Mehrfachplaettchen } from "@/components/mehrfachauswahl";
 import { Prioritaetspille } from "@/components/prioritaet";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
+import { reiterTaste } from "@/lib/tasten";
 
 type Datensatz = Record<string, unknown> & { id: string; custom?: Record<string, unknown> };
 
@@ -87,7 +89,9 @@ export function Segmentliste({
   stapelfelder,
 }: {
   entity: Objektart;
-  basisPfad: string;
+  /** Wohin eine Zeile führt. Ohne ihn (Aufgaben haben keine eigene Seite)
+      ist die Zeile nur Anzeige — vorher führte sie ins Leere (404). */
+  basisPfad?: string;
   suchePlatzhalter: string;
   leerTitel: string;
   leerText: string;
@@ -283,7 +287,7 @@ export function Segmentliste({
   return (
     <>
       {/* Reiter: die gespeicherten Fragen an den Bestand. */}
-      <div className="ansichtsleiste" role="tablist" aria-label="Ansichten">
+      <div className="ansichtsleiste" role="tablist" onKeyDown={reiterTaste} aria-label="Ansichten">
         <button
           type="button"
           role="tab"
@@ -571,7 +575,8 @@ export function Segmentliste({
                   <tr
                     key={z.id}
                     data-gewaehlt={gewaehlt.includes(z.id) ? "true" : undefined}
-                    onClick={() => router.push(`${basisPfad}/${z.id}`)}
+                    data-ziel={basisPfad ? "" : undefined}
+                    onClick={basisPfad ? () => router.push(`${basisPfad}/${z.id}`) : undefined}
                   >
                     <td className="wahlspalte" onClick={(e) => e.stopPropagation()}>
                       <input
@@ -587,7 +592,17 @@ export function Segmentliste({
                     </td>
                     {spalten.map((f, i) => (
                       <td key={f.schluessel} className={f.zahl ? "zahl" : i === 0 ? "haupt" : undefined}>
-                        <Zelle feld={f} zeile={z} personen={auskunft.data!.personen} />
+                        {basisPfad && i === 0 && !IST_LINK.has(f.schluessel) ? (
+                          <Link
+                            href={`${basisPfad}/${z.id}`}
+                            className="zeilen-ziel"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Zelle feld={f} zeile={z} personen={auskunft.data!.personen} />
+                          </Link>
+                        ) : (
+                          <Zelle feld={f} zeile={z} personen={auskunft.data!.personen} />
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -600,6 +615,9 @@ export function Segmentliste({
     </>
   );
 }
+
+/** Felder, die schon selbst ein Link sind — dort kein zweiter darum. */
+const IST_LINK = new Set(["email", "website", "linkedin_url", "domain"]);
 
 /** Ein Wert in der Tabelle, nach der Art seines Feldes dargestellt. */
 function Zelle({

@@ -9,6 +9,7 @@ import { datumZeit } from "@/lib/format";
 import type { Company, Deal, Eingangsposten } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
+import { Dialog } from "@/components/dialog";
 
 /**
  * Länge des Protokolls. Auf Tausender zu runden machte aus einem kurzen
@@ -83,15 +84,19 @@ export default function EingangSeite() {
       />
 
       {ansicht && (
-        <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Inhalt">
-          <div className="karte" style={{ maxWidth: "720px", width: "100%", maxHeight: "85vh", overflow: "auto" }}>
-            <h2 style={{ fontSize: "1.125rem", marginBottom: "var(--am-raum-4)" }}>{ansicht.titel ?? "Inhalt"}</h2>
-            <pre style={{ whiteSpace: "pre-wrap", fontFamily: "var(--am-schrift-sans)", fontSize: "0.875rem", lineHeight: 1.6 }}>{ansicht.markdown}</pre>
-            <div className="btn-reihe" style={{ marginTop: "var(--am-raum-4)" }}>
-              <button type="button" className="btn btn-still" onClick={() => setAnsicht(null)}>Schließen</button>
-            </div>
+        <Dialog
+          titel={ansicht.titel ?? "Inhalt"}
+          breite="breit"
+          beiSchliessen={() => setAnsicht(null)}
+          beiSenden={() => setAnsicht(null)}
+        >
+          <div className="dialog-koerper">
+            <pre className="lesetext">{ansicht.markdown}</pre>
           </div>
-        </div>
+          <div className="dialog-fuss">
+            <button type="button" className="btn btn-still" onClick={() => setAnsicht(null)}>Schließen</button>
+          </div>
+        </Dialog>
       )}
 
       <div className="liste">
@@ -106,7 +111,7 @@ export default function EingangSeite() {
           <section className="block" key={p.id} style={{ marginBottom: "var(--am-raum-4)" }}>
             <div className="block-kopf">
               <h2>{p.titel ?? "Ohne Titel"}</h2>
-              <span style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+              <span className="text-leise-klein">
                 {datumZeit(p.occurred_at ?? p.created_at)}
               </span>
             </div>

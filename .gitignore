@@ -24,3 +24,7 @@ node_modules/
 
 # Sicherungsabzüge der Entwicklungsumgebung — enthalten Zugangsdaten
 backend/daten/
+
+# Rundgang im Browser (Playwright)
+frontend/e2e-bericht/
+frontend/test-results/

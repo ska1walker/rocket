@@ -1866,6 +1866,43 @@ Behoben in 26.9.5:
 - **Kaputte Adresse** (`/angebote/abc`): statt „Anfrage fehlgeschlagen
   (422)" steht „Diese Adresse führt zu keinem Datensatz."
 
+**Nachgezogen in 26.9.6:** Tastaturwege für Listen, Brett, Reiter, Menüs
+und Assistent; ein gemeinsames `Dialog`- und `Rueckfrage`-Bauteil; die
+wiederkehrenden Inline-Stile als Klassen. Nebenbei behoben: Die
+Aufgaben-Tabelle führte ins Leere (404), und am Lead ohne Sprachmodell hing
+die Knopfreihe aus dem Seitenkopf. Einzelheiten in `docs/MODULE.md`.
+
+### Der Rundgang läuft in der CI
+
+Seit 26.9.6 prüft der CI-Job **„oberfläche · Rundgang im Browser"** jeden
+PR: Er legt eine Datenbank an, spielt die Migrationen ein, startet Backend
+und Frontend, lädt die Beispieldaten und geht mit Playwright
+(`frontend/e2e/`) durch:
+
+- **`rundgang.spec.ts`** — jede Seite auf Desktop (1400 px) und Handy
+  (390 px): keine API-Antwort 4xx/5xx, kein Skriptfehler, nichts breiter
+  als der Bildschirm, genau eine `h1`, nichts ragt aus dem Seitenkopf,
+  keine axe-Befunde „critical" oder „serious". Ausgenommen ist nur die
+  Regel `color-contrast`, bis die Token-Frage unten entschieden ist.
+- **`tastatur.spec.ts`** — die Tastaturwege: Anlegen-Dialoge (Fokus, Tab,
+  Escape), „Erstellen", Listenzeile mit Enter, Reiter, Brett mit Alt+Pfeil,
+  Assistent, Rückfrage vor dem Löschen.
+
+Jeder Prüfpunkt hat einmal einen echten Fehler gefunden; die Gegenprobe
+(den Sortierfehler der Aufgaben kurz zurückgenommen) lässt den Rundgang rot
+werden. Schlägt er fehl, hängt der Bericht mit Bildschirmfotos am Lauf
+(`rundgang-bericht`).
+
+Lokal gegen einen laufenden Stand (Frontend auf 3011, Beispieldaten
+geladen):
+
+```bash
+cd frontend
+npm run e2e                                     # Browser von Playwright
+ROCKET_CHROMIUM=/opt/pw-browsers/chromium npm run e2e   # in einer Claude-Sitzung
+ROCKET_URL=http://localhost:3000 npm run e2e    # anderer Port
+```
+
 **Offen, weil es das Designsystem betrifft:** Gedämpfter Text
 (`--am-text-gedaempft` = Blau-500) erreicht auf der Grundfläche Blau-25
 nur 4,36:1, Gold-800 auf Blau-50 4,45:1 — knapp unter 4,5. Das ist eine

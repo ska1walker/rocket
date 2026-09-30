@@ -140,7 +140,7 @@ export function Podcastblock({ entity, entityId }: { entity: "companies" | "deal
           </p>
         )}
         {!laufend && !folgen.length && bereit && (
-          <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+          <p className="text-leise">
             Ein kurzes Gespräch zweier Stimmen über alles, was hier steht — zum Anhören vor dem Termin.
           </p>
         )}
@@ -394,7 +394,7 @@ export function Sprachausgabeblock({ e }: { e: OrgSettings }) {
             <button type="submit" className="btn btn-primaer" disabled={speichern.isPending}>
               {speichern.isPending ? "Wird gespeichert …" : "Speichern"}
             </button>
-            {speichern.isSuccess && <span style={{ fontSize: "0.8125rem", color: "var(--am-erfolg)" }}>Gespeichert.</span>}
+            {speichern.isSuccess && <span className="text-gelungen">Gespeichert.</span>}
           </div>
         </form>
 

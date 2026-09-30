@@ -9,6 +9,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { AnreicherungStatus, Erfassungsvorschlag, Fund, Kandidat, Kandidatenantwort } from "@/lib/typen";
 import { Fehler } from "@/components/zustaende";
+import { reiterTaste } from "@/lib/tasten";
 
 /**
  * Beschreiben statt tippen.
@@ -350,7 +351,7 @@ function pfad(url: string): string {
 /** Zwei Wege in die Maske: beschreiben oder hineinwerfen. */
 export function Wegwahl({ weg, setWeg }: { weg: "finden" | "werfen"; setWeg: (w: "finden" | "werfen") => void }) {
   return (
-    <div className="wegwahl" role="tablist" aria-label="Wie die Maske gefüllt wird">
+    <div className="wegwahl" role="tablist" onKeyDown={reiterTaste} aria-label="Wie die Maske gefüllt wird">
       <button type="button" role="tab" aria-selected={weg === "finden"} className={weg === "finden" ? "aktiv" : ""} onClick={() => setWeg("finden")}>
         Beschreiben
       </button>

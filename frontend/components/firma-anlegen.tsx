@@ -3,7 +3,6 @@
 // Modul RK-ANLEGEN — docs/MODULE.md
 
 import { useMutation } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { STUFEN_TEXT } from "@/lib/format";
@@ -13,7 +12,7 @@ import { Finden, Wegwahl } from "@/components/finden";
 import { PersonenFinden } from "@/components/personen-finden";
 import { Fehler } from "@/components/zustaende";
 import { useAnlegefelder } from "@/components/anlegefelder";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Dialog } from "@/components/dialog";
 
 export function FirmaAnlegen({
   beiSchliessen,
@@ -22,7 +21,6 @@ export function FirmaAnlegen({
   beiSchliessen: () => void;
   beiErfolg: (id: string) => void;
 }) {
-  const falle = useDialogfalle(beiSchliessen);
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
   const [branche, setBranche] = useState("");
@@ -90,22 +88,7 @@ export function FirmaAnlegen({
   const mit = Object.keys(weitere).length;
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Firma anlegen" ref={falle}>
-      <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
-        <div className="dialog-kopf">
-          <h2>Firma anlegen</h2>
-          <button type="button" className="dialog-zu" aria-label="Schließen" onClick={beiSchliessen}>
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-
-        <form
-          className="dialog-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            anlegen.mutate();
-          }}
-        >
+    <Dialog titel="Firma anlegen" beiSchliessen={beiSchliessen} beiSenden={() => anlegen.mutate()}>
           <div className="dialog-koerper">
           <Wegwahl weg={weg} setWeg={setWeg} />
           {weg === "finden" ? <Finden art="company" beiErgebnis={uebernehmen} /> : <Erfassung art="company" beiErgebnis={uebernehmen} />}
@@ -183,9 +166,7 @@ export function FirmaAnlegen({
               Abbrechen
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+    </Dialog>
   );
 }
 

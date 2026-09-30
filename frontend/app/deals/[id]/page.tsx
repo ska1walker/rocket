@@ -26,7 +26,7 @@ import { Qualifizierungsblock } from "@/components/qualifizierung";
 import { Feldgruppen } from "@/components/feldgruppen";
 import { Notizkasten } from "@/components/notizkasten";
 import { Dokumente } from "@/components/dokumente";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Rueckfrage } from "@/components/dialog";
 
 export default function DealSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -35,7 +35,6 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
   // Beim Verlieren wird nach dem Grund gefragt. Ohne ihn ist die
   // Verlustanalyse in der Prognose eine Liste aus „ohne Kategorie".
   const [verlorenStufe, setVerlorenStufe] = useState<string | null>(null);
-  const falle = useDialogfalle(() => setVerlorenStufe(null));
   const [grund, setGrund] = useState("");
   const [grundText, setGrundText] = useState("");
 
@@ -131,15 +130,23 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
       )}
 
       {verlorenStufe && (
-        <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Verlustgrund" ref={falle}>
-          <div className="karte" style={{ maxWidth: "440px", width: "100%" }}>
-            <h2 style={{ marginBottom: "var(--am-raum-4)", fontSize: "1.125rem" }}>
-              Woran ist es gescheitert?
-            </h2>
-            <p style={{ fontSize: "0.875rem", color: "var(--am-text-sekundaer)", marginBottom: "var(--am-raum-6)" }}>
-              Der Grund ist die einzige Frage, die aus einem verlorenen Geschäft noch etwas
-              macht. Er steht später in der Prognose.
-            </p>
+        <Rueckfrage
+          titel="Woran ist es gescheitert?"
+          label="Verlustgrund"
+          text="Der Grund ist die einzige Frage, die aus einem verlorenen Geschäft noch etwas macht. Er steht später in der Prognose."
+          beiSchliessen={() => setVerlorenStufe(null)}
+          vorsicht={false}
+          knopf={
+            <button
+              type="button"
+              className="btn btn-primaer"
+              onClick={() => verlorenMelden.mutate(verlorenStufe)}
+              disabled={verlorenMelden.isPending}
+            >
+              {verlorenMelden.isPending ? "Speichert …" : "Als verloren vermerken"}
+            </button>
+          }
+        >
 
             <div className="feld">
               <label htmlFor="verlustgrund">Grund</label>
@@ -169,26 +176,7 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
             {verlorenMelden.isError && (
               <Fehler text={(verlorenMelden.error as Error).message} />
             )}
-
-            <div className="btn-reihe">
-              <button
-                type="button"
-                className="btn btn-primaer"
-                onClick={() => verlorenMelden.mutate(verlorenStufe)}
-                disabled={verlorenMelden.isPending}
-              >
-                {verlorenMelden.isPending ? "Speichert …" : "Als verloren vermerken"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-still"
-                onClick={() => setVerlorenStufe(null)}
-              >
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        </div>
+        </Rueckfrage>
       )}
 
       <div className="datensatz">
@@ -291,7 +279,7 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
             </div>
             <div className="block-inhalt">
               {angebote.data?.length === 0 && (
-                <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+                <p className="text-leise">
                   Noch kein Angebot.
                 </p>
               )}

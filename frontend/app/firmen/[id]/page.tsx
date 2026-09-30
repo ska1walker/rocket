@@ -133,7 +133,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
             </div>
             <div className="block-inhalt">
               {deals.data?.length === 0 && (
-                <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+                <p className="text-leise">
                   Noch kein Lead.
                 </p>
               )}
@@ -172,7 +172,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
                 </div>
               )}
               {kontakte.data?.length === 0 && (
-                <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+                <p className="text-leise">
                   Noch niemand hinterlegt.
                 </p>
               )}
