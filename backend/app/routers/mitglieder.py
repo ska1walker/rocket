@@ -94,6 +94,29 @@ class WerEinstellungenPatch(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     favoriten: list[str] | None = None
+    # Datensatzseite (seit 26.9.3): welche Eigenschaftsgruppen zugeklappt
+    # sind, je Objekt als Liste von Gruppenschlüsseln — und ob leere Felder
+    # ausgeblendet werden.
+    zugeklappt: dict[Literal["companies", "contacts", "deals"], list[str]] | None = None
+    leere_ausblenden: bool | None = None
+
+    @field_validator("zugeklappt")
+    @classmethod
+    def _gruppen(cls, wert: dict[str, list[str]] | None) -> dict[str, list[str]] | None:
+        if wert is None:
+            return None
+        sauber: dict[str, list[str]] = {}
+        for entity, schluessel in wert.items():
+            liste: list[str] = []
+            for k in schluessel:
+                if not isinstance(k, str) or not re.fullmatch(r"[a-z0-9_]{1,80}", k):
+                    raise ValueError(f"kein Gruppenschlüssel: {k!r}")
+                if k not in liste:
+                    liste.append(k)
+            if len(liste) > 50:
+                raise ValueError("höchstens 50 Gruppen je Objekt")
+            sauber[entity] = liste
+        return sauber
 
     @field_validator("favoriten")
     @classmethod

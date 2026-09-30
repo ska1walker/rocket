@@ -227,3 +227,44 @@ async def test_gruppen_ueberleben_die_sicherung(datenbank):
         felder = _schluessel(await _anordnung(z))
     assert "serverraum" in felder["it"]
     assert "region" in felder["vertrieb"]
+
+
+async def test_im_anlegen_nur_fuer_bearbeitbares(datenbank):
+    async with klient_fuer("gr-anlegen") as k:
+        a = await _anordnung(k, "deals")
+        felder = {f["key"]: f for g in a["gruppen"] for f in g["felder"]}
+        assert (await k.patch(f"/api/eigenschaften/{felder['service_days']['id']}", json={"im_anlegen": True})).status_code == 200
+        # Gerechnet — im Dialog nichts zu tun.
+        assert (await k.patch(f"/api/eigenschaften/{felder['probability']['id']}", json={"im_anlegen": True})).status_code == 400
+        # Der Absagegrund entsteht beim Verlieren.
+        assert (await k.patch(f"/api/eigenschaften/{felder['lost_reason']['id']}", json={"im_anlegen": True})).status_code == 400
+        a = await _anordnung(k, "deals")
+        assert next(f for g in a["gruppen"] for f in g["felder"] if f["key"] == "service_days")["im_anlegen"] is True
+
+
+async def test_zugeklappte_gruppen_gehoeren_der_person(datenbank):
+    async with klient_fuer("gr-klappen") as k:
+        r = await k.patch("/api/mitglieder/wer/einstellungen", json={
+            "zugeklappt": {"companies": ["adresse", "adresse", "vertrieb"]}, "leere_ausblenden": True,
+        })
+        assert r.status_code == 200, r.text
+        e = r.json()["einstellungen"]
+        assert e["zugeklappt"] == {"companies": ["adresse", "vertrieb"]}
+        assert e["leere_ausblenden"] is True
+        # Unsinn wird abgewiesen.
+        for schlecht in ({"zugeklappt": {"tickets": ["x"]}}, {"zugeklappt": {"companies": ["<script>"]}}):
+            assert (await k.patch("/api/mitglieder/wer/einstellungen", json=schlecht)).status_code == 422
+        # Favoriten bleiben unberührt.
+        await k.patch("/api/mitglieder/wer/einstellungen", json={"favoriten": ["/firmen"]})
+        e = (await k.get("/api/mitglieder/wer")).json()["einstellungen"]
+        assert e["favoriten"] == ["/firmen"] and e["leere_ausblenden"] is True
+
+
+async def test_anlegen_nimmt_feste_und_eigene_felder_mit(datenbank):
+    """Was der Dialog zusätzlich zeigt, geht mit dem POST — feste oben, eigene in custom."""
+    async with klient_fuer("gr-post") as k:
+        await k.post("/api/eigenschaften", json={"entity": "deals", "label": "Kammer"})
+        d = (await k.post("/api/deals", json={
+            "name": "Mit Zusatz", "service_days": 3, "custom": {"kammer": "IHK"},
+        })).json()
+    assert d["service_days"] == 3 and d["custom"]["kammer"] == "IHK"

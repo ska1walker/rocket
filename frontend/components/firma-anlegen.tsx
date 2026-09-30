@@ -10,6 +10,7 @@ import { Erfassung } from "@/components/erfassung";
 import { Finden, Wegwahl } from "@/components/finden";
 import { PersonenFinden } from "@/components/personen-finden";
 import { Fehler } from "@/components/zustaende";
+import { useAnlegefelder } from "@/components/anlegefelder";
 
 export function FirmaAnlegen({
   beiSchliessen,
@@ -32,10 +33,13 @@ export function FirmaAnlegen({
   const [gefunden, setGefunden] = useState<{ name: string; website: string | null } | null>(null);
   const [personen, setPersonen] = useState<Personenvorschlag[]>([]);
 
+  const zusatz = useAnlegefelder("companies", ["name", "domain", "industry", "city", "lifecycle_stage"]);
+
   const anlegen = useMutation({
     mutationFn: async () => {
       const firma = await api.post<Company>("/api/companies", {
         ...weitere,
+        ...zusatz.nutzlast(),
         name,
         domain: domain || null,
         industry: branche || null,
@@ -154,6 +158,8 @@ export function FirmaAnlegen({
               </select>
             </div>
           </div>
+
+          {zusatz.element}
 
           {mit > 0 && (
             <p className="erfassung-hinweis">

@@ -461,7 +461,10 @@ function Feldzeile({
           )}
           <span className="eig-schluessel">{feld.key}</span>
         </span>
-        <span className="eig-art">{TYP_TEXT[feld.art] ?? feld.art}</span>
+        <span className="eig-art">
+          {TYP_TEXT[feld.art] ?? feld.art}
+          {feld.im_anlegen && <span className="eig-anlegen" title="Erscheint im Anlegen-Dialog">im Anlegen</span>}
+        </span>
         <span className="eig-zahl">{zahlText(feld.anzahl)}</span>
         <span className="eig-knoepfe">
           <button
@@ -495,10 +498,17 @@ function Feldzeile({
 function Feldpflege({ feld, fertig, geaendert }: { feld: Feldeintrag; fertig: () => void; geaendert: () => void }) {
   const [label, setLabel] = useState(feld.label);
   const [hilfe, setHilfe] = useState(feld.description ?? "");
+  const [imAnlegen, setImAnlegen] = useState(feld.im_anlegen);
+  // Gerechnetes und Felder mit eigenem Weg haben im Anlegen nichts zu tun.
+  const anlegbar = feld.bearbeitbar && !(feld.is_system && feld.key === "lost_reason");
 
   const sichern = useMutation({
     mutationFn: () =>
-      api.patch(`/api/eigenschaften/${feld.id}`, { label: label.trim(), description: hilfe.trim() || null }),
+      api.patch(`/api/eigenschaften/${feld.id}`, {
+        label: label.trim(),
+        description: hilfe.trim() || null,
+        ...(anlegbar ? { im_anlegen: imAnlegen } : {}),
+      }),
     onSuccess: () => {
       geaendert();
       fertig();
@@ -534,6 +544,12 @@ function Feldpflege({ feld, fertig, geaendert }: { feld: Feldeintrag; fertig: ()
             placeholder="Was hier hineingehört — erscheint am Feld"
           />
         </div>
+        {anlegbar && (
+          <label className="faktor-bestaetigung">
+            <input type="checkbox" checked={imAnlegen} onChange={(e) => setImAnlegen(e.target.checked)} />
+            <span>Im Anlegen-Dialog zeigen — zusätzlich zu dem, was der Dialog ohnehin fragt.</span>
+          </label>
+        )}
         <div className="btn-reihe">
           <button type="submit" className="btn btn-primaer btn-klein" disabled={!label.trim() || sichern.isPending}>
             {sichern.isPending ? "Speichert …" : "Speichern"}

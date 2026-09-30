@@ -9,6 +9,7 @@ import type { Company, Contact, Erfassungsvorschlag } from "@/lib/typen";
 import { Erfassung } from "@/components/erfassung";
 import { Finden, Wegwahl } from "@/components/finden";
 import { Fehler } from "@/components/zustaende";
+import { useAnlegefelder } from "@/components/anlegefelder";
 
 const LEER = {
   first_name: "",
@@ -52,9 +53,12 @@ export function KontaktAnlegen({
     enabled: Boolean(firmaId),
   });
 
+  const zusatz = useAnlegefelder("contacts", Object.keys(LEER));
+
   const anlegen = useMutation({
     mutationFn: () =>
       api.post<Contact>("/api/contacts", {
+        ...zusatz.nutzlast(),
         ...Object.fromEntries(Object.entries(werte).map(([k, v]) => [k, v || null])),
       }),
     onSuccess: (k) => beiErfolg(k.id),
@@ -174,6 +178,7 @@ export function KontaktAnlegen({
             <label htmlFor="k-notiz">Notizen <span className="optional">optional</span></label>
             <textarea id="k-notiz" rows={2} value={werte.notes} onChange={setze("notes")} />
           </div>
+          {zusatz.element}
           {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
           </div>
 

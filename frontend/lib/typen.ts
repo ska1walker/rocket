@@ -624,6 +624,10 @@ export interface Wer {
 
 export interface NutzerEinstellungen {
   favoriten?: string[];
+  /** Zugeklappte Eigenschaftsgruppen je Objekt (Gruppenschlüssel). */
+  zugeklappt?: Partial<Record<PropertyEntity, string[]>>;
+  /** Auf Datensatzseiten nur gefüllte Felder zeigen. */
+  leere_ausblenden?: boolean;
 }
 
 export type PropertyKind = "text" | "number" | "date" | "bool" | "select" | "multiselect";

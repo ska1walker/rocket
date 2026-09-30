@@ -13,7 +13,7 @@ import {
   prozent,
   vorgangswort,
 } from "@/lib/format";
-import type { Board, Company, Deal, Mitglied, Quote, Verlustgrund } from "@/lib/typen";
+import type { Board, Company, Deal, Pipeline, Quote, Verlustgrund } from "@/lib/typen";
 import { Beteiligtenblock } from "@/components/beteiligte";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Dealstufe } from "@/components/stufe";
@@ -23,8 +23,7 @@ import { Podcastblock } from "@/components/podcast";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { AngebotAnlegen } from "@/components/angebot-anlegen";
 import { Qualifizierungsblock } from "@/components/qualifizierung";
-import { Eigenschaftswerteblock } from "@/components/eigenschaften";
-import { Stammdaten } from "@/components/stammdaten";
+import { Feldgruppen } from "@/components/feldgruppen";
 import { Notizkasten } from "@/components/notizkasten";
 import { Dokumente } from "@/components/dokumente";
 
@@ -60,10 +59,13 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
     queryFn: () => api.get<Board>("/api/board"),
   });
 
-  const mitglieder = useQuery({
-    queryKey: ["mitglieder"],
-    queryFn: () => api.get<Mitglied[]>("/api/mitglieder"),
+  const pipelines = useQuery({
+    queryKey: ["pipelines"],
+    queryFn: () => api.get<Pipeline[]>("/api/pipelines"),
+    staleTime: 60_000,
   });
+  const pipelineName = (pid: string) => pipelines.data?.find((p) => p.id === pid)?.name ?? "—";
+
 
   const zustaendig = useMutation({
     mutationFn: (owner_id: string | null) => api.patch<Deal>(`/api/deals/${id}`, { owner_id }),
@@ -197,7 +199,8 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
 
       <div className="datensatz">
         <div>
-          <Stammdaten
+          <Feldgruppen
+            entity="deals"
             titel={`Über diesen ${wort}`}
             pfad={`/api/deals/${id}`}
             abfrageSchluessel={["deal", id]}
@@ -205,12 +208,8 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
             loeschtext={`Der ${wort} verschwindet vom Board und aus der Prognose. Verlauf und Angebote bleiben 30 Tage wiederherstellbar.`}
             kopfrechts={<Dealstufe name={d.stage_name} art={d.stage_kind} />}
             werte={d as unknown as Record<string, unknown>}
-            felder={[
-              { key: "name", text: "Bezeichnung" },
-              {
-                key: "company_id",
-                text: "Firma",
-                art: "select",
+            sonder={{
+              company_id: {
                 optionen: (firmen.data ?? []).map((f) => ({ wert: f.id, text: f.name })),
                 auchLeer: true,
                 // Angezeigt wird der Name als Verweis, bearbeitet die
@@ -218,27 +217,26 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
                 // ohne dass jemand eine UUID abtippt.
                 zeige: () =>
                   d.company_id ? (
-                    <Link href={`/firmen/${d.company_id}`} style={{ textDecoration: "underline", textUnderlineOffset: "2px" }}>
-                      {d.company_name}
-                    </Link>
+                    <Link href={`/firmen/${d.company_id}`} className="fg-verweis">{d.company_name}</Link>
                   ) : (
-                    <span className="ohne-zuordnung">noch keine — über „Bearbeiten“ zuordnen</span>
+                    <span className="ohne-zuordnung">noch keine — mit dem Stift zuordnen</span>
                   ),
               },
-              { key: "product", text: "Produkt", art: "select", optionen: Object.entries(PRODUKT_TEXT).map(([wert, text]) => ({ wert, text })) },
-              { key: "amount_cents", text: "Betrag netto", art: "number", skala: 100, zeige: (v) => euro(Number(v)) },
-              { key: "probability", text: "Wahrscheinlichkeit", zeige: (v) => prozent(Number(v)) },
-              { key: "close_date", text: "Abschluss geplant", art: "date", zeige: (v) => <span style={ueberfaellig ? { color: "var(--am-fehler)" } : undefined}>{datum(String(v))}{ueberfaellig && " · überfällig"}</span> },
-              { key: "service_days", text: "Servicetage", art: "number" },
-              { key: "next_step", text: "Nächster Schritt", art: "textarea" },
-              { key: "owner_id", text: "Zuständig", art: "select", optionen: (mitglieder.data ?? []).map((m) => ({ wert: m.id, text: m.display_name ?? m.olares_username })) },
-              { key: "lost_reason", text: "Grund für die Absage", art: "textarea" },
-            ]}
+              probability: { zeige: (v) => prozent(Number(v)) },
+              pipeline_id: { zeige: (v) => pipelineName(String(v)) },
+              stage_name: { zeige: () => <Dealstufe name={d.stage_name} art={d.stage_kind} /> },
+              close_date: {
+                zeige: (v) => (
+                  <span className={ueberfaellig ? "fg-ueberfaellig" : undefined}>
+                    {datum(String(v))}
+                    {ueberfaellig && " · überfällig"}
+                  </span>
+                ),
+              },
+            }}
           />
 
           <Beteiligtenblock dealId={id} />
-
-          <Eigenschaftswerteblock entity="deals" id={id} werte={d.custom} abfrageSchluessel={["deal", id]} />
 
           <Qualifizierungsblock dealId={id} />
 
