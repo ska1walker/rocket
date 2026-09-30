@@ -47,6 +47,32 @@ Olares (`olares-cli market get rocket -s market.AImighty`).
 | Entrances `authLevel: internal` | **Ausnahme:** `public` — siehe „Entschieden" |
 | „Kein gesetzter Markenname / kein Logo" | **Ausnahme:** AImighty-Wortmarke bleibt — siehe „Entschieden" |
 
+## Der Markt bewegt sich auch ohne uns
+
+Marc veröffentlicht im selben Repo eigene Apps und ändert den Markt
+selbst — am 30.9.2026 zum Beispiel, wie `_lib.ts` die Änderungszeit der
+Apps rechnet (`appModifyTime` nach Deploy-Zeitpunkt statt nach Version).
+Ein Rocket-Eintrag, der auf einem älteren `main` gebaut ist, kann dadurch
+veraltet sein, ohne dass Git einen Konflikt meldet. Deshalb gilt
+**vor jedem Markt-Eintrag** (festgelegt von Kai am 30.9.2026):
+
+1. **`upstream/main` frisch holen und den Zweig darauf bauen**, nie auf
+   einem Zweig eines früheren Eintrags oder einem alten Stand.
+2. **Nachlesen, was sich seit dem letzten Rocket-Eintrag geändert hat**
+   (`git log` und `git diff` auf `functions/` seit dem letzten
+   `rocket`-Commit). Betrifft es mehr als fremde App-Einträge — `_lib.ts`,
+   die API unter `functions/api/`, Felder in `_apps.ts`, Regeln in
+   `CLAUDE.md` des Markt-Repos —, dann erst verstehen, ob Rocket etwas
+   nachziehen muss, und das hier unter den Regeln festhalten.
+3. **Mit wrangler gegen genau diesen Stand beweisen**, nicht gegen den
+   vom letzten Mal.
+4. **Unmittelbar vor dem Merge erneut prüfen**, ob `main` weitergelaufen
+   ist; wenn ja, konfliktfrei (`git merge-tree`) und die Änderung
+   verstanden, sonst neu aufbauen.
+5. Ist ein Rocket-Eintrag nicht durchgekommen und ein neuer folgt, **baut
+   der neue auf `main` auf und nimmt den alten in seine Notizen mit** —
+   den alten Zweig nicht nachträglich einreichen.
+
 ## Regeln, die bei jedem Markt-PR gelten
 
 - **Jede Änderung braucht eine neue Version** — auch reine Texte,
@@ -121,6 +147,10 @@ Erster Durchlauf: Rocket 26.9.1, PR #81, 30.9.2026 — von Kai im Katalog der Bo
 Zweiter Durchlauf: Rocket 26.9.4, PR #83, 30.9.2026 — Fork-Branch `rocket-26.9.4`, lokal mit wrangler bewiesen, von der Standard-Sitzung gemergt, auf `main` byte-gleich geprüft (sha256 `80137700…dd099`). Überspringt 26.9.2 und 26.9.3; das Update von 26.9.1 spielt die Migrationen 0033–0035 beim Start ein. Von Kai auf der Box aktualisiert und laufend bestätigt (30.9.2026) — das erste Update über den Markt, nicht nur eine Erstinstallation.
 
 Dritter Durchlauf: Rocket 26.9.5, PR #84, 30.9.2026 — auf Kais Auftrag vor einer Installation auf der Box eingereicht (die Regel „erst nach laufender Installation" hat er damit bewusst übergangen). Fork-Branch `rocket-26.9.5`, alle vier Endpunkte lokal mit wrangler bewiesen, von der Standard-Sitzung gemergt, auf `main` byte-gleich geprüft (sha256 `e7f50cc2…6545d`). Keine Datenbankänderung gegenüber 26.9.4.
+
+Vierter Durchlauf: Rocket 26.9.7, PR #85, 30.9.2026 — auf Kais Auftrag vor einer Installation auf der Box. Der Eintrag für 26.9.6 (Fork-Branch `rocket-26.9.6`) kam nie an, weil die Markt-Sitzung auf eine Bestätigung wartete; 26.9.7 baut auf Marcs frischem `main` auf (dort hatte sich inzwischen `appModifyTime` geändert) und nimmt 26.9.6 in die Notizen mit. Fork-Branch `rocket-26.9.7`, lokal mit wrangler bewiesen, in einer Standard-Sitzung erst nach Kais Bestätigung dort gemergt, auf `main` byte-gleich geprüft (sha256 `c471aed4…0931`, keine alten Schlüssel). Keine Datenbankänderung gegenüber 26.9.5.
+
+**Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
 

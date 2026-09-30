@@ -17,6 +17,13 @@ def _in(stunden: float) -> str:
     return (datetime.now().astimezone() + timedelta(hours=stunden)).isoformat()
 
 
+def _heute_mittag() -> str:
+    # Nicht „in zwei Stunden“: Ab 22 Uhr liegt das schon morgen, und „heute
+    # fällig“ richtet sich nach dem Kalendertag der Box (CI lief am 30.9.2026
+    # um 22 Uhr UTC rot).
+    return datetime.now().astimezone().replace(hour=12, minute=0, second=0, microsecond=0).isoformat()
+
+
 async def test_art_phase_und_dringlichkeit(datenbank):
     async with klient_fuer("aufg-art") as k:
         a = (await k.post("/api/tasks", json={
@@ -39,7 +46,7 @@ async def test_art_phase_und_dringlichkeit(datenbank):
 
 async def test_die_drei_fragen_einer_aufgabenliste(datenbank):
     async with klient_fuer("aufg-fristen") as k:
-        await k.post("/api/tasks", json={"title": "Heute", "due_at": _in(2)})
+        await k.post("/api/tasks", json={"title": "Heute", "due_at": _heute_mittag()})
         await k.post("/api/tasks", json={"title": "Gestern", "due_at": _in(-30)})
         await k.post("/api/tasks", json={"title": "Nächste Woche", "due_at": _in(24 * 7)})
         await k.post("/api/tasks", json={"title": "Irgendwann"})
