@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-SEGMENTLISTE — docs/MODULE.md
+
 import { Plus, X } from "lucide-react";
 import { gruppieren } from "@/lib/anordnung";
 import { OHNE_WERT, OPERATOR_TEXT } from "@/lib/format";

@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-VERSAND — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { datumZeit, EINWILLIGUNG_TEXT } from "@/lib/format";

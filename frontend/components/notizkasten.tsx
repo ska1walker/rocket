@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-NOTIZ — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";

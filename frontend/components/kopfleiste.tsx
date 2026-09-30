@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-KOPFLEISTE — docs/MODULE.md
+
 // Die Kopfleiste — die zwei Dinge, die man von überall tut.
 //
 // Suchen und Anlegen gehören nicht in die Navigationsspalte. Die Suche

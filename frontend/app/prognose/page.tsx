@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-PROGNOSE — docs/MODULE.md
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, suchparameter } from "@/lib/api";

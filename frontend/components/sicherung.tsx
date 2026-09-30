@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-EINSTELLUNGEN — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Download, Save } from "lucide-react";
 import { useState } from "react";

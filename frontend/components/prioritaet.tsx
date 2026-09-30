@@ -1,3 +1,5 @@
+// Modul HB-PILLE — docs/MODULE.md
+
 import { PRIORITAET_TEXT } from "@/lib/format";
 
 /**

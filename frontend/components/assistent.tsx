@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-ASSISTENT — docs/MODULE.md
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowUp, Check, ExternalLink, X } from "lucide-react";
 import Link from "next/link";

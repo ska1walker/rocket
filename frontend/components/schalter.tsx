@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-SCHALTER — docs/MODULE.md
+
 import { useId } from "react";
 
 /**

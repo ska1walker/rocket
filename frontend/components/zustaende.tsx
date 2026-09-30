@@ -1,3 +1,5 @@
+// Modul HB-ZUSTAND — docs/MODULE.md
+
 import { AlertTriangle, Inbox } from "lucide-react";
 
 export function Laedt({ text = "Wird geladen …" }: { text?: string }) {

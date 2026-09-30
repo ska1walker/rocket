@@ -69,7 +69,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
 | Tests | 704 Backend, 73 Frontend |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.9.4 läuft auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`; 26.9.1 installiert am 30.9.2026, am selben Tag auf 26.9.4 aktualisiert — das erste Update über den Markt, mit den Migrationen 0033–0035). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
-| Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.9.5` am 30.9.2026, Chart als Anhang). Katalogeintrag `rocket` **26.9.4 im Markt** (`bayerhazard/aimighty-market` PR #83, 30.9.2026; vorher 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
+| Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.9.5` am 30.9.2026, Chart als Anhang). Katalogeintrag `rocket` **26.9.5 im Markt** (`bayerhazard/aimighty-market` PR #84, 30.9.2026; vorher 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
 **Nicht gebaut, bewusst:** Mehrsprachigkeit (internes Werkzeug),
 Sequenzen (Kampagnen ja, automatische Folgen nein), Kalender-Anbindung,
@@ -204,6 +204,12 @@ eine Farbe ändern will, ändert das Token.
   obwohl der Markt für seine Apps „kein Markenname, kein Logo" vorgibt —
   entschieden von Kai am 30.9.2026.
 
+**Bausteine für die ganze Schmiede:** `docs/MODULE.md` beschreibt jedes
+Modul der Oberfläche mit Kennung, Bild und Übertragbarkeit. `AM-` kommt
+aus dem Paket und ist überall gleich, `HB-` sind Hausbausteine, die Relay
+und andere Apps übernehmen sollen (Kennung bleibt), `RK-` ist
+CRM-Fachlichkeit.
+
 `frontend/tailwind.aimighty.preset.js` ist eine unveränderte Kopie aus
 der Lieferung und liest die Token über `var(--am-*)`.
 
@@ -249,7 +255,10 @@ der Lieferung und liest die Token über `var(--am-*)`.
    Definition sind nach dem Anlegen fest.
 
 4. **Bei UI-Arbeit:** Erst schauen, ob `globals.css` das Bauteil schon
-   hat. Werte nie am Bauteil setzen. Jeder Dialog nimmt `useDialogfalle`
+   hat, und in `docs/MODULE.md`, ob es den Baustein schon gibt — jeder
+   hat dort eine Kennung (`AM-`, `HB-`, `RK-`), die auch im Kopf seiner
+   Datei und im CSS-Abschnitt steht; ein neuer Baustein bekommt sie an
+   allen drei Stellen. Werte nie am Bauteil setzen. Jeder Dialog nimmt `useDialogfalle`
    (Fokus, Tab, Escape); Spalten, die das Handy nicht trägt, kommen aus
    CSS mit Umbruch (`.feldreihe`, `.datensatz-zwei`), nicht inline.
 

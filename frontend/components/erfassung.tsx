@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-ANLEGEN — docs/MODULE.md
+
 import { useMutation } from "@tanstack/react-query";
 import { ClipboardPaste, ImageUp, Sparkles, X } from "lucide-react";
 import Link from "next/link";

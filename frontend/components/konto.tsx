@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-KONTO — docs/MODULE.md
+
 import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown, Globe, KeyRound, LogOut, Server } from "lucide-react";
 import Link from "next/link";

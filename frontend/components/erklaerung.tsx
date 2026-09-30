@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-ERKLAERUNG — docs/MODULE.md
+
 import { Info } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 

@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-ASSISTENT — docs/MODULE.md
+
 import { useEffect, useState } from "react";
 
 /**

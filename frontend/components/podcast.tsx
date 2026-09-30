@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-PODCAST — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Headphones, Trash2 } from "lucide-react";
 import Link from "next/link";

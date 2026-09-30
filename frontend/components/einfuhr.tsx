@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-EINFUHR — docs/MODULE.md
+
 // Kontakte und Firmen aus einer CSV.
 //
 // Zwei Schritte, nicht vier: sehen, was passieren würde, und es dann tun.

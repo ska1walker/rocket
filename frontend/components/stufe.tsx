@@ -1,3 +1,5 @@
+// Modul HB-PILLE — docs/MODULE.md
+
 import { STUFEN_TEXT } from "@/lib/format";
 import type { LifecycleStage, StageKind } from "@/lib/typen";
 

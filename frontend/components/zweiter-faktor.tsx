@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-FAKTOR — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import { useState } from "react";

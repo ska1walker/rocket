@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-ANREICHERUNG — docs/MODULE.md
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";

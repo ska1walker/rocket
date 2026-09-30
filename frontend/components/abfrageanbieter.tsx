@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-ANREICHERUNG — docs/MODULE.md
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { ApiFehler } from "@/lib/api";

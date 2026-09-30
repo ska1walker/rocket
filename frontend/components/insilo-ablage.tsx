@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-WISSEN — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/lib/api";

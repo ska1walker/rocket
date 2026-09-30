@@ -1,5 +1,7 @@
 "use client";
 
+// Modul HB-MEHRFACH — docs/MODULE.md
+
 import { Check, ChevronDown, X } from "lucide-react";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";

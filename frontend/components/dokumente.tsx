@@ -1,5 +1,7 @@
 "use client";
 
+// Modul RK-DOKUMENTE — docs/MODULE.md
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, FileImage, FileSpreadsheet, File as FileZeichen, Upload } from "lucide-react";
 import { useRef, useState } from "react";
