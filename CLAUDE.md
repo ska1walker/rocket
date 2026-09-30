@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 0.14.0 — Vertrieb, Versand und Service durchgängig. Bis 0.12.1 hieß das Produkt **Beacon**; der Umzug auf Kais Box unter dem neuen Namen steht aus
+> **Status:** 26.9.1 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig. Bis 0.12.1 hieß das Produkt **Beacon**; der Umzug auf Kais Box unter dem neuen Namen steht aus
 > **Letzte Aktualisierung:** 29. September 2026
 
 ---
@@ -92,7 +92,9 @@ Dieselben Constraints wie bei Insilo. Die wichtigsten für dieses Repo:
    installiert eine App je Nutzer, ein Team kann sich keinen Bestand
    teilen. Deshalb steht `ANMELDUNG_MODUS=eigen` als Literal im
    Deployment und der Entrance `rocket` auf `public`. In diesem Modus
-   gilt `X-Bfl-User` **nicht** und legt nichts an. Reihenfolge ist die
+   gilt `X-Bfl-User` **nicht** und legt nichts an. Der Markt verlangt
+   sonst `authLevel: internal` — `public` ist bei Rocket eine bewusste,
+   von Kai bestätigte Ausnahme (30.9.2026), nicht zurückdrehen. Reihenfolge ist die
    Sicherheit: erst `eigen`, dann den Entrance öffnen, nie umgekehrt —
    sonst ist ein gefälschter Kopf der Eigentümer. Im Modus `olares`
    (lokal, Altbestand) gilt weiter: Identität aus `X-Bfl-User`, fehlt er,
@@ -199,6 +201,10 @@ eine Farbe ändern will, ändert das Token.
   notiert hat.
 - **Keine Verläufe, kein Glas, keine Parallaxe, keine KI-Funken.**
 
+- **Die AImighty-Wortmarke oben links bleibt** (`components/marke.tsx`),
+  obwohl der Markt für seine Apps „kein Markenname, kein Logo" vorgibt —
+  entschieden von Kai am 30.9.2026.
+
 `frontend/tailwind.aimighty.preset.js` ist eine unveränderte Kopie aus
 der Lieferung und liest die Token über `var(--am-*)`.
 
@@ -277,9 +283,10 @@ der Lieferung und liest die Token über `var(--am-*)`.
    Nachdenken an.
 
 9. **Beim Veröffentlichen:** `docs/BETRIEB.md`, Abschnitt
-   „Veröffentlichen". Version an drei Stellen, Tag `vX.Y.Z` baut die
+   „Veröffentlichen". Version `YY.M.<n>` (Monat ohne führende Null,
+   Zähler je Monat neu, z. B. `26.10.1`) an drei Stellen, Tag `vYY.M.n` baut die
    Abbilder (`release.yml`), das Chart wird immer als Paket geprüft
-   (`olares-cli chart lint dist/rocket-X.Y.Z.tgz`), und **erst nach einer
+   (`olares-cli chart lint dist/rocket-YY.M.n.tgz`), und **erst nach einer
    laufenden Installation auf einer Box** geht der Eintrag per PR in
    `bayerhazard/aimighty-market`. Die Regeln dahinter stehen im Skill
    `insilo/.claude/skills/olares-release/SKILL.md`; was der Markt selbst

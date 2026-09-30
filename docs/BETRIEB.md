@@ -1686,7 +1686,7 @@ Zugang bringt noch einen Nutzer anlegt.
 
 ## Datenbank ansehen — lesend, unter Zeilensicherheit
 
-Seit 0.14.0 unter *Einstellungen › Daten › Datenbank öffnen* (`/datenbank`),
+Seit 26.9.1 unter *Einstellungen › Daten › Datenbank öffnen* (`/datenbank`),
 nur für `owner` und `admin`: die Tabellen der eigenen Organisation
 durchblättern, sortieren, in einer Spalte suchen, und im Reiter **SQL**
 eigene Abfragen stellen, das Ergebnis auch als CSV.
@@ -2010,6 +2010,16 @@ ist.
 
 ## Veröffentlichen — Abbilder, Chart, Markt
 
+**Versionsschema seit 26.9.1: `YY.M.<n>`** wie im AImighty-Markt —
+`26.9.1` ist die erste Version im September 2026, `26.10.1` die erste im
+Oktober; der Zähler beginnt jeden Monat neu, der Monat steht **ohne**
+führende Null (`26.09.1` ist kein gültiges SemVer, `market upgrade`
+hinge daran). Bis 0.13.0 zählte Rocket (und davor Beacon) `0.x.y`;
+0.14.0 wurde nie veröffentlicht und ist in 26.9.1 aufgegangen. Der
+Sprung von `0.13.0` auf `26.9.1` ist nach SemVer ein Update.
+`scripts/check-chart.sh` prüft das Schema. Regeln des Markts selbst:
+`docs/MARKT.md`.
+
 Der Weg ist derselbe wie bei Insilo, nur kürzer. Die Version steht an
 **drei** Stellen und muss überall gleich sein — `scripts/check-chart.sh`
 bricht sonst ab:
@@ -2043,21 +2053,21 @@ kommen frisch an (Insilo v0.1.80, ausführlich in
 ```bash
 # 1. Version an den drei Stellen setzen, prüfen, committen
 bash scripts/check-chart.sh
-git commit -am "release: v0.1.1"
+git commit -am "release: v26.9.1"
 
-# 2. Tag pushen — release.yml baut ghcr.io/ska1walker/rocket-{frontend,backend}:0.1.1
-#    (öffentlich, amd64) und legt dist/rocket-0.1.1.tgz als Artefakt ab
-git tag v0.1.1 && git push origin main v0.1.1
+# 2. Tag pushen — release.yml baut ghcr.io/ska1walker/rocket-{frontend,backend}:26.9.1
+#    (öffentlich, amd64) und legt dist/rocket-26.9.1.tgz als Artefakt ab
+git tag v26.9.1 && git push origin main v26.9.1
 gh run watch
 
 # 3. Chart packen und mit dem Olares-Prüfer ansehen — immer das Paket,
 #    nie den Ordner (der Prüfer verlangt Ordnername == Chart-Name)
 helm package olares -d dist
-olares-cli chart lint dist/rocket-0.1.1.tgz --with-rbac --with-security-context
+olares-cli chart lint dist/rocket-26.9.1.tgz --with-rbac --with-security-context
 
 # 4. Auf der eigenen Box installieren, bevor irgendetwas in einen Markt geht
 olares-cli profile login --olares-id <id>       # macht Kai selbst (Browser, TOTP)
-olares-cli market upload dist/rocket-0.1.1.tgz
+olares-cli market upload dist/rocket-26.9.1.tgz
 olares-cli market install rocket
 ```
 

@@ -43,9 +43,9 @@ Olares (`olares-cli market get rocket -s market.AImighty`).
 | Beschreibungen englisch | ✓ |
 | Version an **5 Stellen** gleich: `_apps.ts`, `_lib.ts`-Schlüssel `rocket-<version>.tgz`, `Chart.yaml`, Manifest `metadata.version` und `spec.versionName` | im Repo 3 Stellen (BETRIEB.md), im Markt 2 weitere |
 | Farben Hanseatenblau `#051729` + Gold `#caa960`, Geist selbst gehostet, `--am-*`, WCAG 2.2 AA | ✓ (`--am-blau-900`, `--am-gold-500`) |
-| **Versionsschema `YY.M.<n>`** (z. B. `26.9.1`) | ✗ Rocket zählt SemVer `0.x.y` — siehe „Abweichungen" |
-| **Entrances `authLevel: internal`** | ✗ bewusst `public` — siehe „Abweichungen" |
-| **„Kein gesetzter Markenname / kein Logo"** | ✗ Rocket zeigt die AImighty-Wortmarke oben links — siehe „Abweichungen" |
+| Versionsschema `YY.M.<n>` (z. B. `26.9.1`) | ✓ seit 26.9.1, `check-chart.sh` prüft es |
+| Entrances `authLevel: internal` | **Ausnahme:** `public` — siehe „Entschieden" |
+| „Kein gesetzter Markenname / kein Logo" | **Ausnahme:** AImighty-Wortmarke bleibt — siehe „Entschieden" |
 
 ## Regeln, die bei jedem Markt-PR gelten
 
@@ -112,20 +112,20 @@ App-zu-App auf derselben Box geht über die **Entrance-Adresse** der
 Ziel-App; Cluster-DNS-Namen sind nicht erreichbar. Das deckt sich mit der
 Messung bei Insilo (BETRIEB.md, 15.9.2026).
 
-## Abweichungen — zu entscheiden
+## Entschieden (Kai, 30.9.2026)
 
-1. **Versionsschema.** Der Markt nennt `YY.M.<n>` (September 2026 =
-   `26.9.x`). Rocket zählt `0.14.0`. SemVer `0.x.y` ist gültig und kommt
-   durch den Linter; ein Wechsel auf `26.9.x` wäre ein Sprung nach oben
-   und damit als Update möglich. Offen, ob der Markt das verlangt oder nur
-   für die eigenen Modell-Apps so hält.
-2. **`authLevel: public`.** Der Markt nennt `internal`. Rocket braucht
-   `public`, weil ein Team sich sonst keinen Bestand teilen kann und die
-   Mail-Links von außen erreichbar sein müssen; Rocket meldet selbst an
-   (BETRIEB.md „Anmeldung"). Bleibt so.
-3. **Wortmarke.** Der Markt sagt „kein gesetzter Markenname / kein Logo".
-   Rocket zeigt seit 0.1.4 die AImighty-Wortmarke oben links
-   (`frontend/components/marke.tsx`). Offen, ob die Regel für Rocket gilt.
+1. **Versionsschema `YY.M.<n>`.** Rocket startet im Markt als neue App und
+   übernimmt das Schema gleich: erste Version `26.9.1`, im Oktober
+   `26.10.1`. Bis 0.13.0 zählte Rocket `0.x.y`; 0.14.0 wurde nie
+   veröffentlicht. Die erste Zeile der `upgradeDescription` beginnt wie
+   im Markt üblich mit `v26.9.1: …` und endet mit „Built for Olares
+   1.12.6."
+2. **`authLevel: public` bleibt** — eine wichtige Ausnahme. Ohne sie
+   könnte sich kein Team einen Bestand teilen, und die Links in Mails
+   wären von außen nicht erreichbar; Rocket meldet selbst an
+   (BETRIEB.md „Anmeldung").
+3. **Die AImighty-Wortmarke bleibt** oben links
+   (`frontend/components/marke.tsx`).
 
 Nicht übernommen, weil für Rocket ohne Belang: Titelschema
 `AIM <Modell> <Größe> <Aufgabe>`, Beschreibungsvorlage für Modelle,
