@@ -1908,6 +1908,42 @@ ROCKET_URL=http://localhost:3000 npm run e2e    # anderer Port
 nur 4,36:1, Gold-800 auf Blau-50 4,45:1 — knapp unter 4,5. Das ist eine
 Entscheidung über die Token, nicht über ein Bauteil.
 
+## Symbol der Web-App (seit 26.9.7)
+
+Bis 26.9.6 gab die Oberfläche kein Symbol an. iOS baute beim „Teilen →
+Zum Home-Bildschirm" daraus eine dunkle Kachel mit dem ersten Buchstaben
+des Titels, Android und der Browser-Reiter ein leeres Blatt.
+
+**Es gilt ein Symbol: das Rocket-Icon aus `docs/icon/rocket.svg`** (Marcs
+Idee 6, dasselbe wie im Markt). Nie ein anderes Bild, nie ein Platzhalter.
+
+| Datei | Größe | Form | Wofür |
+|---|---|---|---|
+| `frontend/app/icon.png` | 64 | Kachel mit Ecken | Favicon im Reiter |
+| `frontend/app/apple-icon.png` | 180 | Quadrat ohne Ecken | iOS „Zum Home-Bildschirm" |
+| `frontend/public/symbol/rocket-192.png`, `-512.png` | 192, 512 | Kachel mit Ecken | Manifest, `purpose: any` |
+| `frontend/public/symbol/rocket-maskable-512.png` | 512 | Quadrat ohne Ecken | Manifest, `purpose: maskable` (Android) |
+
+Die Formen ohne Ecken sind Absicht: iOS und Android runden selbst, eine
+eigene Rundung gäbe dort schwarze Ecken. Next hängt `icon.png`,
+`apple-icon.png` und `app/manifest.ts` (Name „Rocket", `standalone`) von
+selbst in den Kopf.
+
+Neu erzeugen, wenn sich das Icon ändert:
+
+```bash
+cd frontend && ROCKET_CHROMIUM=/opt/pw-browsers/chromium node scripts/app-symbole.mjs
+```
+
+Gerendert wird mit Chromium und der Geist aus `app/fonts/`, damit das „R"
+dasselbe ist wie im Markt-Icon. Der Browser-Rundgang prüft, dass die drei
+Link-Tags da sind und jedes Bild als PNG kommt.
+
+Auf dem iPhone: Ein schon angelegtes Lesezeichen behält die alte Kachel —
+einmal vom Home-Bildschirm entfernen und neu hinzufügen. Durch `standalone`
+öffnet es sich danach ohne Safari-Leisten; iOS führt für so geöffnete
+Web-Apps eigene Cookies, also einmal neu anmelden.
+
 ## Datenbank ansehen — lesend, unter Zeilensicherheit
 
 Seit 26.9.1 unter *Einstellungen › Daten › Datenbank öffnen* (`/datenbank`),

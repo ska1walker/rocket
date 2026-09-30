@@ -104,3 +104,23 @@ for (const [name, muster] of SEITEN) {
     expect(schwer, "axe critical/serious").toEqual([]);
   });
 }
+
+// Das Symbol auf dem Home-Bildschirm: ohne Angabe baut iOS eine Kachel aus
+// dem ersten Buchstaben des Titels. Es muss das Rocket-Icon sein
+// (docs/icon/rocket.svg, gerendert von scripts/app-symbole.mjs).
+test("Web-App-Symbole: Apple-Touch-Icon, Favicon und Manifest", async ({ page }) => {
+  await page.goto("/anmelden");
+  const hrefs = await page.evaluate(() =>
+    ["apple-touch-icon", "icon", "manifest"].map(
+      (rel) => document.querySelector(`link[rel="${rel}"]`)?.getAttribute("href") ?? null,
+    ),
+  );
+  expect(hrefs.every(Boolean), "Link-Tags im Kopf").toBe(true);
+  const manifest = await (await page.request.get(hrefs[2]!)).json();
+  expect(manifest.short_name).toBe("Rocket");
+  for (const pfad of [hrefs[0]!, hrefs[1]!, ...manifest.icons.map((i: { src: string }) => i.src)]) {
+    const antwort = await page.request.get(pfad);
+    expect(antwort.status(), pfad).toBe(200);
+    expect(antwort.headers()["content-type"], pfad).toBe("image/png");
+  }
+});
