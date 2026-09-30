@@ -306,7 +306,7 @@ function Feldzeile({
 
   if (offen) {
     return (
-      <div className="eigenschaft fg-bearbeiten">
+      <div className="eigenschaft">
         <dt><label htmlFor={`fg-${feld.key}`}>{feld.label}</label></dt>
         <dd>
           <form

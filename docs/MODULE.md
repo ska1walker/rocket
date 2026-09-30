@@ -788,13 +788,26 @@ RK. Ein Bild dazu entsteht mit dem Prüflauf im Browser (siehe BETRIEB.md,
 Beim Durchgehen fiel auf, was nicht zur eigenen Regel passt. Nichts davon
 ist akut; es ist die Liste für eine ruhige Stunde.
 
-- **Farbwerte im CRM-Abschnitt:** Die Regel ist „kein einziger Farbwert".
-  Tatsächlich stehen dort `#fff` (Personenkreis, Zahlpille, `.btn-gefahr`,
-  aktiver Stufenschritt), `rgb(255 255 255 / .25)` am Knopfmenü und
-  `rgb()`-Schatten an der Mehrfachauswahl-Tafel statt `--am-schatten-1`.
-  Gehört in Token.
-- **Klassen ohne CSS:** `.tabellenrahmen` (Einfuhr), `.erfassung-ergebnis`,
-  `.marke-punkt` (Druck).
+**Erledigt am 30.9.2026 (Aufräumen):**
+
+- **Farbwerte:** Der CRM-Abschnitt ist farbwertfrei. Die Werte kamen in
+  vier neue Rollen-Token: `--am-text-auf-farbe`,
+  `--am-trenner-auf-handlung`, `--am-schatten-2` und
+  `--am-schatten-schild`. Wo eine Handlungsfläche Weiß trug, gilt jetzt
+  `--am-handlung-text`.
+- **Klassen ohne CSS** sind entfernt. Die Tabellen der Einfuhr sind
+  Rollflächen nach HB-TABELLE, und „holt ab" im Postfach ist eine
+  HB-PILLE.
+- **Ungenutzt und entfernt:**
+  - CSS: `.pill`, `.quelle-freigabe`, `.filter-mehrfach`,
+    `.deal-karte[data-zieht]`;
+  - Code: `zusammenfassung()`, `PropertyDefinition`, `ANMELDEPFAD`,
+    `anmeldung.frist` sowie fünf ungenutzte Importe und Variablen.
+- **Wache:** `tsconfig.json` verlangt jetzt `noUnusedLocals` und
+  `noUnusedParameters`.
+
+**Noch offen:**
+
 - **Paketklassen ohne Nutzer:** `.streifen*`, `.deckschicht`,
   `table.am-tabelle`, `.tabelle-rahmen`, `.btn-gesperrt`,
   `.flaeche-auswahl`, `.huelle.hat-ablage`, `html[data-dichte]`. Sie

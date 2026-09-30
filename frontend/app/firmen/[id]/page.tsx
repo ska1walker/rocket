@@ -25,15 +25,6 @@ import { useState } from "react";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { Dokumente } from "@/components/dokumente";
 
-function Eigenschaft({ name, wert }: { name: string; wert: React.ReactNode }) {
-  return (
-    <div className="eigenschaft">
-      <dt>{name}</dt>
-      <dd>{wert || "—"}</dd>
-    </div>
-  );
-}
-
 export default function FirmaSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [kontaktOffen, setKontaktOffen] = useState(false);

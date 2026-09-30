@@ -252,7 +252,7 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
               {OBJEKT_TEXT[vorschau.entity]}
             </p>
 
-            <div className="tabellenrahmen" style={{ overflowX: "auto" }}>
+            <div className="rollbar" tabIndex={0}>
               <table className="tabelle">
                 <thead>
                   <tr>
@@ -368,7 +368,7 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
         {bisher.data && bisher.data.length > 0 && (
           <details className="einfuhr-protokoll">
             <summary style={{ cursor: "pointer", fontSize: "0.8125rem" }}>Bisherige Importe</summary>
-            <div className="tabellenrahmen" style={{ overflowX: "auto", marginTop: "var(--am-raum-2)" }}>
+            <div className="rollbar" tabIndex={0} style={{ marginTop: "var(--am-raum-2)" }}>
               <table className="tabelle">
                 <thead>
                   <tr>

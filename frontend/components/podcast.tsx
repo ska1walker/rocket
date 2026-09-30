@@ -145,7 +145,7 @@ export function Podcastblock({ entity, entityId }: { entity: "companies" | "deal
           </p>
         )}
         {laufend && (
-          <p className="erfassung-hinweis podcast-stand" aria-live="polite" style={{ marginBottom: "var(--am-raum-3)" }}>
+          <p className="erfassung-hinweis" aria-live="polite" style={{ marginBottom: "var(--am-raum-3)" }}>
             {fortschrittText(laufend.fortschritt)}
           </p>
         )}

@@ -132,6 +132,17 @@
      Bauteile verwendeten ihn, bevor es ihn gab, und schwebten deshalb
      ohne (gefunden am 15.9.2026 vom Tokentest). */
   --am-schatten-1: 0 8px 24px rgb(5 23 41 / 12%), 0 1px 2px rgb(5 23 41 / 8%);
+  /* Große schwebende Flächen (Assistent) und das Schild darüber — standen
+     bis 26.9.5 als Wert am Bauteil. */
+  --am-schatten-2: 0 16px 40px rgb(5 23 41 / 22%);
+  --am-schatten-schild: 0 6px 16px rgb(5 23 41 / 28%);
+
+  /* Schrift auf einer satten Fläche, die in beiden Modi dunkel bleibt
+     (Blau 600/900, Fehlerrot) — dort ist Weiß richtig, auch im Dunkeln.
+     Auf der Handlungsfläche gilt dagegen --am-handlung-text. */
+  --am-text-auf-farbe: #ffffff;
+  /* Trennlinie innerhalb eines Handlungsknopfs (Knopfmenü). */
+  --am-trenner-auf-handlung: rgb(255 255 255 / 0.25);
 
   --am-gold-auszeichnung: var(--am-gold-500);
   --am-fokus-ring: #002f56;
@@ -173,6 +184,8 @@ html.dunkel {
   --am-handlung-aktiv: var(--am-gold-600);
   --am-handlung-text: var(--am-blau-900);
   --am-schatten-1: 0 8px 24px rgb(0 0 0 / 40%), 0 1px 2px rgb(0 0 0 / 30%);
+  --am-schatten-2: 0 16px 40px rgb(0 0 0 / 45%);
+  --am-schatten-schild: 0 6px 16px rgb(0 0 0 / 45%);
 
   --am-erfolg: #55c483;
   --am-hinweis: #60b0ff;
@@ -1692,7 +1705,6 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .deal-karte:hover { border-color: var(--am-rand-betont-farbe); }
   .deal-karte:active { cursor: grabbing; }
-  .deal-karte[data-zieht="true"] { opacity: 0.4; }
 
   .deal-karte-name {
     display: -webkit-box;
@@ -1880,7 +1892,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     height: 24px;
     border-radius: var(--am-radius-voll);
     background: var(--am-blau-600);
-    color: #fff;
+    color: var(--am-text-auf-farbe);
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -2036,7 +2048,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .knopfmenue-pfeil {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-    border-left: 1px solid rgb(255 255 255 / 0.25);
+    border-left: 1px solid var(--am-trenner-auf-handlung);
     padding-left: var(--am-raum-2);
     padding-right: var(--am-raum-2);
   }
@@ -2573,18 +2585,6 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     padding-right: var(--am-raum-4);
   }
 
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: var(--am-radius-voll);
-    font-weight: 500;
-    font-size: 0.75rem;
-    background: var(--am-flaeche-1);
-    color: var(--am-text-sekundaer);
-  }
-
   /* ── Segmentierung: Ansichten, Filter, Stapel [RK-SEGMENTLISTE] ─────────────────────
      Der Kern der Listenarbeit. Eine Liste ist nie „alle“, sondern eine
      Frage an den Bestand — die Reiter sind die gespeicherten Fragen. */
@@ -2671,7 +2671,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     padding: 0 4px;
     border-radius: var(--am-radius-voll);
     background: var(--am-handlung-ruhend);
-    color: #fff;
+    color: var(--am-handlung-text);
     font-size: 0.625rem;
     font-weight: 600;
   }
@@ -2711,20 +2711,6 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     height: var(--am-ziel-zeiger);
     color: var(--am-text-gedaempft);
     font-size: 0.8125rem;
-  }
-
-  .filter-mehrfach {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: var(--am-raum-3);
-    font-size: 0.8125rem;
-  }
-
-  .filter-mehrfach label {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--am-raum-1);
-    cursor: pointer;
   }
 
   .filterchips {
@@ -2798,7 +2784,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .btn-gefahr {
     background: var(--am-fehler);
-    color: #fff;
+    color: var(--am-text-auf-farbe);
     border-color: var(--am-fehler);
   }
 
@@ -2958,7 +2944,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .stufenschritt.aktiv {
     background: var(--am-handlung-ruhend);
     border-color: var(--am-handlung-ruhend);
-    color: #fff;
+    color: var(--am-handlung-text);
     font-weight: 600;
     cursor: default;
   }
@@ -3089,7 +3075,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   /* Die Zahl der überfälligen ist die einzige, die rot sein darf. */
   .zahlpille[data-warnung="true"] { background: var(--am-fehler); }
-  .dunkel .zahlpille[data-warnung="true"] { background: var(--am-fehler); color: #fff; }
+  .dunkel .zahlpille[data-warnung="true"] { background: var(--am-fehler); color: var(--am-text-auf-farbe); }
 }
 
 @layer components {
@@ -3185,7 +3171,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     border: var(--am-rand-ruhend) solid var(--am-rand);
     border-radius: var(--am-radius-mittel);
     background: var(--am-seite);
-    box-shadow: 0 8px 24px rgb(5 23 41 / 12%);
+    box-shadow: var(--am-schatten-1);
     overflow: hidden;
   }
 
@@ -3570,7 +3556,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .assistent-knopf svg {
     height: 3.25rem;
     width: auto;
-    filter: drop-shadow(0 6px 16px rgba(5, 23, 41, 0.28));
+    filter: drop-shadow(var(--am-schatten-schild));
   }
   .assistent-knopf:hover { transform: translateY(-1px); }
   .assistent-knopf:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
@@ -3588,7 +3574,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     border: var(--am-rand-ruhend) solid var(--am-rand);
     border-radius: var(--am-radius-mittel);
     background: var(--am-seite);
-    box-shadow: 0 16px 40px rgba(5, 23, 41, 0.22);
+    box-shadow: var(--am-schatten-2);
     overflow: hidden;
   }
 
@@ -3643,7 +3629,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     line-height: 1.5;
     white-space: pre-wrap;
   }
-  .assistent-nachricht.nutzer { align-self: flex-end; background: var(--am-blau-900); color: #fff; }
+  .assistent-nachricht.nutzer { align-self: flex-end; background: var(--am-blau-900); color: var(--am-text-auf-farbe); }
   .assistent-nachricht.arbeitet { color: var(--am-text-gedaempft); font-style: italic; }
   .assistent-nachricht.fehler { color: var(--am-achtung); background: transparent; padding: 0; }
   .assistent-antwort { display: flex; flex-direction: column; gap: var(--am-raum-2); align-items: flex-start; }
@@ -3697,7 +3683,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     border: 0;
     border-radius: var(--am-radius-voll);
     background: var(--am-blau-900);
-    color: #fff;
+    color: var(--am-text-auf-farbe);
     cursor: pointer;
   }
   .assistent-senden:disabled { opacity: 0.4; cursor: default; }
@@ -4075,23 +4061,6 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
 }
 
-@layer components {
-  /* Die Freigabe einer eingehenden Quelle. Bewusst ein Satz und kein
-     Schalter allein: „legt Tickets an" ist eine Entscheidung mit Folgen,
-     und die gehören danebengeschrieben. */
-  .quelle-freigabe {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--am-raum-2);
-    margin-top: var(--am-raum-3);
-    max-width: 46rem;
-    font-size: 0.8125rem;
-    line-height: 1.5;
-    cursor: pointer;
-  }
-
-  .quelle-freigabe input { margin-top: 2px; flex: none; }
-}
 
 /* ── Erklärung: ein Satz, der Rest hinter dem Symbol [HB-ERKLAERUNG] ─────────────────── */
 .erklaerung { margin-bottom: var(--am-raum-4); }

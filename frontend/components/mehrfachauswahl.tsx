@@ -270,7 +270,7 @@ export function Mehrfachauswahl({
                   }}
                 >
                   <span className="mehrfach-kasten" aria-hidden="true">
-                    {an && <Check size={12} />}
+                    {an && <Check size={12} aria-hidden="true" />}
                   </span>
                   {o.text}
                 </li>

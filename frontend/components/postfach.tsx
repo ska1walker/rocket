@@ -84,7 +84,7 @@ export function Postfachblock() {
     <section className="block">
       <div className="block-kopf">
         <h2>Eingehende E-Mails</h2>
-        {e?.imap_aktiv && <span className="pille pille-erfolg">holt ab</span>}
+        {e?.imap_aktiv && <span className="stufe" data-art="won">holt ab</span>}
       </div>
       <div className="block-inhalt">
         <Erklaerung kurz="Rocket liest Ihr Postfach mit und macht aus neuen Mails Tickets — ohne etwas zu verändern." lang={<>Rocket holt eingehende Post ab und macht Tickets daraus. Es <strong>fasst dabei nichts

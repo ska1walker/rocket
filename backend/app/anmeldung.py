@@ -26,7 +26,7 @@ from __future__ import annotations
 import hashlib
 import secrets
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from uuid import UUID
 
 import asyncpg
@@ -467,7 +467,3 @@ async def einladung_einloesen(conn: asyncpg.Connection, token: str, passwort: st
     # Verwalter lädt neu ein, die Person richtet den Faktor neu ein.
     await zweiter_faktor_zuruecksetzen(conn, row["user_id"])
     return row["user_id"]
-
-
-def frist(tage: int) -> datetime:
-    return datetime.now(UTC) + timedelta(days=tage)

@@ -69,7 +69,6 @@ export default function DruckSeite({ params }: { params: Promise<{ id: string }>
       <article className="dokument">
         <header className="dokument-kopf">
           <div className="dokument-marke">
-            <span className="marke-punkt" aria-hidden="true" />
             <span>{a.absender_name ?? "Absender fehlt"}</span>
           </div>
         </header>
