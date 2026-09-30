@@ -6,6 +6,7 @@ ist die Trennung zwischen zwei Mandanten, und eine nachgebaute Datenbank
 würde genau das nicht prüfen, worauf es ankommt.
 """
 
+import contextlib
 import os
 import pathlib
 import tempfile
@@ -110,3 +111,24 @@ async def kai(datenbank):
 async def marc(datenbank):
     async with _klient("marc") as c:
         yield c
+
+
+TEST_PASSWORT = "ein langes gutes Passwort"
+
+
+@contextlib.asynccontextmanager
+async def als_person(verwalter: AsyncClient, person_id: str):
+    """Ein Klient, der **als** diese Person angemeldet ist.
+
+    Seit dem Ende des Sitzplatzes handelt jede Person nur über ihre eigene
+    Sitzung: Der Verwalter lädt sie ein, sie setzt ihr Passwort und ist
+    damit angemeldet. Über https, sonst sendet httpx den `Secure`-Keks
+    nicht zurück.
+    """
+    einladung = await verwalter.post(f"/api/mitglieder/{person_id}/einladung")
+    assert einladung.status_code in (200, 201), einladung.text
+    token = einladung.json()["pfad"].rsplit("/", 1)[-1]
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="https://test") as klient:
+        r = await klient.post(f"/api/einladung/{token}", json={"passwort": TEST_PASSWORT})
+        assert r.status_code == 200, r.text
+        yield klient

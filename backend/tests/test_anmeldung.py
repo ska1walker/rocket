@@ -487,25 +487,6 @@ async def test_ein_mitglied_kann_sich_nicht_auf_den_platz_des_eigentuemers_setze
         assert (await k.put("/api/settings", json={"llm_model": "x"}, headers=kopf)).status_code == 403
 
 
-async def test_der_sitzplatz_nimmt_dem_eigentuemer_seine_rechte_nicht(datenbank):
-    """Beim geteilten Zugang ist der Platz Zuschreibung, keine Anmeldung.
-
-    Prüfte `verwaltet` die Rolle des Platzes, verlöre der Eigentümer den
-    Zugriff auf die Einstellungen, sobald er den Platz eines Mitglieds
-    einnimmt — obwohl er sich mit einem Klick zurückholen könnte. Rechte
-    hängen an der angemeldeten Person.
-    """
-    async with klient_fuer("anm-platzrechte") as k:
-        m = (await k.post("/api/mitglieder", json={"display_name": "Zugeschriebene Person"})).json()
-        kopf = {"X-Rocket-Sitzplatz": m["id"]}
-        # Die Arbeit wird der Person zugeschrieben …
-        wer = (await k.get("/api/mitglieder/wer", headers=kopf)).json()
-        assert wer["display_name"] == "Zugeschriebene Person"
-        assert wer["sitzplatz_gewaehlt"] is True
-        # … die Rechte bleiben aber beim Eigentümer.
-        assert (await k.put("/api/settings", json={"locale": "de"}, headers=kopf)).status_code == 200
-
-
 # ── Passwort ändern ──────────────────────────────────────────────────────
 
 

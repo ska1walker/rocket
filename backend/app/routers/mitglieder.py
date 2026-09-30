@@ -1,14 +1,13 @@
 """Die Menschen, die in dieser Organisation arbeiten.
 
-Zwei Sorten, und der Unterschied ist wichtig genug, um ihn sichtbar zu
-halten:
+Zwei Sorten, erkennbar an `zugang`:
 
-- **eigener Zugang** — meldet sich selbst über Olares an, der Name kommt
-  aus `X-Bfl-User`.
-- **Sitzplatz** — eine Person ohne eigenen Olares-Zugang. Sie existiert,
-  damit ihr Arbeit zugeschrieben werden kann. Wer den geteilten Zugang
-  hat, kann jeden Sitzplatz einnehmen; das ist Zuschreibung und keine
-  Anmeldung, und die Oberfläche sagt das auch so.
+- **`olares`** — die Person, unter deren Olares-Konto Rocket installiert
+  ist; ihr Name kam aus `X-Bfl-User`.
+- **`sitzplatz`** — jede weitere Person. Der Name ist historisch: Früher
+  nahm man ihren Platz am geteilten Zugang ein. Seit 26.10.1 gibt es
+  diesen Wechsel nicht mehr; jede Person meldet sich über ihre Einladung
+  mit eigenem Passwort (und zweitem Faktor) an und handelt als sie selbst.
 """
 
 import json
@@ -119,11 +118,9 @@ async def _einstellungen(conn, user_id: UUID) -> dict[str, Any]:
 def _kennung(name: str) -> str:
     """Aus „Marc Bayer" wird „marc-bayer".
 
-    Der Name ist zugleich die Kennung, unter der sich diese Person später
-    selbst anmelden könnte: Bekommt Marc irgendwann ein eigenes
-    Olares-Konto mit demselben Namen, greift sein Sitzplatz automatisch
-    — aus der zugeschriebenen Person wird eine angemeldete, ohne dass
-    Besitz oder Protokoll umgeschrieben werden müssen.
+    Der Name ist zugleich die Kennung, unter der sich diese Person
+    anmeldet. Ist sie auf der Box schon vergeben, hängt `anlegen` eine
+    Nummer an.
     """
     klein = name.strip().lower()
     ersetzt = (
@@ -178,8 +175,8 @@ async def einstellungen_aendern(
 ) -> Wer:
     """Ändert, was die handelnde Person für sich eingestellt hat.
 
-    Persönlich, nicht organisationsweit: `user.user_id` ist der gewählte
-    Sitzplatz. Kein Protokolleintrag — eine Vorliebe in der Oberfläche ist
+    Persönlich, nicht organisationsweit: `user.user_id` ist die
+    angemeldete Person. Kein Protokolleintrag — eine Vorliebe in der Oberfläche ist
     kein Geschäftsdatum, und ein Verlauf voller Sternklicks hülfe niemandem.
     """
     felder = payload.model_dump(exclude_unset=True)
@@ -243,10 +240,12 @@ async def anlegen(
             """
             select u.id from public.users u
             join public.user_org_roles r on r.user_id = u.id
-            where u.olares_username = $1 and r.org_id = $2
+            where r.org_id = $2
+              and (u.olares_username = $1 or lower(trim(u.display_name)) = lower(trim($3)))
             """,
             kennung,
             user.org_id,
+            payload.display_name,
         )
         if vorhanden:
             raise HTTPException(
@@ -254,18 +253,29 @@ async def anlegen(
                 f'„{payload.display_name}“ ist in dieser Organisation schon angelegt.',
             )
 
-        person = await conn.fetchrow(
-            """
-            insert into public.users (olares_username, display_name, email, zugang)
-            values ($1, $2, $3, 'sitzplatz')
-            on conflict (olares_username) do update
-              set display_name = coalesce(public.users.display_name, excluded.display_name)
-            returning id, display_name, email, olares_username, zugang, created_at, last_seen_at
-            """,
-            kennung,
-            payload.display_name.strip(),
-            payload.email,
-        )
+        # Die Kennung ist boxweit eindeutig, und sie ist der Anmeldename.
+        # Früher griff eine vorhandene Kennung einfach durch — dann bekam eine
+        # zweite Organisation mit ihrem „Marc Bayer" den Nutzer der ersten,
+        # und mit der Einladung dessen Passwort. Deshalb eine eigene Kennung:
+        # „marc-bayer-2", „marc-bayer-3", … Nie eine fremde Zeile anfassen.
+        person = None
+        for nummer in range(1, 100):
+            kandidat = kennung if nummer == 1 else f"{kennung}-{nummer}"
+            person = await conn.fetchrow(
+                """
+                insert into public.users (olares_username, display_name, email, zugang)
+                values ($1, $2, $3, 'sitzplatz')
+                on conflict (olares_username) do nothing
+                returning id, display_name, email, olares_username, zugang, created_at, last_seen_at
+                """,
+                kandidat,
+                payload.display_name.strip(),
+                payload.email,
+            )
+            if person:
+                break
+        if person is None:
+            raise HTTPException(409, "Für diesen Namen ist keine Kennung mehr frei.")
         await conn.execute(
             "insert into public.user_org_roles (user_id, org_id, role) values ($1,$2,'member') "
             "on conflict (user_id, org_id) do nothing",
@@ -551,9 +561,8 @@ async def absender_setzen(
 
     Geschrieben wird `user.user_id` — dieselbe Person, die auch in
     `mails.created_by` landet. Beides muss übereinstimmen, sonst setzt man
-    eine Adresse und schickt unter einer anderen. Bei einem geteilten
-    Olares-Zugang ist das der gewählte Sitzplatz; mit eigener Anmeldung
-    greift der Sitzplatz nicht mehr, dann ist es man selbst.
+    eine Adresse und schickt unter einer anderen. Das ist immer die
+    angemeldete Person selbst.
 
     Es gibt **keinen** Weg, die Adresse einer beliebigen anderen Person zu
     setzen: Der Pfad kennt keine Kennung, nur „wer gerade handelt".

@@ -324,7 +324,7 @@ async def _nutzerzuordnung(
     """Alte Nutzer-Kennung → heutige, über den Olares-Namen.
 
     Personen ohne eigenen Olares-Zugang werden dabei **wieder angelegt**.
-    Ohne das verschwände nach einer Neuinstallation jeder Sitzplatz, und
+    Ohne das verschwände nach einer Neuinstallation jede weitere Person, und
     alles, was Marc gehörte, gehörte plötzlich dem, der die
     Wiederherstellung ausgelöst hat. Besitz und Protokoll wären damit
     stillschweigend umgeschrieben — schlimmer als ein Datenverlust, weil
@@ -394,8 +394,8 @@ async def _nutzerzuordnung(
             await _absender_zurueck(conn, heutige, eintrag)
 
         if heutige is not None:
-            # Die Mitgliedschaft gehört dazu: Ohne sie könnte der Sitzplatz
-            # nicht wieder eingenommen werden (siehe _sitzplatz_einnehmen).
+            # Die Mitgliedschaft gehört dazu: Ohne sie gälte die Person
+            # nicht als angemeldet (siehe auth._aus_sitzung).
             await conn.execute(
                 "insert into public.user_org_roles (user_id, org_id, role) "
                 "values ($1, $2, coalesce($3::public.user_role, 'member')) "

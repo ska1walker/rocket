@@ -17,7 +17,7 @@ from app import versand
 from app.config import settings
 from app.db import acquire, acquire_as
 from app.oeffentlich import app as oeffentlich
-from tests.conftest import klient_fuer
+from tests.conftest import als_person, klient_fuer
 
 SMTP = {
     "smtp_host": "mail.example.de", "smtp_port": 587, "smtp_benutzer": "kai@aimighty.de",
@@ -397,13 +397,13 @@ async def test_marc_schickt_unter_seinem_namen_kai_unter_seinem(datenbank, brief
         kontakt = await _kontakt(k)
         kai = await conn_nutzer(k)
 
-        # Marc setzt seine Adresse — über seinen eigenen Sitzplatz, denn
+        # Marc setzt seine Adresse — angemeldet als er selbst, denn
         # niemand ändert die Absenderadresse eines anderen.
-        gesetzt = await k.put(
-            "/api/mitglieder/wer/absender",
-            json={"absender_email": "marc.bayer@aimighty.de", "absender_name": "Marc Bayer"},
-            headers={"X-Rocket-Sitzplatz": m["id"]},
-        )
+        async with als_person(k, m["id"]) as als_marc:
+            gesetzt = await als_marc.put(
+                "/api/mitglieder/wer/absender",
+                json={"absender_email": "marc.bayer@aimighty.de", "absender_name": "Marc Bayer"},
+            )
         assert gesetzt.status_code == 200, gesetzt.text
         assert gesetzt.json()["haus_absender"] == SMTP["smtp_absender"]
 
