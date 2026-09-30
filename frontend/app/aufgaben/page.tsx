@@ -175,7 +175,7 @@ export default function AufgabenSeite() {
 
           <div className="werkzeugleiste">
             <form
-              style={{ display: "flex", gap: "var(--am-raum-2)", flex: "1 1 520px", flexWrap: "wrap" }}
+              className="aufgabe-neu"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (titel.trim()) anlegen.mutate();
@@ -183,14 +183,14 @@ export default function AufgabenSeite() {
             >
               <input
                 ref={titelfeld}
-                style={{ flex: "2 1 220px" }}
+                className="aufgabe-neu-titel"
                 value={titel}
                 onChange={(e) => setTitel(e.target.value)}
                 placeholder="Was ist zu tun?"
                 aria-label="Neue Aufgabe"
               />
               <select
-                style={{ flex: "0 0 130px" }}
+                className="aufgabe-neu-art"
                 value={art}
                 onChange={(e) => setArt(e.target.value as AufgabenArt)}
                 aria-label="Art"
@@ -202,14 +202,14 @@ export default function AufgabenSeite() {
                 ))}
               </select>
               <input
-                style={{ flex: "0 0 150px" }}
+                className="aufgabe-neu-datum"
                 type="date"
                 value={faellig}
                 onChange={(e) => setFaellig(e.target.value)}
                 aria-label="Fällig am"
               />
               <select
-                style={{ flex: "1 1 180px" }}
+                className="aufgabe-neu-lead"
                 value={dealId}
                 onChange={(e) => setDealId(e.target.value)}
                 aria-label="Lead"
