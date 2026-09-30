@@ -5,7 +5,7 @@
 // - **Datei auf der Box.** Rocket legt einen Code in seinen Datenordner.
 //   Wer an die Box kommt, liest ihn dort. Dieser Weg setzt auch den
 //   zweiten Faktor zurück — er ist die Rettung, wenn das Handy weg ist.
-// - **Mail** (seit 26.10.1), wenn die Organisation einen Versand
+// - **Mail** (seit 26.9.2), wenn die Organisation einen Versand
 //   eingerichtet hat und die Person eine Adresse hat. Wer nur das Postfach
 //   hat, hat nicht das Handy: Der zweite Faktor bleibt und wird danach
 //   verlangt.

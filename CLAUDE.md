@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 26.9.1 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket 26.9.1 läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert)
+> **Status:** 26.9.2 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket 26.9.1 läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert)
 > **Letzte Aktualisierung:** 30. September 2026
 
 ---
@@ -42,7 +42,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 
 | Teil | Zustand |
 |---|---|
-| Schema + Zeilensicherheit | 32 Migrationen, alle Fachtabellen unter FORCE |
+| Schema + Zeilensicherheit | 33 Migrationen, alle Fachtabellen unter FORCE |
 | Backend | rund 210 API-Pfade, FastAPI + asyncpg |
 | Oberfläche | Start, Board, Angebote, Prognose, Firmen, Kontakte, Listen, Kampagnen, Tickets, Aufgaben, Fragen, Erkenntnisse, Eingang, Besprechungen, Einfuhr, Einstellungen; Kopfleiste zum Suchen und Anlegen von überall; kurze Navigation mit „Mehr" und Favoriten |
 | Angebote | Katalog, Positionen, Summen, Druckfassung mit Briefkopf |
@@ -50,8 +50,8 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Prognose | gewichtet, Trefferquote, Verlustanalyse, nach Produkt |
 | KI | Notiz→Struktur, Tagesbriefing, Fragen an den Bestand, Angebotsvorschlag, Qualifizierung aus dem Verlauf, Anschreiben, Erkenntnisse aus Gesprächsnotizen, Firma/Kontakt aus Beschreibung finden, Assistent (Aufträge in Worten, Handlung nur über Karte), Gesprächsvorbereitung als Podcast (zwei Stimmen, gesprochen auf der Box) |
 | Insilo-Kopplung | auf derselben Box über Insilos gemeinsamen Ordner wie Relay (seit 0.11.0, `app/insilo_ablage.py`), sonst signierter Webhook; Besprechungen als eigener Bereich mit Vorschlag, nie automatisch zugeordnet; Protokoll ohne Wortlaut (`docs/BETRIEB.md` „Insilo anschließen") |
-| Anmeldung | eigene Anmeldung seit 0.6.0 (`ANMELDUNG_MODUS=eigen`, Entrance `public` seit 0.6.9): Einladung, Sitzungen, Geräteübersicht, Bremse nach Fehlversuchen, Rückweg per Datei unter `/app/data` wenn niemand mehr hereinkommt |
-| Zusammenarbeit | jede Person mit eigenem Zugang; Rollen `owner`/`admin`/`member`/`viewer`, Eigentümerin vergibt `admin` (seit 0.9.2); Besitz, Filter „Nur meine"; Sitzplätze nur noch im Modus `olares` |
+| Anmeldung | eigene Anmeldung seit 0.6.0 (`ANMELDUNG_MODUS=eigen`, Entrance `public` seit 0.6.9): Einladung, Sitzungen, Geräteübersicht, Bremse nach Fehlversuchen; zweiter Faktor (TOTP, Wiederherstellungscodes, Pflicht für alle als Schalter) seit 26.9.2; Rückweg per Datei unter `/app/data` (setzt auch den Faktor zurück) oder per Mail (Faktor bleibt); Anmeldungen im Audit-Log |
+| Zusammenarbeit | jede Person mit eigenem Zugang; Rollen `owner`/`admin`/`member`/`viewer`, Eigentümerin vergibt `admin` (seit 0.9.2); Besitz, Filter „Nur meine"; den Sitzplatz-Wechsel gibt es seit 26.9.2 nicht mehr — jede Person meldet sich selbst an |
 | Tresor | SMTP/IMAP-Passwörter, API-Schlüssel und Geheimnisse AES-GCM-verschlüsselt, Schlüssel `tresor.key` unter `/app/data` (seit 0.6.6) |
 | Versand | SMTP/IMAP je Organisation, Absenderadresse je Person, Einwilligung am Kontakt, öffentliche Links (Einwilligung, Abmelden, Klick) über eigenen Entrance `rocketlinks`; Listen (statisch/aktiv) und Kampagnen |
 | Tickets | eigene Pipeline, SLA-Uhr ab Absendezeit; Eingang aus API, Bot oder Formular über einen gemeinsamen Weg (`ticketeingang.py`) |
@@ -67,7 +67,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | 657 Backend, 57 Frontend |
+| Tests | 675 Backend, 53 Frontend |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.9.1 läuft seit 30.9.2026 auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.9.1` am 30.9.2026, Chart als Anhang). Katalogeintrag `rocket` 26.9.1 **im Markt** (`bayerhazard/aimighty-market` PR #81, am 30.9.2026 im Katalog der Box bestätigt); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
@@ -79,9 +79,8 @@ mobile Ansicht über das Responsive hinaus.
 Postfach über IMAP/SMTP mit Anbieter-Voreinstellungen (Microsoft 365 nur
 per OAuth-Freigabe des Postfachs, kein SSO), feinere Rechte.
 
-**Offen:** zweiter Faktor bei der Anmeldung (`users.totp_geheimnis`
-steht bereit), „alle Geräte abmelden" als Knopf, Anmeldungen im
-Audit-Log (`docs/BETRIEB.md`, „Noch offen").
+**Offen:** Stufe 2 (persönliches Postfach) und Stufe 3 (feinere Rechte)
+aus `docs/PLAN-TEAM.md`; Eigenschaften in Gruppen ordnen.
 
 ## Plattform-Kontext: Olares OS
 
@@ -227,12 +226,13 @@ der Lieferung und liest die Token über `var(--am-*)`.
    `audit.log_fuer(conn, user, …)`: Es hält Person **und** Zugang fest,
    denn am geteilten Olares-Konto sind das zwei verschiedene Dinge.
 
-   **Zwei Menschen, ein Zugang.** Olares installiert eine App pro Nutzer;
-   ein zweites Olares-Konto kommt nicht an den Entrance. Kai und Marc
-   teilen deshalb einen Zugang, und der *Sitzplatz* (Cookie, Kopf
-   `X-Rocket-Sitzplatz`) sagt, wem die Arbeit zugeschrieben wird. Das ist
-   Zuschreibung, keine Anmeldung — ein Sitzplatz greift nur innerhalb
-   derselben Organisation, sonst 403.
+   **Jede Person meldet sich selbst an.** Den *Sitzplatz* (Kopf
+   `X-Rocket-Sitzplatz`) gibt es seit 26.9.2 nicht mehr; `handelnder` ist
+   immer die angemeldete Person. Tests, die als eine andere Person
+   handeln, holen sich deren Sitzung über `tests.conftest.als_person`
+   (Einladung einlösen), nie über einen Kopf. Anmeldenamen sind boxweit
+   eindeutig — nie eine vorhandene `users`-Zeile einer fremden
+   Organisation wiederverwenden.
 
    **Neue Tabelle:** in `app/datenbank.py` entweder in `FREI` oder mit
    Grund in `GESPERRT` eintragen, und im Abzug (`sicherung.py`) ebenso —

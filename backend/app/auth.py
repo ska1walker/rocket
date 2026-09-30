@@ -108,7 +108,7 @@ class CurrentUser(BaseModel):
 
     @property
     def handelnder(self) -> UUID:
-        """Wer handelt. Seit der Sitzplatz-Wechsel weg ist (26.10.1), ist
+        """Wer handelt. Seit der Sitzplatz-Wechsel weg ist (26.9.2), ist
         das immer die angemeldete Person selbst."""
         return self.user_id
 
@@ -468,7 +468,7 @@ async def get_current_user(
     mit dem ersten Passwort ist er endgültig tot.
 
     Den Wechsel auf eine andere Person per Kopf `X-Rocket-Sitzplatz` gibt
-    es seit 26.10.1 nicht mehr: Er stammte aus der Zeit eines geteilten
+    es seit 26.9.2 nicht mehr: Er stammte aus der Zeit eines geteilten
     Olares-Zugangs, und mit eigener Anmeldung ist jeder bereits er selbst.
     """
     angemeldet: CurrentUser | None = None

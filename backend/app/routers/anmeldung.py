@@ -492,7 +492,7 @@ async def zuruecksetzen_einloesen(
         )
         # Alle Geräte abmelden — mit dem Kontext der Person: `sitzungen`
         # steht unter FORCE, und ohne Kontext träfe das Update lautlos
-        # keine einzige Zeile (so war es bis 26.10.1).
+        # keine einzige Zeile (so war es bis 26.9.2).
         async with conn.transaction():
             await conn.execute(
                 "select set_config('app.current_user_id', $1, true)", str(zeile["id"])

@@ -588,8 +588,7 @@ wird beim Speichern **und** beim Versand.
 
 Nicht daran, wer die Schleife anstößt. Sonst ginge Marcs Angebot als Kai
 hinaus, sobald Kai als Nächster etwas versendet. Dieselbe Kennung schreibt
-auch die Absenderadresse: bei geteiltem Olares-Zugang der gewählte
-Sitzplatz, mit eigener Anmeldung man selbst.
+auch die Absenderadresse: die angemeldete Person selbst.
 
 **Marketing bleibt beim Absender der Organisation.** Eine Kampagne kommt
 von der Firma, nicht von einem Menschen, und der Abmeldelink hängt an
@@ -1124,7 +1123,7 @@ mit Favoriten darüber wurden das neunzehn Zeilen.
 gemerkte Einträge bilden die Leiste. Gespeichert in `users.einstellungen` (jsonb, Migration 0024)
 über `PATCH /api/mitglieder/wer/einstellungen {"favoriten": [...]}`; `null`
 löscht den Schlüssel, unbekannte Schlüssel werden abgewiesen. `user_id` ist
-die handelnde Person — Marc am Sitzplatz hat seine eigenen. Die Oberfläche
+die angemeldete Person — Marc hat seine eigenen. Die Oberfläche
 schaltet sofort um und nimmt sich bei Fehler zurück (`frontend/lib/wer.ts`).
 Kein Protokolleintrag: eine Vorliebe ist kein Geschäftsdatum. In der
 Sicherung reist `einstellungen` im `nutzer`-Block mit und wird beim
@@ -1150,11 +1149,10 @@ dieser Box“ in 10-px-Monoschrift. Seit 0.5.6 sind es zwei Zeilen mit
 Aussage (`components/konto.tsx`):
 
 *Die Kontozeile* ist ruhig — Kreis, Name, kein Kasten — und öffnet ein
-Menü nach oben mit **Sitzplatz** (nur bei mehr als einer Person) und
-**Darstellung**. Das Menü schließt bei Escape, Klick außerhalb und
-Seitenwechsel und gibt den Fokus zurück; die alte Personenliste schloss
-nur durch Auswahl. Die zweite Zeile unter dem Namen erscheint nur, wenn
-ein Sitzplatz gewählt ist — dann sagt sie etwas.
+Menü nach oben mit **Darstellung** und, bei eigener Anmeldung, **Zugang**
+(Passwort und zweiter Faktor, Abmelden). Das Menü schließt bei Escape,
+Klick außerhalb und Seitenwechsel und gibt den Fokus zurück. Die
+Sitzplatz-Auswahl ist seit 26.9.2 weg.
 
 *Die Nachweiszeile* nennt den **gemessenen** Stand und führt auf
 *Einstellungen › Daten › Wohin Daten gehen*. `lib/datenwege.ts` prüft
@@ -1476,14 +1474,10 @@ laden ein. `member` und `viewer` arbeiten im Bestand und bekommen dort
 offenem Eingang ist das nicht mehr tragbar. Die Einstellungsseite sagt es
 vorher, statt es den Server abweisen zu lassen.
 
-**Der Sitzplatz greift bei eigener Anmeldung nicht mehr.** Er existierte
-für **einen** geteilten Olares-Zugang. Wer sich selbst anmeldet, ist
-bereits er selbst — und mit Sitzplatz nähme ein `member` den Platz des
-Eigentümers ein und erbte dessen Rechte.
-
-Und dort, wo er weiter greift, hängen die Rechte an der **angemeldeten**
-Person, nicht am gewählten Platz. Sonst verlöre der Eigentümer den Zugriff
-auf die Einstellungen, sobald er den Platz eines Mitglieds einnimmt.
+**Den Sitzplatz gibt es seit 26.9.2 nicht mehr** (siehe „Der Sitzplatz ist
+weg"). Er existierte für **einen** geteilten Olares-Zugang; mit eigener
+Anmeldung hätte ein `member` damit den Platz des Eigentümers einnehmen
+können. Rechte hängen an der angemeldeten Person.
 
 ### Drei Dinge, die nur der Browser zeigte
 
@@ -1562,6 +1556,44 @@ prüft zusätzlich auf `user_id` — eine zweite Wand, falls die Policy einmal
 gelockert wird. Angezeigt werden weder Token noch Adresse, nur die
 Browserkennung, aus der die Oberfläche „Chrome auf Mac" macht.
 
+### Zweiter Faktor (seit 26.9.2)
+
+Nach dem Passwort ein sechsstelliger Code aus einer Authenticator-App
+(TOTP nach RFC 6238, jede App tut es). Eingerichtet wird unter
+*Einstellungen › Firma und Team › Zweiter Faktor*: QR-Code scannen, einen
+Code bestätigen, zehn Wiederherstellungscodes notieren. Erst der
+bestätigte Code schaltet ihn ein — wer den QR-Code abbricht, sperrt sich
+nicht aus.
+
+- **Anmelden in zwei Schritten.** Stimmt das Passwort, entsteht eine
+  *Vorstufe* (Keks `rocket_vorstufe`, nur für `/api/anmeldung`, fünf
+  Minuten, `sitzungen.bestaetigt = false`). Sie gilt für nichts außer der
+  Code-Eingabe. Erst der Code macht daraus eine Sitzung. Falscher Code:
+  403, abgelaufene Vorstufe: 401 und zurück zum Passwort.
+- **Kein Code zweimal.** Der zuletzt angenommene Zeitschritt steht an der
+  Person (`totp_letzter_schritt`); ein mitgelesener Code ist danach wertlos.
+  Ein Schritt Nachsicht in beide Richtungen, mehr nicht.
+- **Wiederherstellungscodes** gelten einmal, gespeichert ist nur ihr
+  SHA-256 (`zweitfaktor_codes`). Sie laufen durch dieselbe Bremse wie das
+  Passwort. Neue erzeugen verlangt einen Code aus der App; Abschalten
+  verlangt Passwort **und** Code.
+- **Das Geheimnis liegt im Tresor**, verschlüsselt wie die SMTP-Passwörter.
+  Der QR-Code entsteht auf dem Server (`segno`) und geht als Bild in die
+  Seite — kein fremder Dienst sieht das Geheimnis.
+- **Pflicht für alle** schaltet die Eigentümerin oder ein Verwalter im
+  selben Block ein, sobald der eigene Faktor steht. Wer dann noch keinen
+  hat, bekommt auf jeden Aufruf 403 mit dem Kopf
+  `X-Rocket-Zweiter-Faktor: einrichten` und landet auf `/zweiter-faktor`.
+  Die Teamliste zeigt vorher, wen das trifft. Unter Pflicht lässt sich der
+  eigene Faktor nicht abschalten.
+- **Protokoll.** Anmeldung, Abweisung (mit Grund), Abmeldung, Einrichten,
+  Abschalten, neue Codes und Zurücksetzen stehen im Audit-Log unter
+  `entity = 'anmeldung'`.
+
+Handy **und** Codes weg: Die Datei auf der Box (unten) setzt den zweiten
+Faktor mit zurück. Eine neue Einladung tut es ebenso — sie ist ohnehin
+die Übernahme des Zugangs.
+
 ### Wenn niemand mehr hereinkommt
 
 Das Passwort gehört **nicht** in die Olares-Umgebungsvariablen. Dort stünde
@@ -1615,10 +1647,20 @@ heißt derselbe Ordner `Data` und darunter der Name der App. 0.7.0 nannte
 zuerst den Containerpfad, und genau daran ist der erste Versuch auf der
 Box gescheitert: Die Datei lag da, nur nicht dort, wo sie gesucht wurde.
 
-**Warum kein Rücksetzlink per Mail:** Auf einer frischen Box ist kein
-Postfach eingerichtet, ein solcher Link käme nie an. Und er verlagerte
-das Vertrauen in ein Postfach, das wir nicht kennen — bei einem Zugang,
-der den ganzen Bestand öffnet.
+**Zusätzlich per Mail (seit 26.9.2).** Hat die Organisation SMTP
+eingerichtet und die Person eine Adresse, schickt „Passwort vergessen?"
+den Code auch dorthin — 30 Minuten gültig, einmal. Die Datei bleibt der
+Weg, der immer geht. Drei Unterschiede zur Datei:
+
+- **Der zweite Faktor bleibt.** Wer nur das Postfach hat, hat nicht das
+  Handy; nach dem neuen Passwort wird der Code verlangt. Nur die Datei
+  setzt ihn zurück.
+- **Der Code geht nie durch `mails`.** Den Postausgang sehen Verwalter im
+  Datenbank-Blick — ein Code dort hieße, ein Verwalter könnte das Passwort
+  der Eigentümerin zurücksetzen. Rocket schickt direkt über SMTP; in der
+  Datenbank steht nur der Hash (`passwort_links`, im Blick gesperrt).
+- **Gleiche Antwort, gleiche Dauer.** Der Versand läuft im Hintergrund,
+  auch für unbekannte Namen — sonst verriete die Antwortzeit, wen es gibt.
 
 Vier Dinge, die diesen Weg tragbar machen:
 
@@ -1631,7 +1673,9 @@ Vier Dinge, die diesen Weg tragbar machen:
 - **Die Datei ist der ganze Datensatz.** Kein Eintrag in der Datenbank.
   Ein zurückgespielter Abzug kann keinen alten Code wiederbeleben.
 - **Einlösen beendet jede offene Sitzung** und leert die Bremse. Wer
-  zurücksetzt, tut das oft, weil etwas nicht stimmt.
+  zurücksetzt, tut das oft, weil etwas nicht stimmt. (Bis 26.9.1 traf das
+  Beenden unter FORCE lautlos keine Zeile — es lief ohne Nutzerkontext.
+  Seit 26.9.2 mit Kontext und mit Test.)
 
 Der Weg über die Kommandozeile bleibt daneben bestehen — für den Fall,
 dass die Oberfläche selbst nicht mehr hochkommt:
@@ -1676,13 +1720,16 @@ nichts, solange der Entrance dabei zurück auf `internal` geht.
 
 ### Noch offen
 
-Zweiter Faktor (`users.totp_geheimnis` steht bereit, die Migration dafür
-ist getan), Passwort zurücksetzen per Mail (braucht SMTP), „alle Geräte
-abmelden" als Knopf, und die Anmeldungen im Audit-Log.
+Seit 26.9.2 erledigt: zweiter Faktor, Rücksetzen per Mail, Anmeldungen im
+Audit-Log („Andere abmelden" gab es schon unter *Ihre Geräte*). Offen aus
+`docs/PLAN-TEAM.md` sind Stufe 2 (persönliches Postfach) und Stufe 3
+(feinere Rechte).
 
-Tests: `backend/tests/test_anmeldung.py` — 29 Fälle, darunter der
+Tests: `backend/tests/test_anmeldung.py` — 36 Fälle, darunter der
 entscheidende, dass ein gefälschter `X-Bfl-User` im Modus `eigen` weder
-Zugang bringt noch einen Nutzer anlegt.
+Zugang bringt noch einen Nutzer anlegt. Der zweite Faktor und das
+Rücksetzen per Mail stehen in `test_zweiter_faktor.py` (22 Fälle, mit den
+Testvektoren aus RFC 6238).
 
 ## Datenbank ansehen — lesend, unter Zeilensicherheit
 
@@ -1809,7 +1856,28 @@ die man gerade gefiltert hat, als Tabelle heraus.
   Kontakte oder Firmen. Jedes Mitglied darf das; die Datei zeigt nur, was
   die Liste ohnehin zeigt.
 
-### „Dieser Sitzplatz gehört nicht zu Ihrer Organisation"
+### Der Sitzplatz ist weg (seit 26.9.2)
+
+Bis 26.9.1 konnte man am geteilten Olares-Zugang den *Sitzplatz* einer
+anderen Person einnehmen (Kopf `X-Rocket-Sitzplatz`, Keks
+`rocket-sitzplatz`). Mit eigener Anmeldung ist jede Person bereits sie
+selbst; der Wechsel war nur noch eine Umgehung. Das Backend liest den Kopf
+nicht mehr, die Oberfläche hat die Auswahl nicht mehr, ein alter Keks im
+Browser schadet nicht. Weitere Personen heißen in der Datenbank weiter
+`zugang = 'sitzplatz'`; das ist nur noch der Name der Spalte.
+
+Zwei Dinge sind dabei mit aufgefallen und behoben:
+
+- **Gleicher Name, fremde Organisation.** Legte eine zweite Organisation
+  auf derselben Box „Marc Bayer" an, bekam sie den Nutzer `marc-bayer` der
+  ersten — und mit der Einladung dessen Passwort. Jetzt bekommt jede neue
+  Person eine eigene Kennung (`marc-bayer-2`, …). Doppelte Namen in
+  *einer* Organisation werden am Anzeigenamen erkannt.
+- **Entfernt heißt abgemeldet.** Die Sitzung einer entfernten Person galt
+  weiter (sie sah unter der Zeilensicherheit nur nichts mehr). Jetzt
+  prüft jede Anfrage die Mitgliedschaft; ohne sie ist die Sitzung wertlos.
+
+### „Dieser Sitzplatz gehört nicht zu Ihrer Organisation" (bis 26.9.1)
 
 Der Sitzplatz liegt in einem Cookie im Browser, die Personen liegen in
 der Datenbank. Eine Neuinstallation legt die Datenbank neu an — der
@@ -1854,10 +1922,7 @@ Schalter in der Zeile. Vier Riegel:
 - **`owner` lässt sich nicht vergeben.** Eigentum zu übergeben ist etwas
   anderes als eine Rolle zu setzen und braucht seinen eigenen Weg.
 
-Geprüft wird die Rolle der **angemeldeten** Person (`handelnder`), nicht
-die des gewählten Sitzplatzes. Wer auf dem Platz der Eigentümerin sitzt,
-handelt in ihrem Namen, hat aber ihre Rechte nicht — sonst wäre der Platz
-ein Weg, sich welche zu holen.
+Geprüft wird die Rolle der **angemeldeten** Person (`handelnder`).
 
 `viewer` steht im Datenbank-Typ, bewirkt aber nichts: Für die Rechte ist
 es dasselbe wie `member` (`auth.VERWALTET`). Es wird deshalb nirgends

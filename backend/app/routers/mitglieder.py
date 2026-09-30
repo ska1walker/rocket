@@ -5,7 +5,7 @@ Zwei Sorten, erkennbar an `zugang`:
 - **`olares`** — die Person, unter deren Olares-Konto Rocket installiert
   ist; ihr Name kam aus `X-Bfl-User`.
 - **`sitzplatz`** — jede weitere Person. Der Name ist historisch: Früher
-  nahm man ihren Platz am geteilten Zugang ein. Seit 26.10.1 gibt es
+  nahm man ihren Platz am geteilten Zugang ein. Seit 26.9.2 gibt es
   diesen Wechsel nicht mehr; jede Person meldet sich über ihre Einladung
   mit eigenem Passwort (und zweitem Faktor) an und handelt als sie selbst.
 """
