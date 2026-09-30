@@ -1,6 +1,6 @@
 # Plan: Rocket für Vertriebsteams
 
-> **Stand:** 29. September 2026 · **Status:** Plan, nicht umgesetzt
+> **Stand:** 30. September 2026 · **Status:** Stufe 1 umgesetzt (26.9.2), Stufen 2 und 3 geplant
 > **Entschieden von Kai am 29.9.2026:**
 > - Anmeldung an Rocket **nur mit Rocket-Passwort und zweitem Faktor** —
 >   keine Anmeldung über Microsoft oder Google (kein SSO).
@@ -32,7 +32,13 @@ Was fehlt, damit echte Vertriebsteams damit arbeiten:
    dort, wo sie Post liest, und Mails aus dem eigenen Programm fehlen im
    CRM ganz.
 
-## Stufe 1 — Anmeldung härten
+## Stufe 1 — Anmeldung härten ✅ umgesetzt in 26.9.2
+
+Wie es gebaut ist, steht in `docs/BETRIEB.md` unter „Zweiter Faktor",
+„Wenn niemand mehr hereinkommt" und „Der Sitzplatz ist weg". Abweichungen
+vom Plan: „Alle Geräte abmelden" gab es schon („Andere abmelden"); die
+Zuschreibung im Modus `olares` läuft ohne Sitzplatz, jede weitere Person
+meldet sich über ihre Einladung selbst an.
 
 Klein, ohne jede Einrichtung bei Microsoft oder Google, für jeden Kunden
 nutzbar. Das ist die Anmeldung an Rocket, und sie bleibt es.
