@@ -298,6 +298,13 @@ der Lieferung und liest die Token über `var(--am-*)`.
 
 10. **Bei Unsicherheit:** stoppen und Kai fragen.
 
+11. **Builds, CI und Merges selbst verfolgen — nicht fragen.** Nach jedem
+    Push, PR, Merge oder Release prüft Claude den Stand selbst (Check-Runs
+    des PR, Workflow-Läufe, Merge-Status auf GitHub, Abbilder in GHCR) und
+    meldet erst das Ergebnis: grün und erledigt, oder rot mit Ursache und
+    Fix. „Gemergt" heißt: GitHub zeigt `merged: true`. Kai soll nie
+    nachfragen müssen, ob ein Build fertig ist (festgelegt 30.9.2026).
+
 ---
 
 ## Lokale Entwicklung
