@@ -24,6 +24,9 @@ dependencies = [
   # Für den Datenbank-Blick: zerlegt eine Abfrage mit dem Parser von
   # Postgres selbst, bevor sie ausgeführt wird (app/datenbank.py).
   "pglast>=7.0,<8",
+  # QR-Code für den zweiten Faktor, als SVG auf dem Server erzeugt — reines
+  # Python, keine Abhängigkeiten, und das Geheimnis geht an keinen fremden Dienst.
+  "segno>=1.6,<2",
 ]
 
 [project.optional-dependencies]
