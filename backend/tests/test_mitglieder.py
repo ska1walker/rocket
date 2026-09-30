@@ -9,7 +9,6 @@ und dass Namen und Rollen nicht über Mandanten hinweg greifen.
 import re
 from uuid import UUID
 
-
 from app.db import acquire
 from tests.conftest import als_person, klient_fuer
 
