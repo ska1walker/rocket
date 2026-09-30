@@ -279,7 +279,8 @@ async def code_einloesen(
         if art is None:
             await kern.versuch_merken(conn, kennungen)
             await _protokoll(offen.user_id, offen.org_id, "anmeldung_abgewiesen", name, {"grund": "code"})
-            raise HTTPException(401, "Der Code stimmt nicht.")
+            # 403, nicht 401: Die Vorstufe gilt ja noch. 401 heißt „von vorn".
+            raise HTTPException(403, "Der Code stimmt nicht.")
         await kern.sitzung_beenden(conn, vorstufe)
         await kern.versuche_loeschen(conn, kennungen)
         token = await kern.sitzung_anlegen(conn, offen.user_id, offen.org_id, user_agent or "")

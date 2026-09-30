@@ -1,24 +1,17 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { favoritUmschalten } from "@/lib/navigation";
-import { liesSitzplatz } from "@/lib/sitzplatz";
 import type { Wer } from "@/lib/typen";
 
-/**
- * Wer gerade handelt — mit dem gewählten Sitzplatz als Teil des Schlüssels,
- * damit ein Wechsel der Person auch die Antwort wechselt.
- */
+/** Wer gerade handelt — immer die angemeldete Person selbst. */
 export function useWer() {
-  const [gewaehlt, setGewaehlt] = useState<string | null>(null);
-  useEffect(() => setGewaehlt(liesSitzplatz()), []);
   const wer = useQuery({
-    queryKey: ["wer", gewaehlt],
+    queryKey: ["wer"],
     queryFn: () => api.get<Wer>("/api/mitglieder/wer"),
   });
-  return { wer, gewaehlt, setGewaehlt };
+  return { wer };
 }
 
 /**
@@ -30,8 +23,8 @@ export function useWer() {
  */
 export function useFavoriten() {
   const client = useQueryClient();
-  const { wer, gewaehlt } = useWer();
-  const schluessel = ["wer", gewaehlt];
+  const { wer } = useWer();
+  const schluessel = ["wer"];
   const favoriten = wer.data?.einstellungen?.favoriten ?? [];
 
   const speichern = useMutation({

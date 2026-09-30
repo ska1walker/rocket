@@ -106,17 +106,10 @@ export function Mitgliederblock() {
         )}
       </div>
       <div className="block-inhalt">
-        <Erklaerung kurz="Wer mit Ihnen in Rocket arbeitet. Alle sehen und ändern alles." lang={<>Olares installiert Apps pro Nutzer und lässt an einem Zugang keinen zweiten
-          Menschen zusätzlich herein. Wer zu zweit dasselbe CRM benutzt, teilt deshalb einen
-          Olares-Zugang — und Rocket unterscheidet die Personen selbst.</>} />
-        <div className="hinweis" data-art="achtung" style={{ marginBottom: "var(--am-raum-4)" }}>
-          <span>
-            Der Sitzplatz ist <strong>Zuschreibung, keine Anmeldung.</strong> Wer den
-            geteilten Zugang hat, kann jeden Platz wählen. Er entscheidet, wem Besitz,
-            Zuordnung und Protokolleinträge zugeschrieben werden — nicht, wer hereinkommt.
-            Das Protokoll hält beides fest: die Person und den Zugang.
-          </span>
-        </div>
+        <Erklaerung kurz="Wer mit Ihnen in Rocket arbeitet. Alle sehen und ändern alles." lang={<>Jede Person meldet sich mit
+          eigenem Namen und Passwort an — dazu gibt es den Einladungslink. Was sie anlegt,
+          gehört ihr; das Protokoll nennt sie. Einen Wechsel auf den Platz einer anderen Person
+          gibt es nicht mehr.</>} />
 
         <table className="tabelle mitgliedertabelle" style={{ marginBottom: "var(--am-raum-4)" }}>
           <thead>
@@ -183,9 +176,14 @@ export function Mitgliederblock() {
                       nicht — die bekommt eine eigene Spalte, weil sie hier
                       als Bedienelement steht und keine Aussage ist. */}
                   <span className="mitglied-zugang">
-                    <span className="stufe" data-art={m.zugang === "olares" ? "won" : undefined}>
-                      {m.zugang === "olares" ? "eigener Zugang" : "Sitzplatz"}
+                    <span className="stufe" data-art={m.passwort_gesetzt ? "won" : undefined}>
+                      {m.passwort_gesetzt ? "Passwort" : m.zugang === "olares" ? "Box-Konto" : "eingeladen"}
                     </span>
+                    {m.passwort_gesetzt && (
+                      <span className="stufe" data-art={m.zweiter_faktor ? "won" : undefined}>
+                        {m.zweiter_faktor ? "zweiter Faktor" : "ohne zweiten Faktor"}
+                      </span>
+                    )}
                     <span className="mitglied-zuletzt">
                       {m.last_seen_at ? `zuletzt ${datum(m.last_seen_at)}` : "noch nie hier"}
                     </span>
@@ -321,9 +319,8 @@ export function Mitgliederblock() {
               placeholder="Marc Bayer"
             />
             <p className="feld-hinweis">
-              Bekommt sie später einen eigenen Olares-Zugang mit derselben Kennung, wird aus
-              dem Sitzplatz automatisch eine angemeldete Person — Besitz und Protokoll bleiben,
-              wie sie sind.
+              Aus dem Namen wird der Anmeldename. Danach erzeugen Sie mit dem Schlüssel einen
+              Einladungslink; damit setzt die Person ihr Passwort.
             </p>
           </div>
           <button

@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Download, Lock, Play } from "lucide-react";
 import { useState } from "react";
 import { api, ApiFehler, suchparameter } from "@/lib/api";
-import { liesSitzplatz } from "@/lib/sitzplatz";
 import type { DbErgebnis, DbSeite, DbUebersicht, Wer } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
@@ -180,11 +179,7 @@ async function csvHerunterladen(sql: string): Promise<void> {
   // nicht in den Verlauf des Browsers und nicht in ein Zugriffsprotokoll.
   const antwort = await fetch("/api/datenbank/abfrage/csv", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      // Wie bei jedem anderen Aufruf: Das Protokoll soll die richtige Person nennen.
-      ...(liesSitzplatz() ? { "X-Rocket-Sitzplatz": liesSitzplatz() as string } : {}),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ sql }),
   });
   if (!antwort.ok) {

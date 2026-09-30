@@ -16,6 +16,8 @@ export type Lage = {
   name: string | null;
   /** `olares` — der Sidecar prüft. `eigen` — diese Anmeldung prüft. */
   modus: string;
+  /** Passwort stimmt, der Code aus der App steht noch aus. */
+  zweiter_faktor?: boolean;
 };
 
 export type Einladung = {
@@ -27,6 +29,11 @@ export type Einladung = {
 
 export function anmelden(name: string, passwort: string) {
   return api.post<Lage>("/api/anmeldung", { name, passwort });
+}
+
+/** Der zweite Schritt: Code aus der App oder ein Wiederherstellungscode. */
+export function codeEinloesen(code: string) {
+  return api.post<Lage>("/api/anmeldung/code", { code });
 }
 
 export function abmelden() {
@@ -54,6 +61,50 @@ export function ruecksetzungAnfordern(name: string) {
 
 export function ruecksetzungEinloesen(name: string, code: string, passwort: string) {
   return api.post<Lage>("/api/anmeldung/zuruecksetzen", { name, code, passwort });
+}
+
+// ── Zweiter Faktor ──────────────────────────────────────────────────────
+
+export type FaktorStand = {
+  aktiv: boolean;
+  seit: string | null;
+  /** Wie viele Wiederherstellungscodes noch gelten. */
+  codes_uebrig: number;
+  /** Verlangt die Organisation den zweiten Faktor von allen? */
+  pflicht: boolean;
+};
+
+export type Einrichtung = {
+  /** Zum Abtippen, falls die Kamera nicht will. */
+  geheimnis: string;
+  uri: string;
+  /** Auf dem Server erzeugt — das Geheimnis geht an keinen Bilderdienst. */
+  qr_svg: string;
+};
+
+export function faktorStand() {
+  return api.get<FaktorStand>("/api/anmeldung/zweiter-faktor");
+}
+
+export function faktorEinrichten() {
+  return api.post<Einrichtung>("/api/anmeldung/zweiter-faktor/einrichten");
+}
+
+/** Erst ein bestätigter Code macht das Geheimnis zum Faktor. */
+export function faktorBestaetigen(code: string) {
+  return api.post<{ codes: string[] }>("/api/anmeldung/zweiter-faktor/bestaetigen", { code });
+}
+
+export function codesNeu(code: string) {
+  return api.post<{ codes: string[] }>("/api/anmeldung/zweiter-faktor/codes", { code });
+}
+
+export function faktorAbschalten(passwort: string, code: string) {
+  return api.post<void>("/api/anmeldung/zweiter-faktor/abschalten", { passwort, code });
+}
+
+export function pflichtSetzen(an: boolean) {
+  return api.put<FaktorStand>("/api/anmeldung/zweiter-faktor/pflicht", { an });
 }
 
 export function einladungLesen(token: string) {

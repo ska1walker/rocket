@@ -87,6 +87,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
   if (
     aktuell === "/anmelden"
     || aktuell === "/passwort-vergessen"
+    || aktuell === "/zweiter-faktor"
     || aktuell.startsWith("/einladung/")
   ) {
     return <>{children}</>;

@@ -56,6 +56,9 @@ class Mitglied(BaseModel):
     # Nur ob, nie was. Die Oberfläche braucht es, um zu warnen, dass eine
     # Einladung hier kein Konto einrichtet, sondern eines zurücksetzt.
     passwort_gesetzt: bool = False
+    # Ebenso nur ob: Wer die Pflicht einschalten will, sieht vorher, wen sie
+    # beim nächsten Aufruf zur Einrichtung schickt.
+    zweiter_faktor: bool = False
 
 
 class Wer(BaseModel):
@@ -208,7 +211,8 @@ async def liste(user: CurrentUser = Depends(get_current_user)) -> list[Mitglied]
             """
             select u.id, u.display_name, u.email, u.olares_username, u.zugang,
                    r.role::text as role, u.created_at, u.last_seen_at,
-                   u.passwort_hash is not null as passwort_gesetzt
+                   u.passwort_hash is not null as passwort_gesetzt,
+                   u.totp_seit is not null as zweiter_faktor
             from public.users u
             join public.user_org_roles r on r.user_id = u.id
             where r.org_id = $1 and u.deleted_at is null

@@ -106,7 +106,7 @@ async def test_mit_faktor_reicht_das_passwort_allein_nicht(datenbank, monkeypatc
         assert (await k.get("/api/companies")).status_code == 401
         assert (await k.get("/api/anmeldung/lage")).json()["zweiter_faktor"] is True
 
-        assert (await k.post("/api/anmeldung/code", json={"code": "000000"})).status_code == 401
+        assert (await k.post("/api/anmeldung/code", json={"code": "000000"})).status_code == 403
         r = await k.post("/api/anmeldung/code", json={"code": zf.code_zu(geheimnis, schritt + 1)})
         assert r.status_code == 200, r.text
         assert r.json()["angemeldet"] is True
@@ -122,7 +122,7 @@ async def test_derselbe_code_gilt_nur_einmal(datenbank, monkeypatch):
         await k.post("/api/abmeldung")
         await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})
         # Jemand hat über die Schulter geschaut — derselbe Code kommt nicht noch einmal durch.
-        assert (await k.post("/api/anmeldung/code", json={"code": code})).status_code == 401
+        assert (await k.post("/api/anmeldung/code", json={"code": code})).status_code == 403
 
 
 async def test_ein_wiederherstellungscode_gilt_genau_einmal(datenbank, monkeypatch):
@@ -135,7 +135,7 @@ async def test_ein_wiederherstellungscode_gilt_genau_einmal(datenbank, monkeypat
         assert stand["aktiv"] is True and stand["codes_uebrig"] == 9
         await k.post("/api/abmeldung")
         await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})
-        assert (await k.post("/api/anmeldung/code", json={"code": codes[0]})).status_code == 401
+        assert (await k.post("/api/anmeldung/code", json={"code": codes[0]})).status_code == 403
 
 
 async def test_codes_raten_bremst(datenbank, monkeypatch):
@@ -417,3 +417,15 @@ async def test_ein_zurueckgesetztes_passwort_meldet_alle_geraete_ab(datenbank, m
             assert r.status_code == 200, r.text
 
             assert (await fremd.get("/api/mitglieder/wer")).status_code == 401
+
+
+async def test_die_liste_sagt_wer_einen_faktor_hat(datenbank, monkeypatch):
+    """Vor dem Einschalten der Pflicht soll man sehen, wen sie trifft."""
+    async with klient_fuer("zf-liste") as k:
+        name, *_ = await _mit_faktor(k, monkeypatch, "Mit Faktor")
+        monkeypatch.setattr("app.config.settings.anmeldung_modus", "olares")
+        k.cookies.clear()
+        liste = (await k.get("/api/mitglieder")).json()
+    stand = {m["olares_username"]: m["zweiter_faktor"] for m in liste}
+    assert stand[name] is True
+    assert stand["zf-liste"] is False

@@ -1,8 +1,6 @@
 // Ein Zugang zur API, nicht viele. Jeder Aufruf geht über denselben
 // Ursprung — auf der Box sieht der Envoy-Sidecar ihn dadurch und prüft ihn.
 
-import { liesSitzplatz, setzeSitzplatz } from "@/lib/sitzplatz";
-
 export class ApiFehler extends Error {
   constructor(
     readonly status: number,
@@ -25,48 +23,34 @@ export class ApiFehler extends Error {
  * ein 401, und es soll als Meldung im Formular stehen, nicht als Sprung.
  */
 let leitetUm = false;
-let raeumtAuf = false;
+let fuehrtZumFaktor = false;
 
 /**
- * Ein Sitzplatz, den es nicht mehr gibt, räumt sich selbst weg.
- *
- * Nach einer Neuinstallation ist die Datenbank neu — der Platz im
- * Browser zeigt dann auf eine Person, die es nicht mehr gibt, und
- * **jeder** Aufruf scheitert mit „Dieser Sitzplatz gehört nicht zu Ihrer
- * Organisation". Marc saß am 9.9.2026 genau darin fest: Die Oberfläche
- * lud, aber nichts ging, und an den Platz denkt in dem Moment niemand.
- *
- * Ohne Platz ist man schlicht man selbst — Wegräumen nimmt also keine
- * Rechte, es gibt nur die Zuschreibung auf. Einmal, nicht je Kachel:
- * Eine Seite stellt fünf Abfragen gleichzeitig und lüde sonst fünfmal
- * neu.
+ * Verlangt die Organisation den zweiten Faktor und fehlt er noch, antwortet
+ * jeder Aufruf mit 403 und dem Kopf `X-Rocket-Zweiter-Faktor: einrichten`.
+ * Dann einmal zur Einrichtung — am Kopf, nicht an der Meldung: Die ist Text
+ * für Menschen und darf sich ändern.
  */
-function platzRaeumen(): void {
-  if (typeof window === "undefined" || raeumtAuf || !liesSitzplatz()) return;
-  raeumtAuf = true;
-  setzeSitzplatz(null);
-  window.location.reload();
+function zurEinrichtung(): void {
+  if (typeof window === "undefined" || fuehrtZumFaktor) return;
+  if (window.location.pathname === "/zweiter-faktor") return;
+  fuehrtZumFaktor = true;
+  window.location.assign("/zweiter-faktor");
 }
 
 function zurZurAnmeldung(pfad: string): void {
   if (typeof window === "undefined" || leitetUm) return;
   if (pfad.startsWith("/api/anmeldung") || pfad.startsWith("/api/einladung")) return;
   const hier = window.location.pathname;
-  if (hier === "/anmelden" || hier === "/passwort-vergessen" || hier.startsWith("/einladung/")) return;
+  if (hier === "/anmelden" || hier === "/passwort-vergessen" || hier === "/zweiter-faktor" || hier.startsWith("/einladung/")) return;
   leitetUm = true;
   const weiter = hier + window.location.search;
   window.location.assign(`/anmelden?weiter=${encodeURIComponent(weiter)}`);
 }
 
 async function anfrage<T>(pfad: string, init?: RequestInit): Promise<T> {
-  // Der Sitzplatz geht bei jedem Aufruf mit. Ihn nur beim Anlegen
-  // mitzuschicken wäre nicht genug: Auch das Protokoll einer Änderung
-  // muss auf die richtige Person zeigen.
-  const sitzplatz = liesSitzplatz();
-
   const koepfe: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(sitzplatz ? { "X-Rocket-Sitzplatz": sitzplatz } : {}),
     ...((init?.headers as Record<string, string>) ?? {}),
   };
   // Ein leerer Wert heißt „diesen Kopf nicht setzen" — siehe `postForm`.
@@ -75,7 +59,7 @@ async function anfrage<T>(pfad: string, init?: RequestInit): Promise<T> {
   const antwort = await fetch(pfad, { ...init, headers: koepfe });
 
   if (antwort.status === 401) zurZurAnmeldung(pfad);
-  if (antwort.headers.get("X-Rocket-Sitzplatz") === "unbekannt") platzRaeumen();
+  if (antwort.status === 403 && antwort.headers.get("X-Rocket-Zweiter-Faktor") === "einrichten") zurEinrichtung();
 
   if (!antwort.ok) {
     // FastAPI legt den Grund unter `detail` ab. Steht dort nichts
