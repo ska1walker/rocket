@@ -116,7 +116,7 @@ passen nicht in eine Sitzung. Deshalb:
    das Chart byte-gleich ist. `aimighty-market.pages.dev` ist aus den
    Sitzungen nicht erreichbar — den Katalog prüft Kais Box.
 
-Erster Durchlauf: Rocket 26.9.1, PR #81, 30.9.2026.
+Erster Durchlauf: Rocket 26.9.1, PR #81, 30.9.2026 — von Kai im Katalog der Box bestätigt.
 
 ## Bekannte Fallen im Markt
 
