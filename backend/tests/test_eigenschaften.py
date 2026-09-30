@@ -167,7 +167,10 @@ async def test_sicherung_nimmt_definitionen_mit(datenbank, tmp_path, monkeypatch
     async with klient_fuer("eig-k") as k:
         await k.post("/api/eigenschaften", json={"entity": "deals", "label": "Kammer"})
         bilanz = (await k.post("/api/sicherung")).json()
-    assert bilanz["zeilen"]["property_definitions"] == 1
+    # Die eigene Eigenschaft plus die festen Felder des Geschäfts (seit 0034
+    # stehen sie als Systemeigenschaften in derselben Tabelle).
+    from app import eigenschaften
+    assert bilanz["zeilen"]["property_definitions"] == 1 + len(eigenschaften.SYSTEMFELDER["deals"])
 
 
 # ---- Mehrfachauswahl ----------------------------------------------------

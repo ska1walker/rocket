@@ -6,8 +6,10 @@ und zwar beim Schreiben, denn beim Lesen ist es zu spät.
 """
 
 import re
+from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
+from uuid import UUID
 
 import asyncpg
 
@@ -33,9 +35,15 @@ class Ungueltig(ValueError):  # noqa: N818
 
 
 async def definitionen(conn: asyncpg.Connection, entity: str) -> list[asyncpg.Record]:
+    """Die **eigenen** Eigenschaften — die in `custom` stehen.
+
+    Systemeigenschaften stehen seit 0034 in derselben Tabelle, gehören aber
+    nicht hierher: Ihr Wert liegt in der Spalte, und die Prüfung von
+    `custom` wiese sie sonst als erlaubten Schlüssel aus.
+    """
     return await conn.fetch(
         "select id, key, label, kind, options from public.property_definitions "
-        "where entity = $1 and is_active order by position, label",
+        "where entity = $1 and is_active and not is_system order by position, label",
         entity,
     )
 
@@ -183,3 +191,188 @@ def optionswerte(roh: Any, *, auch_verborgene: bool = True) -> list[str]:
 def optionstexte(roh: Any) -> list[str]:
     """Nur die Beschriftungen — das, was in einer Fehlermeldung steht."""
     return [o["text"] for o in optionen(roh)]
+
+
+# ── Gruppen und Systemeigenschaften (0034, docs/PLAN-EIGENSCHAFTEN.md) ──
+
+# Die Gruppe, in der eigene Eigenschaften landen, solange niemand sie
+# einsortiert hat. Auch neu angelegte kommen hierher, wenn keine Gruppe
+# genannt ist.
+WEITERE = "weitere"
+
+VORGABEGRUPPEN: dict[str, list[tuple[str, str]]] = {
+    "companies": [
+        ("firmeninformationen", "Firmeninformationen"),
+        ("adresse", "Adresse"),
+        ("kontaktwege", "Kontaktwege"),
+        ("vertrieb", "Vertrieb"),
+        (WEITERE, "Weitere Eigenschaften"),
+    ],
+    "contacts": [
+        ("kontaktinformationen", "Kontaktinformationen"),
+        ("kontaktwege", "Kontaktwege"),
+        ("vertrieb", "Vertrieb"),
+        ("einwilligung", "Einwilligung"),
+        (WEITERE, "Weitere Eigenschaften"),
+    ],
+    "deals": [
+        ("geschaeftsinformationen", "Geschäftsinformationen"),
+        ("vertrieb", "Vertrieb"),
+        (WEITERE, "Weitere Eigenschaften"),
+    ],
+}
+
+
+@dataclass(frozen=True)
+class Systemfeld:
+    """Ein festes Feld, beschrieben wie eine Eigenschaft.
+
+    `art` ist die Art, wie die Oberfläche sie zeigt — sie geht über die
+    Arten eigener Eigenschaften hinaus (`person`, `currency`, `url` …),
+    weil feste Felder das schon immer waren.
+
+    `bearbeitbar` ist falsch für Gerechnetes (Anzahl Kontakte, Angelegt)
+    und für Felder mit eigenem Weg (die Einwilligung ändert sich nur über
+    Double-Opt-in und Abmelden, die Firma eines Kontakts über die
+    Zuordnung). Sie lassen sich gruppieren, aber nie zur Pflicht machen.
+    """
+
+    key: str
+    label: str
+    art: str
+    gruppe: str
+    bearbeitbar: bool = True
+    optionen: tuple[tuple[str, str], ...] = field(default_factory=tuple)
+
+
+_STUFEN = (
+    ("lead", "Kontakt"), ("qualified", "Qualifiziert"), ("opportunity", "Chance"),
+    ("customer", "Kunde"), ("partner", "Partner"), ("disqualified", "Verworfen"),
+)
+_EINWILLIGUNG = (
+    ("keine", "keine"), ("angefragt", "angefragt"), ("bestaetigt", "bestätigt"),
+    ("bestandskunde", "Bestandskunde"), ("abgemeldet", "abgemeldet"),
+)
+_PRODUKTE = (
+    ("assistent", "Assistent"), ("analyst", "Analyst"), ("experte", "Experte"),
+    ("service", "Service"), ("sonstiges", "Sonstiges"),
+)
+
+S = Systemfeld
+SYSTEMFELDER: dict[str, list[Systemfeld]] = {
+    "companies": [
+        S("name", "Firma", "text", "firmeninformationen"),
+        S("domain", "Domain", "text", "firmeninformationen"),
+        S("industry", "Branche", "text", "firmeninformationen"),
+        S("employee_count", "Mitarbeiter", "number", "firmeninformationen"),
+        S("description", "Beschreibung", "textarea", "firmeninformationen"),
+        S("created_at", "Angelegt", "date", "firmeninformationen", bearbeitbar=False),
+        S("updated_at", "Zuletzt geändert", "date", "firmeninformationen", bearbeitbar=False),
+        S("street", "Straße", "text", "adresse"),
+        S("postal_code", "PLZ", "text", "adresse"),
+        S("city", "Ort", "text", "adresse"),
+        S("country", "Land", "text", "adresse"),
+        S("phone", "Telefon", "phone", "kontaktwege"),
+        S("website", "Website", "url", "kontaktwege"),
+        S("linkedin_url", "LinkedIn", "url", "kontaktwege"),
+        S("lifecycle_stage", "Stufe", "select", "vertrieb", optionen=_STUFEN),
+        S("source", "Herkunft", "text", "vertrieb"),
+        S("owner_id", "Besitzer", "user", "vertrieb"),
+        S("contact_count", "Kontakte", "number", "vertrieb", bearbeitbar=False),
+        S("open_deal_count", "Offene Deals", "number", "vertrieb", bearbeitbar=False),
+        S("open_amount_cents", "Offener Wert", "currency", "vertrieb", bearbeitbar=False),
+    ],
+    "contacts": [
+        S("first_name", "Vorname", "text", "kontaktinformationen"),
+        S("last_name", "Nachname", "text", "kontaktinformationen"),
+        S("job_title", "Position", "text", "kontaktinformationen"),
+        S("buying_role", "Kaufrolle", "text", "kontaktinformationen"),
+        S("company_name", "Firma", "text", "kontaktinformationen", bearbeitbar=False),
+        S("created_at", "Angelegt", "date", "kontaktinformationen", bearbeitbar=False),
+        S("updated_at", "Zuletzt geändert", "date", "kontaktinformationen", bearbeitbar=False),
+        S("email", "E-Mail", "email", "kontaktwege"),
+        S("phone", "Telefon", "phone", "kontaktwege"),
+        S("mobile", "Mobil", "phone", "kontaktwege"),
+        S("linkedin_url", "LinkedIn", "url", "kontaktwege"),
+        S("lifecycle_stage", "Stufe", "select", "vertrieb", optionen=_STUFEN),
+        S("source", "Herkunft", "text", "vertrieb"),
+        S("owner_id", "Besitzer", "user", "vertrieb"),
+        S("notes", "Notizen", "textarea", "vertrieb"),
+        S("marketing_einwilligung", "Marketing-Einwilligung", "select", "einwilligung",
+          bearbeitbar=False, optionen=_EINWILLIGUNG),
+    ],
+    "deals": [
+        S("name", "Name", "text", "geschaeftsinformationen"),
+        S("amount_cents", "Betrag", "currency", "geschaeftsinformationen"),
+        S("product", "Produkt", "select", "geschaeftsinformationen", optionen=_PRODUKTE),
+        S("service_days", "Servicetage", "number", "geschaeftsinformationen"),
+        S("close_date", "Abschluss geplant", "date", "geschaeftsinformationen"),
+        S("company_name", "Firma", "text", "geschaeftsinformationen", bearbeitbar=False),
+        S("created_at", "Angelegt", "date", "geschaeftsinformationen", bearbeitbar=False),
+        S("updated_at", "Zuletzt geändert", "date", "geschaeftsinformationen", bearbeitbar=False),
+        S("pipeline_id", "Pipeline", "text", "vertrieb", bearbeitbar=False),
+        S("stage_name", "Stufe", "text", "vertrieb", bearbeitbar=False),
+        S("probability", "Wahrscheinlichkeit", "number", "vertrieb", bearbeitbar=False),
+        S("owner_id", "Besitzer", "user", "vertrieb"),
+        S("next_step", "Nächster Schritt", "textarea", "vertrieb"),
+        S("lost_reason", "Verlustgrund", "text", "vertrieb", bearbeitbar=False),
+    ],
+}
+del S
+
+
+def systemfeld(entity: str, key: str) -> Systemfeld | None:
+    return next((f for f in SYSTEMFELDER.get(entity, []) if f.key == key), None)
+
+
+async def vorgaben_sicherstellen(conn: asyncpg.Connection, org_id: UUID, entity: str) -> None:
+    """Legt fehlende Vorgabegruppen und Systemeigenschaften an.
+
+    Wiederholbar und nebenläufig sicher: Alles läuft über `on conflict do
+    nothing` auf den eindeutigen Schlüsseln. Zwei gleichzeitige erste
+    Aufrufe legen also nichts doppelt an. Kommt mit einer neuen Version ein
+    festes Feld dazu, erscheint es hier von selbst — am Ende seiner
+    Vorgabegruppe.
+
+    Eigene Eigenschaften ohne Gruppe (alle aus der Zeit vor 0034) kommen in
+    „Weitere Eigenschaften". Umsortiert wird nichts, was schon eine Gruppe
+    hat — die Einrichtung eines Menschen gilt.
+    """
+    for pos, (key, label) in enumerate(VORGABEGRUPPEN[entity]):
+        await conn.execute(
+            "insert into public.property_groups (org_id, entity, key, label, position, is_system) "
+            "values ($1, $2, $3, $4, $5, true) on conflict (org_id, entity, key) do nothing",
+            org_id, entity, key, label, pos * 10,
+        )
+    gruppen = {
+        z["key"]: z["id"] for z in await conn.fetch(
+            "select id, key from public.property_groups where org_id = $1 and entity = $2",
+            org_id, entity,
+        )
+    }
+    # Neue Felder hinten anstellen: Die Stelle ist die höchste bisherige
+    # Position in der Gruppe plus Abstand, damit ein später hinzugekommenes
+    # Feld eine Anordnung nicht durcheinanderbringt.
+    hoechste = {
+        z["group_id"]: z["pos"] for z in await conn.fetch(
+            "select group_id, max(position) as pos from public.property_definitions "
+            "where org_id = $1 and entity = $2 group by group_id",
+            org_id, entity,
+        )
+    }
+    for i, f in enumerate(SYSTEMFELDER[entity]):
+        gid = gruppen.get(f.gruppe) or gruppen[WEITERE]
+        await conn.execute(
+            """
+            insert into public.property_definitions
+              (org_id, entity, key, label, kind, group_id, is_system, position)
+            values ($1, $2, $3, $4, 'text', $5, true, $6)
+            on conflict (org_id, entity, key) do nothing
+            """,
+            org_id, entity, f.key, f.label, gid, (hoechste.get(gid) or 0) + (i + 1) * 10,
+        )
+    await conn.execute(
+        "update public.property_definitions set group_id = $3 "
+        "where org_id = $1 and entity = $2 and group_id is null",
+        org_id, entity, gruppen[WEITERE],
+    )

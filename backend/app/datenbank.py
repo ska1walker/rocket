@@ -46,7 +46,7 @@ FREI = frozenset({
     "contact_companies", "contacts", "deal_contacts", "deals", "dokumente",
     "einfuhren", "eingang", "kampagnen", "listen", "listen_mitglieder",
     "loss_reasons", "mails", "orgs", "pipeline_stages", "pipelines",
-    "podcasts", "products", "property_definitions", "quote_items", "quotes",
+    "podcasts", "products", "property_definitions", "property_groups", "quote_items", "quotes",
     "tasks", "themenlaeufe", "ticket_kategorien", "ticket_pipelines",
     "ticket_stages", "tickets", "user_org_roles", "vorlagen",
 })

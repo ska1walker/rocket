@@ -33,6 +33,8 @@ from app.config import settings
 # Firma vor dem Kontakt stehen und die Stufe vor dem Geschäft, sonst
 # greift der Fremdschlüssel.
 TABELLEN: list[str] = [
+    # Gruppen vor den Eigenschaften — die Eigenschaft zeigt auf ihre Gruppe.
+    "property_groups",
     "property_definitions",
     "companies",
     "pipelines",
@@ -441,6 +443,12 @@ async def zurueckspielen(
         conn, daten.get("einstellungen") or {}, ziel_org, nutzer, handelnder, ueberschreiben=frisch
     )
 
+    # Eine Eigenschaftsgruppe, die es am Ziel schon gibt (die Vorgaben
+    # entstehen beim ersten Lesen), hat dort eine andere id. Die
+    # Eigenschaften aus dem Abzug zeigen dann auf die alte — ohne
+    # Umschreiben scheiterte ihr Einfügen am Fremdschlüssel.
+    gruppe_neu: dict[str, str] = {}
+
     for tabelle in TABELLEN:
         zeilen = daten["tabellen"].get(tabelle, [])
         typen = await _spaltentypen(conn, tabelle)
@@ -452,6 +460,16 @@ async def zurueckspielen(
             werte = dict(zeile)
             if "org_id" in werte:
                 werte["org_id"] = str(ziel_org)
+            if tabelle == "property_groups":
+                vorhanden = await conn.fetchval(
+                    "select id from public.property_groups "
+                    "where org_id = $1 and entity = $2 and key = $3",
+                    ziel_org, werte.get("entity"), werte.get("key"),
+                )
+                if vorhanden is not None and str(vorhanden) != str(werte.get("id")):
+                    gruppe_neu[str(werte.get("id"))] = str(vorhanden)
+            if tabelle == "property_definitions" and werte.get("group_id"):
+                werte["group_id"] = gruppe_neu.get(str(werte["group_id"]), werte["group_id"])
             for spalte in nutzerspalten:
                 alt = werte.get(spalte)
                 if alt:
