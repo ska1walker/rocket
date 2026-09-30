@@ -282,7 +282,9 @@ der Lieferung und liest die Token über `var(--am-*)`.
    (`olares-cli chart lint dist/rocket-X.Y.Z.tgz`), und **erst nach einer
    laufenden Installation auf einer Box** geht der Eintrag per PR in
    `bayerhazard/aimighty-market`. Die Regeln dahinter stehen im Skill
-   `insilo/.claude/skills/olares-release/SKILL.md`.
+   `insilo/.claude/skills/olares-release/SKILL.md`; was der Markt selbst
+   verlangt (Version an 5 Stellen, frisches base64, jede Änderung = neue
+   Version) und wo Rocket bewusst abweicht, steht in `docs/MARKT.md`.
 
 10. **Bei Unsicherheit:** stoppen und Kai fragen.
 
