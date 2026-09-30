@@ -26,6 +26,7 @@ import { Qualifizierungsblock } from "@/components/qualifizierung";
 import { Feldgruppen } from "@/components/feldgruppen";
 import { Notizkasten } from "@/components/notizkasten";
 import { Dokumente } from "@/components/dokumente";
+import { useDialogfalle } from "@/components/dialogfalle";
 
 export default function DealSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -34,6 +35,7 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
   // Beim Verlieren wird nach dem Grund gefragt. Ohne ihn ist die
   // Verlustanalyse in der Prognose eine Liste aus „ohne Kategorie".
   const [verlorenStufe, setVerlorenStufe] = useState<string | null>(null);
+  const falle = useDialogfalle(() => setVerlorenStufe(null));
   const [grund, setGrund] = useState("");
   const [grundText, setGrundText] = useState("");
 
@@ -137,7 +139,7 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
       )}
 
       {verlorenStufe && (
-        <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Verlustgrund">
+        <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Verlustgrund" ref={falle}>
           <div className="karte" style={{ maxWidth: "440px", width: "100%" }}>
             <h2 style={{ marginBottom: "var(--am-raum-4)", fontSize: "1.125rem" }}>
               Woran ist es gescheitert?

@@ -47,7 +47,7 @@ function Ergebnistabelle({
   sortieren?: (spalte: string) => void;
 }) {
   return (
-    <div className="rollbar">
+    <div className="rollbar" tabIndex={0}>
       <table className="tabelle db-tabelle">
         <thead>
           <tr>

@@ -107,7 +107,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
         </Link>
       </Seitenkopf>
 
-      <div className="datensatz" style={{ gridTemplateColumns: "minmax(0, 1fr) 260px" }}>
+      <div className="datensatz datensatz-seitenleiste">
         <section className="block">
           <div className="block-kopf">
             <h2>Positionen</h2>
@@ -145,7 +145,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
               </div>
             )}
 
-            <div className="rollbar">
+            <div className="rollbar" tabIndex={0}>
               <table className="tabelle" style={{ minInlineSize: "48rem" }}>
                 <thead>
                   <tr>
@@ -154,7 +154,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
                     <th style={{ width: "9rem", textAlign: "right" }}>Einzelpreis</th>
                     <th style={{ width: "6rem", textAlign: "right" }}>Nachlass %</th>
                     <th style={{ width: "8rem", textAlign: "right" }}>Betrag</th>
-                    {entwurf && <th style={{ width: "2rem" }} />}
+                    {entwurf && <th style={{ width: "2rem" }}><span className="nur-vorleser">Aktionen</span></th>}
                   </tr>
                 </thead>
                 <tbody>

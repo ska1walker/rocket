@@ -41,22 +41,22 @@ export default function StartSeite() {
         <div className="kennzahl">
           <dt>Offene Pipeline</dt>
           <dd>{euro(summeOffen)}</dd>
-          <div className="kennzahl-fuss">{anzahlOffen} Geschäfte</div>
+          <dd className="kennzahl-fuss">{anzahlOffen} Geschäfte</dd>
         </div>
         <div className="kennzahl">
           <dt>Gewichtet</dt>
           <dd>{euro(gewichtet)}</dd>
-          <div className="kennzahl-fuss">nach Stufenwahrscheinlichkeit</div>
+          <dd className="kennzahl-fuss">nach Stufenwahrscheinlichkeit</dd>
         </div>
         <div className="kennzahl">
           <dt>Gewonnen</dt>
           <dd>{euro(gewonnen?.sum_amount_cents ?? 0)}</dd>
-          <div className="kennzahl-fuss">{gewonnen?.deals.length ?? 0} Abschlüsse</div>
+          <dd className="kennzahl-fuss">{gewonnen?.deals.length ?? 0} Abschlüsse</dd>
         </div>
         <div className="kennzahl">
           <dt>Überfällig</dt>
           <dd>{ueberfaellig.length}</dd>
-          <div className="kennzahl-fuss">Abschlussdatum verstrichen</div>
+          <dd className="kennzahl-fuss">Abschlussdatum verstrichen</dd>
         </div>
       </dl>
 

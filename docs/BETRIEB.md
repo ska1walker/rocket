@@ -1830,6 +1830,47 @@ ganze Abfrage mit einem Cast-Fehler abzubrechen.
   Vorgabegruppe am Ziel schon (andere id), schreibt das Zurückspielen die
   Verweise der Eigenschaften um.
 
+## GUI-Prüfung — was sie fand (26.9.5)
+
+Am 30.9.2026 lief die ganze Oberfläche durch einen Prüflauf: jede Seite
+in drei Breiten (1400, 768, 390 px), hell und dunkel, mit axe-core
+(WCAG 2 A/AA), dazu jeder harmlose Knopf geklickt, die Anlegen-Dialoge
+mit der Tastatur bedient und die Trefferflächen auf dem Handy gemessen.
+Behoben in 26.9.5:
+
+- **Aufgaben als Liste scheiterten mit 400.** Die Listenansicht sortiert
+  ohne gespeicherte Ansicht nach `updated_at`; Aufgaben kannten das Feld
+  nicht. Ein Test prüft die Vorgabesortierung jetzt für alle vier Listen.
+- **Dialoge ließen die Tastatur im Stich.** Der Fokus blieb hinter dem
+  Dialog, Tab lief hinaus, Escape tat nichts. Jeder Dialog nimmt jetzt
+  `useDialogfalle` (`components/dialogfalle.ts`): Fokus ins erste Feld,
+  Tab bleibt drin, Escape schließt, danach zurück. Eine Rückfrage vor dem
+  Löschen fokussiert „Abbrechen" (`data-autofokus`), damit ein Enter
+  nichts löscht. **Ein neuer Dialog nimmt den Haken, immer.**
+- **Handy:** Die Positionen eines Angebots schrumpften auf einen Streifen,
+  die Prognose blieb zweispaltig, und Server, Port und Verschlüsselung
+  beim Versand standen zu dritt in einer Zeile. Spalten, die das Handy
+  nicht tragen, kommen jetzt aus CSS mit Umbruch (`.datensatz-zwei`,
+  `.datensatz-seitenleiste`, `.feldreihe`), nie mehr inline am Bauteil.
+- **Trefferflächen:** Haken, Spaltenköpfe, Rückweg, Verweise im Feld und
+  die Marke haben auf Berührungsgeräten eine unsichtbare Fläche von 44 px.
+- **Vorleser:** „Erstellen" behält seinen Namen, wenn das Wort auf
+  schmalen Schirmen weicht; leere Tabellenköpfe sagen „Aktionen";
+  Kennzahlen sind eine gültige Definitionsliste; Leerzustände
+  überspringen keine Überschriftenebene mehr; Rollflächen sind mit der
+  Tastatur erreichbar.
+- **Kontrast:** Zeitangaben in der Zeitleiste und die gewichtete Summe am
+  Board standen in der Farbe für Gesperrtes (2,7:1) und nehmen jetzt die
+  gedämpfte; die Pille „Opportunity" trägt Gold-900 (5,1:1), im Dunkeln
+  ohne Fläche.
+- **Kaputte Adresse** (`/angebote/abc`): statt „Anfrage fehlgeschlagen
+  (422)" steht „Diese Adresse führt zu keinem Datensatz."
+
+**Offen, weil es das Designsystem betrifft:** Gedämpfter Text
+(`--am-text-gedaempft` = Blau-500) erreicht auf der Grundfläche Blau-25
+nur 4,36:1, Gold-800 auf Blau-50 4,45:1 — knapp unter 4,5. Das ist eine
+Entscheidung über die Token, nicht über ein Bauteil.
+
 ## Datenbank ansehen — lesend, unter Zeilensicherheit
 
 Seit 26.9.1 unter *Einstellungen › Daten › Datenbank öffnen* (`/datenbank`),

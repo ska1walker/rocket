@@ -82,7 +82,7 @@ export default function ListenSeite() {
           <Leer titel="Noch keine Liste" text="Eine Liste sagt, wem eine Kampagne gilt. Ob Sie schreiben dürfen, sagt der Kontakt." />
         )}
         {listen.data && listen.data.length > 0 && (
-          <div className="rollbar">
+          <div className="rollbar" tabIndex={0}>
             <table className="tabelle" style={{ minInlineSize: "40rem" }}>
               <thead>
                 <tr>

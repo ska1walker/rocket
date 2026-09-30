@@ -125,7 +125,7 @@ export function Quellenblock() {
                 <th>Art</th>
                 <th>Tickets</th>
                 <th>Zuletzt gehört</th>
-                <th />
+                <th><span className="nur-vorleser">Aktionen</span></th>
               </tr>
             </thead>
             <tbody>

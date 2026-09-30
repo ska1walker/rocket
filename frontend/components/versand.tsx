@@ -85,7 +85,7 @@ export function Versandblock() {
           Kontakt kommen. Ein gewöhnliches SMTP-Konto — dasselbe, das Relay oder Ihr Mailprogramm
           benutzt. Jede Mail steht danach im Verlauf des Kontakts, mit dem Faden zur Anfrage.</>} />
 
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.4fr)", gap: "0 var(--am-raum-4)" }}>
+        <div className="feldreihe" style={{ "--spalten": "minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.4fr)" } as React.CSSProperties}>
           <div className="feld">
             <label htmlFor="smtp-host">SMTP-Server</label>
             <input id="smtp-host" value={host} onChange={(x) => setHost(x.target.value)} placeholder="smtp.beispiel.de" />
@@ -104,7 +104,7 @@ export function Versandblock() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 var(--am-raum-4)" }}>
+        <div className="feldreihe">
           <div className="feld">
             <label htmlFor="smtp-benutzer">Benutzer</label>
             <input id="smtp-benutzer" value={benutzer} onChange={(x) => setBenutzer(x.target.value)} placeholder="kai@aimighty.de" />
@@ -124,7 +124,7 @@ export function Versandblock() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 var(--am-raum-4)" }}>
+        <div className="feldreihe">
           <div className="feld">
             <label htmlFor="smtp-absender">Absenderadresse</label>
             <input id="smtp-absender" type="email" value={absender} onChange={(x) => setAbsender(x.target.value)} placeholder="support@aimighty.de" />
@@ -262,7 +262,7 @@ export function Marketingversandblock() {
           </div>
         )}
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 var(--am-raum-4)" }}>
+        <div className="feldreihe">
           <div className="feld">
             <label htmlFor="mk-absender">Absenderadresse <span className="optional">optional</span></label>
             <input id="mk-absender" type="email" value={absender} onChange={(x) => setAbsender(x.target.value)} placeholder="wie beim Versand oben" />

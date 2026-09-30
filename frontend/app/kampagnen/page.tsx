@@ -75,7 +75,7 @@ function Inhalt() {
           <Leer titel="Noch keine Kampagne" text="Eine Kampagne ist Betreff, Text und eine Liste. Geschrieben wird nur, wer eingewilligt hat." />
         )}
         {kampagnen.data && kampagnen.data.length > 0 && (
-          <div className="rollbar">
+          <div className="rollbar" tabIndex={0}>
             <table className="tabelle" style={{ minInlineSize: "48rem" }}>
               <thead>
                 <tr>

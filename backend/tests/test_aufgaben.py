@@ -82,6 +82,12 @@ async def test_filter_sortierung_und_ansicht(datenbank):
         auf = (await k.get("/api/tasks?sort=title&richtung=asc")).json()
         assert [t["title"] for t in auf] == ["Anrufen", "Mailen"]
 
+        # Die Listenansicht sortiert ohne gespeicherte Ansicht nach
+        # `updated_at` — das war bei Aufgaben ein 400.
+        for pfad in ("/api/tasks", "/api/companies", "/api/contacts", "/api/tickets"):
+            r = await k.get(f"{pfad}?sort=updated_at&richtung=desc")
+            assert r.status_code == 200, (pfad, r.text)
+
         felder = (await k.get("/api/ansichten/felder?entity=tasks")).json()
         schluessel = {x["schluessel"] for x in felder["felder"]}
         assert {"title", "art", "phase", "prioritaet", "due_at", "assigned_to"} <= schluessel

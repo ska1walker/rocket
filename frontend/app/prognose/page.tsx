@@ -75,28 +75,28 @@ export default function PrognoseSeite() {
         <div className="kennzahl">
           <dt>Offen</dt>
           <dd>{euro(p.offen_cents)}</dd>
-          <div className="kennzahl-fuss">{p.anzahl_offen} Leads</div>
+          <dd className="kennzahl-fuss">{p.anzahl_offen} Leads</dd>
         </div>
         <div className="kennzahl">
           <dt>Gewichtet</dt>
           <dd>{euro(p.gewichtet_cents)}</dd>
-          <div className="kennzahl-fuss">nach Stufenwahrscheinlichkeit</div>
+          <dd className="kennzahl-fuss">nach Stufenwahrscheinlichkeit</dd>
         </div>
         <div className="kennzahl">
           <dt>Gewonnen im Zeitraum</dt>
           <dd>{euro(p.gewonnen_cents)}</dd>
-          <div className="kennzahl-fuss">{p.anzahl_gewonnen} Abschlüsse</div>
+          <dd className="kennzahl-fuss">{p.anzahl_gewonnen} Abschlüsse</dd>
         </div>
         <div className="kennzahl">
           <dt>Trefferquote</dt>
           <dd>
             {p.trefferquote === null ? "—" : `${Math.round(p.trefferquote * 100)} %`}
           </dd>
-          <div className="kennzahl-fuss">
+          <dd className="kennzahl-fuss">
             {p.trefferquote === null
               ? "noch nichts entschieden"
               : `${p.anzahl_gewonnen} von ${p.anzahl_gewonnen + p.anzahl_verloren}`}
-          </div>
+          </dd>
         </div>
         <div className="kennzahl">
           <dt>Dauer bis Abschluss</dt>
@@ -105,16 +105,16 @@ export default function PrognoseSeite() {
               ? "—"
               : `${Math.round(p.durchschnittsdauer_tage)}`}
           </dd>
-          <div className="kennzahl-fuss">Tage im Mittel</div>
+          <dd className="kennzahl-fuss">Tage im Mittel</dd>
         </div>
         <div className="kennzahl">
           <dt>Überfällig</dt>
           <dd>{p.ueberfaellig_anzahl}</dd>
-          <div className="kennzahl-fuss">{euro(p.ueberfaellig_cents)} mit verstrichenem Datum</div>
+          <dd className="kennzahl-fuss">{euro(p.ueberfaellig_cents)} mit verstrichenem Datum</dd>
         </div>
       </dl>
 
-      <div className="datensatz" style={{ gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)" }}>
+      <div className="datensatz datensatz-zwei">
         <section className="block">
           <div className="block-kopf">
             <h2>Erwarteter Abschluss je Monat</h2>
@@ -126,28 +126,30 @@ export default function PrognoseSeite() {
                 prognostizieren — das ist die eigentliche Aussage dieser Kachel.
               </p>
             ) : (
-              <table className="tabelle">
-                <thead>
-                  <tr>
-                    <th>Monat</th>
-                    <th style={{ width: "40%" }}>Verteilung</th>
-                    <th style={{ textAlign: "right" }}>Offen</th>
-                    <th style={{ textAlign: "right" }}>Gewichtet</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {p.monate.map((m) => (
-                    <tr key={m.monat} style={{ cursor: "default" }}>
-                      <td className="haupt">{monatsname(m.monat)}</td>
-                      <td>
-                        <Balken anteil={m.offen_cents / groessterMonat} />
-                      </td>
-                      <td className="zahl">{euro(m.offen_cents)}</td>
-                      <td className="zahl">{euro(m.gewichtet_cents)}</td>
+              <div className="rollbar" tabIndex={0}>
+                <table className="tabelle">
+                  <thead>
+                    <tr>
+                      <th>Monat</th>
+                      <th style={{ width: "40%" }}>Verteilung</th>
+                      <th style={{ textAlign: "right" }}>Offen</th>
+                      <th style={{ textAlign: "right" }}>Gewichtet</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {p.monate.map((m) => (
+                      <tr key={m.monat} style={{ cursor: "default" }}>
+                        <td className="haupt">{monatsname(m.monat)}</td>
+                        <td>
+                          <Balken anteil={m.offen_cents / groessterMonat} />
+                        </td>
+                        <td className="zahl">{euro(m.offen_cents)}</td>
+                        <td className="zahl">{euro(m.gewichtet_cents)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </section>
@@ -162,28 +164,30 @@ export default function PrognoseSeite() {
                 Im Zeitraum ist nichts verloren gegangen — oder es wurde kein Grund vermerkt.
               </p>
             ) : (
-              <table className="tabelle">
-                <thead>
-                  <tr>
-                    <th>Grund</th>
-                    <th style={{ width: "35%" }}>Anteil</th>
-                    <th style={{ textAlign: "right" }}>Anzahl</th>
-                    <th style={{ textAlign: "right" }}>Wert</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {p.verlustgruende.map((g) => (
-                    <tr key={g.grund} style={{ cursor: "default" }}>
-                      <td className="haupt">{g.grund}</td>
-                      <td>
-                        <Balken anteil={g.anzahl / meisteVerluste} betont />
-                      </td>
-                      <td className="zahl">{g.anzahl}</td>
-                      <td className="zahl">{euro(g.summe_cents)}</td>
+              <div className="rollbar" tabIndex={0}>
+                <table className="tabelle">
+                  <thead>
+                    <tr>
+                      <th>Grund</th>
+                      <th style={{ width: "35%" }}>Anteil</th>
+                      <th style={{ textAlign: "right" }}>Anzahl</th>
+                      <th style={{ textAlign: "right" }}>Wert</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {p.verlustgruende.map((g) => (
+                      <tr key={g.grund} style={{ cursor: "default" }}>
+                        <td className="haupt">{g.grund}</td>
+                        <td>
+                          <Balken anteil={g.anzahl / meisteVerluste} betont />
+                        </td>
+                        <td className="zahl">{g.anzahl}</td>
+                        <td className="zahl">{euro(g.summe_cents)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </section>
@@ -198,33 +202,35 @@ export default function PrognoseSeite() {
                 Im Zeitraum wurde nichts entschieden.
               </p>
             ) : (
-              <table className="tabelle">
-                <thead>
-                  <tr>
-                    <th>Produkt</th>
-                    <th style={{ textAlign: "right" }}>Gewonnen</th>
-                    <th style={{ textAlign: "right" }}>Verloren</th>
-                    <th style={{ textAlign: "right" }}>Trefferquote</th>
-                    <th style={{ textAlign: "right" }}>Umsatz</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {p.produkte.map((pr) => {
-                    const gesamt = pr.gewonnen + pr.verloren;
-                    return (
-                      <tr key={pr.produkt} style={{ cursor: "default" }}>
-                        <td className="haupt">{PRODUKT_TEXT[pr.produkt] ?? pr.produkt}</td>
-                        <td className="zahl">{pr.gewonnen}</td>
-                        <td className="zahl">{pr.verloren}</td>
-                        <td className="zahl">
-                          {gesamt === 0 ? "—" : `${Math.round((pr.gewonnen / gesamt) * 100)} %`}
-                        </td>
-                        <td className="zahl">{euro(pr.gewonnen_cents)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="rollbar" tabIndex={0}>
+                <table className="tabelle">
+                  <thead>
+                    <tr>
+                      <th>Produkt</th>
+                      <th style={{ textAlign: "right" }}>Gewonnen</th>
+                      <th style={{ textAlign: "right" }}>Verloren</th>
+                      <th style={{ textAlign: "right" }}>Trefferquote</th>
+                      <th style={{ textAlign: "right" }}>Umsatz</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {p.produkte.map((pr) => {
+                      const gesamt = pr.gewonnen + pr.verloren;
+                      return (
+                        <tr key={pr.produkt} style={{ cursor: "default" }}>
+                          <td className="haupt">{PRODUKT_TEXT[pr.produkt] ?? pr.produkt}</td>
+                          <td className="zahl">{pr.gewonnen}</td>
+                          <td className="zahl">{pr.verloren}</td>
+                          <td className="zahl">
+                            {gesamt === 0 ? "—" : `${Math.round((pr.gewonnen / gesamt) * 100)} %`}
+                          </td>
+                          <td className="zahl">{euro(pr.gewonnen_cents)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </section>

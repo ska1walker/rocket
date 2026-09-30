@@ -28,7 +28,7 @@ export function Katalogblock() {
       <div className="block-inhalt">
         <Erklaerung kurz="Ihre Produkte mit Listenpreis — die Grundlage jedes Angebots." lang={<>Die Listenpreise für Angebote. Ein Angebot kopiert den Preis beim Anlegen — spätere Änderungen hier ändern kein liegendes Angebot.</>} />
         <table className="tabelle" style={{ marginBottom: "var(--am-raum-4)" }}>
-          <thead><tr><th>Produkt</th><th>Art</th><th style={{ textAlign: "right" }}>Netto €</th><th style={{ textAlign: "right" }}>Servicetage</th><th /></tr></thead>
+          <thead><tr><th>Produkt</th><th>Art</th><th style={{ textAlign: "right" }}>Netto €</th><th style={{ textAlign: "right" }}>Servicetage</th><th><span className="nur-vorleser">Aktionen</span></th></tr></thead>
           <tbody>
             {produkte.data!.map((p) => (
               <tr key={p.id} style={{ cursor: "default", opacity: p.is_active ? 1 : 0.5 }}>
@@ -42,7 +42,7 @@ export function Katalogblock() {
           </tbody>
         </table>
         {(aendern.isError || anlegen.isError) && <Fehler text={((aendern.error ?? anlegen.error) as Error).message} />}
-        <form style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr auto", gap: "var(--am-raum-2)", alignItems: "end" }} onSubmit={(e) => { e.preventDefault(); if (neu.name.trim()) anlegen.mutate(); }}>
+        <form className="feldreihe" style={{ "--spalten": "minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto", gap: "var(--am-raum-2)", alignItems: "end" } as React.CSSProperties} onSubmit={(e) => { e.preventDefault(); if (neu.name.trim()) anlegen.mutate(); }}>
           <div className="feld" style={{ marginBottom: 0 }}><label htmlFor="pk-name">Neues Produkt</label><input id="pk-name" value={neu.name} onChange={(e) => setNeu({ ...neu, name: e.target.value })} placeholder="Einführungstag" /></div>
           <div className="feld" style={{ marginBottom: 0 }}><label htmlFor="pk-art">Art</label><select id="pk-art" value={neu.kind} onChange={(e) => setNeu({ ...neu, kind: e.target.value })}>{Object.entries(ART).map(([w, t]) => <option key={w} value={w}>{t}</option>)}</select></div>
           <div className="feld" style={{ marginBottom: 0 }}><label htmlFor="pk-preis">Netto €</label><input id="pk-preis" type="number" min="0" value={neu.preis} onChange={(e) => setNeu({ ...neu, preis: e.target.value })} /></div>

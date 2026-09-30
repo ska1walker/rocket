@@ -103,13 +103,13 @@ export function Sicherungsblock() {
         )}
 
         {staende.data && staende.data.length > 0 && (
-          <div className="rollbar" style={{ marginTop: "var(--am-raum-6)" }}>
+          <div className="rollbar" tabIndex={0} style={{ marginTop: "var(--am-raum-6)" }}>
             <table className="tabelle">
               <thead>
                 <tr>
                   <th>Stand</th>
                   <th style={{ textAlign: "right" }}>Größe</th>
-                  <th />
+                  <th><span className="nur-vorleser">Aktionen</span></th>
                 </tr>
               </thead>
               <tbody>

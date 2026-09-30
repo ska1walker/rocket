@@ -212,6 +212,9 @@ AUFGABEN_FELDER: list[Feld] = [
     Feld("ticket_betreff", "Ticket", "text", "ti.betreff"),
     Feld("created_at", "Angelegt", "datum", "t.created_at"),
     Feld("completed_at", "Erledigt am", "datum", "t.completed_at"),
+    # Ohne dieses Feld scheiterte die Listenansicht mit 400: Die Oberfläche
+    # sortiert ohne gespeicherte Ansicht nach `updated_at`.
+    Feld("updated_at", "Zuletzt geändert", "datum", "t.updated_at"),
 ]
 
 FELDER: dict[str, list[Feld]] = {

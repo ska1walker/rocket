@@ -15,6 +15,7 @@ import type {
   QuoteItemIn,
 } from "@/lib/typen";
 import { Fehler } from "@/components/zustaende";
+import { useDialogfalle } from "@/components/dialogfalle";
 
 /**
  * Legt ein Angebot zu einem Lead an — leer oder aus einem
@@ -28,6 +29,7 @@ export function AngebotAnlegen({
   dealId: string;
   beiSchliessen: () => void;
 }) {
+  const falle = useDialogfalle(beiSchliessen);
   const router = useRouter();
   const [positionen, setPositionen] = useState<QuoteItemIn[]>([]);
   const [anschreiben, setAnschreiben] = useState("");
@@ -83,7 +85,7 @@ export function AngebotAnlegen({
   const bereit = kiStatus.data?.ready ?? false;
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Angebot anlegen">
+    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Angebot anlegen" ref={falle}>
       <div className="karte" style={{ maxWidth: "620px", width: "100%" }}>
         <h2 style={{ marginBottom: "var(--am-raum-4)", fontSize: "1.125rem" }}>Angebot anlegen</h2>
 

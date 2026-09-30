@@ -171,7 +171,7 @@ export default function ListeSeite({ params }: { params: Promise<{ id: string }>
               {mitglieder.data && mitglieder.data.length > 0 && (
                 <table className="tabelle">
                   <thead>
-                    <tr><th>Kontakt</th><th>Firma</th><th>Einwilligung</th>{l.art === "statisch" && <th>Seit</th>}<th></th></tr>
+                    <tr><th>Kontakt</th><th>Firma</th><th>Einwilligung</th>{l.art === "statisch" && <th>Seit</th>}<th><span className="nur-vorleser">Aktionen</span></th></tr>
                   </thead>
                   <tbody>
                     {mitglieder.data.map((m) => (

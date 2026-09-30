@@ -50,7 +50,7 @@ export default function AngeboteSeite() {
           <Leer titel="Noch kein Angebot" text="Angebote entstehen am Lead." />
         )}
         {abfrage.data && abfrage.data.length > 0 && (
-          <div className="rollbar">
+          <div className="rollbar" tabIndex={0}>
             <table className="tabelle" style={{ minInlineSize: "48rem" }}>
               <thead>
                 <tr>
