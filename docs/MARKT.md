@@ -20,7 +20,7 @@ Git (bayerhazard/aimighty-market, functions/)
 | Zweck | Wert |
 |---|---|
 | Market-Source-Repo | `bayerhazard/aimighty-market` — nur `functions/` anfassen |
-| Beitragsweg | Fork (`ska1walker/aimighty-market`) → Branch → PR an `bayerhazard/aimighty-market`, nie direkt auf `main` |
+| Beitragsweg | Fork (`ska1walker/aimighty-market`) → Branch → PR an `bayerhazard/aimighty-market`, nie direkt auf `main`; Kai hat Schreibrechte und kann selbst mergen |
 | Kanonische Adresse | `https://aimighty-market.pages.dev` |
 | Vorschau eines Deploys | `https://<hash>.aimighty-market.pages.dev` — sofort aktuell, die kanonische Adresse cacht 1–2 Minuten |
 | Market-Source-ID in Olares | `market.AImighty` |
@@ -94,6 +94,29 @@ Das geht **nur nach der Installation**, nicht im Chart. Noch nicht
 ausprobiert; wenn gesetzt, in BETRIEB.md festhalten und prüfen, ob die
 öffentlichen Mail-Links (`rocketlinks`, `APP_DOMAIN`) davon unberührt
 bleiben.
+
+## Wie Claude einen Markt-PR anlegt
+
+Eine Rocket-Sitzung kann Marcs Repo nicht selbst einbinden: Sie hat den
+Fork `ska1walker/aimighty-market` schon, und zwei gleichnamige Repos
+passen nicht in eine Sitzung. Deshalb:
+
+1. Die Rocket-Sitzung baut den Eintrag im Fork (Branch `rocket-<version>`,
+   Chart = Anhang des GitHub-Release, lokal mit wrangler bewiesen) und
+   pusht ihn.
+2. Sie startet eine **zweite Sitzung** mit `bayerhazard/aimighty-market`
+   als Quelle — in der Umgebung **„Standard"**. Die Umgebung „Rocket"
+   bricht dort im Einrichtungsskript ab (30.9.2026), weil es auf das
+   Rocket-Repo zugeschnitten ist.
+3. Die zweite Sitzung legt den PR an und merged ihn. Fragt sie vorher
+   nach Bestätigung, antwortet Kai dort einmal (eine Nachricht aus der
+   Rocket-Sitzung dorthin geht nicht).
+4. Die Rocket-Sitzung prüft danach selbst über `git fetch` von
+   `bayerhazard/aimighty-market`, ob der Eintrag auf `main` steht und
+   das Chart byte-gleich ist. `aimighty-market.pages.dev` ist aus den
+   Sitzungen nicht erreichbar — den Katalog prüft Kais Box.
+
+Erster Durchlauf: Rocket 26.9.1, PR #81, 30.9.2026.
 
 ## Bekannte Fallen im Markt
 

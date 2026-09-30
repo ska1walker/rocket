@@ -2090,8 +2090,10 @@ erreicht hat, gehört in keinen Katalog.
 (`bayerhazard/aimighty-market`, Cloudflare Pages). Ein Eintrag besteht
 aus dem Block in `functions/_apps.ts` und dem base64-gepackten Chart
 unter dem Schlüssel `rocket-<version>.tgz` in `functions/_lib.ts`. Kai
-hat dort nur Leserechte — der Weg ist Fork, Branch, Pull Request an
-Marc. Vor dem PR alle vier Endpunkte lokal beweisen
+hat dort Schreibrechte; der Weg bleibt Fork (`ska1walker/aimighty-market`),
+Branch, Pull Request — Rocket 26.9.1 kam so als PR #81 hinein
+(30.9.2026). Wie Claude das ohne Handgriff erledigt, steht in
+`docs/MARKT.md`, „Wie Claude einen Markt-PR anlegt". Vor dem PR alle vier Endpunkte lokal beweisen
 (`npx wrangler pages dev functions --port 8788`): `/api/v1/appstore/info`
 listet die App, `/api/v1/applications/rocket/chart` liefert die Bytes
 sha256-gleich, `/api/v1/appstore/hash` hat sich bewegt. Insilos
