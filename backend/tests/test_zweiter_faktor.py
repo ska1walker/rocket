@@ -396,3 +396,24 @@ async def test_die_datei_auf_der_box_setzt_den_faktor_mit_zurueck(datenbank, mon
         r = await k.post("/api/anmeldung/zuruecksetzen", json={"name": name, "code": gelesen[1], "passwort": GUT + "neu"})
         assert r.status_code == 200 and r.json()["angemeldet"] is True
         assert (await k.get("/api/anmeldung/zweiter-faktor")).json()["aktiv"] is False
+
+
+async def test_ein_zurueckgesetztes_passwort_meldet_alle_geraete_ab(datenbank, monkeypatch):
+    """Wer sein Passwort zurücksetzt, tut es oft aus Verdacht. Dann darf
+    der Keks auf dem fremden Gerät danach nichts mehr wert sein — auch
+    wenn die Zeilensicherheit ohne Nutzerkontext nichts sieht."""
+    async with klient_fuer("zf-rueck-geraete") as k:
+        name, _ = await _konto(k, "Rueck Geraete")
+        eigen_an(monkeypatch)
+        async with klient_fuer("zf-rueck-geraete") as fremd:
+            fremd.headers.pop("X-Bfl-User")
+            assert (await fremd.post("/api/anmeldung", json={"name": name, "passwort": GUT})).status_code == 200
+            assert (await fremd.get("/api/mitglieder/wer")).status_code == 200
+
+            gesendet = await _mail_bereit(k, name, monkeypatch)
+            assert (await k.post("/api/anmeldung/vergessen", json={"name": name})).status_code == 200
+            code = await _code_aus(gesendet)
+            r = await k.post("/api/anmeldung/zuruecksetzen", json={"name": name, "code": code, "passwort": GUT + "neu"})
+            assert r.status_code == 200, r.text
+
+            assert (await fremd.get("/api/mitglieder/wer")).status_code == 401
