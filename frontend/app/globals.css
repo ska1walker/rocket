@@ -2988,6 +2988,37 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     padding-block: 0;
   }
 
+  /* Die Zeile „Neue Aufgabe". `min-width: 0`, sonst behält ein Eingabefeld
+     seine eingebaute Mindestbreite und schiebt die Auswahl daneben über den
+     Rand — so war es auf dem Handy bis 26.9.4. */
+  .aufgabe-neu {
+    display: flex;
+    flex: 1 1 520px;
+    flex-wrap: wrap;
+    gap: var(--am-raum-2);
+    min-width: 0;
+  }
+
+  .aufgabe-neu > * { min-width: 0; }
+  .aufgabe-neu-titel { flex: 2 1 220px; }
+  .aufgabe-neu-art { flex: 0 0 130px; }
+  .aufgabe-neu-datum { flex: 0 0 150px; }
+  .aufgabe-neu-lead { flex: 1 1 180px; }
+
+  .aufgabe-zeile > * { white-space: nowrap; }
+
+  /* Schmal: Haken und Titel oben über die volle Breite, Priorität, Phase
+     und Frist darunter eingerückt. Vorher quetschte die Zeile den Titel
+     auf ein Wort pro Zeile. */
+  @media (max-width: 40rem) {
+    .werkzeugleiste { padding-inline: var(--am-raum-4); }
+    .aufgabe { flex-wrap: wrap; padding-inline: var(--am-raum-4); row-gap: var(--am-raum-2); }
+    .aufgabe-mitte { flex: 1 1 calc(100% - 18px - var(--am-raum-3)); }
+    .aufgabe-mitte + * { margin-left: calc(18px + var(--am-raum-3)); }
+    .aufgabe-neu-titel, .aufgabe-neu-lead { flex: 1 1 100%; }
+    .aufgabe-neu-art, .aufgabe-neu-datum { flex: 1 1 40%; }
+  }
+
   /* Die Zahl der überfälligen ist die einzige, die rot sein darf. */
   .zahlpille[data-warnung="true"] { background: var(--am-fehler); }
   .dunkel .zahlpille[data-warnung="true"] { background: var(--am-fehler); color: #fff; }
