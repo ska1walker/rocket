@@ -20,6 +20,12 @@ MANIFEST_VERSIONNAME=$(grep -E '^  versionName:' olares/OlaresManifest.yaml | aw
 [ "$CHART_VERSION" = "$MANIFEST_VERSION" ] || melde "OlaresManifest metadata.version ($MANIFEST_VERSION) != Chart-version ($CHART_VERSION)"
 [ "$CHART_APPVERSION" = "$MANIFEST_VERSIONNAME" ] || melde "OlaresManifest spec.versionName ($MANIFEST_VERSIONNAME) != appVersion ($CHART_APPVERSION)"
 
+# Das Schema des AImighty-Markts: YY.M.<n>, Monat ohne führende Null
+# (26.9.1, 26.10.1). Mit Null (26.09.1) ist es kein gültiges SemVer, und
+# `market upgrade` bleibt daran hängen (docs/MARKT.md).
+echo "$CHART_VERSION" | grep -Eq '^[0-9]{2}\.([1-9]|1[0-2])\.[1-9][0-9]*$' \
+  || melde "Version '$CHART_VERSION' folgt nicht YY.M.<n> (z. B. 26.9.1, Monat ohne führende Null)"
+
 echo "→ Root-Manifest ist eine Kopie des Chart-Manifests"
 # Marcs Regel für den AImighty-Markt: Repo-Wurzel und Chart tragen
 # dasselbe Manifest. Zwei Fassungen driften, eine Kopie nicht.
