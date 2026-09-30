@@ -99,6 +99,11 @@ TABELLEN: list[str] = [
 AUSGENOMMEN = {
     "orgs", "users", "user_org_roles", "org_settings",
     "sitzungen", "anmeldeversuche",
+    # Wiederherstellungscodes: nach einem Wiederanlauf erzeugt man neue —
+    # alte, vielleicht längst ausgedruckte Codes sollen nicht wieder gelten.
+    # Rücksetz-Links leben eine halbe Stunde; einen zurückzuspielen hieße,
+    # einen verbrauchten Weg ins Konto wieder zu öffnen.
+    "zweitfaktor_codes", "passwort_links",
 }
 
 # Tabellen ohne eigene org_id — sie hängen an einer Elterntabelle.
@@ -199,7 +204,7 @@ async def abzug_erstellen(conn: asyncpg.Connection, org_id: UUID) -> dict[str, A
     nutzer = await conn.fetch(
         """
         select u.id, u.olares_username, u.display_name, u.email, u.zugang, u.einstellungen,
-               u.passwort_hash, u.passwort_am, u.totp_geheimnis,
+               u.passwort_hash, u.passwort_am, u.totp_geheimnis, u.totp_seit,
                u.absender_email, u.absender_name, u.smtp_host, u.smtp_port,
                u.smtp_benutzer, u.smtp_passwort, u.smtp_sicherheit,
                r.role
@@ -373,10 +378,14 @@ async def _nutzerzuordnung(
             if eintrag.get("passwort_hash"):
                 await conn.execute(
                     "update public.users set passwort_hash = $2, passwort_am = $3, "
-                    "totp_geheimnis = coalesce(public.users.totp_geheimnis, $4) "
+                    "totp_geheimnis = coalesce(public.users.totp_geheimnis, $4), "
+                    "totp_seit = coalesce(public.users.totp_seit, $5) "
                     "where id = $1 and passwort_hash is null",
                     heutige, eintrag["passwort_hash"], _zeit(eintrag.get("passwort_am")),
                     eintrag.get("totp_geheimnis"),
+                    # Der zweite Faktor kommt mit, sonst fiele er nach einer
+                    # Neuinstallation still weg — und mit ihm der Schutz.
+                    _zeit(eintrag.get("totp_seit")),
                 )
             # Und womit diese Person schickt. Ohne das trüge nach einer
             # Neuinstallation wieder jeder die Adresse der Organisation —

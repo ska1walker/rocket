@@ -9,18 +9,23 @@ darf den Keks bei einem POST nicht mitschicken. Zusätzlich wird der
 `Origin` geprüft, wo er ankommt — Gürtel und Hosenträger, beides billig.
 """
 
+import asyncio
+import logging
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from app import anmeldung as kern
-from app import zuruecksetzen
-from app.auth import CurrentUser, get_current_user
+from app import audit, tresor, versand, zuruecksetzen
+from app import zweiterfaktor as zf
+from app.auth import CurrentUser, get_current_user, verwaltet
 from app.config import settings
 from app.db import acquire, acquire_as
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["anmeldung"])
 
@@ -62,6 +67,43 @@ class Lage(BaseModel):
     angemeldet: bool
     name: str | None = None
     modus: str
+    # Passwort stimmt, der Code aus der App steht noch aus.
+    zweiter_faktor: bool = False
+
+
+class Code(BaseModel):
+    code: str = Field(min_length=1, max_length=40)
+
+
+class Abschalten(BaseModel):
+    passwort: str = Field(min_length=1, max_length=200)
+    code: str = Field(min_length=1, max_length=40)
+
+
+class Pflicht(BaseModel):
+    an: bool
+
+
+class FaktorStand(BaseModel):
+    aktiv: bool
+    seit: datetime | None = None
+    codes_uebrig: int = 0
+    # Verlangt die Organisation den Faktor? Dann lässt er sich nicht abschalten.
+    pflicht: bool = False
+
+
+class Einrichtung(BaseModel):
+    """Einmal gezeigt: das Geheimnis zum Abtippen und derselbe Inhalt als QR."""
+
+    geheimnis: str
+    uri: str
+    qr_svg: str
+
+
+class Codes(BaseModel):
+    """Die Wiederherstellungscodes — nur in dieser einen Antwort im Klartext."""
+
+    codes: list[str]
 
 
 def _adresse(request: Request) -> str:
@@ -130,16 +172,43 @@ def _keks_setzen(request: Request, antwort: Response, token: str) -> None:
     )
 
 
+def _vorstufe_setzen(request: Request, antwort: Response, token: str) -> None:
+    antwort.set_cookie(
+        kern.VORSTUFE_KEKS,
+        token,
+        max_age=kern.VORSTUFE_MINUTEN * 60,
+        httponly=True,
+        secure=_ueber_tls(request),
+        samesite="lax",
+        path="/api/anmeldung",
+    )
+
+
+async def _protokoll(
+    user_id: UUID, org_id: UUID, action: str, login: str | None, diff: dict[str, Any] | None = None
+) -> None:
+    """Hält eine Anmeldung fest — Erfolg, Fehlversuch, zweiter Faktor,
+    Abmeldung. Mit dem Kontext der betroffenen Person, sonst dürfte die
+    Zeile nicht in ihre Organisation. Ein unbekannter Name hat keine
+    Organisation und bleibt deshalb ungeschrieben; die Bremse zählt ihn
+    trotzdem."""
+    async with acquire_as(user_id) as conn:
+        await audit.log(
+            conn, org_id=org_id, actor_id=user_id, action=action,
+            entity="anmeldung", entity_id=user_id, diff=diff, actor_login=login,
+        )
+
+
 @router.get("/anmeldung/lage", response_model=Lage)
 async def lage(request: Request) -> Lage:
     """Sagt der Oberfläche, ob jemand angemeldet ist. Verrät sonst nichts."""
     keks = request.cookies.get(kern.KEKS)
-    if not keks:
-        return Lage(angemeldet=False, modus=settings.anmeldung_modus)
+    vorstufe = request.cookies.get(kern.VORSTUFE_KEKS)
     async with acquire() as conn:
-        sitzung = await kern.sitzung_lesen(conn, keks)
+        sitzung = await kern.sitzung_lesen(conn, keks) if keks else None
         if sitzung is None:
-            return Lage(angemeldet=False, modus=settings.anmeldung_modus)
+            offen = await kern.vorstufe_lesen(conn, vorstufe) if vorstufe else None
+            return Lage(angemeldet=False, modus=settings.anmeldung_modus, zweiter_faktor=offen is not None)
         name = await conn.fetchval("select display_name from public.users where id = $1", sitzung.user_id)
     return Lage(angemeldet=True, name=name, modus=settings.anmeldung_modus)
 
@@ -152,9 +221,10 @@ async def anmelden(
     user_agent: Annotated[str | None, Header()] = None,
 ) -> Lage:
     _herkunft_pruefen(request)
+    name = daten.name.strip()
     async with acquire() as conn:
         try:
-            token = await kern.anmelden(conn, daten.name, daten.passwort, user_agent or "", _adresse(request))
+            ergebnis = await kern.anmelden(conn, daten.name, daten.passwort, user_agent or "", _adresse(request))
         except kern.ZuVieleVersuche as exc:
             raise HTTPException(
                 429,
@@ -162,10 +232,72 @@ async def anmelden(
                 headers={"Retry-After": str(exc.sekunden)},
             ) from exc
         except kern.Anmeldefehler as exc:
+            if exc.user_id and exc.org_id:
+                await _protokoll(exc.user_id, exc.org_id, "anmeldung_abgewiesen", name, {"grund": "passwort"})
             # Immer dieselbe Meldung: Ob es den Namen gibt, geht niemanden an.
             raise HTTPException(401, "Name oder Passwort stimmt nicht.") from exc
-    _keks_setzen(request, antwort, token)
+    if ergebnis.vorstufe:
+        _vorstufe_setzen(request, antwort, ergebnis.token)
+        return Lage(angemeldet=False, name=None, modus=settings.anmeldung_modus, zweiter_faktor=True)
+    await _protokoll(ergebnis.user_id, ergebnis.org_id, "anmeldung", name, {"zweiter_faktor": False})
+    _keks_setzen(request, antwort, ergebnis.token)
     return Lage(angemeldet=True, name=daten.name, modus=settings.anmeldung_modus)
+
+
+@router.post("/anmeldung/code", response_model=Lage)
+async def code_einloesen(
+    daten: Code,
+    request: Request,
+    antwort: Response,
+    user_agent: Annotated[str | None, Header()] = None,
+) -> Lage:
+    """Der zweite Schritt: Code aus der App oder ein Wiederherstellungscode.
+
+    Die Vorstufe wird danach beendet und eine **neue** Sitzung angelegt —
+    nicht die Vorstufe hochgestuft. So kann ein Token, das vor dem Code
+    irgendwo sichtbar war, nachher nichts mehr.
+    """
+    _herkunft_pruefen(request)
+    vorstufe = request.cookies.get(kern.VORSTUFE_KEKS)
+    if not vorstufe:
+        raise HTTPException(401, "Bitte melden Sie sich zuerst mit Name und Passwort an.")
+    async with acquire() as conn:
+        offen = await kern.vorstufe_lesen(conn, vorstufe)
+        if offen is None:
+            raise HTTPException(401, "Die Anmeldung ist abgelaufen. Bitte noch einmal mit Name und Passwort.")
+        name = await conn.fetchval("select olares_username from public.users where id = $1", offen.user_id)
+        kennungen = [f"name:{(name or '').lower()}", f"ip:{_adresse(request)}"]
+        try:
+            await kern.bremse_pruefen(conn, kennungen)
+        except kern.ZuVieleVersuche as exc:
+            raise HTTPException(
+                429,
+                "Zu viele Versuche. Bitte warten Sie eine Viertelstunde.",
+                headers={"Retry-After": str(exc.sekunden)},
+            ) from exc
+        art = await kern.zweiter_faktor_pruefen(conn, offen.user_id, daten.code)
+        if art is None:
+            await kern.versuch_merken(conn, kennungen)
+            await _protokoll(offen.user_id, offen.org_id, "anmeldung_abgewiesen", name, {"grund": "code"})
+            raise HTTPException(401, "Der Code stimmt nicht.")
+        await kern.sitzung_beenden(conn, vorstufe)
+        await kern.versuche_loeschen(conn, kennungen)
+        token = await kern.sitzung_anlegen(conn, offen.user_id, offen.org_id, user_agent or "")
+        uebrig = None
+        if art == "wiederherstellung":
+            async with conn.transaction():
+                await conn.execute("select set_config('app.zweitfaktor_fuer', $1, true)", str(offen.user_id))
+                uebrig = await conn.fetchval(
+                    "select count(*) from public.zweitfaktor_codes where user_id = $1 and benutzt_am is null",
+                    offen.user_id,
+                )
+    await _protokoll(
+        offen.user_id, offen.org_id, "anmeldung", name,
+        {"zweiter_faktor": art, **({"codes_uebrig": uebrig} if uebrig is not None else {})},
+    )
+    antwort.delete_cookie(kern.VORSTUFE_KEKS, path="/api/anmeldung")
+    _keks_setzen(request, antwort, token)
+    return Lage(angemeldet=True, name=name, modus=settings.anmeldung_modus)
 
 
 @router.post("/abmeldung", status_code=204)
@@ -175,8 +307,16 @@ async def abmelden(request: Request, antwort: Response) -> Response:
     keks = request.cookies.get(kern.KEKS)
     if keks:
         async with acquire() as conn:
+            sitzung = await kern.sitzung_lesen(conn, keks)
             await kern.sitzung_beenden(conn, keks)
+            name = (
+                await conn.fetchval("select olares_username from public.users where id = $1", sitzung.user_id)
+                if sitzung else None
+            )
+        if sitzung:
+            await _protokoll(sitzung.user_id, sitzung.org_id, "abmeldung", name)
     antwort.delete_cookie(kern.KEKS, path="/")
+    antwort.delete_cookie(kern.VORSTUFE_KEKS, path="/api/anmeldung")
     return Response(status_code=204, headers=dict(antwort.headers))
 
 
@@ -270,6 +410,9 @@ async def vergessen(
         daten.name.strip(), zugaenge,
         bekannt=gibt_es, passwoerter_ueberhaupt=bool(passwoerter_ueberhaupt),
     )
+    # Zusätzlich per Mail, wo das geht — immer angestoßen, damit Antwort
+    # und Dauer nicht verraten, ob es den Namen gibt.
+    _im_hintergrund(_mail_code_schicken(daten.name.strip()))
     return Ablageort(
         ordner=zuruecksetzen.wo_liegt_die_datei(), minuten=zuruecksetzen.GUELTIG_MINUTEN
     )
@@ -304,10 +447,6 @@ async def zuruecksetzen_einloesen(
                 headers={"Retry-After": str(exc.sekunden)},
             ) from exc
 
-        if not zuruecksetzen.stimmt(daten.name, daten.code):
-            await kern.versuch_merken(conn, kennungen)
-            raise HTTPException(403, "Der Code stimmt nicht oder ist abgelaufen.")
-
         zeile = await conn.fetchrow(
             """
             select u.id, r.org_id
@@ -319,7 +458,30 @@ async def zuruecksetzen_einloesen(
             """,
             daten.name.strip(),
         )
-        if zeile is None or zeile["org_id"] is None:
+
+        # Zwei Wege, und sie unterscheiden sich im zweiten Faktor:
+        # - **Datei auf der Box**: Wer sie öffnen kann, verfügt ohnehin über
+        #   die Box. Der Weg setzt den zweiten Faktor mit zurück — er ist
+        #   die Rettung, wenn Handy und Wiederherstellungscodes weg sind.
+        # - **Mail**: Wer nur das Postfach hat, hat nicht das Handy. Der
+        #   zweite Faktor bleibt und wird nach dem neuen Passwort verlangt.
+        weg = None
+        if zuruecksetzen.stimmt(daten.name, daten.code):
+            weg = "datei"
+        elif zeile is not None:
+            async with conn.transaction():
+                hash_wert = kern.token_hash(_code_normal(daten.code))
+                await conn.execute("select set_config('app.anmelde_token', $1, true)", hash_wert)
+                getroffen = await conn.fetchval(
+                    "update public.passwort_links set benutzt_am = now() "
+                    "where token_hash = $1 and user_id = $2 and benutzt_am is null and laeuft_ab > now() "
+                    "returning id",
+                    hash_wert, zeile["id"],
+                )
+            if getroffen:
+                weg = "mail"
+        if weg is None or zeile is None or zeile["org_id"] is None:
+            await kern.versuch_merken(conn, kennungen)
             raise HTTPException(403, "Der Code stimmt nicht oder ist abgelaufen.")
 
         await conn.execute(
@@ -332,10 +494,22 @@ async def zuruecksetzen_einloesen(
             "where user_id = $1 and beendet_am is null",
             zeile["id"],
         )
-        await kern.versuche_loeschen(conn, kennungen)
-        token = await kern.sitzung_anlegen(conn, zeile["id"], zeile["org_id"], user_agent or "")
+        if weg == "datei":
+            await kern.zweiter_faktor_zuruecksetzen(conn, zeile["id"])
+        mit_faktor = await kern.zweiter_faktor_aktiv(conn, zeile["id"])
+        if not mit_faktor:
+            await kern.versuche_loeschen(conn, kennungen)
+        token = await kern.sitzung_anlegen(conn, zeile["id"], zeile["org_id"], user_agent or "", vorstufe=mit_faktor)
 
-    zuruecksetzen.verbrauchen()
+    if weg == "datei":
+        zuruecksetzen.verbrauchen()
+    await _protokoll(
+        zeile["id"], zeile["org_id"], "passwort_zurueckgesetzt", daten.name.strip(),
+        {"weg": weg, "zweiter_faktor_zurueckgesetzt": weg == "datei"},
+    )
+    if mit_faktor:
+        _vorstufe_setzen(request, antwort, token)
+        return Lage(angemeldet=False, modus=settings.anmeldung_modus, zweiter_faktor=True)
     _keks_setzen(request, antwort, token)
     return Lage(angemeldet=True, name=daten.name, modus=settings.anmeldung_modus)
 
@@ -473,3 +647,214 @@ async def andere_beenden(
             user.user_id, kern.token_hash(keks) if keks else "",
         )
     return {"beendet": int(ergebnis.split()[-1])}
+
+
+# ── Der zweite Faktor ───────────────────────────────────────────────────
+#
+# Alle Wege hier stehen in `auth.OHNE_FAKTOR_ERLAUBT`: Wer den verlangten
+# Faktor noch nicht hat, muss ihn einrichten können.
+
+
+async def _pflicht(conn, org_id: UUID) -> bool:
+    return bool(await conn.fetchval(
+        "select zweiter_faktor_pflicht from public.org_settings where org_id = $1", org_id
+    ))
+
+
+@router.get("/anmeldung/zweiter-faktor", response_model=FaktorStand)
+async def faktor_stand(user: CurrentUser = Depends(get_current_user)) -> FaktorStand:
+    async with acquire_as(user.user_id) as conn:
+        seit = await conn.fetchval("select totp_seit from public.users where id = $1", user.user_id)
+        uebrig = await conn.fetchval(
+            "select count(*) from public.zweitfaktor_codes where user_id = $1 and benutzt_am is null",
+            user.user_id,
+        )
+        pflicht = await _pflicht(conn, user.org_id)
+    return FaktorStand(aktiv=seit is not None, seit=seit, codes_uebrig=uebrig or 0, pflicht=pflicht)
+
+
+@router.post("/anmeldung/zweiter-faktor/einrichten", response_model=Einrichtung)
+async def faktor_einrichten(request: Request, user: CurrentUser = Depends(get_current_user)) -> Einrichtung:
+    """Legt ein neues Geheimnis an — noch **nicht** aktiv.
+
+    Aktiv wird es erst mit einem bestätigten Code. Wer hier abbricht, hat
+    nichts verändert und sperrt sich nicht aus. Ist schon ein Faktor
+    aktiv, wird er nicht still ersetzt: Dafür erst abschalten.
+    """
+    _herkunft_pruefen(request)
+    geheimnis = zf.geheimnis_neu()
+    async with acquire_as(user.user_id) as conn:
+        getroffen = await conn.fetchval(
+            "update public.users set totp_geheimnis = $2, totp_letzter_schritt = null "
+            "where id = $1 and totp_seit is null returning id",
+            user.user_id, tresor.verschluesseln(geheimnis),
+        )
+    if getroffen is None:
+        raise HTTPException(409, "Der zweite Faktor ist schon eingerichtet.")
+    adresse = zf.uri(geheimnis, user.login_username or user.olares_username)
+    return Einrichtung(geheimnis=geheimnis, uri=adresse, qr_svg=zf.qr_svg(adresse))
+
+
+@router.post("/anmeldung/zweiter-faktor/bestaetigen", response_model=Codes)
+async def faktor_bestaetigen(
+    daten: Code, request: Request, user: CurrentUser = Depends(get_current_user)
+) -> Codes:
+    """Der erste Code aus der App macht den Faktor aktiv — und bringt die
+    Wiederherstellungscodes, die es nur in dieser Antwort gibt."""
+    _herkunft_pruefen(request)
+    async with acquire_as(user.user_id) as conn:
+        row = await conn.fetchrow(
+            "select totp_geheimnis, totp_seit from public.users where id = $1", user.user_id
+        )
+        if row is None or row["totp_seit"] is not None or not row["totp_geheimnis"]:
+            raise HTTPException(409, "Es gibt keine offene Einrichtung. Bitte neu beginnen.")
+        geheimnis = tresor.entschluesseln(row["totp_geheimnis"])
+        schritt = zf.pruefen(geheimnis or "", daten.code, None)
+        if schritt is None:
+            raise HTTPException(422, "Der Code stimmt nicht. Prüfen Sie die Uhrzeit des Handys.")
+        await conn.execute(
+            "update public.users set totp_seit = now(), totp_letzter_schritt = $2 where id = $1",
+            user.user_id, schritt,
+        )
+        codes = await kern.wiederherstellungscodes_neu(conn, user.user_id)
+        await audit.log_fuer(conn, user, action="zweiter_faktor_eingerichtet", entity="anmeldung", entity_id=user.user_id)
+    return Codes(codes=codes)
+
+
+@router.post("/anmeldung/zweiter-faktor/codes", response_model=Codes)
+async def codes_erneuern(
+    daten: Code, request: Request, user: CurrentUser = Depends(get_current_user)
+) -> Codes:
+    """Zehn neue Wiederherstellungscodes gegen einen gültigen Code aus der
+    App. Die alten gelten danach nicht mehr."""
+    _herkunft_pruefen(request)
+    async with acquire_as(user.user_id) as conn:
+        if await kern.zweiter_faktor_pruefen(conn, user.user_id, daten.code) != "app":
+            raise HTTPException(403, "Der Code aus der App stimmt nicht.")
+        codes = await kern.wiederherstellungscodes_neu(conn, user.user_id)
+        await audit.log_fuer(conn, user, action="wiederherstellungscodes_neu", entity="anmeldung", entity_id=user.user_id)
+    return Codes(codes=codes)
+
+
+@router.post("/anmeldung/zweiter-faktor/abschalten", status_code=204)
+async def faktor_abschalten(
+    daten: Abschalten, request: Request, user: CurrentUser = Depends(get_current_user)
+) -> Response:
+    """Nur mit Passwort **und** Code — ein offener Browser allein genügt
+    nicht. Verlangt die Organisation den Faktor, geht es gar nicht."""
+    _herkunft_pruefen(request)
+    async with acquire_as(user.user_id) as conn:
+        if await _pflicht(conn, user.org_id):
+            raise HTTPException(403, "Ihre Organisation verlangt den zweiten Faktor.")
+        hash_wert = await conn.fetchval("select passwort_hash from public.users where id = $1", user.user_id)
+        if not kern.passwort_stimmt(hash_wert, daten.passwort):
+            raise HTTPException(403, "Das Passwort stimmt nicht.")
+        if await kern.zweiter_faktor_pruefen(conn, user.user_id, daten.code) is None:
+            raise HTTPException(403, "Der Code stimmt nicht.")
+        await kern.zweiter_faktor_zuruecksetzen(conn, user.user_id)
+        await audit.log_fuer(conn, user, action="zweiter_faktor_abgeschaltet", entity="anmeldung", entity_id=user.user_id)
+    return Response(status_code=204)
+
+
+@router.put("/anmeldung/zweiter-faktor/pflicht", response_model=FaktorStand)
+async def pflicht_setzen(
+    daten: Pflicht, request: Request, user: CurrentUser = Depends(verwaltet)
+) -> FaktorStand:
+    """Der Schalter für die ganze Organisation.
+
+    Einschalten darf nur, wer selbst schon einen Faktor hat — sonst sperrte
+    man sich im selben Klick aus allem außer der Einrichtung aus.
+    Menschen ohne Faktor werden danach bei jedem Aufruf zur Einrichtung
+    geführt (`auth.get_current_user`).
+    """
+    _herkunft_pruefen(request)
+    async with acquire_as(user.user_id) as conn:
+        seit = await conn.fetchval("select totp_seit from public.users where id = $1", user.user_id)
+        if daten.an and seit is None:
+            raise HTTPException(409, "Richten Sie zuerst Ihren eigenen zweiten Faktor ein.")
+        await conn.execute(
+            "insert into public.org_settings (org_id, zweiter_faktor_pflicht) values ($1, $2) "
+            "on conflict (org_id) do update set zweiter_faktor_pflicht = excluded.zweiter_faktor_pflicht",
+            user.org_id, daten.an,
+        )
+        await audit.log_fuer(
+            conn, user, action="zweiter_faktor_pflicht", entity="org_settings", entity_id=None,
+            diff={"an": daten.an},
+        )
+    return await faktor_stand(user)
+
+
+# ── Rücksetzen per Mail ─────────────────────────────────────────────────
+
+MAIL_GUELTIG_MINUTEN = 30
+
+# Was die Mail verschickt. Tests hängen hier eine Attrappe ein.
+mail_senden = versand.senden_smtp
+# Laufende Hintergrundaufgaben — gehalten, damit sie nicht mitten im
+# Versand eingesammelt werden, und damit Tests auf sie warten können.
+_laufend: set[asyncio.Task] = set()
+
+
+def _code_normal(code: str) -> str:
+    return "".join(ch for ch in code.upper() if ch.isalnum())
+
+
+async def _mail_code_schicken(name: str) -> None:
+    """Schickt einen Rücksetzcode an die hinterlegte Adresse — wenn es den
+    Zugang gibt, er eine Adresse hat und die Organisation Mail verschicken
+    kann. Läuft im Hintergrund: Die Antwort an den Browser kommt gleich
+    schnell, ob es den Namen gibt oder nicht.
+
+    Der Code steht **nicht** in `mails` — die Tabelle ist im
+    Datenbank-Blick für Verwalter lesbar. Gespeichert wird nur sein Hash
+    in `passwort_links`.
+    """
+    try:
+        async with acquire() as conn:
+            person = await conn.fetchrow(
+                "select u.id, u.email, u.display_name, r.org_id from public.users u "
+                "join public.user_org_roles r on r.user_id = u.id "
+                "where lower(u.olares_username) = lower($1) and u.deleted_at is null "
+                "and u.passwort_hash is not null order by r.joined_at limit 1",
+                name,
+            )
+        if person is None or not (person["email"] or "").strip():
+            return
+        async with acquire_as(person["id"]) as conn:
+            konto = versand.smtp_aus(await versand._einstellungen(conn, person["org_id"]))
+            if konto is None:
+                return
+            code = zuruecksetzen.code_neu()
+            await conn.execute(
+                "update public.passwort_links set benutzt_am = now() "
+                "where user_id = $1 and benutzt_am is null",
+                person["id"],
+            )
+            await conn.execute(
+                "insert into public.passwort_links (token_hash, user_id, org_id, laeuft_ab) "
+                "values ($1, $2, $3, now() + make_interval(mins => $4))",
+                kern.token_hash(_code_normal(code)), person["id"], person["org_id"], MAIL_GUELTIG_MINUTEN,
+            )
+        text = (
+            f"Guten Tag {person['display_name'] or name},\n\n"
+            "für Ihren Zugang zu Rocket wurde ein neues Passwort angefordert.\n\n"
+            f"Ihr Code: {code}\n\n"
+            "Geben Sie ihn auf der Anmeldeseite unter „Passwort vergessen?“ zusammen\n"
+            f"mit Ihrer Kennung „{name}“ und einem neuen Passwort ein. Er gilt\n"
+            f"{MAIL_GUELTIG_MINUTEN} Minuten und nur einmal.\n\n"
+            "Haben Sie das nicht angefordert, tun Sie nichts — Ihr Passwort bleibt,\n"
+            "wie es ist. Ein eingerichteter zweiter Faktor gilt auch danach weiter.\n"
+        )
+        nachricht = versand.nachricht_bauen(
+            an=person["email"].strip(), betreff="Rocket — Passwort zurücksetzen", text=text,
+            konto=konto, message_id=versand.neue_message_id(konto.absender),
+        )
+        await mail_senden(konto, nachricht)
+    except Exception:  # noqa: BLE001 — ein Hintergrundversand darf nichts mitreißen
+        log.exception("Rücksetzmail für %s nicht verschickt", name)
+
+
+def _im_hintergrund(koroutine) -> None:
+    aufgabe = asyncio.create_task(koroutine)
+    _laufend.add(aufgabe)
+    aufgabe.add_done_callback(_laufend.discard)
