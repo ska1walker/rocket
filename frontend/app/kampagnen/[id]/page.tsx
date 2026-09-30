@@ -99,10 +99,10 @@ export default function KampagneSeite({ params }: { params: Promise<{ id: string
 
       {!entwurf && (
         <dl className="kennzahlen" style={{ margin: "0 var(--am-raum-8) var(--am-raum-6)" }}>
-          <div className="kennzahl"><dt>Empfänger</dt><dd>{k.empfaenger}</dd><div className="kennzahl-fuss">{k.uebergangen} übergangen (keine Einwilligung oder Adresse)</div></div>
-          <div className="kennzahl"><dt>Gesendet</dt><dd>{k.gesendet}</dd><div className="kennzahl-fuss">{k.wartend} warten · {k.fehlgeschlagen} fehlgeschlagen</div></div>
-          <div className="kennzahl"><dt>Klicks</dt><dd>{k.klicks}</dd><div className="kennzahl-fuss">{k.klicker} Personen</div></div>
-          <div className="kennzahl"><dt>Abgemeldet</dt><dd>{k.abgemeldet}</dd><div className="kennzahl-fuss">über den Link in der Mail</div></div>
+          <div className="kennzahl"><dt>Empfänger</dt><dd>{k.empfaenger}</dd><dd className="kennzahl-fuss">{k.uebergangen} übergangen (keine Einwilligung oder Adresse)</dd></div>
+          <div className="kennzahl"><dt>Gesendet</dt><dd>{k.gesendet}</dd><dd className="kennzahl-fuss">{k.wartend} warten · {k.fehlgeschlagen} fehlgeschlagen</dd></div>
+          <div className="kennzahl"><dt>Klicks</dt><dd>{k.klicks}</dd><dd className="kennzahl-fuss">{k.klicker} Personen</dd></div>
+          <div className="kennzahl"><dt>Abgemeldet</dt><dd>{k.abgemeldet}</dd><dd className="kennzahl-fuss">über den Link in der Mail</dd></div>
         </dl>
       )}
 

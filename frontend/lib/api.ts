@@ -48,6 +48,21 @@ function zurZurAnmeldung(pfad: string): void {
   window.location.assign(`/anmelden?weiter=${encodeURIComponent(weiter)}`);
 }
 
+/**
+ * Der Grund aus dem `detail` einer FastAPI-Antwort. Ein Text steht so da;
+ * Prüffehler kommen als Liste — eine kaputte Adresse (/angebote/abc)
+ * zeigte sonst nur „Anfrage fehlgeschlagen (422)".
+ */
+export function fehlergrund(detail: unknown): string | null {
+  if (typeof detail === "string") return detail;
+  if (!Array.isArray(detail) || detail.length === 0) return null;
+  const erster = detail[0] as { loc?: unknown };
+  const ort: unknown[] = Array.isArray(erster?.loc) ? erster.loc : [];
+  if (ort[0] === "path") return "Diese Adresse führt zu keinem Datensatz.";
+  const feld = ort.slice(1).join(".");
+  return `Eine Angabe passt nicht${feld ? ` („${feld}“)` : ""}.`;
+}
+
 async function anfrage<T>(pfad: string, init?: RequestInit): Promise<T> {
   const koepfe: Record<string, string> = {
     "Content-Type": "application/json",
@@ -67,7 +82,7 @@ async function anfrage<T>(pfad: string, init?: RequestInit): Promise<T> {
     let grund = `Anfrage fehlgeschlagen (${antwort.status})`;
     try {
       const koerper = await antwort.json();
-      if (typeof koerper?.detail === "string") grund = koerper.detail;
+      grund = fehlergrund(koerper?.detail) ?? grund;
     } catch {
       /* keine JSON-Antwort — dann bleibt der Statuscode die Auskunft */
     }

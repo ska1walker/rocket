@@ -10,6 +10,7 @@ import { Erfassung } from "@/components/erfassung";
 import { Finden, Wegwahl } from "@/components/finden";
 import { Fehler } from "@/components/zustaende";
 import { useAnlegefelder } from "@/components/anlegefelder";
+import { useDialogfalle } from "@/components/dialogfalle";
 
 const LEER = {
   first_name: "",
@@ -33,6 +34,7 @@ export function KontaktAnlegen({
   beiSchliessen: () => void;
   beiErfolg: (id: string) => void;
 }) {
+  const falle = useDialogfalle(beiSchliessen);
   const client = useQueryClient();
   const [werte, setWerte] = useState({ ...LEER, company_id: firmaId ?? "" });
   // Die Firma aus der Signatur, die es im Bestand noch nicht gibt. Sie
@@ -112,7 +114,7 @@ export function KontaktAnlegen({
   }
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Kontakt anlegen">
+    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Kontakt anlegen" ref={falle}>
       <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
         <div className="dialog-kopf">
           <h2>Kontakt anlegen</h2>

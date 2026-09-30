@@ -9,6 +9,7 @@ import type { Company, Contact, Deal, DealProduct, Stage } from "@/lib/typen";
 import { Mehrfachauswahl } from "@/components/mehrfachauswahl";
 import { Fehler } from "@/components/zustaende";
 import { useAnlegefelder } from "@/components/anlegefelder";
+import { useDialogfalle } from "@/components/dialogfalle";
 
 // Die Listenpreise aus claude/Produkte.md. Sie füllen den Betrag vor,
 // wenn ein Produkt gewählt wird — überschreibbar, denn beim Experten
@@ -34,6 +35,7 @@ export function DealAnlegen({
   beiSchliessen: () => void;
   beiErfolg: () => void;
 }) {
+  const falle = useDialogfalle(beiSchliessen);
   const [name, setName] = useState("");
   const [produkt, setProdukt] = useState<DealProduct>("assistent");
   const [betrag, setBetrag] = useState(String(LISTENPREIS.assistent));
@@ -82,7 +84,7 @@ export function DealAnlegen({
   });
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Lead anlegen">
+    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Lead anlegen" ref={falle}>
       <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
         <div className="dialog-kopf">
           <h2>Lead anlegen</h2>

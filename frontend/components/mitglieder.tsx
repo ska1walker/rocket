@@ -117,7 +117,7 @@ export function Mitgliederblock() {
               <th>Person</th>
               <th>Zugang</th>
               <th>Rolle</th>
-              <th />
+              <th><span className="nur-vorleser">Aktionen</span></th>
             </tr>
           </thead>
           <tbody>

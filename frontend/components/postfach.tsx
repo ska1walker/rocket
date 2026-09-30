@@ -90,7 +90,7 @@ export function Postfachblock() {
           gelöscht. Ihr Posteingang sieht danach aus wie vorher — auch in Relay. Gemerkt wird
           nur, bis wohin gelesen wurde.</>} />
 
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "0 var(--am-raum-4)" }}>
+        <div className="feldreihe" style={{ "--spalten": "minmax(0, 2fr) minmax(0, 1fr)" } as React.CSSProperties}>
           <div className="feld">
             <label htmlFor="imap-host">IMAP-Server</label>
             <input id="imap-host" value={host} onChange={(x) => setHost(x.target.value)} placeholder="imap.beispiel.de" />
@@ -102,7 +102,7 @@ export function Postfachblock() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 var(--am-raum-4)" }}>
+        <div className="feldreihe">
           <div className="feld">
             <label htmlFor="imap-benutzer">Benutzer</label>
             <input id="imap-benutzer" value={benutzer} onChange={(x) => setBenutzer(x.target.value)} placeholder="support@aimighty.de" />
@@ -122,7 +122,7 @@ export function Postfachblock() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "0 var(--am-raum-4)" }}>
+        <div className="feldreihe" style={{ "--spalten": "minmax(0, 2fr) minmax(0, 1fr)" } as React.CSSProperties}>
           <div className="feld">
             <label htmlFor="imap-ordner">Ordner</label>
             <input id="imap-ordner" value={ordner} onChange={(x) => setOrdner(x.target.value)} />

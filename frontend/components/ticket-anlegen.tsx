@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { PRIORITAET_TEXT } from "@/lib/format";
 import type { Company, Contact, Ticket, Ticketkategorie, Ticketprioritaet } from "@/lib/typen";
 import { Fehler } from "@/components/zustaende";
+import { useDialogfalle } from "@/components/dialogfalle";
 
 /**
  * Ein Anliegen aufnehmen.
@@ -26,6 +27,7 @@ export function TicketAnlegen({
   beiSchliessen: () => void;
   beiErfolg: (id: string) => void;
 }) {
+  const falle = useDialogfalle(beiSchliessen);
   const [betreff, setBetreff] = useState("");
   const [beschreibung, setBeschreibung] = useState("");
   const [prioritaet, setPrioritaet] = useState<Ticketprioritaet>("mittel");
@@ -64,7 +66,7 @@ export function TicketAnlegen({
   });
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Ticket anlegen">
+    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Ticket anlegen" ref={falle}>
       <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
         <div className="dialog-kopf">
           <h2>Ticket anlegen</h2>
@@ -104,7 +106,7 @@ export function TicketAnlegen({
             />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--am-raum-4)" }}>
+          <div className="feldreihe" style={{ gap: "var(--am-raum-4)" }}>
             <div className="feld">
               <label htmlFor="t-prio">Dringlichkeit</label>
               <select

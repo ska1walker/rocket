@@ -54,6 +54,8 @@ function NeuMenue() {
       <button
         type="button"
         className="btn btn-primaer kopf-neu"
+        // Auf schmalen Schirmen weicht das Wort — der Name bleibt.
+        aria-label="Erstellen"
         aria-haspopup="menu"
         aria-expanded={offen}
         aria-controls={id}

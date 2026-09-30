@@ -11,6 +11,7 @@ import { Finden, Wegwahl } from "@/components/finden";
 import { PersonenFinden } from "@/components/personen-finden";
 import { Fehler } from "@/components/zustaende";
 import { useAnlegefelder } from "@/components/anlegefelder";
+import { useDialogfalle } from "@/components/dialogfalle";
 
 export function FirmaAnlegen({
   beiSchliessen,
@@ -19,6 +20,7 @@ export function FirmaAnlegen({
   beiSchliessen: () => void;
   beiErfolg: (id: string) => void;
 }) {
+  const falle = useDialogfalle(beiSchliessen);
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
   const [branche, setBranche] = useState("");
@@ -86,7 +88,7 @@ export function FirmaAnlegen({
   const mit = Object.keys(weitere).length;
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Firma anlegen">
+    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Firma anlegen" ref={falle}>
       <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
         <div className="dialog-kopf">
           <h2>Firma anlegen</h2>

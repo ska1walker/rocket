@@ -21,6 +21,7 @@ import type { Anordnung, Feldeintrag, Mitglied, PropertyEntity, Wer } from "@/li
 import { useWer } from "@/lib/wer";
 import { Mehrfachauswahl } from "@/components/mehrfachauswahl";
 import { Fehler, Laedt } from "@/components/zustaende";
+import { useDialogfalle } from "@/components/dialogfalle";
 
 /** Was eine Seite an einem Feld anders zeigen oder anbieten will. */
 export interface Sonderfeld {
@@ -74,6 +75,7 @@ export function Feldgruppen({
   const [alle, setAlle] = useState(false);
   const [einzeln, setEinzeln] = useState<string | null>(null);
   const [loeschen, setLoeschen] = useState(false);
+  const falle = useDialogfalle(() => setLoeschen(false));
 
   const anordnung = useQuery({
     queryKey: ["anordnung", entity],
@@ -244,14 +246,14 @@ export function Feldgruppen({
         )}
 
         {loeschen && (
-          <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Löschen bestätigen">
+          <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Löschen bestätigen" ref={falle}>
             <div className="karte fg-loeschen">
               <h2>Wirklich löschen?</h2>
               <p>{loeschtext}</p>
               {entfernen.isError && <Fehler text={(entfernen.error as Error).message} />}
               <div className="btn-reihe">
                 <button type="button" className="btn btn-primaer" onClick={() => entfernen.mutate()} disabled={entfernen.isPending}>Löschen</button>
-                <button type="button" className="btn btn-still" onClick={() => setLoeschen(false)}>Abbrechen</button>
+                <button type="button" className="btn btn-still" data-autofokus onClick={() => setLoeschen(false)}>Abbrechen</button>
               </div>
             </div>
           </div>

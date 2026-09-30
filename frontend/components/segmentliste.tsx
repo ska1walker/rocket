@@ -527,7 +527,7 @@ export function Segmentliste({
         {zeilen.isError && <Fehler text={(zeilen.error as Error).message} />}
         {zeilen.data?.length === 0 && <Leer titel={leerTitel} text={leerText} />}
         {zeilen.data && zeilen.data.length > 0 && (
-          <div className="rollbar">
+          <div className="rollbar" tabIndex={0}>
             <table className="tabelle" style={{ minInlineSize: `${Math.max(42, spalten.length * 9)}rem` }}>
               <thead>
                 <tr>

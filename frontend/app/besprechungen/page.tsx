@@ -148,7 +148,7 @@ export default function BesprechungenSeite() {
         )}
 
         {seite.data && seite.data.gesamt > 0 && (
-          <div className="rollbar">
+          <div className="rollbar" tabIndex={0}>
             <table className="tabelle besprechungstabelle" style={{ minInlineSize: "46rem" }}>
               <thead>
                 <tr>

@@ -22,7 +22,7 @@ export function Leer({ titel, text }: { titel: string; text: string }) {
   return (
     <div className="leerzustand">
       <Inbox size={24} aria-hidden="true" />
-      <h4>{titel}</h4>
+      <p className="leerzustand-titel">{titel}</p>
       <p>{text}</p>
     </div>
   );
