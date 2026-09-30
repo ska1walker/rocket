@@ -80,7 +80,7 @@ Postfach über IMAP/SMTP mit Anbieter-Voreinstellungen (Microsoft 365 nur
 per OAuth-Freigabe des Postfachs, kein SSO), feinere Rechte.
 
 **Offen:** Stufe 2 (persönliches Postfach) und Stufe 3 (feinere Rechte)
-aus `docs/PLAN-TEAM.md`; Eigenschaften in Gruppen ordnen.
+aus `docs/PLAN-TEAM.md`; Eigenschaften in Gruppen nach HubSpot-Muster (`docs/PLAN-EIGENSCHAFTEN.md`, Stufen A–D).
 
 ## Plattform-Kontext: Olares OS
 
