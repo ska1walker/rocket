@@ -265,7 +265,7 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
                   {vorschau.spalten.map((s) => (
                     <tr key={s.nr}>
                       <td style={{ fontWeight: 600 }}>{s.kopf}</td>
-                      <td style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+                      <td className="text-leise-klein">
                         {s.beispiele.join(" · ") || "—"}
                       </td>
                       <td>

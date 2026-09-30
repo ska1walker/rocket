@@ -52,12 +52,12 @@ export function KiKnopf({
         {lauf.isPending ? "Denkt nach …" : text}
       </button>
       {!bereit && status.data?.hint && (
-        <span style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+        <span className="ki-hinweis">
           {status.data.hint}
         </span>
       )}
       {lauf.isError && (
-        <span style={{ fontSize: "0.75rem", color: "var(--am-fehler)" }}>
+        <span className="ki-hinweis" data-art="fehler">
           {(lauf.error as Error).message}
         </span>
       )}

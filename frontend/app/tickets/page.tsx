@@ -16,6 +16,8 @@ import { TicketAnlegen } from "@/components/ticket-anlegen";
 import { Prioritaetspille } from "@/components/prioritaet";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { useNeuGewuenscht } from "@/lib/neu";
+import { BRETT_HINWEIS_ID, BrettHinweis, useBrettTastatur } from "@/components/brett";
+import { reiterTaste } from "@/lib/tasten";
 
 type Sicht = "brett" | "tabelle";
 type Reiter = "alle" | "meine" | "offen";
@@ -67,6 +69,7 @@ export default function TicketsSeite() {
       api.post<Ticket>(`/api/tickets/${id}/stufe`, { stage_id: stageId }),
     onSuccess: () => client.invalidateQueries({ queryKey: ["ticket-brett"] }),
   });
+  const brettTasten = useBrettTastatur(brett.data);
 
   const offeneAnzahl = brett.data
     ? brett.data.spalten
@@ -147,7 +150,7 @@ export default function TicketsSeite() {
       ) : (
         <>
           {/* Dieselben drei Fragen, die eine Warteschlange täglich stellt. */}
-          <div className="ansichtsleiste" role="tablist" aria-label="Ansichten">
+          <div className="ansichtsleiste" role="tablist" onKeyDown={reiterTaste} aria-label="Ansichten">
             {REITER.map((r) => (
               <button
                 key={r.wert}
@@ -166,14 +169,15 @@ export default function TicketsSeite() {
           {brett.isPending && <Laedt />}
           {brett.isError && <Fehler text={(brett.error as Error).message} />}
           {verschieben.isError && (
-            <div style={{ padding: "0 var(--am-raum-8)" }}>
+            <div className="seitenrand">
               <Fehler text={(verschieben.error as Error).message} />
             </div>
           )}
 
+          {brett.data && <BrettHinweis ansage={brettTasten.ansage} />}
           {brett.data && (
             <div className="board">
-              {brett.data.spalten.map((spalte) => (
+              {brett.data.spalten.map((spalte, si, alle) => (
                 <div
                   key={spalte.stufe.id}
                   className="board-spalte"
@@ -202,7 +206,16 @@ export default function TicketsSeite() {
                   </div>
 
                   {spalte.tickets.map((t) => (
-                    <Ticketkarte key={t.id} ticket={t} />
+                    <Ticketkarte
+                      key={t.id}
+                      ticket={t}
+                      beiTaste={(e) =>
+                        brettTasten.taste(e, t.id, si, alle.length, (z) => {
+                          verschieben.mutate({ id: t.id, stageId: alle[z].stufe.id });
+                          return alle[z].stufe.name;
+                        })
+                      }
+                    />
                   ))}
 
                   {spalte.anzahl > spalte.tickets.length && (
@@ -221,13 +234,17 @@ export default function TicketsSeite() {
 }
 
 /** Eine Karte trägt, was man zum Priorisieren braucht — nicht mehr. */
-function Ticketkarte({ ticket }: { ticket: Ticket }) {
+function Ticketkarte({ ticket, beiTaste }: { ticket: Ticket; beiTaste: (e: React.KeyboardEvent) => void }) {
   return (
     <Link
       href={`/tickets/${ticket.id}`}
       className="deal-karte"
+      data-karte={ticket.id}
       draggable
       onDragStart={(e) => e.dataTransfer.setData("text/plain", ticket.id)}
+      aria-describedby={BRETT_HINWEIS_ID}
+      aria-keyshortcuts="Alt+ArrowLeft Alt+ArrowRight"
+      onKeyDown={beiTaste}
     >
       <div className="ticket-karte-kopf">
         <span className="ticket-kennung">{ticket.kennung}</span>

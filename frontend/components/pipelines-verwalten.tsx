@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 import type { Pipeline, Stage, StageKind } from "@/lib/typen";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { Erklaerung } from "@/components/erklaerung";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Rueckfrage } from "@/components/dialog";
 
 const ART_TEXT: Record<StageKind, string> = { open: "offen", won: "gewonnen", lost: "verloren" };
 
@@ -25,7 +25,6 @@ export function Pipelinesblock() {
   const [neuerName, setNeuerName] = useState("");
   const [neueStufe, setNeueStufe] = useState<Record<string, string>>({});
   const [loeschZiel, setLoeschZiel] = useState<{ stage: Stage; pipeline: Pipeline } | null>(null);
-  const falle = useDialogfalle(() => setLoeschZiel(null));
   const [ziel, setZiel] = useState("");
 
   const pipelines = useQuery({
@@ -113,7 +112,7 @@ export function Pipelinesblock() {
               <thead><tr><th>Stufe</th><th>Art</th><th style={{ textAlign: "right", width: "9rem" }}>Wahrscheinlichkeit %</th><th style={{ width: "10rem" }}><span className="nur-vorleser">Aktionen</span></th></tr></thead>
               <tbody>
                 {pl.stages.map((s, i) => (
-                  <tr key={s.id} style={{ cursor: "default" }}>
+                  <tr key={s.id}>
                     <td>
                       <input className="input" aria-label="Name der Stufe" defaultValue={s.name}
                         onBlur={(e) => e.target.value.trim() && e.target.value !== s.name && stufeAendern.mutate({ id: s.id, name: e.target.value.trim() })} />
@@ -149,12 +148,13 @@ export function Pipelinesblock() {
         </form>
 
         {loeschZiel && (
-          <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Stufe löschen" ref={falle}>
-            <div className="karte" style={{ maxWidth: "440px", width: "100%" }}>
-              <h2 style={{ fontSize: "1.125rem", marginBottom: "var(--am-raum-4)" }}>„{loeschZiel.stage.name}“ löschen</h2>
-              <p style={{ fontSize: "0.875rem", color: "var(--am-text-sekundaer)", marginBottom: "var(--am-raum-4)" }}>
-                Liegen Geschäfte auf dieser Stufe, wandern sie auf die gewählte — mit Eintrag im Verlauf.
-              </p>
+          <Rueckfrage
+            titel={<>„{loeschZiel.stage.name}“ löschen</>}
+            label="Stufe löschen"
+            text="Liegen Geschäfte auf dieser Stufe, wandern sie auf die gewählte — mit Eintrag im Verlauf."
+            beiSchliessen={() => setLoeschZiel(null)}
+            knopf={<button type="button" className="btn btn-primaer" onClick={() => stufeLoeschen.mutate({ id: loeschZiel.stage.id, zielId: ziel || null })} disabled={stufeLoeschen.isPending}>Löschen</button>}
+          >
               <div className="feld">
                 <label htmlFor="loeschziel">Leads verschieben nach</label>
                 <select id="loeschziel" value={ziel} onChange={(e) => setZiel(e.target.value)}>
@@ -164,12 +164,7 @@ export function Pipelinesblock() {
                   ))}
                 </select>
               </div>
-              <div className="btn-reihe">
-                <button type="button" className="btn btn-primaer" onClick={() => stufeLoeschen.mutate({ id: loeschZiel.stage.id, zielId: ziel || null })} disabled={stufeLoeschen.isPending}>Löschen</button>
-                <button type="button" className="btn btn-still" data-autofokus onClick={() => setLoeschZiel(null)}>Abbrechen</button>
-              </div>
-            </div>
-          </div>
+          </Rueckfrage>
         )}
       </div>
     </section>

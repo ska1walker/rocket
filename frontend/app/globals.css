@@ -883,11 +883,17 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
       overflow-y: auto;
     }
 
+    /* Mindesthöhe statt fester Höhe: Im Regelfall trifft der Kopf die
+       Linie der linken Spalte; braucht er mehr Platz (Lead ohne
+       Sprachmodell, schmale Fenster), wächst er. Mit fester Höhe hing die
+       umgebrochene Knopfreihe über dem ersten Block. */
     .seitenkopf {
-      height: var(--am-kopfhoehe);
+      min-height: var(--am-kopfhoehe);
       box-sizing: border-box;
       flex-wrap: nowrap;
     }
+    .seitenkopf > .btn-reihe { justify-content: flex-end; }
+    .seitenkopf .ki-hinweis { max-width: 20rem; line-height: 1.3; }
 
     .huelle-nav-gruppe {
       display: flex;
@@ -1138,6 +1144,67 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     margin: 0 auto var(--am-raum-2);
   }
 
+  /* ── Dokumente am Datensatz [RK-DOKUMENTE] ───────────────────────────
+     Stand bis 26.9.6 ganz als Inline-Stil am Bauteil. Der Name bekommt die
+     volle Breite; Größe, Datum und Person stehen eingerückt darunter. */
+  .dokumente-liste { list-style: none; padding: 0; margin: 0 0 var(--am-raum-3); display: grid; gap: var(--am-raum-2); }
+  .dokument-zeile { display: flex; align-items: center; gap: var(--am-raum-2); }
+  .dokument-unter { padding-left: calc(16px + var(--am-raum-2)); }
+  .dokument-name { min-width: 0; overflow-wrap: anywhere; }
+  .dokument-meta { flex: 1; font-size: 0.75rem; color: var(--am-text-gedaempft); }
+  .dokumente-leer { font-size: 0.8125rem; color: var(--am-text-gedaempft); margin-bottom: var(--am-raum-3); }
+  .dokumente-ablage {
+    border: 1px dashed var(--am-rand);
+    border-radius: var(--am-radius-mittel);
+    padding: var(--am-raum-3);
+    text-align: center;
+  }
+  .dokumente-ablage[data-ueber] { border-color: var(--am-handlung-ruhend); background: var(--am-flaeche-2); }
+  .dokumente-ablage-satz { font-size: 0.75rem; color: var(--am-text-gedaempft); margin: var(--am-raum-2) 0 0; }
+
+  /* ── Notiz → Struktur [RK-NOTIZ] ─────────────────────────────────────
+     Der Vorschlag aus einer Gesprächsnotiz: jede Zeile abwählbar. Stand bis
+     26.9.6 als Inline-Stil am Bauteil. */
+  .notiz-knoepfe { margin-top: var(--am-raum-2); }
+  .notiz-hinweis { margin-bottom: var(--am-raum-4); }
+  .notiz-feld-abstand { margin-top: var(--am-raum-4); }
+  .notiz-fuss { margin-top: var(--am-raum-4); }
+  .notiz-aufgaben { border: none; padding: 0; margin: 0 0 var(--am-raum-4); }
+  .notiz-aufgaben legend {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--am-text-gedaempft);
+    margin-bottom: var(--am-raum-2);
+  }
+  .notiz-wahl {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--am-raum-2);
+    margin-bottom: var(--am-raum-3);
+    font-size: 0.875rem;
+  }
+  .notiz-wahl[data-mitte] { align-items: center; margin-bottom: var(--am-raum-2); }
+
+  /* Hinweis oder Fehler neben einem KI-Knopf [HB-KI]. */
+  .ki-hinweis { font-size: 0.75rem; color: var(--am-text-gedaempft); }
+  .ki-hinweis[data-art="fehler"] { color: var(--am-fehler); }
+
+  /* ── Textrollen [HB-TEXT] ───────────────────────────────────────────
+     Was bis 26.9.6 an über sechzig Stellen als Inline-Stil stand: der
+     leise Satz unter einem Block, die kleine Randnotiz, die Bestätigung
+     „gespeichert", die rechtsbündige Zahlenspalte, der Seitenrand für
+     Meldungen unter dem Seitenkopf. Benannt, damit man sie wiederfindet. */
+  .text-leise { font-size: 0.875rem; color: var(--am-text-gedaempft); }
+  .text-leise-klein { font-size: 0.75rem; color: var(--am-text-gedaempft); }
+  .text-zweit { font-size: 0.875rem; color: var(--am-text-sekundaer); }
+  .text-gelungen { font-size: 0.8125rem; color: var(--am-erfolg); }
+  .rechts,
+  .tabelle th.rechts,
+  .tabelle td.rechts { text-align: right; }
+  .seitenrand { padding: 0 var(--am-raum-8); }
+
   /* ── Felder nebeneinander [HB-FELDREIHE] ─────────────────────────────────────────
      Server, Port und Verschlüsselung in einer Zeile — auf dem Handy
      schnitt das Beschriftung und Auswahl ab. Die Spalten kommen vom
@@ -1362,9 +1429,21 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .tabelle tbody tr {
     border-bottom: 1px solid var(--am-trennlinie);
-    cursor: pointer;
     transition: background var(--am-dauer-kurz) ease;
   }
+  /* Nur eine Zeile, die irgendwohin führt, zeigt die Hand. Mit der
+     Tastatur führt der Link in der ersten Spalte (.zeilen-ziel) dorthin —
+     vorher ließ sich keine Liste ohne Maus öffnen. */
+  .tabelle tbody tr[data-ziel] { cursor: pointer; }
+  .zeilen-ziel { color: inherit; text-decoration: none; }
+  .zeilen-ziel:hover { text-decoration: underline; text-underline-offset: 2px; }
+  .zeilen-ziel:focus-visible {
+    outline: 2px solid var(--am-fokus-ring);
+    outline-offset: 2px;
+    border-radius: var(--am-radius-klein);
+  }
+  /* Die zweite, leisere Zeile in einer Zelle (Beschreibung, Betreff). */
+  .zeile-unter { font-size: 0.8125rem; color: var(--am-text-gedaempft); font-weight: 400; }
 
   .tabelle tbody tr:hover { background: var(--am-flaeche-1); }
 
@@ -1481,6 +1560,10 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     .datensatz.datensatz-zwei { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
     .datensatz.datensatz-seitenleiste { grid-template-columns: minmax(0, 1fr) 260px; }
   }
+  /* Eine Spalte auf jeder Breite (Start, Fragen) und die Lesespalte der
+     Einstellungen — standen inline an den Seiten. */
+  .datensatz.datensatz-einzeln { grid-template-columns: minmax(0, 1fr); }
+  .datensatz.datensatz-lesespalte { grid-template-columns: minmax(0, 40rem); }
 
   .block {
     border: 1px solid var(--am-rand);
@@ -3345,6 +3428,12 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     padding: 0;
     overflow: hidden;
   }
+  /* Breiten als Varianten statt inline am Bauteil (HB-DIALOG). */
+  .dialog-karte[data-breite="normal"] { width: 100%; max-width: 35rem; }
+  .dialog-karte[data-breite="schmal"] { width: 100%; max-width: 30rem; }
+  .dialog-karte[data-breite="breit"] { width: 100%; max-width: 39rem; }
+  /* Mitgebrachter Text zum Lesen (Eingang): Umbrüche bleiben, Schrift wie sonst. */
+  .lesetext { margin: 0; white-space: pre-wrap; font-family: var(--am-schrift-sans); font-size: 0.875rem; line-height: 1.6; }
 
   .dialog-kopf {
     flex: none;
@@ -4755,9 +4844,11 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 .fg-loeschknopf { margin-left: auto; color: var(--am-fehler); }
 
-.fg-loeschen { max-width: 420px; width: 100%; }
-.fg-loeschen h2 { font-size: 1.125rem; margin-bottom: var(--am-raum-3); }
-.fg-loeschen p { font-size: 0.875rem; color: var(--am-text-sekundaer); margin-bottom: var(--am-raum-4); }
+/* Rückfrage vor einem Schritt mit Folgen [HB-DIALOG] — vorher viermal
+   mit eigenen Inline-Maßen gebaut. */
+.rueckfrage { width: 100%; max-width: 27.5rem; }
+.rueckfrage h2 { font-size: 1.125rem; margin-bottom: var(--am-raum-3); }
+.rueckfrage-text { font-size: 0.875rem; color: var(--am-text-sekundaer); margin-bottom: var(--am-raum-4); }
 
 .eig-archiv { margin-top: var(--am-raum-4); }
 .eig-archiv summary { cursor: pointer; font-size: 0.875rem; font-weight: 500; margin-bottom: var(--am-raum-2); }
@@ -4969,6 +5060,7 @@ select,
   white-space: nowrap;
   font-size: 0.8125rem;
 }
+.db-reiter { border-bottom: 1px solid var(--am-rand); margin-bottom: var(--am-raum-4); }
 .db-tabelle td.db-leer { color: var(--am-text-deaktiviert); }
 .db-tabelle thead th button {
   all: unset;

@@ -105,7 +105,7 @@ function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
             <div className="feld"><label htmlFor="mail-betreff">Betreff</label><input id="mail-betreff" value={betreff} onChange={(e) => setBetreff(e.target.value)} placeholder={anlass} /></div>
             <div className="notiz-feld"><textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} aria-label="Nachricht" /></div>
             {senden.isError && <Fehler text={(senden.error as Error).message} />}
-            {senden.isSuccess && <p style={{ fontSize: "0.8125rem", color: "var(--am-erfolg)" }}>Übergeben — steht im Verlauf.</p>}
+            {senden.isSuccess && <p className="text-gelungen">Übergeben — steht im Verlauf.</p>}
             <div className="btn-reihe" style={{ marginTop: "var(--am-raum-3)" }}>
               <button type="button" className="btn btn-primaer btn-klein" disabled={!post.data?.eingerichtet || !text.trim() || senden.isPending} title={post.data?.hinweis ?? undefined} onClick={() => senden.mutate()}>
                 {senden.isPending ? "Übergibt …" : "Senden"}

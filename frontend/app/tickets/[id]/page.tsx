@@ -96,7 +96,7 @@ export default function TicketSeite({ params }: { params: Promise<{ id: string }
       )}
 
       {stufeSetzen.isError && (
-        <div style={{ padding: "0 var(--am-raum-8)" }}>
+        <div className="seitenrand">
           <Fehler text={(stufeSetzen.error as Error).message} />
         </div>
       )}

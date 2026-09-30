@@ -2,6 +2,7 @@
 
 // Modul RK-VERSAND — docs/MODULE.md
 
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -10,6 +11,7 @@ import { datum, KAMPAGNE_STATUS_ART, KAMPAGNE_STATUS_TEXT } from "@/lib/format";
 import type { Kampagne, Liste } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
+import { Dialog } from "@/components/dialog";
 
 function KampagneAnlegen({ vorgewaehlt, beiSchliessen, beiErfolg }: { vorgewaehlt: string | null; beiSchliessen: () => void; beiErfolg: (id: string) => void }) {
   const [name, setName] = useState("");
@@ -20,10 +22,8 @@ function KampagneAnlegen({ vorgewaehlt, beiSchliessen, beiErfolg }: { vorgewaehl
     onSuccess: (k) => beiErfolg(k.id),
   });
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Kampagne anlegen">
-      <div className="karte dialog-karte" style={{ maxWidth: "480px", width: "100%" }}>
-        <h2 style={{ marginBottom: "var(--am-raum-4)", fontSize: "1.125rem" }}>Kampagne anlegen</h2>
-        <form onSubmit={(e) => { e.preventDefault(); anlegen.mutate(); }}>
+    <Dialog titel="Kampagne anlegen" breite="schmal" beiSchliessen={beiSchliessen} beiSenden={() => anlegen.mutate()}>
+          <div className="dialog-koerper">
           <div className="feld">
             <label htmlFor="ka-name">Name</label>
             <input id="ka-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Herbst-Neuigkeiten" />
@@ -37,15 +37,14 @@ function KampagneAnlegen({ vorgewaehlt, beiSchliessen, beiErfolg }: { vorgewaehl
             </select>
           </div>
           {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
-          <div className="btn-reihe" style={{ marginTop: "var(--am-raum-6)" }}>
+          </div>
+          <div className="dialog-fuss">
             <button type="submit" className="btn btn-primaer" disabled={anlegen.isPending || !name.trim()}>
               {anlegen.isPending ? "Wird angelegt …" : "Anlegen"}
             </button>
             <button type="button" className="btn btn-still" onClick={beiSchliessen}>Abbrechen</button>
           </div>
-        </form>
-      </div>
-    </div>
+    </Dialog>
   );
 }
 
@@ -84,16 +83,16 @@ function Inhalt() {
                   <th>Kampagne</th>
                   <th>Liste</th>
                   <th>Status</th>
-                  <th style={{ textAlign: "right" }}>Gesendet</th>
-                  <th style={{ textAlign: "right" }}>Klicks</th>
-                  <th style={{ textAlign: "right" }}>Abgemeldet</th>
+                  <th className="rechts">Gesendet</th>
+                  <th className="rechts">Klicks</th>
+                  <th className="rechts">Abgemeldet</th>
                   <th>Gestartet</th>
                 </tr>
               </thead>
               <tbody>
                 {kampagnen.data.map((k) => (
-                  <tr key={k.id} onClick={() => router.push(`/kampagnen/${k.id}`)}>
-                    <td className="haupt">{k.name}<div style={{ fontSize: "0.8125rem", color: "var(--am-text-gedaempft)" }}>{k.betreff || "ohne Betreff"}</div></td>
+                  <tr key={k.id} data-ziel onClick={() => router.push(`/kampagnen/${k.id}`)}>
+                    <td className="haupt"><Link href={`/kampagnen/${k.id}`} className="zeilen-ziel" onClick={(e) => e.stopPropagation()}>{k.name}</Link><div className="zeile-unter">{k.betreff || "ohne Betreff"}</div></td>
                     <td>{k.liste_name ?? "—"}</td>
                     <td><span className="stufe" data-art={KAMPAGNE_STATUS_ART[k.status]}>{KAMPAGNE_STATUS_TEXT[k.status]}</span></td>
                     <td className="zahl">{k.gesendet}{k.wartend > 0 && <span style={{ color: "var(--am-text-gedaempft)" }}> +{k.wartend}</span>}</td>

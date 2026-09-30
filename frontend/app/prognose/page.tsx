@@ -67,7 +67,7 @@ export default function PrognoseSeite() {
           bis
           <input className="input" type="date" value={bis} onChange={(e) => setBis(e.target.value)} style={{ width: "auto" }} />
         </label>
-        <span style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+        <span className="text-leise-klein">
           Offene Leads zählen immer alle — ein Zeitfilter würde gerade die verstecken,
           deren Datum längst verstrichen ist.
         </span>
@@ -123,7 +123,7 @@ export default function PrognoseSeite() {
           </div>
           <div className="block-inhalt">
             {p.monate.length === 0 ? (
-              <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+              <p className="text-leise">
                 Kein offener Lead trägt ein Abschlussdatum. Ohne Datum lässt sich nichts
                 prognostizieren — das ist die eigentliche Aussage dieser Kachel.
               </p>
@@ -134,13 +134,13 @@ export default function PrognoseSeite() {
                     <tr>
                       <th>Monat</th>
                       <th style={{ width: "40%" }}>Verteilung</th>
-                      <th style={{ textAlign: "right" }}>Offen</th>
-                      <th style={{ textAlign: "right" }}>Gewichtet</th>
+                      <th className="rechts">Offen</th>
+                      <th className="rechts">Gewichtet</th>
                     </tr>
                   </thead>
                   <tbody>
                     {p.monate.map((m) => (
-                      <tr key={m.monat} style={{ cursor: "default" }}>
+                      <tr key={m.monat}>
                         <td className="haupt">{monatsname(m.monat)}</td>
                         <td>
                           <Balken anteil={m.offen_cents / groessterMonat} />
@@ -162,7 +162,7 @@ export default function PrognoseSeite() {
           </div>
           <div className="block-inhalt">
             {p.verlustgruende.length === 0 ? (
-              <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+              <p className="text-leise">
                 Im Zeitraum ist nichts verloren gegangen — oder es wurde kein Grund vermerkt.
               </p>
             ) : (
@@ -172,13 +172,13 @@ export default function PrognoseSeite() {
                     <tr>
                       <th>Grund</th>
                       <th style={{ width: "35%" }}>Anteil</th>
-                      <th style={{ textAlign: "right" }}>Anzahl</th>
-                      <th style={{ textAlign: "right" }}>Wert</th>
+                      <th className="rechts">Anzahl</th>
+                      <th className="rechts">Wert</th>
                     </tr>
                   </thead>
                   <tbody>
                     {p.verlustgruende.map((g) => (
-                      <tr key={g.grund} style={{ cursor: "default" }}>
+                      <tr key={g.grund}>
                         <td className="haupt">{g.grund}</td>
                         <td>
                           <Balken anteil={g.anzahl / meisteVerluste} betont />
@@ -200,7 +200,7 @@ export default function PrognoseSeite() {
           </div>
           <div className="block-inhalt">
             {p.produkte.length === 0 ? (
-              <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+              <p className="text-leise">
                 Im Zeitraum wurde nichts entschieden.
               </p>
             ) : (
@@ -209,17 +209,17 @@ export default function PrognoseSeite() {
                   <thead>
                     <tr>
                       <th>Produkt</th>
-                      <th style={{ textAlign: "right" }}>Gewonnen</th>
-                      <th style={{ textAlign: "right" }}>Verloren</th>
-                      <th style={{ textAlign: "right" }}>Trefferquote</th>
-                      <th style={{ textAlign: "right" }}>Umsatz</th>
+                      <th className="rechts">Gewonnen</th>
+                      <th className="rechts">Verloren</th>
+                      <th className="rechts">Trefferquote</th>
+                      <th className="rechts">Umsatz</th>
                     </tr>
                   </thead>
                   <tbody>
                     {p.produkte.map((pr) => {
                       const gesamt = pr.gewonnen + pr.verloren;
                       return (
-                        <tr key={pr.produkt} style={{ cursor: "default" }}>
+                        <tr key={pr.produkt}>
                           <td className="haupt">{PRODUKT_TEXT[pr.produkt] ?? pr.produkt}</td>
                           <td className="zahl">{pr.gewonnen}</td>
                           <td className="zahl">{pr.verloren}</td>

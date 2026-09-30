@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { Fehler } from "@/components/zustaende";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Rueckfrage } from "@/components/dialog";
 
 export interface Stammfeld {
   key: string;
@@ -62,7 +62,6 @@ export function Stammdaten({
   const [bearbeiten, setBearbeiten] = useState(false);
   const [entwurf, setEntwurf] = useState<Record<string, string>>({});
   const [loeschen, setLoeschen] = useState(false);
-  const falle = useDialogfalle(() => setLoeschen(false));
 
   const speichern = useMutation({
     mutationFn: () => {
@@ -157,17 +156,15 @@ export function Stammdaten({
         )}
 
         {loeschen && (
-          <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Löschen bestätigen" ref={falle}>
-            <div className="karte" style={{ maxWidth: "420px", width: "100%" }}>
-              <h2 style={{ fontSize: "1.125rem", marginBottom: "var(--am-raum-3)" }}>Wirklich löschen?</h2>
-              <p style={{ fontSize: "0.875rem", color: "var(--am-text-sekundaer)", marginBottom: "var(--am-raum-4)" }}>{loeschtext}</p>
-              {entfernen.isError && <Fehler text={(entfernen.error as Error).message} />}
-              <div className="btn-reihe">
-                <button type="button" className="btn btn-primaer" onClick={() => entfernen.mutate()} disabled={entfernen.isPending}>Löschen</button>
-                <button type="button" className="btn btn-still" data-autofokus onClick={() => setLoeschen(false)}>Abbrechen</button>
-              </div>
-            </div>
-          </div>
+          <Rueckfrage
+            titel="Wirklich löschen?"
+            label="Löschen bestätigen"
+            text={loeschtext}
+            beiSchliessen={() => setLoeschen(false)}
+            knopf={<button type="button" className="btn btn-primaer" onClick={() => entfernen.mutate()} disabled={entfernen.isPending}>Löschen</button>}
+          >
+            {entfernen.isError && <Fehler text={(entfernen.error as Error).message} />}
+          </Rueckfrage>
         )}
       </div>
     </section>

@@ -16,12 +16,53 @@
 
 import { ChevronDown } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
+import { menueTaste } from "@/lib/tasten";
 
 export type Menuepunkt = {
   text: string;
   hinweis?: string;
   onWahl: () => void;
 };
+
+/**
+ * Was ein aufklappendes Menü mit der Tastatur können muss: Beim Öffnen
+ * steht der Fokus auf dem ersten Punkt, ↑/↓/Pos1/Ende wandern, Escape
+ * schließt und gibt den Fokus dem Knopf zurück, Tab schließt und geht
+ * weiter. Ein Klick daneben schließt. Geteilt mit „Erstellen" in der
+ * Kopfleiste.
+ */
+export function useMenue() {
+  const [offen, setOffen] = useState(false);
+  const wurzel = useRef<HTMLDivElement>(null);
+  const knopf = useRef<HTMLButtonElement>(null);
+  const feld = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!offen) return;
+    feld.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    function maus(e: MouseEvent) {
+      if (!wurzel.current?.contains(e.target as Node)) setOffen(false);
+    }
+    function taste(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setOffen(false);
+        knopf.current?.focus();
+      } else if (e.key === "Tab") {
+        setOffen(false);
+      } else if (feld.current && menueTaste(e.key, feld.current)) {
+        e.preventDefault();
+      }
+    }
+    document.addEventListener("mousedown", maus);
+    document.addEventListener("keydown", taste);
+    return () => {
+      document.removeEventListener("mousedown", maus);
+      document.removeEventListener("keydown", taste);
+    };
+  }, [offen]);
+
+  return { offen, setOffen, wurzel, knopf, feld };
+}
 
 export function Knopfmenue({
   text,
@@ -30,28 +71,8 @@ export function Knopfmenue({
   text: string;
   eintraege: Menuepunkt[];
 }) {
-  const [offen, setOffen] = useState(false);
-  const wurzel = useRef<HTMLDivElement>(null);
+  const { offen, setOffen, wurzel, knopf, feld } = useMenue();
   const id = useId();
-
-  useEffect(() => {
-    if (!offen) return;
-    function zu(e: MouseEvent | KeyboardEvent) {
-      if (
-        e instanceof KeyboardEvent
-          ? e.key === "Escape"
-          : !wurzel.current?.contains(e.target as Node)
-      ) {
-        setOffen(false);
-      }
-    }
-    document.addEventListener("mousedown", zu);
-    document.addEventListener("keydown", zu);
-    return () => {
-      document.removeEventListener("mousedown", zu);
-      document.removeEventListener("keydown", zu);
-    };
-  }, [offen]);
 
   return (
     <div className="knopfmenue" ref={wurzel}>
@@ -65,6 +86,7 @@ export function Knopfmenue({
       <button
         type="button"
         className="btn btn-primaer knopfmenue-pfeil"
+        ref={knopf}
         aria-haspopup="menu"
         aria-expanded={offen}
         aria-controls={id}
@@ -75,7 +97,7 @@ export function Knopfmenue({
       </button>
 
       {offen && (
-        <div className="knopfmenue-feld" id={id} role="menu">
+        <div className="knopfmenue-feld" id={id} role="menu" ref={feld}>
           {eintraege.map((e) => (
             <button
               key={e.text}

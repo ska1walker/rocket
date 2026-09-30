@@ -161,7 +161,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
                 </thead>
                 <tbody>
                   {zeilen.map((z, i) => (
-                    <tr key={z.schluessel} style={{ cursor: "default" }}>
+                    <tr key={z.schluessel}>
                       <td>
                         {entwurf ? (
                           <>
@@ -282,7 +282,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
             </div>
 
             {zeilen.length === 0 && (
-              <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+              <p className="text-leise">
                 Noch keine Position.
               </p>
             )}
@@ -341,7 +341,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
                 </div>
               </dl>
               {geaendert && (
-                <p style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+                <p className="text-leise-klein">
                   Vorschau. Verbindlich ist, was nach dem Speichern hier steht.
                 </p>
               )}

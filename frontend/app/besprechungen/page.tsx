@@ -13,6 +13,7 @@ import type { Besprechung, Besprechungsanzahl, Besprechungsseite, BesprechungVol
 import { BesprechungZuordnen } from "@/components/besprechung-zuordnen";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
+import { reiterTaste } from "@/lib/tasten";
 
 type Reiter = "alle" | "offen" | "zugeordnet";
 
@@ -89,7 +90,7 @@ export default function BesprechungenSeite() {
         zahl={zahlen.data ? `${anzahl(zahlen.data.offen, "ohne Kunde", "ohne Kunde")}` : undefined}
       />
 
-      <div className="ansichtsleiste" role="tablist" aria-label="Ansichten">
+      <div className="ansichtsleiste" role="tablist" onKeyDown={reiterTaste} aria-label="Ansichten">
         {REITER.map((r) => (
           <button
             key={r.wert}
@@ -161,13 +162,13 @@ export default function BesprechungenSeite() {
               </thead>
               <tbody>
                 {seite.data.eintraege.map((b) => (
-                  <tr key={b.id} onClick={() => router.push(`/besprechungen/${b.id}`)}>
+                  <tr key={b.id} data-ziel onClick={() => router.push(`/besprechungen/${b.id}`)}>
                     <td className="besprechung-datum">
                       {datum(b.recorded_at ?? b.created_at)}
                       {dauer(b.dauer_sek) && <span>{dauer(b.dauer_sek)}</span>}
                     </td>
                     <td>
-                      <span className="haupt">{b.titel || "Besprechung"}</span>
+                      <Link href={`/besprechungen/${b.id}`} className="haupt zeilen-ziel" onClick={(e) => e.stopPropagation()}>{b.titel || "Besprechung"}</Link>
                       {b.beteiligte.length > 0 && (
                         <span className="besprechung-beteiligte">{b.beteiligte.join(", ")}</span>
                       )}

@@ -124,13 +124,13 @@ export function Anreicherungsblock({
         {anreichern.isError && <Fehler text={(anreichern.error as Error).message} />}
 
         {!letzter && !laeuft && (
-          <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>
+          <p className="text-leise">
             Noch nichts gelesen.
           </p>
         )}
 
         {letzter?.status === "laeuft" && (
-          <p style={{ fontSize: "0.875rem", color: "var(--am-text-sekundaer)" }}>
+          <p className="text-zweit">
             Liest Website und Suchtreffer …
           </p>
         )}

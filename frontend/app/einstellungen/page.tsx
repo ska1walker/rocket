@@ -115,7 +115,7 @@ function KIBlock({ e }: { e: OrgSettings }) {
             <button type="submit" className="btn btn-primaer" disabled={speichern.isPending}>
               {speichern.isPending ? "Wird gespeichert …" : "Speichern"}
             </button>
-            {speichern.isSuccess && <span style={{ fontSize: "0.8125rem", color: "var(--am-erfolg)" }}>Gespeichert.</span>}
+            {speichern.isSuccess && <span className="text-gelungen">Gespeichert.</span>}
           </div>
         </form>
       </div>
@@ -181,7 +181,7 @@ function Inhalt() {
       <Tresorhinweis e={e} />
       <Rollenhinweis />
 
-      <div className="datensatz" style={{ gridTemplateColumns: "minmax(0, 640px)" }}>
+      <div className="datensatz datensatz-lesespalte">
         {bereich === "firma" && (
           <>
             <Absenderblock />

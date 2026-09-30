@@ -90,7 +90,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
                 aria-label="Gesprächsnotiz"
               />
             </div>
-            <div className="btn-reihe" style={{ marginTop: "var(--am-raum-2)" }}>
+            <div className="btn-reihe notiz-knoepfe">
               <button
                 type="button"
                 className="btn btn-primaer btn-klein"
@@ -102,7 +102,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
                 {verarbeiten.isPending ? "Liest …" : "Verarbeiten"}
               </button>
               {!bereit && kiStatus.data?.hint && (
-                <span style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+                <span className="text-leise-klein">
                   {kiStatus.data.hint}
                 </span>
               )}
@@ -113,7 +113,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
 
         {vorschlag && (
           <>
-            <div className="hinweis" style={{ marginBottom: "var(--am-raum-4)" }}>
+            <div className="hinweis notiz-hinweis">
               <span>
                 Vorschlag. Nichts davon ist gespeichert — wählen Sie ab, was nicht stimmt.
               </span>
@@ -130,7 +130,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
               </div>
             </dl>
 
-            <div className="feld" style={{ marginTop: "var(--am-raum-4)" }}>
+            <div className="feld notiz-feld-abstand">
               <label htmlFor="zusammenfassung">Was festgehalten wird</label>
               <textarea
                 id="zusammenfassung"
@@ -143,30 +143,12 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
             </div>
 
             {aufgaben.length > 0 && (
-              <fieldset style={{ border: "none", padding: 0, margin: "0 0 var(--am-raum-4)" }}>
-                <legend
-                  style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.04em",
-                    color: "var(--am-text-gedaempft)",
-                    marginBottom: "var(--am-raum-2)",
-                  }}
-                >
+              <fieldset className="notiz-aufgaben">
+                <legend>
                   Aufgaben
                 </legend>
                 {aufgaben.map((a, i) => (
-                  <label
-                    key={`${a.titel}-${i}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "var(--am-raum-2)",
-                      marginBottom: "var(--am-raum-2)",
-                      fontSize: "0.875rem",
-                    }}
-                  >
+                  <label key={`${a.titel}-${i}`} className="notiz-wahl" data-mitte="">
                     <input
                       type="checkbox"
                       checked={a.an}
@@ -177,7 +159,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
                       }
                     />
                     <span>{a.titel}</span>
-                    <span style={{ color: "var(--am-text-gedaempft)", fontSize: "0.75rem" }}>
+                    <span className="text-leise-klein">
                       {a.faellig_am ? datum(a.faellig_am) : "ohne Frist"}
                     </span>
                   </label>
@@ -186,15 +168,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
             )}
 
             {vorschlag.naechster_schritt && (
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "var(--am-raum-2)",
-                  marginBottom: "var(--am-raum-3)",
-                  fontSize: "0.875rem",
-                }}
-              >
+              <label className="notiz-wahl">
                 <input
                   type="checkbox"
                   checked={schrittAn}
@@ -207,15 +181,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
             )}
 
             {vorschlag.qualifikation_punkte ? (
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "var(--am-raum-2)",
-                  marginBottom: "var(--am-raum-3)",
-                  fontSize: "0.875rem",
-                }}
-              >
+              <label className="notiz-wahl">
                 <input
                   type="checkbox"
                   checked={qualAn}
@@ -240,7 +206,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
 
             {uebernehmen.isError && <Fehler text={(uebernehmen.error as Error).message} />}
 
-            <div className="btn-reihe" style={{ marginTop: "var(--am-raum-4)" }}>
+            <div className="btn-reihe notiz-fuss">
               <button
                 type="button"
                 className="btn btn-primaer btn-klein"

@@ -1,6 +1,6 @@
 # Module der Oberfläche — Bausteinkatalog
 
-> **Stand:** 30. September 2026 · Rocket 26.9.5
+> **Stand:** 30. September 2026 · Rocket 26.9.6
 > **Für wen:** alle, die an Rocket, Relay, Insilo oder einer weiteren
 > AImighty-App bauen. Rocket ist nur die erste App, in der die Bausteine
 > beschrieben sind.
@@ -61,8 +61,10 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | HB-KNOPFMENUE | Knopf mit zweitem Weg | `knopfmenue.tsx` | ● |
 | HB-MEHRFACH | Mehrfachauswahl | `mehrfachauswahl.tsx` | ● |
 | HB-ERKLAERUNG | Ein Satz, der Rest hinter ⓘ | `erklaerung.tsx` | ● |
-| HB-DIALOG | Dialog: Schicht, Karte, Kopf/Mitte/Fuß, Tastatur | `dialogfalle.ts` + CSS | ● |
+| HB-DIALOG | Dialog und Rückfrage: Schicht, Karte, Kopf/Mitte/Fuß, Tastatur | `dialog.tsx`, `dialogfalle.ts` | ● |
 | HB-FELDREIHE | Felder nebeneinander, auf dem Handy untereinander | CSS | ● |
+| HB-TEXT | Textrollen: leise, Randnotiz, gelungen, rechtsbündig, Seitenrand | CSS | ● |
+| HB-TASTATUR | Tastaturwege: Reiter, Menüs, Brett | `lib/tasten.ts` | ● |
 | HB-TOR | Anmeldeseiten | `tor.tsx` | ◐ Produktwort |
 | HB-FAKTOR | Zweiter Faktor: Codefeld, Codeliste | `zweiter-faktor.tsx` | ● / ○ |
 | HB-FEHLERMELDER | Oberflächenfehler ins Pod-Log | `fehlermelder.tsx` | ◐ Endpunkt |
@@ -73,7 +75,7 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | HB-BLOCK | Datensatzseite und Block | CSS | ● |
 | HB-TABELLE | Werkzeugleiste, Datentabelle, Rollfläche | CSS | ● |
 | HB-ZEITLEISTE | Verlauf mit KI-Punkt | `zeitleiste.tsx` | ◐ Darstellung / ○ Daten |
-| HB-BOARD | Brett mit Spalten und Karten | CSS | ● CSS / ○ Seite |
+| HB-BOARD | Brett mit Spalten und Karten, auch per Tastatur | CSS, `brett.tsx` | ● CSS / ○ Seite |
 | HB-EINSTELLUNGEN | Unterpunkte und Block-Muster der Einstellungen | CSS, `einstellungen/page.tsx` | ● Muster |
 | HB-DRUCK | A4-Dokument und Druck | CSS | ● CSS / ○ Seite |
 | RK-SEGMENTLISTE | Listen mit Ansichten, Filter, Spalten, Stapel | `segmentliste.tsx`, `filterbau.tsx` | ○ (◐ Filterbau) |
@@ -340,21 +342,25 @@ Info-Knopf.
 
 ![Dialog](module/hb-dialog.png)
 
-Kein Bauteil, ein **Muster aus Hook und Klassen**:
+`components/dialog.tsx` → `Dialog({ titel, label?, breite?, beiSchliessen, beiSenden, children })`
+und `Rueckfrage({ titel, label, text?, beiSchliessen, knopf, vorsicht?, children? })`.
+Beide bringen den Tastatur-Hook `useDialogfalle` (`dialogfalle.ts`) mit.
 
 ```tsx
-const falle = useDialogfalle(beiSchliessen);   // components/dialogfalle.ts
-<div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Firma anlegen" ref={falle}>
-  <div className="karte dialog-karte">
-    <div className="dialog-kopf"><h2>…</h2><button className="dialog-zu" aria-label="Schließen">×</button></div>
-    <form className="dialog-form">
-      <div className="dialog-koerper">…Felder…</div>
-      <div className="dialog-fuss">…Knöpfe…</div>
-    </form>
-  </div>
-</div>
+<Dialog titel="Firma anlegen" beiSchliessen={zu} beiSenden={() => anlegen.mutate()}>
+  <div className="dialog-koerper">…Felder…</div>
+  <div className="dialog-fuss">…Knöpfe…</div>
+</Dialog>
+
+<Rueckfrage titel="Wirklich löschen?" label="Löschen bestätigen" text={folgen}
+  beiSchliessen={zu} knopf={<button className="btn btn-primaer" …>Löschen</button>} />
 ```
 
+- **Breiten** als Variante, nie inline: `breite="normal"` (35rem),
+  `"schmal"` (30rem), `"breit"` (39rem). Die Rückfrage ist 27,5rem.
+- Bis 26.9.5 stand das Markup in jeder Datei einzeln — mit vier
+  verschiedenen Breiten, und drei Dialoge (Liste, Kampagne, Eingang) hatten
+  die Tastaturführung vergessen.
 - **Kopf und Fuß stehen fest, nur die Mitte rollt.** Vorher wanderte
   „Anlegen" aus dem Bild. Höhe höchstens 46rem.
 - **Tastatur (`useDialogfalle`):**
@@ -364,9 +370,10 @@ const falle = useDialogfalle(beiSchliessen);   // components/dialogfalle.ts
   - danach geht der Fokus dorthin zurück, wo er vorher war;
   - verschwindet das fokussierte Feld (etwa beim Nachladen), holt der
     Hook den Fokus zurück.
-- **Rückfragen vor dem Löschen:** `data-autofokus` auf „Abbrechen", damit
-  ein Enter nichts löscht.
-- **Regel:** Jeder neue Dialog nimmt den Hook.
+- **Rückfragen vor dem Löschen:** Der Fokus steht auf „Abbrechen", damit
+  ein Enter nichts löscht (`vorsicht`, Vorgabe). Beim Verlustgrund steht er
+  im ersten Feld (`vorsicht={false}`).
+- **Regel:** Jeder neue Dialog ist ein `Dialog` oder eine `Rueckfrage`.
 
 <details><summary>Dunkel</summary>
 
@@ -385,6 +392,33 @@ unter 40rem untereinander; `.feld-paar` für das feste Paar im Dialog.
 
 **Regel:** Spalten nie inline mit `gridTemplateColumns` — das galt auch
 auf dem Handy und schnitt Server, Port und Verschlüsselung ab.
+
+### HB-TEXT — Textrollen ●
+
+Was vorher an über sechzig Stellen als Inline-Stil stand, hat einen Namen:
+
+| Klasse | Wofür |
+|---|---|
+| `.text-leise` | der leise Satz unter einem Block oder Feld |
+| `.text-leise-klein` | Randnotiz, Meta-Angabe |
+| `.text-zweit` | Nebentext in Sekundärfarbe |
+| `.text-gelungen` | „Gespeichert." und andere Bestätigungen |
+| `.rechts` | rechtsbündige Spalte in `.tabelle` |
+| `.seitenrand` | Meldung unter dem Seitenkopf, auf die Breite des Inhalts eingerückt |
+| `.zeile-unter` | zweite, leisere Zeile in einer Tabellenzelle |
+
+**Regel:** Ein neuer Text mit Rolle nimmt die Klasse, nicht `style`.
+
+### HB-TASTATUR — Tastaturwege ●
+
+`lib/tasten.ts` — reine Funktionen, getestet:
+
+- `reiterTaste(e)`: an jede `role="tablist"`; ←/→/Pos1/Ende wechseln und
+  wählen den Reiter.
+- `menueTaste(key, feld)`: im offenen Menü ↑/↓/Pos1/Ende. Den Rest (Fokus
+  hinein, Escape mit Fokus zurück, Tab schließt) macht
+  `useMenue()` in `knopfmenue.tsx` — auch für „Erstellen".
+- `nachbarspalte(taste, spalte, anzahl)`: Alt+←/→ im Brett (HB-BOARD).
 
 ### HB-TOR — Anmeldeseiten ◐
 
@@ -504,6 +538,11 @@ stehen in `.rollbar` mit `tabIndex={0}`, damit man auch mit der Tastatur
 seitlich rollt. Leere Kopfzellen tragen
 `<span className="nur-vorleser">Aktionen</span>`.
 
+**Zeilen, die irgendwohin führen,** tragen `data-ziel` (erst dann zeigt
+sich die Hand), und der Haupttext der ersten Spalte ist ein Link
+`.zeilen-ziel` — so erreicht man jede Zeile mit Tab und öffnet sie mit
+Enter. Eine Liste ohne eigene Seite je Zeile (Aufgaben) hat beides nicht.
+
 ### HB-ZEITLEISTE — Verlauf ◐ / ○
 
 ![Zeitleiste](module/hb-zeitleiste.png)
@@ -524,6 +563,11 @@ und die Arten sind Rocket. Sinnvoll wäre ein reines Anzeige-Bauteil
 
 `.board`, `.board-spalte` (feste Breite, waagerecht rollbar),
 `.deal-karte` (alle gleich hoch — sonst liest man eine Rangfolge heraus).
+
+**Tastatur** (`components/brett.tsx`, `useBrettTastatur`, `BrettHinweis`):
+Alt+← / Alt+→ auf einer Karte schiebt sie in die Nachbarspalte, wie das
+Ziehen. Der Fokus folgt der Karte, ein Vorleser hört „Nach ‚Angebot'
+verschoben". Jede Karte trägt `data-karte` und verweist auf den Hinweis.
 Rocket nutzt es für Leads und Tickets; für Relay taugt es etwa für
 Postzustände.
 
@@ -806,6 +850,24 @@ ist akut; es ist die Liste für eine ruhige Stunde.
 - **Wache:** `tsconfig.json` verlangt jetzt `noUnusedLocals` und
   `noUnusedParameters`.
 
+**Erledigt in 26.9.6:**
+
+- **Tastatur:** Listenzeilen öffnen mit Enter (HB-TABELLE), Karten
+  wandern mit Alt+Pfeil (HB-BOARD), Reiter und Menüs kennen die Pfeile
+  (HB-TASTATUR), der Assistent schließt mit Escape.
+- **Dialog-Bauteil:** `Dialog` und `Rueckfrage` statt wiederholtem
+  Markup (HB-DIALOG); dabei drei Dialoge ohne Tastaturführung gefunden
+  und mitgenommen.
+- **Inline-Stile:** Dokumente, Notizkasten, Dialogbreiten, Spalten von
+  Start, Fragen und Einstellungen in Klassen; über sechzig wiederkehrende
+  Stile als Textrollen (HB-TEXT). Übrig sind rund 250 Einzelfälle, meist
+  ein Abstand.
+- **Nebenbei gefunden:** Die Aufgaben-Tabelle führte beim Klick auf eine
+  Zeile ins Leere (404), und am Lead ohne Sprachmodell hing die Knopfreihe
+  aus dem Seitenkopf über dem ersten Block.
+- **Wache:** Der CI-Job „oberfläche" geht jede Seite im Browser durch
+  (BETRIEB.md, „GUI-Prüfung").
+
 **Noch offen:**
 
 - **Paketklassen ohne Nutzer:** `.streifen*`, `.deckschicht`,
@@ -813,18 +875,8 @@ ist akut; es ist die Liste für eine ruhige Stunde.
   `.flaeche-auswahl`, `.huelle.hat-ablage`, `html[data-dichte]`. Sie
   bleiben (Paketgut); die App nutzt eigene Gegenstücke. Beim nächsten
   Paketabgleich klären, welche Seite recht hat.
-- **Tastatur:**
-  - Listenzeilen öffnen den Datensatz nur per Klick.
-  - Board-Karten lassen sich nur mit der Maus verschieben.
-  - Reiter (`role="tab"`) haben keine Pfeiltasten.
-  - Knopfmenü und „Erstellen" kennen keine Pfeiltasten und geben den
-    Fokus nicht zurück.
-  - Der Assistent schließt nicht mit Escape.
 - **Doppelte Wege:** Stammdaten und Feldgruppen tun dasselbe in zwei
-  Bauarten.
-- **Das Dialog-Markup** wiederholt sich in jeder Datei — ein kleines
-  Bauteil `Dialog` wäre die saubere Form von HB-DIALOG.
-- **Inline-Stile** an einigen Stellen (Dokumente, Notizkasten, Breite der
-  Dialoge, Spalten der Startseite und Einstellungen).
+  Bauarten. Angebote und Tickets nutzen noch Stammdaten; sie bleiben
+  bewusst ohne Gruppen (Entscheidung zu den Eigenschaften, 30.9.2026).
 - **Kontrast:** Gedämpfter Text liegt auf der Grundfläche bei 4,36:1 —
   eine Entscheidung über AM-TOKEN (BETRIEB.md, „GUI-Prüfung").

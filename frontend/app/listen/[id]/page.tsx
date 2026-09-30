@@ -187,7 +187,7 @@ export default function ListeSeite({ params }: { params: Promise<{ id: string }>
                           </span>
                         </td>
                         {l.art === "statisch" && <td>{datum(m.hinzugefuegt_am)}</td>}
-                        <td style={{ textAlign: "right" }}>
+                        <td className="rechts">
                           {l.art === "statisch" && (
                             <button type="button" className="btn btn-still btn-klein" disabled={entfernen.isPending} onClick={() => entfernen.mutate(m.id)}>Entfernen</button>
                           )}

@@ -3,7 +3,6 @@
 // Modul RK-ANLEGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { firmenschluessel } from "@/lib/format";
@@ -12,7 +11,7 @@ import { Erfassung } from "@/components/erfassung";
 import { Finden, Wegwahl } from "@/components/finden";
 import { Fehler } from "@/components/zustaende";
 import { useAnlegefelder } from "@/components/anlegefelder";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Dialog } from "@/components/dialog";
 
 const LEER = {
   first_name: "",
@@ -36,7 +35,6 @@ export function KontaktAnlegen({
   beiSchliessen: () => void;
   beiErfolg: (id: string) => void;
 }) {
-  const falle = useDialogfalle(beiSchliessen);
   const client = useQueryClient();
   const [werte, setWerte] = useState({ ...LEER, company_id: firmaId ?? "" });
   // Die Firma aus der Signatur, die es im Bestand noch nicht gibt. Sie
@@ -116,16 +114,7 @@ export function KontaktAnlegen({
   }
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Kontakt anlegen" ref={falle}>
-      <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
-        <div className="dialog-kopf">
-          <h2>Kontakt anlegen</h2>
-          <button type="button" className="dialog-zu" aria-label="Schließen" onClick={beiSchliessen}>
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-
-        <form className="dialog-form" onSubmit={(e) => { e.preventDefault(); anlegen.mutate(); }}>
+    <Dialog titel="Kontakt anlegen" beiSchliessen={beiSchliessen} beiSenden={() => anlegen.mutate()}>
           <div className="dialog-koerper">
         <Wegwahl weg={weg} setWeg={setWeg} />
         {weg === "finden" ? (
@@ -190,9 +179,7 @@ export function KontaktAnlegen({
             <button type="submit" className="btn btn-primaer" disabled={anlegen.isPending || !werte.last_name.trim()}>{anlegen.isPending ? "Legt an …" : "Anlegen"}</button>
             <button type="button" className="btn btn-still" onClick={beiSchliessen}>Abbrechen</button>
           </div>
-        </form>
-      </div>
-    </div>
+    </Dialog>
   );
 }
 

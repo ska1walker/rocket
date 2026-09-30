@@ -303,7 +303,7 @@ export function Marketingversandblock() {
           <button type="button" className="btn btn-primaer" disabled={speichern.isPending} onClick={() => speichern.mutate()}>
             {speichern.isPending ? "Speichert …" : "Speichern"}
           </button>
-          {speichern.isSuccess && <span style={{ fontSize: "0.8125rem", color: "var(--am-erfolg)" }}>Gespeichert.</span>}
+          {speichern.isSuccess && <span className="text-gelungen">Gespeichert.</span>}
         </div>
       </div>
     </section>

@@ -42,7 +42,7 @@ export function KontaktFirmen({ kontaktId }: { kontaktId: string }) {
         <span className="board-spalte-anzahl">{firmen.data?.length ?? 0}</span>
       </div>
       <div className="block-inhalt">
-        {firmen.data?.length === 0 && <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)" }}>Keiner Firma zugeordnet.</p>}
+        {firmen.data?.length === 0 && <p className="text-leise">Keiner Firma zugeordnet.</p>}
         <dl>
           {firmen.data?.map((f) => (
             <div className="eigenschaft" key={f.company_id}>

@@ -10,6 +10,7 @@ import type { DbErgebnis, DbSeite, DbUebersicht, Wer } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
 import { Erklaerung } from "@/components/erklaerung";
+import { reiterTaste } from "@/lib/tasten";
 
 /**
  * Der Blick in die Datenbank — lesend, für Verwalter.
@@ -286,7 +287,7 @@ export default function DatenbankSeite() {
                 lang={<>Alles läuft unter derselben Zeilensicherheit wie der Rest von Rocket: Daten anderer Organisationen auf dieser Box bleiben unsichtbar. Ändern lässt sich hier nichts; dafür gibt es die Masken, die prüfen und protokollieren. Tabellen mit Zugangsdaten und Sitzungen sind gesperrt.</>}
               />
             </div>
-            <div role="tablist" style={{ borderBottom: "1px solid var(--am-rand)", marginBottom: "var(--am-raum-4)" }}>
+            <div role="tablist" onKeyDown={reiterTaste} className="db-reiter">
               <button type="button" role="tab" aria-selected={reiter === "tabellen"} className={`ansicht-reiter${reiter === "tabellen" ? " aktiv" : ""}`} onClick={() => setReiter("tabellen")}>
                 Tabellen
               </button>

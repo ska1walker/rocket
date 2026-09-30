@@ -38,6 +38,7 @@ export function Assistent() {
   const router = useRouter();
   const client = useQueryClient();
   const feld = useRef<HTMLTextAreaElement>(null);
+  const knopf = useRef<HTMLButtonElement>(null);
   const ende = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,6 +76,7 @@ export function Assistent() {
       <button
         type="button"
         className={`assistent-knopf${offen ? " offen" : ""}`}
+        ref={knopf}
         onClick={() => setOffen((o) => !o)}
         aria-label={offen ? "Assistent schließen" : "Assistent öffnen"}
         aria-expanded={offen}
@@ -84,11 +86,24 @@ export function Assistent() {
       </button>
 
       {offen && (
-        <section className="assistent-panel" id="assistent-panel" aria-label="Assistent">
+        <section
+          className="assistent-panel"
+          id="assistent-panel"
+          aria-label="Assistent"
+          onKeyDown={(e) => {
+            // Escape schließt, wie jedes aufgehende Feld — und der Fokus
+            // steht wieder auf dem Schild, von dem aus es aufging.
+            if (e.key === "Escape" && !e.defaultPrevented) {
+              e.preventDefault();
+              setOffen(false);
+              knopf.current?.focus();
+            }
+          }}
+        >
           <header className="assistent-kopf">
             <Schild size={16} />
             <span>Assistent</span>
-            <button type="button" className="assistent-zu" onClick={() => setOffen(false)} aria-label="Schließen">
+            <button type="button" className="assistent-zu" onClick={() => { setOffen(false); knopf.current?.focus(); }} aria-label="Schließen">
               <X size={16} aria-hidden="true" />
             </button>
           </header>

@@ -60,7 +60,7 @@ export default function StartSeite() {
         </div>
       </dl>
 
-      <div className="datensatz" style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
+      <div className="datensatz datensatz-einzeln">
         <HeuteVorbereitet />
         <Tagesbriefing />
       </div>

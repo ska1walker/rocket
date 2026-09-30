@@ -146,7 +146,7 @@ export function AnreicherungEinstellungen({ einstellungen }: { einstellungen: Or
               {speichern.isPending ? "Wird gespeichert …" : "Speichern"}
             </button>
             {speichern.isSuccess && (
-              <span style={{ fontSize: "0.8125rem", color: "var(--am-erfolg)" }}>Gespeichert.</span>
+              <span className="text-gelungen">Gespeichert.</span>
             )}
           </div>
         </form>

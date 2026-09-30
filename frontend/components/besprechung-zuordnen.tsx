@@ -3,13 +3,12 @@
 // Modul RK-WISSEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import type { Besprechung, BesprechungVoll, Company, Contact, Deal } from "@/lib/typen";
 import { Mehrfachauswahl } from "@/components/mehrfachauswahl";
 import { Fehler } from "@/components/zustaende";
-import { useDialogfalle } from "@/components/dialogfalle";
+import { Dialog } from "@/components/dialog";
 
 function kontaktname(k: Pick<Contact, "first_name" | "last_name" | "email">): string {
   return [k.first_name, k.last_name].filter(Boolean).join(" ") || k.email || "Kontakt";
@@ -33,7 +32,6 @@ export function BesprechungZuordnen({
   beiSchliessen: () => void;
   beiErfolg?: (b: BesprechungVoll) => void;
 }) {
-  const falle = useDialogfalle(beiSchliessen);
   const client = useQueryClient();
   const v = besprechung.vorschlag;
   const [firma, setFirma] = useState(besprechung.company?.id ?? v?.company?.id ?? "");
@@ -88,22 +86,7 @@ export function BesprechungZuordnen({
   }
 
   return (
-    <div className="dialog-schicht" role="dialog" aria-modal="true" aria-label="Besprechung zuordnen" ref={falle}>
-      <div className="karte dialog-karte" style={{ maxWidth: "560px", width: "100%" }}>
-        <div className="dialog-kopf">
-          <h2>Zuordnen</h2>
-          <button type="button" className="dialog-zu" aria-label="Schließen" onClick={beiSchliessen}>
-            <X size={18} aria-hidden="true" />
-          </button>
-        </div>
-
-        <form
-          className="dialog-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            zuordnen.mutate();
-          }}
-        >
+    <Dialog titel="Zuordnen" label="Besprechung zuordnen" beiSchliessen={beiSchliessen} beiSenden={() => zuordnen.mutate()}>
           <div className="dialog-koerper">
             <p className="erfassung-hinweis" style={{ marginTop: 0, marginBottom: "var(--am-raum-4)" }}>
               <strong style={{ color: "var(--am-text-primaer)" }}>{besprechung.titel || "Besprechung"}</strong>
@@ -184,8 +167,6 @@ export function BesprechungZuordnen({
               Abbrechen
             </button>
           </div>
-        </form>
-      </div>
-    </div>
+    </Dialog>
   );
 }

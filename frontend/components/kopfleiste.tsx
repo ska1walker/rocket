@@ -21,41 +21,23 @@
 
 import { ChevronDown, Plus } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import { useId } from "react";
 import { neuPfad, NEU_ZIELE } from "@/lib/neu";
 import { Marke } from "@/components/marke";
 import { Klappschalter } from "@/components/navigation";
 import { Suchfeld } from "@/components/suche";
+import { useMenue } from "@/components/knopfmenue";
 
 function NeuMenue() {
-  const [offen, setOffen] = useState(false);
-  const wurzel = useRef<HTMLDivElement>(null);
+  const { offen, setOffen, wurzel, knopf, feld } = useMenue();
   const id = useId();
-
-  useEffect(() => {
-    if (!offen) return;
-    function zu(e: MouseEvent | KeyboardEvent) {
-      if (
-        e instanceof KeyboardEvent
-          ? e.key === "Escape"
-          : !wurzel.current?.contains(e.target as Node)
-      ) {
-        setOffen(false);
-      }
-    }
-    document.addEventListener("mousedown", zu);
-    document.addEventListener("keydown", zu);
-    return () => {
-      document.removeEventListener("mousedown", zu);
-      document.removeEventListener("keydown", zu);
-    };
-  }, [offen]);
 
   return (
     <div className="knopfmenue" ref={wurzel}>
       <button
         type="button"
         className="btn btn-primaer kopf-neu"
+        ref={knopf}
         // Auf schmalen Schirmen weicht das Wort — der Name bleibt.
         aria-label="Erstellen"
         aria-haspopup="menu"
@@ -73,7 +55,7 @@ function NeuMenue() {
       </button>
 
       {offen && (
-        <div className="knopfmenue-feld" id={id} role="menu">
+        <div className="knopfmenue-feld" id={id} role="menu" ref={feld}>
           {NEU_ZIELE.map((z) => (
             <Link
               key={z.pfad}

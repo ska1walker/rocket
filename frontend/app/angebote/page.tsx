@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -59,8 +60,8 @@ export default function AngeboteSeite() {
                   <th>Lead</th>
                   <th>Status</th>
                   <th>Bindefrist</th>
-                  <th style={{ textAlign: "right" }}>Netto</th>
-                  <th style={{ textAlign: "right" }}>Brutto</th>
+                  <th className="rechts">Netto</th>
+                  <th className="rechts">Brutto</th>
                 </tr>
               </thead>
               <tbody>
@@ -68,8 +69,8 @@ export default function AngeboteSeite() {
                   const abgelaufen =
                     q.status === "sent" && q.valid_until && new Date(q.valid_until) < new Date();
                   return (
-                    <tr key={q.id} onClick={() => router.push(`/angebote/${q.id}`)}>
-                      <td className="haupt mono">{q.number}</td>
+                    <tr key={q.id} data-ziel onClick={() => router.push(`/angebote/${q.id}`)}>
+                      <td className="haupt mono"><Link href={`/angebote/${q.id}`} className="zeilen-ziel" onClick={(e) => e.stopPropagation()}>{q.number}</Link></td>
                       <td>{q.company_name ?? "—"}</td>
                       <td>{q.deal_name}</td>
                       <td>

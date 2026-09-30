@@ -84,25 +84,24 @@ export function Dokumente({ bezug }: { bezug: Dokumentbezug }) {
       </div>
       <div className="block-inhalt">
         {dokumente.length > 0 && (
-          <ul style={{ listStyle: "none", padding: 0, margin: "0 0 var(--am-raum-3)", display: "grid", gap: "var(--am-raum-2)" }}>
+          <ul className="dokumente-liste">
             {dokumente.map((d) => (
               <li key={d.id}>
                 {/* Der Name bekommt die volle Breite. Daneben stünde er in
                     einer 300-Pixel-Spalte in drei Zeilen. */}
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--am-raum-2)" }}>
+                <div className="dokument-zeile">
                   <Zeichen typ={d.typ} />
                   <a
                     href={`/api/dokumente/${d.id}/datei`}
                     target={d.im_fenster ? "_blank" : undefined}
                     rel={d.im_fenster ? "noopener noreferrer" : undefined}
-                    className="zellen-link"
-                    style={{ minWidth: 0, overflowWrap: "anywhere" }}
+                    className="zellen-link dokument-name"
                   >
                     {d.name}
                   </a>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--am-raum-2)", paddingLeft: "calc(16px + var(--am-raum-2))" }}>
-                  <span style={{ flex: 1, fontSize: "0.75rem", color: "var(--am-text-gedaempft)" }}>
+                <div className="dokument-zeile dokument-unter">
+                  <span className="dokument-meta">
                     {dateigroesse(d.groesse)} · {datum(d.created_at)}
                     {d.hochgeladen_von_name ? ` · ${d.hochgeladen_von_name}` : ""}
                   </span>
@@ -122,7 +121,7 @@ export function Dokumente({ bezug }: { bezug: Dokumentbezug }) {
         )}
 
         {liste.data && dokumente.length === 0 && (
-          <p style={{ fontSize: "0.8125rem", color: "var(--am-text-gedaempft)", marginBottom: "var(--am-raum-3)" }}>
+          <p className="dokumente-leer">
             Noch nichts abgelegt.
           </p>
         )}
@@ -131,13 +130,8 @@ export function Dokumente({ bezug }: { bezug: Dokumentbezug }) {
           onDragOver={(e) => { e.preventDefault(); setUeber(true); }}
           onDragLeave={() => setUeber(false)}
           onDrop={(e) => { e.preventDefault(); setUeber(false); waehlen(e.dataTransfer.files); }}
-          style={{
-            border: `1px dashed ${ueber ? "var(--am-handlung-ruhend)" : "var(--am-rand)"}`,
-            borderRadius: "var(--am-radius-mittel)",
-            padding: "var(--am-raum-3)",
-            textAlign: "center",
-            background: ueber ? "var(--am-flaeche-2)" : "transparent",
-          }}
+          className="dokumente-ablage"
+          data-ueber={ueber ? "true" : undefined}
         >
           <input
             ref={feld}
@@ -155,7 +149,7 @@ export function Dokumente({ bezug }: { bezug: Dokumentbezug }) {
             <Upload size={14} aria-hidden />
             {hochladen.isPending ? "Wird abgelegt …" : "Datei ablegen"}
           </button>
-          <p style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)", margin: "var(--am-raum-2) 0 0" }}>
+          <p className="dokumente-ablage-satz">
             oder hierher ziehen · bis 25 MB
           </p>
         </div>
