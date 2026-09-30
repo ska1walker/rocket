@@ -251,7 +251,7 @@ async def test_ansichten_bleiben_in_der_organisation(datenbank):
 
 async def test_private_ansicht_erscheint_nur_bei_ihrer_person(datenbank):
     """Wer sich eine Arbeitsliste baut, hängt sie nicht jedem in die Leiste."""
-    from tests.test_mitglieder import mit_sitzplatz
+    from tests.conftest import als_person
 
     async with klient_fuer("ansicht-privat") as k:
         marc = (await k.post("/api/mitglieder", json={"display_name": "Marc Bayer"})).json()
@@ -260,8 +260,8 @@ async def test_private_ansicht_erscheint_nur_bei_ihrer_person(datenbank):
         })
         assert [a["name"] for a in (await k.get("/api/ansichten?entity=contacts")).json()] == ["Nur meine"]
 
-    async with mit_sitzplatz("ansicht-privat", marc["id"]) as m:
-        assert (await m.get("/api/ansichten?entity=contacts")).json() == []
+        async with als_person(k, marc["id"]) as m:
+            assert (await m.get("/api/ansichten?entity=contacts")).json() == []
 
 
 # ---- Stapel -------------------------------------------------------------

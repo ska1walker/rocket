@@ -13,7 +13,7 @@ import pytest
 
 from app import sicherung
 from app.db import acquire_as
-from tests.conftest import klient_fuer
+from tests.conftest import als_person, klient_fuer
 
 
 @pytest.fixture(autouse=True)
@@ -425,13 +425,12 @@ async def test_kennung_bewegt_sich_nur_bei_aenderung(kai):
 
 async def test_nutzereinstellungen_ueberleben_die_wiederherstellung(datenbank, eigene_ablage):
     """Favoriten hängen am Menschen — auch nach der Neuinstallation, und
-    auch für die Person am Sitzplatz, die dabei neu angelegt wird."""
-    from tests.test_mitglieder import mit_sitzplatz
+    auch für die weitere Person, die dabei neu angelegt wird."""
 
     async with klient_fuer("quelle-einst") as quelle:
         marc = (await quelle.post("/api/mitglieder", json={"display_name": "Marc Einst"})).json()
         await quelle.patch("/api/mitglieder/wer/einstellungen", json={"favoriten": ["/firmen"]})
-        async with mit_sitzplatz("quelle-einst", marc["id"]) as als_marc:
+        async with als_person(quelle, marc["id"]) as als_marc:
             await als_marc.patch("/api/mitglieder/wer/einstellungen", json={"favoriten": ["/kampagnen", "/listen"]})
         await quelle.post("/api/sicherung")
 
@@ -446,7 +445,7 @@ async def test_nutzereinstellungen_ueberleben_die_wiederherstellung(datenbank, e
             org_id, user_id = await _org_und_nutzer(conn)
             await sicherung.zurueckspielen(conn, daten, org_id, user_id)
         neu = next(m for m in (await ziel.get("/api/mitglieder")).json() if m["olares_username"] == "marc-einst")
-        async with mit_sitzplatz("ziel-einst", neu["id"]) as als_marc:
+        async with als_person(ziel, neu["id"]) as als_marc:
             assert (await als_marc.get("/api/mitglieder/wer")).json()["einstellungen"] == {"favoriten": ["/kampagnen", "/listen"]}
         assert (await ziel.get("/api/mitglieder/wer")).json()["einstellungen"] == {"favoriten": ["/tickets"]}
 
@@ -539,11 +538,11 @@ async def test_die_absenderadresse_ueberlebt_eine_neuinstallation(datenbank, eig
             "smtp_absender_name": "Kai Böhm",
         })
         m = (await c.post("/api/mitglieder", json={"display_name": "Absender Person"})).json()
-        gesetzt = await c.put(
-            "/api/mitglieder/wer/absender",
-            json={"absender_email": "absender.person@aimighty.de", "absender_name": "Absender Person"},
-            headers={"X-Rocket-Sitzplatz": m["id"]},
-        )
+        async with als_person(c, m["id"]) as als_m:
+            gesetzt = await als_m.put(
+                "/api/mitglieder/wer/absender",
+                json={"absender_email": "absender.person@aimighty.de", "absender_name": "Absender Person"},
+            )
         assert gesetzt.status_code == 200, gesetzt.text
 
         ich = await _kennung(c)

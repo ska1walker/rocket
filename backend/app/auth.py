@@ -108,7 +108,7 @@ class CurrentUser(BaseModel):
 
     @property
     def handelnder(self) -> UUID:
-        """Wer handelt. Seit der Sitzplatz-Wechsel weg ist (26.9.2), ist
+        """Wer handelt. Seit der Sitzplatz-Wechsel weg ist (26.10.1), ist
         das immer die angemeldete Person selbst."""
         return self.user_id
 
@@ -379,17 +379,24 @@ async def _aus_sitzung(keks: str) -> CurrentUser | None:
         )
     if person is None:
         return None
-    faktor_fehlt = False
-    if person["ohne_faktor"]:
-        # Nur wer keinen Faktor hat, braucht die Frage nach der Pflicht —
-        # und sie geht mit Nutzerkontext: `org_settings` steht unter FORCE,
-        # ohne Kontext läse man hier immer „nein" (so war es im ersten
-        # Entwurf, und die Pflicht wäre ein Hinweis geblieben).
-        async with acquire_as(sitzung.user_id) as conn:
-            faktor_fehlt = bool(await conn.fetchval(
-                "select zweiter_faktor_pflicht from public.org_settings where org_id = $1",
-                sitzung.org_id,
-            ))
+    async with acquire_as(sitzung.user_id) as conn:
+        # Noch Mitglied der Organisation, für die die Sitzung gilt? Wer
+        # entfernt wurde, sähe unter der Zeilensicherheit ohnehin nichts
+        # mehr — aber er soll auch nicht mehr als angemeldet gelten.
+        stand = await conn.fetchrow(
+            "select coalesce(s.zweiter_faktor_pflicht, false) as pflicht "
+            "from public.user_org_roles r "
+            "left join public.org_settings s on s.org_id = r.org_id "
+            "where r.user_id = $1 and r.org_id = $2",
+            sitzung.user_id,
+            sitzung.org_id,
+        )
+    if stand is None:
+        return None
+    # Die Pflicht zählt nur für den, der keinen Faktor hat. Gelesen mit
+    # Nutzerkontext: `org_settings` steht unter FORCE, ohne Kontext läse man
+    # hier immer „nein" (so war es im ersten Entwurf).
+    faktor_fehlt = bool(person["ohne_faktor"] and stand["pflicht"])
     return CurrentUser(
         olares_username=person["olares_username"],
         user_id=person["id"],
@@ -461,7 +468,7 @@ async def get_current_user(
     mit dem ersten Passwort ist er endgültig tot.
 
     Den Wechsel auf eine andere Person per Kopf `X-Rocket-Sitzplatz` gibt
-    es seit 26.9.2 nicht mehr: Er stammte aus der Zeit eines geteilten
+    es seit 26.10.1 nicht mehr: Er stammte aus der Zeit eines geteilten
     Olares-Zugangs, und mit eigener Anmeldung ist jeder bereits er selbst.
     """
     angemeldet: CurrentUser | None = None
@@ -500,10 +507,8 @@ VERWALTET = ("owner", "admin")
 async def verwaltet(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
     """Abhängigkeit für die Endpunkte mit der größten Sprengkraft.
 
-    Geprüft wird die Rolle der **angemeldeten** Person, nicht die des
-    gewählten Sitzplatzes. Sonst verlöre ein Eigentümer seine Rechte,
-    sobald er den Platz eines Mitglieds einnimmt — und umgekehrt wäre der
-    Platz ein Weg, sich welche zu holen.
+    Geprüft wird die Rolle der **angemeldeten** Person in der
+    Organisation ihrer Sitzung.
     """
     async with acquire() as conn:
         rolle = await conn.fetchval(

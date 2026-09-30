@@ -1,26 +1,17 @@
-"""Zwei Menschen, ein Olares-Zugang.
+"""Mehrere Menschen, eine Organisation.
 
-Der Sitzplatz ist Zuschreibung, keine Anmeldung. Diese Tests halten
-beides nach: dass die Zuschreibung wirkt — und dass sie **keine** Tür in
-fremde Mandanten ist. Das Zweite ist der Punkt, an dem ein Fehler hier
-teuer würde.
+Jede Person hat seit 0.6.0 einen eigenen Zugang; den Wechsel auf einen
+fremden Sitzplatz gibt es nicht mehr. Diese Tests halten nach, dass Arbeit
+der angemeldeten Person zugeschrieben wird, dass alle den Bestand sehen
+und dass Namen und Rollen nicht über Mandanten hinweg greifen.
 """
 
+import re
 from uuid import UUID
 
-from httpx import ASGITransport, AsyncClient
 
 from app.db import acquire
-from app.main import app
-from tests.conftest import klient_fuer
-
-
-def mit_sitzplatz(login: str, sitzplatz: str) -> AsyncClient:
-    return AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test",
-        headers={"X-Bfl-User": login, "X-Rocket-Sitzplatz": sitzplatz},
-    )
+from tests.conftest import als_person, klient_fuer
 
 
 async def test_person_ohne_olares_zugang_anlegen(datenbank):
@@ -28,14 +19,15 @@ async def test_person_ohne_olares_zugang_anlegen(datenbank):
         marc = (await klient.post("/api/mitglieder", json={"display_name": "Marc Bayer"})).json()
 
     assert marc["zugang"] == "sitzplatz"
-    assert marc["olares_username"] == "marc-bayer"
+    # Boxweit eindeutig: Gibt es „marc-bayer" schon, kommt eine Nummer dazu.
+    assert re.fullmatch(r"marc-bayer(-\d+)?", marc["olares_username"])
     assert marc["role"] == "member"
 
 
 async def test_umlaute_werden_zur_kennung(datenbank):
     async with klient_fuer("team-umlaut") as klient:
         person = (await klient.post("/api/mitglieder", json={"display_name": "Jörg Müller"})).json()
-    assert person["olares_username"] == "joerg-mueller"
+    assert re.fullmatch(r"joerg-mueller(-\d+)?", person["olares_username"])
 
 
 async def test_dieselbe_person_nicht_zweimal(datenbank):
@@ -50,26 +42,24 @@ async def test_liste_zeigt_beide_sorten(datenbank):
         await klient.post("/api/mitglieder", json={"display_name": "Marc Bayer"})
         liste = (await klient.get("/api/mitglieder")).json()
 
-    arten = {m["olares_username"]: m["zugang"] for m in liste}
+    arten = {m["display_name"]: m["zugang"] for m in liste}
     assert arten["team-c"] == "olares"
-    assert arten["marc-bayer"] == "sitzplatz"
+    assert arten["Marc Bayer"] == "sitzplatz"
 
 
-async def test_arbeit_wird_dem_sitzplatz_zugeschrieben(datenbank):
+async def test_arbeit_wird_der_angemeldeten_person_zugeschrieben(datenbank):
     """Der eigentliche Zweck: Marc legt an, und es gehört Marc."""
     async with klient_fuer("team-d") as kai:
         marc = (await kai.post("/api/mitglieder", json={"display_name": "Marc Bayer"})).json()
         eigene = (await kai.post("/api/companies", json={"name": "Kais Firma"})).json()
 
-        async with mit_sitzplatz("team-d", marc["id"]) as als_marc:
+        async with als_person(kai, marc["id"]) as als_marc:
             wer = (await als_marc.get("/api/mitglieder/wer")).json()
             marcs = (await als_marc.post("/api/companies", json={"name": "Marcs Firma"})).json()
 
     assert wer["user_id"] == marc["id"]
     assert wer["display_name"] == "Marc Bayer"
-    # Der Zugang bleibt derselbe — das ist der ehrliche Teil.
-    assert wer["login_username"] == "team-d"
-    assert wer["sitzplatz_gewaehlt"] is True
+    assert wer["login_username"] == marc["olares_username"]
 
     assert marcs["owner_id"] == marc["id"]
     assert eigene["owner_id"] != marc["id"]
@@ -81,7 +71,7 @@ async def test_beide_sehen_alles(datenbank):
         marc = (await kai.post("/api/mitglieder", json={"display_name": "Marc Bayer"})).json()
         await kai.post("/api/companies", json={"name": "Von Kai"})
 
-        async with mit_sitzplatz("team-e", marc["id"]) as als_marc:
+        async with als_person(kai, marc["id"]) as als_marc:
             await als_marc.post("/api/companies", json={"name": "Von Marc"})
             marcs_sicht = [f["name"] for f in (await als_marc.get("/api/companies")).json()]
 
@@ -91,14 +81,14 @@ async def test_beide_sehen_alles(datenbank):
     assert {"Von Kai", "Von Marc"} <= set(marcs_sicht)
 
 
-async def test_protokoll_haelt_person_und_zugang_fest(datenbank):
-    """Sonst sähe es aus, als hätte Marc sich selbst angemeldet."""
+async def test_protokoll_haelt_die_angemeldete_person_fest(datenbank):
+    """Wer anlegt, steht im Protokoll — mit seiner eigenen Kennung."""
     from app.db import acquire_as
 
     async with klient_fuer("team-f") as kai:
         marc = (await kai.post("/api/mitglieder", json={"display_name": "Marc Bayer"})).json()
 
-        async with mit_sitzplatz("team-f", marc["id"]) as als_marc:
+        async with als_person(kai, marc["id"]) as als_marc:
             firma = (await als_marc.post("/api/companies", json={"name": "Protokollfirma"})).json()
 
         async with acquire_as(marc["id"]) as conn:
@@ -109,65 +99,7 @@ async def test_protokoll_haelt_person_und_zugang_fest(datenbank):
             )
 
     assert str(eintrag["actor_id"]) == marc["id"]
-    assert eintrag["actor_login"] == "team-f"
-
-
-async def test_fremder_sitzplatz_wird_abgewiesen(datenbank):
-    """Der Test, an dem die Sicherheit dieser Funktion hängt.
-
-    Ein Sitzplatz greift nur innerhalb derselben Organisation. Ohne diese
-    Bedingung wäre er ein Weg in fremde Mandanten und damit die Umgehung
-    von allem, was die Zeilensicherheit schützt.
-    """
-    # Organisation eins: hat eine Person und Daten.
-    async with klient_fuer("team-fremd") as fremd:
-        fremde_person = (
-            await fremd.post("/api/mitglieder", json={"display_name": "Fremder Kollege"})
-        ).json()
-        await fremd.post("/api/companies", json={"name": "Streng geheim"})
-
-    # Organisation zwei: entsteht mit dem ersten Aufruf.
-    async with klient_fuer("team-eigen") as eigen:
-        await eigen.get("/api/companies")
-
-    # Und versucht nun, sich auf den fremden Sitzplatz zu setzen.
-    async with mit_sitzplatz("team-eigen", fremde_person["id"]) as versuch:
-        antwort = await versuch.get("/api/companies")
-
-    assert antwort.status_code == 403
-    assert "nicht zu Ihrer Organisation" in antwort.json()["detail"]
-    # Der Kopf ist das, woran die Oberfläche es erkennt. An der Meldung
-    # dürfte sie es nicht festmachen — die ist Text für Menschen.
-    assert antwort.headers["x-rocket-sitzplatz"] == "unbekannt"
-
-
-async def test_ein_platz_aus_einer_geloeschten_installation_meldet_sich(datenbank):
-    """Der Fall, in dem Marc am 9.9.2026 feststeckte.
-
-    Nach einer Neuinstallation ist die Datenbank neu, der Platz im
-    Browser aber noch der alte. Dann scheitert **jeder** Aufruf, und an
-    den Sitzplatz denkt in dem Moment niemand. Am Kopf räumt die
-    Oberfläche ihn selbst weg.
-    """
-    from uuid import uuid4
-
-    async with klient_fuer("team-neuinstallation") as klient:
-        await klient.get("/api/companies")
-
-    async with mit_sitzplatz("team-neuinstallation", str(uuid4())) as versuch:
-        antwort = await versuch.get("/api/companies")
-
-    assert antwort.status_code == 403
-    assert antwort.headers["x-rocket-sitzplatz"] == "unbekannt"
-
-
-async def test_unsinniger_sitzplatz_wird_abgewiesen(datenbank):
-    async with klient_fuer("team-i") as klient:
-        await klient.get("/api/companies")
-
-    async with mit_sitzplatz("team-i", "kein-uuid") as versuch:
-        antwort = await versuch.get("/api/companies")
-    assert antwort.status_code == 400
+    assert eintrag["actor_login"] == marc["olares_username"]
 
 
 async def test_eigener_zugang_wird_nicht_entfernt(datenbank):
@@ -177,22 +109,21 @@ async def test_eigener_zugang_wird_nicht_entfernt(datenbank):
     assert antwort.status_code == 400
 
 
-async def test_sitzplatz_entfernen_laesst_besitz_stehen(datenbank):
+async def test_person_entfernen_laesst_besitz_stehen(datenbank):
     """Besitz umzuschreiben wäre eine Geschichtsfälschung."""
     async with klient_fuer("team-k") as kai:
         marc = (await kai.post("/api/mitglieder", json={"display_name": "Marc Bayer"})).json()
-        async with mit_sitzplatz("team-k", marc["id"]) as als_marc:
+        async with als_person(kai, marc["id"]) as als_marc:
             firma = (await als_marc.post("/api/companies", json={"name": "Marcs Erbe"})).json()
 
-        weg = await kai.delete(f"/api/mitglieder/{marc['id']}")
-        assert weg.status_code == 204
+            weg = await kai.delete(f"/api/mitglieder/{marc['id']}")
+            assert weg.status_code == 204
 
-        nachher = (await kai.get(f"/api/companies/{firma['id']}")).json()
-        assert nachher["owner_id"] == marc["id"]
+            nachher = (await kai.get(f"/api/companies/{firma['id']}")).json()
+            assert nachher["owner_id"] == marc["id"]
 
-        # Und der Sitzplatz greift nicht mehr.
-        async with mit_sitzplatz("team-k", marc["id"]) as nicht_mehr:
-            assert (await nicht_mehr.get("/api/companies")).status_code == 403
+            # Und die Sitzung der entfernten Person greift nicht mehr.
+            assert (await als_marc.get("/api/companies")).status_code == 401
 
 
 async def test_boxinhaber_bekommt_einen_namen(datenbank):
@@ -245,15 +176,14 @@ async def test_einstellungen_rundlauf(datenbank):
         assert r.json()["einstellungen"] == {}
 
 
-async def test_einstellungen_gehoeren_zum_sitzplatz(datenbank):
+async def test_einstellungen_gehoeren_zur_person(datenbank):
     async with klient_fuer("einst-b") as kai:
         marc = (await kai.post("/api/mitglieder", json={"display_name": "Marc Bayer"})).json()
-        async with mit_sitzplatz("einst-b", marc["id"]) as als_marc:
+        async with als_person(kai, marc["id"]) as als_marc:
             await als_marc.patch("/api/mitglieder/wer/einstellungen", json={"favoriten": ["/kampagnen"]})
             assert (await als_marc.get("/api/mitglieder/wer")).json()["einstellungen"] == {"favoriten": ["/kampagnen"]}
-        assert (await kai.get("/api/mitglieder/wer")).json()["einstellungen"] == {}
-        await kai.patch("/api/mitglieder/wer/einstellungen", json={"favoriten": ["/firmen"]})
-        async with mit_sitzplatz("einst-b", marc["id"]) as als_marc:
+            assert (await kai.get("/api/mitglieder/wer")).json()["einstellungen"] == {}
+            await kai.patch("/api/mitglieder/wer/einstellungen", json={"favoriten": ["/firmen"]})
             assert (await als_marc.get("/api/mitglieder/wer")).json()["einstellungen"] == {"favoriten": ["/kampagnen"]}
 
 
@@ -320,30 +250,6 @@ async def test_verwalter_vergibt_keine_rollen(datenbank):
     assert "gehört" in abgewiesen.json()["detail"]
 
 
-async def test_ein_sitzplatz_bringt_keine_rechte_mit(datenbank):
-    """Der Platz ist Zuschreibung, keine Anmeldung.
-
-    Wer auf dem Platz der Eigentümerin sitzt, handelt in ihrem Namen, hat
-    aber ihre Rechte nicht — geprüft wird `handelnder`, nicht der Platz.
-    """
-    async with klient_fuer("rolle-platz") as marc:
-        kai = (await marc.post("/api/mitglieder", json={"display_name": "Kai Böhm"})).json()
-        dritte = (await marc.post("/api/mitglieder", json={"display_name": "Ada Lovelace"})).json()
-        wer = (await marc.get("/api/mitglieder/wer")).json()
-        async with acquire() as conn:
-            await conn.execute(
-                "update public.user_org_roles set role = 'member' where user_id = $1",
-                UUID(wer["user_id"]),
-            )
-
-    # Der Zugang ist jetzt nur noch Mitglied, der Platz gehört Kai.
-    async with mit_sitzplatz("rolle-platz", kai["id"]) as klient:
-        antwort = await klient.patch(
-            f"/api/mitglieder/{dritte['id']}/rolle", json={"role": "admin"}
-        )
-    assert antwort.status_code == 403, antwort.text
-
-
 async def test_eine_zweite_eigentuemerin_laesst_sich_nicht_herabstufen(datenbank):
     """Der Riegel in der SQL, nicht nur im Vorspann.
 
@@ -377,3 +283,26 @@ async def test_fremde_organisation_bleibt_unberuehrt(datenbank):
     async with klient_fuer("rolle-fremd-b") as b:
         antwort = await b.patch(f"/api/mitglieder/{ihre['id']}/rolle", json={"role": "admin"})
     assert antwort.status_code == 404
+
+
+async def test_gleicher_name_in_zwei_organisationen_sind_zwei_menschen(datenbank):
+    """Die Kennung ist boxweit eindeutig und zugleich der Anmeldename.
+
+    Früher bekam eine zweite Organisation mit ihrem „Marc Bayer" den Nutzer
+    der ersten — und über die Einladung dessen Passwort und Organisation.
+    """
+    async with klient_fuer("name-org-a") as a, klient_fuer("name-org-b") as b:
+        marc_a = (await a.post("/api/mitglieder", json={"display_name": "Marc Doppelt"})).json()
+        marc_b = (await b.post("/api/mitglieder", json={"display_name": "Marc Doppelt"})).json()
+        assert marc_a["id"] != marc_b["id"]
+        assert marc_a["olares_username"] != marc_b["olares_username"]
+
+        await a.post("/api/companies", json={"name": "Nur bei A"})
+        async with als_person(b, marc_b["id"]) as als_b:
+            wer = (await als_b.get("/api/mitglieder/wer")).json()
+            namen = [f["name"] for f in (await als_b.get("/api/companies")).json()]
+        assert wer["user_id"] == marc_b["id"]
+        assert "Nur bei A" not in namen
+        # Die Person in A bleibt unberührt: kein Passwort, niemand angemeldet.
+        liste_a = (await a.get("/api/mitglieder")).json()
+        assert [m["id"] for m in liste_a if m["display_name"] == "Marc Doppelt"] == [marc_a["id"]]
