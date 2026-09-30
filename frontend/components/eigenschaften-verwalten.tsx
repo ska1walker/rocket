@@ -1,12 +1,17 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, ArchiveRestore, ArrowDown, ArrowUp, Plus, X } from "lucide-react";
-import { Fragment, useState } from "react";
+import {
+  Archive, ArchiveRestore, ArrowDown, ArrowUp, GripVertical, Lock, Pencil, Plus, Trash2, X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { api, suchparameter } from "@/lib/api";
+import { alsReihenfolge, ablageOrt, gruppeSchieben, passt, schritt, verschiebe, type Ort } from "@/lib/anordnung";
 import type {
+  Anordnung,
+  Eigenschaftsgruppe,
   Eigenschaftsoption,
-  PropertyDefinition,
+  Feldeintrag,
   PropertyEntity,
   PropertyKind,
 } from "@/lib/typen";
@@ -28,64 +33,597 @@ const TYPEN: { wert: PropertyKind; text: string; hinweis?: string }[] = [
   { wert: "multiselect", text: "Mehrfachauswahl", hinweis: "beliebig viele Werte" },
 ];
 
-export const TYP_TEXT: Record<string, string> = Object.fromEntries(TYPEN.map((t) => [t.wert, t.text]));
+/** Wie eine Art heißt — auch die, die bisher nur feste Felder haben. */
+export const TYP_TEXT: Record<string, string> = {
+  ...Object.fromEntries(TYPEN.map((t) => [t.wert, t.text])),
+  textarea: "Langer Text",
+  url: "Adresse (URL)",
+  email: "E-Mail",
+  phone: "Telefon",
+  currency: "Betrag",
+  user: "Person",
+};
 
 /** Beide Typen führen eine Werteliste. */
-const MIT_OPTIONEN: PropertyKind[] = ["select", "multiselect"];
+const MIT_OPTIONEN: string[] = ["select", "multiselect"];
 
 /**
- * Eigene Eigenschaften anlegen und pflegen.
+ * Eigenschaften einrichten — nach HubSpots Muster, in Gruppen.
  *
- * Typ und Schlüssel stehen nach dem Anlegen fest — beides hinge sonst
- * von Werten ab, die schon in Datensätzen liegen. Abschalten statt
- * löschen: Die Werte bleiben, sie werden nur nicht mehr gezeigt.
+ * Jedes Objekt hat Gruppen („Firmeninformationen", „Adresse" …), und jede
+ * Eigenschaft steht in genau einer: die festen Felder ebenso wie die
+ * eigenen. Ziehen ordnet Felder innerhalb und zwischen Gruppen; wer ohne
+ * Maus arbeitet, nimmt den Griff und die Pfeiltasten — dieselbe Regel wie
+ * beim Board.
  *
- * Die Werteliste dagegen ist änderbar, denn sie wächst im Betrieb: Eine
- * neue Zertifizierung, eine neue Messe. Was noch an Datensätzen hängt,
- * lässt das Backend nicht streichen — ein entfernter Wert wäre sonst
- * lesbar, aber der Datensatz nicht mehr speicherbar.
+ * Gespeichert wird nach jedem Zug die ganze Anordnung (`PUT
+ * /reihenfolge`), sofort sichtbar und bei einem Fehler zurückgenommen.
+ * Hat jemand anderes inzwischen ein Feld angelegt, weist der Server die
+ * veraltete Anordnung ab, statt dessen Arbeit blind zu verschieben.
+ *
+ * Feste Felder tragen ein Schloss: verschieben, umbenennen, mit Hilfetext
+ * versehen ja — löschen und Typ ändern nein.
  */
 export function Eigenschaftenblock() {
   const client = useQueryClient();
   const [objekt, setObjekt] = useState<PropertyEntity>("companies");
+  const [suche, setSuche] = useState("");
+  const [gezogen, setGezogen] = useState<string | null>(null);
+  const [ziel, setZiel] = useState<Ort | null>(null);
+  const [fokus, setFokus] = useState<string | null>(null);
+  const [offen, setOffen] = useState<string | null>(null);
+
+  const schluessel = ["anordnung", objekt, "mit-anzahl"];
+  const anordnung = useQuery({
+    queryKey: schluessel,
+    queryFn: () =>
+      api.get<Anordnung>(`/api/eigenschaften/anordnung${suchparameter({ entity: objekt, mit_anzahl: "true" })}`),
+  });
+
+  function neuLaden() {
+    client.invalidateQueries({ queryKey: ["anordnung"] });
+    client.invalidateQueries({ queryKey: ["eigenschaften"] });
+  }
+
+  const ordnen = useMutation({
+    mutationFn: (neu: Anordnung) => api.put<Anordnung>("/api/eigenschaften/reihenfolge", alsReihenfolge(neu)),
+    onMutate: async (neu) => {
+      await client.cancelQueries({ queryKey: schluessel });
+      const vorher = client.getQueryData<Anordnung>(schluessel);
+      client.setQueryData(schluessel, neu);
+      return { vorher };
+    },
+    onError: (_f, _n, kontext) => {
+      if (kontext?.vorher) client.setQueryData(schluessel, kontext.vorher);
+    },
+    onSettled: neuLaden,
+  });
+
+  const archivieren = useMutation({
+    mutationFn: ({ id, aktiv }: { id: string; aktiv: boolean }) =>
+      aktiv ? api.patch(`/api/eigenschaften/${id}`, { is_active: true }) : api.del(`/api/eigenschaften/${id}`),
+    onSuccess: neuLaden,
+  });
+
+  // Nach einem Zug mit der Tastatur bleibt der Fokus am Griff — sonst
+  // müsste man ihn nach jedem Schritt neu suchen.
+  useEffect(() => {
+    if (!fokus) return;
+    document.querySelector<HTMLElement>(`[data-griff="${fokus}"]`)?.focus();
+  }, [fokus, anordnung.data]);
+
+  const a = anordnung.data;
+  // Beim Suchen wird nicht gezogen: Eine gefilterte Liste zeigt nicht, wo
+  // ein Feld zwischen den ausgeblendeten landen würde.
+  const sucht = suche.trim().length > 0;
+
+  function ablegen(ort: Ort) {
+    if (!a || !gezogen) return;
+    ordnen.mutate(verschiebe(a, gezogen, ablageOrt(a, gezogen, ort)));
+    setGezogen(null);
+    setZiel(null);
+  }
+
+  return (
+    <section className="block">
+      <div className="block-kopf">
+        <h2>Eigenschaften</h2>
+      </div>
+      <div className="block-inhalt">
+        <Erklaerung
+          kurz="Welche Felder es gibt, in welcher Gruppe und in welcher Reihenfolge."
+          lang={
+            <>
+              So erscheinen die Felder am Datensatz, im Anlegen-Dialog und in der Spaltenwahl.
+              Feste Felder (mit Schloss) lassen sich verschieben und umbenennen, aber nicht
+              entfernen. Eigene Felder für das, was nur Ihr Vertrieb braucht — „Serverraum
+              vorhanden“, „Wartungsvertrag bis“ —, legen Sie unten an; Typ und Schlüssel stehen
+              danach fest. Ziehen Sie am Griff, oder nehmen Sie ihn und die Pfeiltasten.
+            </>
+          }
+        />
+
+        <div className="eig-leiste">
+          <div className="wegwahl" role="tablist" aria-label="Objekt">
+            {OBJEKTE.map((o) => (
+              <button
+                key={o.wert}
+                type="button"
+                role="tab"
+                aria-selected={objekt === o.wert}
+                className={objekt === o.wert ? "aktiv" : ""}
+                onClick={() => {
+                  setObjekt(o.wert);
+                  setOffen(null);
+                }}
+              >
+                {o.text}
+              </button>
+            ))}
+          </div>
+          <input
+            className="input eig-suche"
+            type="search"
+            value={suche}
+            onChange={(e) => setSuche(e.target.value)}
+            placeholder="Eigenschaft suchen"
+            aria-label="Eigenschaft suchen"
+          />
+        </div>
+
+        {anordnung.isPending && <Laedt />}
+        {anordnung.isError && <Fehler text={(anordnung.error as Error).message} />}
+        {ordnen.isError && <Fehler text={(ordnen.error as Error).message} />}
+        {archivieren.isError && <Fehler text={(archivieren.error as Error).message} />}
+
+        {a &&
+          a.gruppen.map((g, gi) => {
+            const sichtbar = g.felder.filter((f) => passt(suche, f.label, f.key));
+            if (sucht && sichtbar.length === 0) return null;
+            return (
+              <Gruppenblock
+                key={g.id}
+                gruppe={g}
+                anordnung={a}
+                erste={gi === 0}
+                letzte={gi === a.gruppen.length - 1}
+                beiSchieben={(r) => ordnen.mutate(gruppeSchieben(a, g.id, r))}
+                geaendert={neuLaden}
+              >
+                <ul
+                  className="eig-felder"
+                  onDragOver={(e) => {
+                    if (!gezogen) return;
+                    e.preventDefault();
+                    // Unter dem letzten Feld oder in einer leeren Gruppe: hinten an.
+                    if (e.target === e.currentTarget) setZiel({ gruppe: g.id, index: g.felder.length });
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (ziel) ablegen(ziel);
+                  }}
+                  data-leer={g.felder.length === 0 ? "true" : undefined}
+                  data-ziel={ziel?.gruppe === g.id && ziel.index === g.felder.length ? "true" : undefined}
+                >
+                  {g.felder.length === 0 && <li className="eig-leer">Noch kein Feld — hierher ziehen.</li>}
+                  {sichtbar.map((f) => {
+                    const index = g.felder.indexOf(f);
+                    return (
+                      <Feldzeile
+                        key={f.id}
+                        feld={f}
+                        ziehbar={!sucht}
+                        gezogen={gezogen === f.id}
+                        ziel={ziel?.gruppe === g.id && ziel.index === index}
+                        offen={offen === f.id}
+                        umschalten={() => setOffen(offen === f.id ? null : f.id)}
+                        beiZiehen={(an) => setGezogen(an ? f.id : null)}
+                        beiUeber={() => gezogen && gezogen !== f.id && setZiel({ gruppe: g.id, index })}
+                        beiTaste={(r) => {
+                          setFokus(f.id);
+                          ordnen.mutate(schritt(a, f.id, r));
+                        }}
+                        beiArchivieren={() => archivieren.mutate({ id: f.id, aktiv: false })}
+                        geaendert={neuLaden}
+                      />
+                    );
+                  })}
+                </ul>
+              </Gruppenblock>
+            );
+          })}
+
+        {a && sucht && a.gruppen.every((g) => !g.felder.some((f) => passt(suche, f.label, f.key))) && (
+          <p className="eig-hinweis">Keine Eigenschaft passt auf „{suche.trim()}“.</p>
+        )}
+
+        {a && <NeueGruppe entity={objekt} geaendert={neuLaden} />}
+        {a && <NeueEigenschaft entity={objekt} gruppen={a.gruppen} geaendert={neuLaden} />}
+
+        {a && a.archiviert.length > 0 && (
+          <details className="eig-archiv">
+            <summary>Archiviert ({a.archiviert.length})</summary>
+            <p className="eig-hinweis">
+              Nicht mehr am Datensatz zu sehen; die Werte stehen weiter in den Datensätzen.
+            </p>
+            <ul className="eig-felder">
+              {a.archiviert.map((f) => (
+                <li key={f.id} className="eig-feld">
+                  <span className="eig-name">
+                    {f.label} <span className="eig-schluessel">{f.key}</span>
+                  </span>
+                  <span className="eig-art">{TYP_TEXT[f.art] ?? f.art}</span>
+                  <span className="eig-zahl">{zahlText(f.anzahl)}</span>
+                  <button
+                    type="button"
+                    className="btn btn-still btn-klein"
+                    onClick={() => archivieren.mutate({ id: f.id, aktiv: true })}
+                  >
+                    <ArchiveRestore size={14} aria-hidden="true" /> Wiederherstellen
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function zahlText(n: number | null): string {
+  if (n === null) return "gerechnet";
+  return n === 1 ? "1 Datensatz" : `${n} Datensätze`;
+}
+
+/** Kopf einer Gruppe: Name, Umbenennen, Verschieben, Löschen mit Ziel. */
+function Gruppenblock({
+  gruppe,
+  anordnung,
+  erste,
+  letzte,
+  beiSchieben,
+  geaendert,
+  children,
+}: {
+  gruppe: Eigenschaftsgruppe;
+  anordnung: Anordnung;
+  erste: boolean;
+  letzte: boolean;
+  beiSchieben: (r: -1 | 1) => void;
+  geaendert: () => void;
+  children: React.ReactNode;
+}) {
+  const [name, setName] = useState<string | null>(null);
+  const [loeschen, setLoeschen] = useState(false);
+  const andere = anordnung.gruppen.filter((g) => g.id !== gruppe.id);
+  const [zielgruppe, setZielgruppe] = useState(andere[0]?.id ?? "");
+
+  const umbenennen = useMutation({
+    mutationFn: () => api.patch(`/api/eigenschaften/gruppen/${gruppe.id}`, { label: name }),
+    onSuccess: () => {
+      setName(null);
+      geaendert();
+    },
+  });
+  const weg = useMutation({
+    mutationFn: () =>
+      api.del(
+        `/api/eigenschaften/gruppen/${gruppe.id}${suchparameter({ ziel: gruppe.felder.length ? zielgruppe : undefined })}`,
+      ),
+    onSuccess: geaendert,
+  });
+
+  return (
+    <div className="eig-gruppe">
+      <div className="eig-gruppe-kopf">
+        {name === null ? (
+          <h3>
+            {gruppe.label}
+            <span className="eig-anzahl">{gruppe.felder.length}</span>
+          </h3>
+        ) : (
+          <form
+            className="eig-umbenennen"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (name.trim()) umbenennen.mutate();
+            }}
+          >
+            <input
+              className="input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              aria-label="Name der Gruppe"
+              autoFocus
+            />
+            <button type="submit" className="btn btn-primaer btn-klein" disabled={!name.trim() || umbenennen.isPending}>
+              Speichern
+            </button>
+            <button type="button" className="btn btn-still btn-klein" onClick={() => setName(null)}>
+              Abbrechen
+            </button>
+          </form>
+        )}
+        <div className="eig-gruppe-knoepfe">
+          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} nach oben`} disabled={erste} onClick={() => beiSchieben(-1)}>
+            <ArrowUp size={14} aria-hidden="true" />
+          </button>
+          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} nach unten`} disabled={letzte} onClick={() => beiSchieben(1)}>
+            <ArrowDown size={14} aria-hidden="true" />
+          </button>
+          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} umbenennen`} onClick={() => setName(gruppe.label)}>
+            <Pencil size={14} aria-hidden="true" />
+          </button>
+          {!gruppe.is_system && (
+            <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} löschen`} onClick={() => setLoeschen((l) => !l)}>
+              <Trash2 size={14} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+      {loeschen && (
+        <div className="eig-loeschen">
+          {gruppe.felder.length > 0 ? (
+            <>
+              <label htmlFor={`ziel-${gruppe.id}`}>
+                {gruppe.felder.length === 1 ? "Das Feld geht nach" : `Die ${gruppe.felder.length} Felder gehen nach`}
+              </label>
+              <select id={`ziel-${gruppe.id}`} className="input" value={zielgruppe} onChange={(e) => setZielgruppe(e.target.value)}>
+                {andere.map((g) => (
+                  <option key={g.id} value={g.id}>{g.label}</option>
+                ))}
+              </select>
+            </>
+          ) : (
+            <span>Die Gruppe ist leer.</span>
+          )}
+          <button type="button" className="btn btn-gefahr btn-klein" disabled={weg.isPending} onClick={() => weg.mutate()}>
+            Gruppe löschen
+          </button>
+          <button type="button" className="btn btn-still btn-klein" onClick={() => setLoeschen(false)}>
+            Abbrechen
+          </button>
+        </div>
+      )}
+      {umbenennen.isError && <Fehler text={(umbenennen.error as Error).message} />}
+      {weg.isError && <Fehler text={(weg.error as Error).message} />}
+      {children}
+    </div>
+  );
+}
+
+/** Eine Zeile: Griff, Name, Art, Nutzung, Handlungen — und aufgeklappt die Pflege. */
+function Feldzeile({
+  feld,
+  ziehbar,
+  gezogen,
+  ziel,
+  offen,
+  umschalten,
+  beiZiehen,
+  beiUeber,
+  beiTaste,
+  beiArchivieren,
+  geaendert,
+}: {
+  feld: Feldeintrag;
+  ziehbar: boolean;
+  gezogen: boolean;
+  ziel: boolean;
+  offen: boolean;
+  umschalten: () => void;
+  beiZiehen: (an: boolean) => void;
+  beiUeber: () => void;
+  beiTaste: (r: -1 | 1) => void;
+  beiArchivieren: () => void;
+  geaendert: () => void;
+}) {
+  return (
+    <li
+      className="eig-feld"
+      data-gezogen={gezogen ? "true" : undefined}
+      data-ziel={ziel ? "true" : undefined}
+      draggable={ziehbar}
+      onDragStart={(e) => {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", feld.id);
+        beiZiehen(true);
+      }}
+      onDragEnd={() => beiZiehen(false)}
+      onDragOver={(e) => {
+        e.preventDefault();
+        beiUeber();
+      }}
+    >
+      <div className="eig-zeile">
+        <button
+          type="button"
+          className="eig-griff"
+          data-griff={feld.id}
+          disabled={!ziehbar}
+          aria-label={`${feld.label} verschieben — Pfeiltaste hoch oder runter`}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+              e.preventDefault();
+              beiTaste(e.key === "ArrowUp" ? -1 : 1);
+            }
+          }}
+        >
+          <GripVertical size={14} aria-hidden="true" />
+        </button>
+        <span className="eig-name">
+          {feld.label}
+          {feld.is_system && (
+            <span className="eig-fest" title="Festes Feld — verschieben und umbenennen ja, entfernen nein">
+              <Lock size={11} aria-hidden="true" /> fest
+            </span>
+          )}
+          <span className="eig-schluessel">{feld.key}</span>
+        </span>
+        <span className="eig-art">{TYP_TEXT[feld.art] ?? feld.art}</span>
+        <span className="eig-zahl">{zahlText(feld.anzahl)}</span>
+        <span className="eig-knoepfe">
+          <button
+            type="button"
+            className="btn btn-still btn-klein btn-symbol"
+            aria-label={`${feld.label} bearbeiten`}
+            aria-expanded={offen}
+            onClick={umschalten}
+          >
+            <Pencil size={14} aria-hidden="true" />
+          </button>
+          {!feld.is_system && (
+            <button
+              type="button"
+              className="btn btn-still btn-klein btn-symbol"
+              aria-label={`${feld.label} archivieren`}
+              title="Archivieren — die Werte bleiben in den Datensätzen"
+              onClick={beiArchivieren}
+            >
+              <Archive size={14} aria-hidden="true" />
+            </button>
+          )}
+        </span>
+      </div>
+      {offen && <Feldpflege feld={feld} fertig={umschalten} geaendert={geaendert} />}
+    </li>
+  );
+}
+
+/** Beschriftung, Hilfetext und — bei eigener Auswahl — die Werteliste. */
+function Feldpflege({ feld, fertig, geaendert }: { feld: Feldeintrag; fertig: () => void; geaendert: () => void }) {
+  const [label, setLabel] = useState(feld.label);
+  const [hilfe, setHilfe] = useState(feld.description ?? "");
+
+  const sichern = useMutation({
+    mutationFn: () =>
+      api.patch(`/api/eigenschaften/${feld.id}`, { label: label.trim(), description: hilfe.trim() || null }),
+    onSuccess: () => {
+      geaendert();
+      fertig();
+    },
+  });
+  const werte = useMutation({
+    mutationFn: (options: Eigenschaftsoption[]) => api.patch(`/api/eigenschaften/${feld.id}`, { options }),
+    onSuccess: geaendert,
+  });
+
+  return (
+    <div className="eig-pflege">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (label.trim()) sichern.mutate();
+        }}
+      >
+        <div className="feld">
+          <label htmlFor={`eig-l-${feld.id}`}>Beschriftung</label>
+          <input id={`eig-l-${feld.id}`} className="input" value={label} onChange={(e) => setLabel(e.target.value)} />
+          <p className="feld-hinweis">
+            Der Schlüssel <span className="mono">{feld.key}</span> bleibt — daran hängen Werte, Einfuhr und Filter.
+          </p>
+        </div>
+        <div className="feld">
+          <label htmlFor={`eig-h-${feld.id}`}>Hilfetext</label>
+          <input
+            id={`eig-h-${feld.id}`}
+            className="input"
+            value={hilfe}
+            onChange={(e) => setHilfe(e.target.value)}
+            placeholder="Was hier hineingehört — erscheint am Feld"
+          />
+        </div>
+        <div className="btn-reihe">
+          <button type="submit" className="btn btn-primaer btn-klein" disabled={!label.trim() || sichern.isPending}>
+            {sichern.isPending ? "Speichert …" : "Speichern"}
+          </button>
+          <button type="button" className="btn btn-still btn-klein" onClick={fertig}>
+            Abbrechen
+          </button>
+        </div>
+      </form>
+      {sichern.isError && <Fehler text={(sichern.error as Error).message} />}
+      {!feld.is_system && MIT_OPTIONEN.includes(feld.art) && (
+        <div className="feld" style={{ marginTop: "var(--am-raum-3)" }}>
+          <label>Erlaubte Werte</label>
+          <Werteliste
+            werte={feld.options}
+            laeuft={werte.isPending}
+            beiSichern={(options) => werte.mutate(options)}
+            beiAbbruch={fertig}
+          />
+          {werte.isError && <Fehler text={(werte.error as Error).message} />}
+        </div>
+      )}
+      {feld.is_system && feld.options.length > 0 && (
+        <p className="feld-hinweis">
+          Werte: {feld.options.map((o) => o.text).join(", ")} — bei festen Feldern vorgegeben.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function NeueGruppe({ entity, geaendert }: { entity: PropertyEntity; geaendert: () => void }) {
+  const [label, setLabel] = useState("");
+  const anlegen = useMutation({
+    mutationFn: () => api.post("/api/eigenschaften/gruppen", { entity, label: label.trim() }),
+    onSuccess: () => {
+      setLabel("");
+      geaendert();
+    },
+  });
+  return (
+    <form
+      className="eig-neu"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (label.trim()) anlegen.mutate();
+      }}
+    >
+      <div className="feld">
+        <label htmlFor="eig-gruppe-neu">Neue Gruppe</label>
+        <input id="eig-gruppe-neu" className="input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="IT-Umgebung" />
+      </div>
+      <button type="submit" className="btn btn-sekundaer btn-klein" disabled={!label.trim() || anlegen.isPending}>
+        <Plus size={14} aria-hidden="true" /> Gruppe
+      </button>
+      {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
+    </form>
+  );
+}
+
+function NeueEigenschaft({
+  entity,
+  gruppen,
+  geaendert,
+}: {
+  entity: PropertyEntity;
+  gruppen: Eigenschaftsgruppe[];
+  geaendert: () => void;
+}) {
   const [label, setLabel] = useState("");
   const [typ, setTyp] = useState<PropertyKind>("text");
+  const [gruppe, setGruppe] = useState("");
   const [optionen, setOptionen] = useState<Eigenschaftsoption[]>([leereOption()]);
-  const [bearbeitet, setBearbeitet] = useState<string | null>(null);
-
-  const definitionen = useQuery({
-    queryKey: ["eigenschaften", objekt],
-    queryFn: () =>
-      api.get<PropertyDefinition[]>(`/api/eigenschaften${suchparameter({ entity: objekt })}`),
-  });
+  // Vorgabe: „Weitere Eigenschaften" — oder, falls umbenannt, die letzte Gruppe.
+  const vorgabe = (gruppen.find((g) => g.key === "weitere") ?? gruppen[gruppen.length - 1])?.id ?? "";
+  const gewaehlt = gruppen.some((g) => g.id === gruppe) ? gruppe : vorgabe;
 
   const anlegen = useMutation({
     mutationFn: () =>
-      api.post<PropertyDefinition>("/api/eigenschaften", {
-        entity: objekt,
+      api.post("/api/eigenschaften", {
+        entity,
         label,
         kind: typ,
         options: MIT_OPTIONEN.includes(typ) ? sauber(optionen) : [],
-        position: definitionen.data?.length ?? 0,
+        group_id: gewaehlt || null,
       }),
     onSuccess: () => {
       setLabel("");
       setOptionen([leereOption()]);
-      client.invalidateQueries({ queryKey: ["eigenschaften"] });
-    },
-  });
-
-  const abschalten = useMutation({
-    mutationFn: (id: string) => api.del(`/api/eigenschaften/${id}`),
-    onSuccess: () => client.invalidateQueries({ queryKey: ["eigenschaften"] }),
-  });
-
-  const werteSetzen = useMutation({
-    mutationFn: ({ id, options }: { id: string; options: Eigenschaftsoption[] }) =>
-      api.patch<PropertyDefinition>(`/api/eigenschaften/${id}`, { options }),
-    onSuccess: () => {
-      setBearbeitet(null);
-      client.invalidateQueries({ queryKey: ["eigenschaften"] });
+      geaendert();
     },
   });
 
@@ -93,141 +631,58 @@ export function Eigenschaftenblock() {
   const genug = label.trim() && (!braucht || sauber(optionen).length > 0);
 
   return (
-    <section className="block">
-      <div className="block-kopf">
-        <h2>Eigene Felder</h2>
-        <select
-          className="input"
-          style={{ width: "auto" }}
-          value={objekt}
-          onChange={(e) => setObjekt(e.target.value as PropertyEntity)}
-          aria-label="Objekt"
-        >
-          {OBJEKTE.map((o) => (
-            <option key={o.wert} value={o.wert}>{o.text}</option>
+    <form
+      className="eig-neue-eigenschaft"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (genug) anlegen.mutate();
+      }}
+    >
+      <div className="feld">
+        <label htmlFor="eig-label">Neue Eigenschaft</label>
+        <input id="eig-label" className="input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Wartungsvertrag bis" />
+      </div>
+      <div className="feld">
+        <label htmlFor="eig-typ">Typ</label>
+        <select id="eig-typ" className="input" value={typ} onChange={(e) => setTyp(e.target.value as PropertyKind)}>
+          {TYPEN.map((t) => (
+            <option key={t.wert} value={t.wert}>
+              {t.text}
+              {t.hinweis ? ` — ${t.hinweis}` : ""}
+            </option>
           ))}
         </select>
       </div>
-      <div className="block-inhalt">
-        <Erklaerung kurz="Eigene Felder für das, was nur Ihr Vertrieb braucht." lang={<>Was nur dieser Vertrieb braucht — „Serverraum vorhanden“, „Kammer“, „Wartungsvertrag
-          bis“ — kommt hier dazu und erscheint dann an jedem Datensatz. Typ und Schlüssel stehen
-          nach dem Anlegen fest; Beschriftung und Werteliste lassen sich ändern.</>} />
-
-        {definitionen.isPending && <Laedt />}
-        {definitionen.data && definitionen.data.length > 0 && (
-          <table className="tabelle" style={{ marginBottom: "var(--am-raum-4)" }}>
-            <thead>
-              <tr>
-                <th>Beschriftung</th>
-                <th>Schlüssel</th>
-                <th>Typ</th>
-                <th>Werte</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {definitionen.data.map((d) => (
-                // Der Werte-Editor bekommt eine eigene Zeile über die volle
-                // Breite. In der Spalte selbst hätte er die Tabelle über den
-                // Rand des Blocks hinausgeschoben.
-                <Fragment key={d.id}>
-                  <tr style={{ cursor: "default" }}>
-                    <td className="haupt">{d.label}</td>
-                    <td className="mono" style={{ fontSize: "0.8125rem" }}>{d.key}</td>
-                    <td>{TYP_TEXT[d.kind]}</td>
-                    <td style={{ fontSize: "0.8125rem" }}>
-                      {MIT_OPTIONEN.includes(d.kind) ? (
-                        <button
-                          type="button"
-                          className="zellen-link"
-                          aria-expanded={bearbeitet === d.id}
-                          onClick={() => setBearbeitet(bearbeitet === d.id ? null : d.id)}
-                          style={{ border: 0, background: "transparent", padding: 0, cursor: "pointer", textAlign: "left" }}
-                        >
-                          {zusammenfassung(d.options)}
-                        </button>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td style={{ textAlign: "right" }}>
-                      <button
-                        type="button"
-                        className="btn btn-still btn-klein"
-                        onClick={() => abschalten.mutate(d.id)}
-                        title="Werte bleiben in den Datensätzen erhalten"
-                      >
-                        Abschalten
-                      </button>
-                    </td>
-                  </tr>
-                  {bearbeitet === d.id && (
-                    <tr style={{ cursor: "default" }}>
-                      <td colSpan={5} style={{ background: "var(--am-flaeche-1)" }}>
-                        <Werteliste
-                          werte={d.options}
-                          laeuft={werteSetzen.isPending}
-                          beiSichern={(options) => werteSetzen.mutate({ id: d.id, options })}
-                          beiAbbruch={() => setBearbeitet(null)}
-                        />
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        )}
-        {definitionen.data?.length === 0 && (
-          <p style={{ fontSize: "0.875rem", color: "var(--am-text-gedaempft)", marginBottom: "var(--am-raum-4)" }}>
-            Noch keine eigene Eigenschaft für {OBJEKTE.find((o) => o.wert === objekt)?.text}.
-          </p>
-        )}
-        {abschalten.isError && <Fehler text={(abschalten.error as Error).message} />}
-        {werteSetzen.isError && <Fehler text={(werteSetzen.error as Error).message} />}
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (genug) anlegen.mutate();
-          }}
-          style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "0 var(--am-raum-4)", alignItems: "end" }}
-        >
-          <div className="feld">
-            <label htmlFor="eig-label">Neue Eigenschaft</label>
-            <input id="eig-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Wartungsvertrag bis" />
-          </div>
-          <div className="feld">
-            <label htmlFor="eig-typ">Typ</label>
-            <select id="eig-typ" value={typ} onChange={(e) => setTyp(e.target.value as PropertyKind)}>
-              {TYPEN.map((t) => (
-                <option key={t.wert} value={t.wert}>
-                  {t.text}
-                  {t.hinweis ? ` — ${t.hinweis}` : ""}
-                </option>
-              ))}
-            </select>
-          </div>
-          {braucht && (
-            <div className="feld" style={{ gridColumn: "1 / -1" }}>
-              <label>Erlaubte Werte</label>
-              <Optionsfelder werte={optionen} beiAendern={setOptionen} />
-              <p className="feld-hinweis">
-                {typ === "multiselect"
-                  ? "An jedem Datensatz lassen sich beliebig viele davon setzen."
-                  : "An jedem Datensatz gilt genau einer davon."}
-              </p>
-            </div>
-          )}
-          <div className="btn-reihe" style={{ gridColumn: "1 / -1" }}>
-            <button type="submit" className="btn btn-primaer btn-klein" disabled={!genug || anlegen.isPending}>
-              {anlegen.isPending ? "Legt an …" : "Anlegen"}
-            </button>
-          </div>
-        </form>
-        {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
+      <div className="feld">
+        <label htmlFor="eig-gruppe">Gruppe</label>
+        <select id="eig-gruppe" className="input" value={gewaehlt} onChange={(e) => setGruppe(e.target.value)}>
+          {gruppen.map((g) => (
+            <option key={g.id} value={g.id}>{g.label}</option>
+          ))}
+        </select>
       </div>
-    </section>
+      {braucht && (
+        <div className="feld eig-volle-breite">
+          <label>Erlaubte Werte</label>
+          <Optionsfelder werte={optionen} beiAendern={setOptionen} />
+          <p className="feld-hinweis">
+            {typ === "multiselect"
+              ? "An jedem Datensatz lassen sich beliebig viele davon setzen."
+              : "An jedem Datensatz gilt genau einer davon."}
+          </p>
+        </div>
+      )}
+      <div className="btn-reihe eig-volle-breite">
+        <button type="submit" className="btn btn-primaer btn-klein" disabled={!genug || anlegen.isPending}>
+          {anlegen.isPending ? "Legt an …" : "Anlegen"}
+        </button>
+      </div>
+      {anlegen.isError && (
+        <div className="eig-volle-breite">
+          <Fehler text={(anlegen.error as Error).message} />
+        </div>
+      )}
+    </form>
   );
 }
 

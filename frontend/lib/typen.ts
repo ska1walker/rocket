@@ -654,7 +654,47 @@ export interface PropertyDefinition {
   description: string | null;
   position: number;
   is_active: boolean;
+  group_id: string | null;
+  is_system: boolean;
+  required: boolean;
+  im_anlegen: boolean;
   created_at: string;
+}
+
+/** Ein Feld in der Anordnung — fest oder eigen, in derselben Form. */
+export interface Feldeintrag {
+  id: string;
+  key: string;
+  label: string;
+  description: string | null;
+  /** Festes Feld: verschiebbar, umbenennbar, nie zu löschen. */
+  is_system: boolean;
+  /** Wie es angezeigt wird: bei festen auch `user`, `currency`, `url` … */
+  art: string;
+  /** Falsch bei Gerechnetem und bei Feldern mit eigenem Weg. */
+  bearbeitbar: boolean;
+  options: Eigenschaftsoption[];
+  required: boolean;
+  im_anlegen: boolean;
+  is_active: boolean;
+  /** Datensätze mit Wert — nur auf Wunsch geladen, `null` bei Gerechnetem. */
+  anzahl: number | null;
+}
+
+export interface Eigenschaftsgruppe {
+  id: string;
+  key: string;
+  label: string;
+  position: number;
+  /** Vorgabegruppe: umbenennbar, nicht löschbar. */
+  is_system: boolean;
+  felder: Feldeintrag[];
+}
+
+export interface Anordnung {
+  entity: PropertyEntity;
+  gruppen: Eigenschaftsgruppe[];
+  archiviert: Feldeintrag[];
 }
 
 /** Werte eigener Eigenschaften — Schlüssel = key der Definition.
