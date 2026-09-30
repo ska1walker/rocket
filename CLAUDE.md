@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 26.9.1 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig. Bis 0.12.1 hieß das Produkt **Beacon**; der Umzug auf Kais Box unter dem neuen Namen steht aus
+> **Status:** 26.9.1 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket 26.9.1 läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert)
 > **Letzte Aktualisierung:** 30. September 2026
 
 ---
@@ -68,7 +68,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
 | Tests | 657 Backend, 57 Frontend |
-| Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; als Beacon seit 5.9.2026 aus dem Aimighty-Katalog auf Kais Box. Die Umbenennung in Rocket (0.13.0) ist auf Olares eine Neuinstallation — Umzug ohne Alias, Schritte in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
+| Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.9.1 läuft seit 30.9.2026 auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.9.1` am 30.9.2026, Chart als Anhang). Katalogeintrag `rocket` 26.9.1 **im Markt** (`bayerhazard/aimighty-market` PR #81, am 30.9.2026 im Katalog der Box bestätigt); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
 **Nicht gebaut, bewusst:** Mehrsprachigkeit (internes Werkzeug),
