@@ -497,6 +497,7 @@ NUTZER_NICHT_IM_ABZUG = {
     "last_seen_at": "entsteht beim ersten Aufruf neu",
     "deleted_at": "wer entfernt wurde, kommt nicht zurück",
     "gesperrt_bis": "eine Bremse von gestern erbt niemand",
+    "totp_letzter_schritt": "Schutz gegen doppelt benutzte Codes, gilt nur Sekunden",
 }
 
 

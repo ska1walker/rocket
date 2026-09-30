@@ -59,6 +59,8 @@ GESPERRT: dict[str, str] = {
     "einladungen": "offene Einladungen mit Schlüssel",
     "org_settings": "Zugangsdaten für Sprachmodell, Suche, SMTP und Postfach",
     "webhook_sources": "Geheimnisse der verbundenen Programme",
+    "zweitfaktor_codes": "Wiederherstellungscodes für den zweiten Faktor",
+    "passwort_links": "Codes zum Zurücksetzen des Passworts — wer sie hat, übernimmt das Konto",
     "oeffentliche_links": "Schlüssel der Links in Mails — wer sie hat, kann im Namen eines Empfängers abmelden",
 }
 

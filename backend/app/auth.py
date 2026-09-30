@@ -100,19 +100,17 @@ class CurrentUser(BaseModel):
     user_id: UUID
     org_id: UUID
     display_name: str | None = None
-    # Der Olares-Name aus X-Bfl-User. Gleich `olares_username`, solange
-    # kein Sitzplatz gewählt ist.
+    # Der Name des Zugangs, über den die Anfrage kam — fürs Protokoll.
     login_username: str = ""
-    sitzplatz: bool = False
-    # Die Person, die sich **angemeldet** hat. Gleich `user_id`, solange
-    # kein Sitzplatz gewählt ist. Rechte hängen hieran und nicht am Platz:
-    # Der Platz ist Zuschreibung, keine Anmeldung — wer ihn wechselt,
-    # verliert dadurch weder Rechte noch gewinnt er welche.
-    zugang_user_id: UUID | None = None
+    # Die Organisation verlangt einen zweiten Faktor, und diese Person hat
+    # noch keinen. Dann ist nur die Einrichtung erlaubt (siehe unten).
+    zweiter_faktor_fehlt: bool = False
 
     @property
     def handelnder(self) -> UUID:
-        return self.zugang_user_id or self.user_id
+        """Wer handelt. Seit der Sitzplatz-Wechsel weg ist (26.9.2), ist
+        das immer die angemeldete Person selbst."""
+        return self.user_id
 
 
 async def _seed_pipeline(conn: asyncpg.Connection, org_id: UUID) -> None:
@@ -368,57 +366,6 @@ async def _ensure_user_and_org(olares_username: str) -> CurrentUser:
     )
 
 
-async def _sitzplatz_einnehmen(angemeldet: CurrentUser, sitzplatz_id: UUID) -> CurrentUser:
-    """Wechselt die handelnde Person innerhalb derselben Organisation.
-
-    Die Prüfung ist die eigentliche Substanz dieser Funktion: Ein
-    Sitzplatz greift **nur**, wenn er Mitglied derselben Organisation ist
-    wie der angemeldete Olares-Nutzer. Ohne diese Bedingung wäre der
-    Sitzplatz ein Weg in fremde Mandanten — und damit die Umgehung von
-    allem, was die Zeilensicherheit schützt.
-
-    Ein unbekannter oder fremder Sitzplatz wird abgewiesen und nicht
-    stillschweigend ignoriert: Sonst schriebe die Oberfläche Arbeit der
-    falschen Person zu und niemand würde es merken.
-
-    Die Abweisung trägt einen Kopf `X-Rocket-Sitzplatz: unbekannt`. Der
-    Grund steht in `frontend/lib/api.ts`: Nach einer Neuinstallation ist
-    die Datenbank neu, der Platz im Browser aber noch der alte — und dann
-    scheitert **jeder** Aufruf, ohne dass ein Mensch den Zusammenhang
-    sieht. Am Kopf erkennt die Oberfläche genau diesen Fall und räumt den
-    Platz selbst weg. An der Meldung dürfte sie es nicht festmachen; die
-    ist Text für Menschen und darf sich ändern.
-    """
-    async with acquire() as conn:
-        person = await conn.fetchrow(
-            """
-            select u.id, u.display_name, u.olares_username, u.zugang
-            from public.users u
-            join public.user_org_roles r on r.user_id = u.id
-            where u.id = $1 and r.org_id = $2 and u.deleted_at is null
-            """,
-            sitzplatz_id,
-            angemeldet.org_id,
-        )
-
-    if person is None:
-        raise HTTPException(
-            status_code=403,
-            detail="Dieser Sitzplatz gehört nicht zu Ihrer Organisation.",
-            headers={"X-Rocket-Sitzplatz": "unbekannt"},
-        )
-
-    return CurrentUser(
-        olares_username=person["olares_username"],
-        user_id=person["id"],
-        org_id=angemeldet.org_id,
-        display_name=person["display_name"],
-        login_username=angemeldet.login_username,
-        sitzplatz=person["id"] != angemeldet.user_id,
-        zugang_user_id=angemeldet.user_id,
-    )
-
-
 async def _aus_sitzung(keks: str) -> CurrentUser | None:
     """Wer steckt hinter diesem Sitzungskeks? Nichts, wenn er nicht (mehr) gilt."""
     async with acquire() as conn:
@@ -426,18 +373,30 @@ async def _aus_sitzung(keks: str) -> CurrentUser | None:
         if sitzung is None:
             return None
         person = await conn.fetchrow(
-            "select id, olares_username, display_name from public.users "
-            "where id = $1 and deleted_at is null",
+            "select id, olares_username, display_name, totp_seit is null as ohne_faktor "
+            "from public.users where id = $1 and deleted_at is null",
             sitzung.user_id,
         )
     if person is None:
         return None
+    faktor_fehlt = False
+    if person["ohne_faktor"]:
+        # Nur wer keinen Faktor hat, braucht die Frage nach der Pflicht —
+        # und sie geht mit Nutzerkontext: `org_settings` steht unter FORCE,
+        # ohne Kontext läse man hier immer „nein" (so war es im ersten
+        # Entwurf, und die Pflicht wäre ein Hinweis geblieben).
+        async with acquire_as(sitzung.user_id) as conn:
+            faktor_fehlt = bool(await conn.fetchval(
+                "select zweiter_faktor_pflicht from public.org_settings where org_id = $1",
+                sitzung.org_id,
+            ))
     return CurrentUser(
         olares_username=person["olares_username"],
         user_id=person["id"],
         org_id=sitzung.org_id,
         display_name=person["display_name"],
         login_username=person["olares_username"],
+        zweiter_faktor_fehlt=faktor_fehlt,
     )
 
 
@@ -466,10 +425,21 @@ async def _noch_unbewohnt() -> bool:
     return not _bewohnt
 
 
+# Was eine Person tun darf, die den verlangten zweiten Faktor noch nicht
+# hat: ihn einrichten, sehen, wer sie ist, sich abmelden. Alles andere
+# wartet, bis der Faktor steht — sonst wäre die Pflicht ein Hinweis und
+# keine Pflicht.
+OHNE_FAKTOR_ERLAUBT = (
+    "/api/anmeldung/zweiter-faktor",
+    "/api/anmeldung/lage",
+    "/api/abmeldung",
+    "/api/mitglieder/wer",
+)
+
+
 async def get_current_user(
     request: Request,
     x_bfl_user: str | None = Header(None, alias="X-Bfl-User"),
-    x_rocket_sitzplatz: str | None = Header(None, alias="X-Rocket-Sitzplatz"),
 ) -> CurrentUser:
     """Wer handelt — aus der eigenen Sitzung, sonst aus dem Olares-Kopf.
 
@@ -488,16 +458,17 @@ async def get_current_user(
     installierte.
 
     Solange **niemand** ein Passwort hat, zählt der Kopf deshalb weiter;
-    mit dem ersten Passwort ist er endgültig tot. Eine frische Installation
-    steht dabei hinter `authLevel: internal`, es kommt also ohnehin nur
-    herein, wer an der Box angemeldet ist.
+    mit dem ersten Passwort ist er endgültig tot.
+
+    Den Wechsel auf eine andere Person per Kopf `X-Rocket-Sitzplatz` gibt
+    es seit 26.9.2 nicht mehr: Er stammte aus der Zeit eines geteilten
+    Olares-Zugangs, und mit eigener Anmeldung ist jeder bereits er selbst.
     """
     angemeldet: CurrentUser | None = None
 
     keks = request.cookies.get(anmeldung_kern.KEKS)
     if keks:
         angemeldet = await _aus_sitzung(keks)
-    aus_sitzung = angemeldet is not None
 
     if angemeldet is None and (settings.anmeldung_modus != "eigen" or await _noch_unbewohnt()):
         name = (x_bfl_user or "").strip() or settings.dev_user.strip()
@@ -508,30 +479,16 @@ async def get_current_user(
     if angemeldet is None:
         raise HTTPException(status_code=401, detail="Nicht angemeldet.")
 
-    gewaehlt = (x_rocket_sitzplatz or "").strip()
-    if not gewaehlt:
-        return angemeldet
+    if angemeldet.zweiter_faktor_fehlt and not request.url.path.startswith(OHNE_FAKTOR_ERLAUBT):
+        # Der Kopf ist das Signal für die Oberfläche, zur Einrichtung zu
+        # führen — an der Meldung dürfte sie das nicht festmachen.
+        raise HTTPException(
+            status_code=403,
+            detail="Ihre Organisation verlangt einen zweiten Faktor. Richten Sie ihn zuerst ein.",
+            headers={"X-Rocket-Zweiter-Faktor": "einrichten"},
+        )
 
-    # Wer sich selbst angemeldet hat, ist bereits er selbst.
-    #
-    # Der Sitzplatz entstand für den Fall, dass **ein** Olares-Zugang von
-    # mehreren Menschen benutzt wird: Er schreibt Arbeit der richtigen
-    # Person zu. Mit eigener Anmeldung gibt es nichts mehr zuzuschreiben —
-    # und er wäre dann das Gegenteil eines Schutzes: Ein `member` nähme
-    # den Platz des Eigentümers ein und erbte über `verwaltet` dessen
-    # Rechte. Deshalb greift der Kopf nur beim geteilten Zugang.
-    if aus_sitzung:
-        return angemeldet
-
-    try:
-        sitzplatz_id = UUID(gewaehlt)
-    except ValueError:
-        raise HTTPException(400, "Der Sitzplatz ist keine gültige Kennung.") from None
-
-    if sitzplatz_id == angemeldet.user_id:
-        return angemeldet
-
-    return await _sitzplatz_einnehmen(angemeldet, sitzplatz_id)
+    return angemeldet
 
 
 # Rollen, die verwalten dürfen. `member` und `viewer` arbeiten im Bestand,

@@ -74,8 +74,9 @@ class Wer(BaseModel):
     # hat, lässt der Olares-Kopf den ersten noch herein (siehe auth.py) —
     # und das soll die Oberfläche sagen, nicht verschweigen.
     passwort_gesetzt: bool = False
-    # Wahr, wenn ein anderer Sitzplatz als der des Zugangs gewählt ist.
-    sitzplatz_gewaehlt: bool
+    # Die Organisation verlangt einen zweiten Faktor, und diese Person hat
+    # noch keinen — die Oberfläche führt dann zur Einrichtung.
+    zweiter_faktor_fehlt: bool = False
     # Was diese Person für sich eingestellt hat — Favoriten in der Navigation.
     einstellungen: dict[str, Any] = Field(default_factory=dict)
 
@@ -142,7 +143,7 @@ def _wer(
         display_name=user.display_name,
         org_id=user.org_id,
         login_username=user.login_username or user.olares_username,
-        sitzplatz_gewaehlt=user.sitzplatz,
+        zweiter_faktor_fehlt=user.zweiter_faktor_fehlt,
         einstellungen=einstellungen,
         rolle=rolle,
         passwort_gesetzt=passwort_gesetzt,
