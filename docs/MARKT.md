@@ -118,7 +118,7 @@ passen nicht in eine Sitzung. Deshalb:
 
 Erster Durchlauf: Rocket 26.9.1, PR #81, 30.9.2026 — von Kai im Katalog der Box bestätigt, installiert und laufend.
 
-Zweiter Durchlauf: Rocket 26.9.4, PR #83, 30.9.2026 — Fork-Branch `rocket-26.9.4`, lokal mit wrangler bewiesen, von der Standard-Sitzung gemergt, auf `main` byte-gleich geprüft (sha256 `80137700…dd099`). Überspringt 26.9.2 und 26.9.3; das Update von 26.9.1 spielt die Migrationen 0033–0035 beim Start ein.
+Zweiter Durchlauf: Rocket 26.9.4, PR #83, 30.9.2026 — Fork-Branch `rocket-26.9.4`, lokal mit wrangler bewiesen, von der Standard-Sitzung gemergt, auf `main` byte-gleich geprüft (sha256 `80137700…dd099`). Überspringt 26.9.2 und 26.9.3; das Update von 26.9.1 spielt die Migrationen 0033–0035 beim Start ein. Von Kai auf der Box aktualisiert und laufend bestätigt (30.9.2026) — das erste Update über den Markt, nicht nur eine Erstinstallation.
 
 ## Bekannte Fallen im Markt
 
