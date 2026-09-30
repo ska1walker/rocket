@@ -2051,13 +2051,16 @@ kommen frisch an (Insilo v0.1.80, ausführlich in
 `insilo/docs/HANDOFF.md`).
 
 ```bash
-# 1. Version an den drei Stellen setzen, prüfen, committen
+# 1. Version an den drei Stellen setzen, prüfen, per PR nach main mergen
 bash scripts/check-chart.sh
 git commit -am "release: v26.9.1"
 
-# 2. Tag pushen — release.yml baut ghcr.io/ska1walker/rocket-{frontend,backend}:26.9.1
-#    (öffentlich, amd64) und legt dist/rocket-26.9.1.tgz als Artefakt ab
-git tag v26.9.1 && git push origin main v26.9.1
+# 2. Nichts weiter: Der Merge nach main startet release.yml. Ist die Version
+#    in olares/Chart.yaml noch nicht getaggt, baut der Workflow
+#    ghcr.io/ska1walker/rocket-{frontend,backend}:26.9.1 (öffentlich, amd64),
+#    legt DANACH Tag v26.9.1 und ein Release an und hängt
+#    rocket-26.9.1.tgz daran. Ist sie schon getaggt, passiert nichts.
+#    (Ein Tag von Hand — git tag v26.9.1 && git push origin v26.9.1 — geht weiter.)
 gh run watch
 
 # 3. Chart packen und mit dem Olares-Prüfer ansehen — immer das Paket,
@@ -2070,6 +2073,15 @@ olares-cli profile login --olares-id <id>       # macht Kai selbst (Browser, TOT
 olares-cli market upload dist/rocket-26.9.1.tgz
 olares-cli market install rocket
 ```
+
+**Der Tag entsteht beim Merge (seit 26.9.1).** Claude-Sitzungen dürfen
+nur ihren Arbeitsbranch pushen, keine Tags — mergen dürfen sie. Deshalb
+setzt `release.yml` den Tag selbst, sobald auf `main` eine Version steht,
+die es als Tag noch nicht gibt; erst nach erfolgreichem Bau, damit ein
+gescheiterter Bau keinen Tag hinterlässt. Der Tag entsteht mit
+`GITHUB_TOKEN` und löst den Workflow kein zweites Mal aus. Ein Merge ohne
+Versionssprung ist kein Release. Das Chart liegt als Anhang am Release —
+dieselbe Datei, die in den Markt geht.
 
 **Erst ausrollen, dann hochladen.** Eine App, die nie `running`
 erreicht hat, gehört in keinen Katalog.

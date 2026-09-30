@@ -1,31 +1,86 @@
 name: release
 
-# Baut die beiden Abbilder bei jedem Tag wie v0.1.0 und legt sie öffentlich
-# unter ghcr.io/<owner>/rocket-<dienst>:<version> ab, damit die Olares-Box
-# sie ohne Zugangsdaten zieht. Dazu das gepackte Chart als Artefakt —
-# das ist die Datei, die in den Markt geht.
+# Baut die beiden Abbilder und legt sie öffentlich unter
+# ghcr.io/<owner>/rocket-<dienst>:<version> ab, damit die Olares-Box sie
+# ohne Zugangsdaten zieht. Dazu das gepackte Chart als Artefakt — das ist
+# die Datei, die in den Markt geht.
+#
+# Drei Auslöser:
+#
+# - **Merge nach main mit neuer Version** (der Normalfall seit 26.9.1).
+#   Steht in olares/Chart.yaml eine Version, zu der es noch keinen Tag
+#   gibt, wird gebaut und danach Tag `v<version>` samt Release angelegt —
+#   erst nach erfolgreichem Bau, damit ein gescheiterter Bau keinen Tag
+#   hinterlässt. Gibt es den Tag schon, passiert nichts: Ein Merge ohne
+#   Versionssprung ist kein Release. Der Tag entsteht mit GITHUB_TOKEN
+#   und löst diesen Workflow deshalb nicht ein zweites Mal aus.
+#   Anlass: Die Claude-Sitzungen dürfen nur ihren Arbeitsbranch pushen,
+#   keine Tags — mergen dürfen sie. So braucht ein Release keinen
+#   Handgriff mehr (docs/BETRIEB.md, „Veröffentlichen").
+# - **Tag von Hand** (`git push origin vYY.M.n`) — wie bisher.
+# - **workflow_dispatch** mit einer Version — baut, ohne Tag.
 
 on:
   push:
+    branches: [main]
+    # Auch der Workflow selbst: Wer ihn ändert, soll sehen, dass er läuft
+    # — und eine noch nicht getaggte Version wird dabei veröffentlicht.
+    paths: [olares/Chart.yaml, .github/workflows/release.yml]
     tags:
       - "v*.*.*"
   workflow_dispatch:
     inputs:
       version:
-        description: "Image tag without leading v (e.g. 0.1.0)"
+        description: "Image tag without leading v (e.g. 26.9.1)"
         required: true
-        default: "0.1.0"
 
 permissions:
   contents: read
   packages: write
 
 jobs:
+  version:
+    name: which version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      proceed: ${{ steps.v.outputs.proceed }}
+      create_tag: ${{ steps.v.outputs.create_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # die Tags gehören zur Entscheidung
+
+      - id: v
+        run: |
+          CHART_VERSION="$(grep -E '^version:' olares/Chart.yaml | head -1 | awk '{print $2}')"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            V="${{ inputs.version }}"; PROCEED=true; CREATE=false
+          elif [ "${{ github.ref_type }}" = "tag" ]; then
+            V="${GITHUB_REF_NAME#v}"; PROCEED=true; CREATE=false
+          else
+            V="$CHART_VERSION"; CREATE=false
+            if git rev-parse -q --verify "refs/tags/v$V" >/dev/null; then
+              PROCEED=false
+              echo "### v$V ist schon getaggt — kein Release" >> "$GITHUB_STEP_SUMMARY"
+            else
+              PROCEED=true; CREATE=true
+              echo "### Neue Version $V — bauen, dann v$V taggen" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "proceed=$PROCEED" >> "$GITHUB_OUTPUT"
+          echo "create_tag=$CREATE" >> "$GITHUB_OUTPUT"
+
   preflight:
     name: olares chart · sanity
+    needs: version
+    if: needs.version.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     outputs:
       build_images: ${{ steps.decide.outputs.build_images }}
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -37,34 +92,32 @@ jobs:
       - name: codified Olares lessons (scripts/check-chart.sh)
         run: bash scripts/check-chart.sh
 
-      - name: chart version must match the tag
+      - name: chart version must match the version to release
         if: github.event_name == 'push'
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
           CHART_VERSION="$(grep -E '^version:' olares/Chart.yaml | head -1 | awk '{print $2}')"
-          if [ "$TAG_VERSION" != "$CHART_VERSION" ]; then
-            echo "::error::git tag $GITHUB_REF_NAME (=$TAG_VERSION) does not match olares/Chart.yaml version $CHART_VERSION"
+          if [ "$VERSION" != "$CHART_VERSION" ]; then
+            echo "::error::version $VERSION does not match olares/Chart.yaml version $CHART_VERSION"
             exit 1
           fi
-          echo "tag $GITHUB_REF_NAME matches chart version $CHART_VERSION"
+          echo "version $VERSION matches the chart"
 
       # Ein leerer Tag in values.yaml heißt „folgt Chart.AppVersion" — der
       # Normalfall, das Chart referenziert dann genau diesen Tag. Ein
       # gesetzter Tag ist ein Pin auf eine Vorversion: Die Abbilder gibt es
       # schon, nichts bauen.
-      - name: are images needed for this tag?
+      - name: are images needed for this version?
         id: decide
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
           BUILD=true
           PINS="$(grep -E "^[[:space:]]+tag:" olares/values.yaml | grep -vE 'tag:[[:space:]]*(""|'"''"')[[:space:]]*$' || true)"
           if [ -n "$PINS" ] \
-             && ! grep -qE "^[[:space:]]+tag:[[:space:]]*[\"']?${TAG_VERSION}[\"']?[[:space:]]*$" olares/values.yaml; then
+             && ! grep -qE "^[[:space:]]+tag:[[:space:]]*[\"']?${VERSION}[\"']?[[:space:]]*$" olares/values.yaml; then
             BUILD=false
           fi
           echo "build_images=$BUILD" >> "$GITHUB_OUTPUT"
           if [ "$BUILD" = "true" ]; then
-            echo "### Images werden gebaut (\`$TAG_VERSION\`)" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Images werden gebaut (\`$VERSION\`)" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "### Image-Build übersprungen — values.yaml pinnt eine Vorversion" >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -83,7 +136,7 @@ jobs:
 
   build:
     name: ${{ matrix.service }}
-    needs: preflight
+    needs: [version, preflight]
     if: needs.preflight.outputs.build_images == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
@@ -100,15 +153,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Derive version
-        id: ver
-        run: |
-          if [ -n "${{ inputs.version }}" ]; then
-            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Lowercase owner
         id: owner
@@ -135,7 +179,34 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/${{ steps.owner.outputs.owner }}/rocket-${{ matrix.service }}:${{ steps.ver.outputs.version }}
+            ghcr.io/${{ steps.owner.outputs.owner }}/rocket-${{ matrix.service }}:${{ needs.version.outputs.version }}
             ghcr.io/${{ steps.owner.outputs.owner }}/rocket-${{ matrix.service }}:latest
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  # Erst wenn beide Abbilder draußen sind: Tag und Release, mit dem Chart
+  # als Anhang — dieselbe Datei, die in den Markt geht.
+  tag:
+    name: tag and release
+    needs: [version, build]
+    if: needs.version.outputs.create_tag == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: chart
+          path: dist
+
+      - name: create tag and release
+        run: |
+          gh release create "v$VERSION" dist/rocket-"$VERSION".tgz \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "v$VERSION" \
+            --notes "Rocket $VERSION — Abbilder ghcr.io/${{ github.repository_owner }}/rocket-{frontend,backend}:$VERSION, Chart im Anhang. Automatisch nach dem Merge angelegt."
+          echo "### Tag und Release v$VERSION angelegt" >> "$GITHUB_STEP_SUMMARY"

@@ -284,8 +284,11 @@ der Lieferung und liest die Token über `var(--am-*)`.
 
 9. **Beim Veröffentlichen:** `docs/BETRIEB.md`, Abschnitt
    „Veröffentlichen". Version `YY.M.<n>` (Monat ohne führende Null,
-   Zähler je Monat neu, z. B. `26.10.1`) an drei Stellen, Tag `vYY.M.n` baut die
-   Abbilder (`release.yml`), das Chart wird immer als Paket geprüft
+   Zähler je Monat neu, z. B. `26.10.1`) an drei Stellen, per PR nach
+   `main` mergen — **den Tag `vYY.M.n` setzt `release.yml` danach selbst**
+   (baut die Abbilder, legt Tag und Release mit dem Chart als Anhang an).
+   Claude pusht keine Tags, das lässt die Sitzung nicht zu; Kai muss
+   dafür nichts mehr von Hand tun. Das Chart wird immer als Paket geprüft
    (`olares-cli chart lint dist/rocket-YY.M.n.tgz`), und **erst nach einer
    laufenden Installation auf einer Box** geht der Eintrag per PR in
    `bayerhazard/aimighty-market`. Die Regeln dahinter stehen im Skill
