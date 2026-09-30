@@ -804,6 +804,10 @@ export interface Segmentfeld {
   zahl: boolean;
   eigen: boolean;
   operatoren: string[];
+  /** Die Eigenschaftsgruppe — `null` bei Objekten ohne Gruppen (Tickets). */
+  gruppe?: string | null;
+  /** Ein Betrag in Cent: gezeigt und gefiltert in Euro. */
+  betrag?: boolean;
 }
 
 export interface Bedingung {

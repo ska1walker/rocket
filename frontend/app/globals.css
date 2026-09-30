@@ -4639,6 +4639,28 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 @media (hover: none) { .fg-stift { opacity: 1; } }
 
 .fg-leer { color: var(--am-text-gedaempft); }
+
+/* Spaltenwahl nach Eigenschaftsgruppen (Stufe D). */
+.spaltenwahl-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--am-raum-3);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--am-raum-3);
+}
+
+.spaltenwahl-kopf p { margin: 0; font-size: 0.8125rem; color: var(--am-text-sekundaer); }
+.spaltenwahl-kopf .input { max-width: 16rem; }
+
+.spaltenwahl-gruppe { border: 0; padding: 0; margin: 0 0 var(--am-raum-3); }
+
+.spaltenwahl-gruppe legend {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--am-text-sekundaer);
+  margin-bottom: var(--am-raum-1);
+}
 .fg-fehlt { display: inline-flex; align-items: center; gap: 4px; color: var(--am-achtung); font-size: 0.8125rem; }
 .fg-lang { white-space: pre-wrap; }
 .fg-verweis { text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }

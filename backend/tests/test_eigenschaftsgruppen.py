@@ -268,3 +268,30 @@ async def test_anlegen_nimmt_feste_und_eigene_felder_mit(datenbank):
             "name": "Mit Zusatz", "service_days": 3, "custom": {"kammer": "IHK"},
         })).json()
     assert d["service_days"] == 3 and d["custom"]["kammer"] == "IHK"
+
+
+async def test_spalten_und_filter_folgen_den_gruppen(datenbank):
+    """Stufe D: dieselbe Ordnung und dieselben Namen wie auf der Datensatzseite."""
+    async with klient_fuer("gr-spalten") as k:
+        a = await _anordnung(k)
+        # Stadt umbenennen und nach vorn in die erste Gruppe.
+        stadt = next(f for g in a["gruppen"] for f in g["felder"] if f["key"] == "city")
+        await k.patch(f"/api/eigenschaften/{stadt['id']}", json={"label": "Stadt"})
+        plan = _reihenfolge(a)
+        for g in plan["gruppen"]:
+            if stadt["id"] in g["felder"]:
+                g["felder"].remove(stadt["id"])
+        plan["gruppen"][0]["felder"].insert(0, stadt["id"])
+        assert (await k.put("/api/eigenschaften/reihenfolge", json=plan)).status_code == 200
+        await k.post("/api/eigenschaften", json={"entity": "companies", "label": "Budget", "kind": "currency"})
+
+        felder = (await k.get("/api/ansichten/felder", params={"entity": "companies"})).json()["felder"]
+    erste = felder[0]
+    assert erste["schluessel"] == "city" and erste["text"] == "Stadt"
+    assert erste["gruppe"] == "Firmeninformationen"
+    budget = next(f for f in felder if f["schluessel"] == "custom.budget")
+    assert budget["betrag"] is True and budget["gruppe"] == "Weitere Eigenschaften"
+    # Die Reihenfolge der Gruppen bleibt zusammenhängend.
+    folge = [f["gruppe"] for f in felder if f["gruppe"]]
+    wechsel = [g for i, g in enumerate(folge) if i == 0 or folge[i - 1] != g]
+    assert len(wechsel) == len(set(wechsel)), wechsel

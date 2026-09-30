@@ -1731,13 +1731,13 @@ Zugang bringt noch einen Nutzer anlegt. Der zweite Faktor und das
 Rücksetzen per Mail stehen in `test_zweiter_faktor.py` (22 Fälle, mit den
 Testvektoren aus RFC 6238).
 
-## Eigenschaften in Gruppen (seit 26.9.3)
+## Eigenschaften in Gruppen (seit 26.9.3, vollständig seit 26.9.4)
 
 Nach HubSpots Muster: Jedes Objekt (Firma, Kontakt, Lead) hat Gruppen —
 „Firmeninformationen", „Adresse", „Kontaktwege", „Vertrieb" … —, und
 jedes Feld steht in genau einer, **die festen ebenso wie die eigenen**.
-Plan und Begründung: `docs/PLAN-EIGENSCHAFTEN.md`; umgesetzt sind dort
-die Stufen A und B.
+Plan und Begründung: `docs/PLAN-EIGENSCHAFTEN.md`; alle vier Stufen
+sind umgesetzt (A und B in 26.9.3, C und D in 26.9.4).
 
 ### Einrichten: Einstellungen › Eigenschaften
 
@@ -1775,6 +1775,40 @@ Kontakt, Stufe am Lead) zeigen keinen Stift.
 und verhinderte das Absenden lautlos — auch wenn nur die Straße geändert
 wurde. So ist es im ersten Browserlauf aufgefallen. Die Formulare tragen
 `noValidate`; geprüft wird in `lib/feldwerte.ts` und im Backend.
+
+### Pflichtfelder und neue Arten (seit 26.9.4)
+
+- **Pflicht** schaltet man am Feld unter *Einstellungen › Eigenschaften*.
+  Geprüft wird beim Anlegen (fehlt → 422 mit den Namen) und wenn eine
+  Anfrage ein Pflichtfeld leert. **Rückwirkend gesperrt wird nichts**: Ein
+  alter Datensatz ohne Wert lässt sich weiter ändern; die Datensatzseite
+  zeigt „fehlt" mit Zeichen. Pflichtfelder erscheinen immer im
+  Anlegen-Dialog, der vor dem Absenden prüft.
+- **Ausgenommen** sind Einfuhr, Anreicherung und KI — sie legen über
+  eigene Wege an. Eine Messeliste scheitert sonst an einem Feld, das auf
+  ihr nicht steht. Nie Pflicht werden können Gerechnetes, die
+  Marketing-Einwilligung und der Absagegrund.
+- **Neue Arten** eigener Eigenschaften (Migration 0035): langer Text,
+  Adresse (nur `http(s)://`, `javascript:` nie), E-Mail, Telefon, Betrag
+  (ganze Cent, gerundet wird nie) und Person. Eine Person muss zur
+  Organisation gehören — geprüft ausdrücklich über
+  `current_user_orgs()`, denn `user_org_roles` steht nicht unter FORCE
+  und sähe als Tabelleneigentümer jede Organisation der Box.
+
+### Spalten und Filter (seit 26.9.4)
+
+Spaltenwahl und Filterbau zeigen die Felder nach Gruppen, in derselben
+Reihenfolge und mit denselben Namen wie auf der Datensatzseite
+(`segmente.felder_fuer` liest dafür die Anordnung). Beträge stehen in
+Cent; gezeigt und gefiltert wird in Euro, umgerechnet an genau einer
+Stelle (`betrag` in der Feldliste). Auch CSV-Ausfuhr und -Einfuhr sehen
+die umbenannten Beschriftungen.
+
+**„größer" und „kleiner" an eigenen Zahlen** gingen bis 26.9.3 nicht:
+Die Bedingung landete im Textzweig und scheiterte mit „Unbekannter
+Operator". Aufgefallen beim Browserlauf für den Betragsfilter. Ein Wert,
+der keine Zahl ist (alter Freitext), zählt jetzt als leer, statt die
+ganze Abfrage mit einem Cast-Fehler abzubrechen.
 
 ### Wie es gespeichert ist
 

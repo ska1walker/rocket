@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
+import { gruppieren } from "@/lib/anordnung";
 import { OHNE_WERT, OPERATOR_TEXT } from "@/lib/format";
 import { Mehrfachauswahl } from "@/components/mehrfachauswahl";
 import type { Bedingung, Feldauskunft, Segmentfeld } from "@/lib/typen";
@@ -79,12 +80,24 @@ export function Filterbau({
                 setze(i, { feld: e.target.value, operator: op, wert: MEHRWERTIG.has(op) ? [] : "" });
               }}
             >
-              {filterbar.map((f) => (
-                <option key={f.schluessel} value={f.schluessel}>
-                  {f.text}
-                  {f.eigen ? " (eigen)" : ""}
-                </option>
-              ))}
+              {gruppieren(filterbar).map((g) =>
+                g.gruppe ? (
+                  <optgroup key={g.gruppe} label={g.gruppe}>
+                    {g.felder.map((f) => (
+                      <option key={f.schluessel} value={f.schluessel}>
+                        {f.text}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : (
+                  g.felder.map((f) => (
+                    <option key={f.schluessel} value={f.schluessel}>
+                      {f.text}
+                      {f.eigen ? " (eigen)" : ""}
+                    </option>
+                  ))
+                ),
+              )}
             </select>
 
             <select
@@ -210,6 +223,23 @@ function Wertfeld({
           </option>
         ))}
       </select>
+    );
+  }
+
+  // Ein Betrag steht in Cent und wird in Euro eingegeben. Umgerechnet wird
+  // hier, an einer Stelle; gespeichert (auch in einer Ansicht) wird Cent.
+  if (feld?.betrag) {
+    const cent = typeof wert === "number" || (typeof wert === "string" && wert !== "") ? Number(wert) : null;
+    return (
+      <input
+        type="number"
+        step="0.01"
+        min={0}
+        value={cent === null || Number.isNaN(cent) ? "" : cent / 100}
+        onChange={(e) => setze(e.target.value === "" ? "" : String(Math.round(Number(e.target.value) * 100)))}
+        aria-label="Betrag in Euro"
+        placeholder="Euro"
+      />
     );
   }
 

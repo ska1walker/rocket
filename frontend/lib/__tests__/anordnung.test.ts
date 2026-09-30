@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ablageOrt, alsReihenfolge, finde, gruppeSchieben, passt, schritt, verschiebe } from "@/lib/anordnung";
+import { ablageOrt, alsReihenfolge, finde, gruppieren, gruppeSchieben, passt, schritt, verschiebe } from "@/lib/anordnung";
 import type { Anordnung, Feldeintrag } from "@/lib/typen";
 
 function feld(id: string): Feldeintrag {
@@ -70,6 +70,15 @@ describe("Anordnung", () => {
       entity: "companies",
       gruppen: [{ id: "g1", felder: ["a", "b"] }, { id: "g2", felder: [] }, { id: "g3", felder: ["c"] }],
     });
+  });
+
+  it("gruppiert in der gelieferten Reihenfolge", () => {
+    const g = gruppieren([
+      { k: "a", gruppe: "Eins" }, { k: "b", gruppe: "Zwei" }, { k: "c", gruppe: "Eins" }, { k: "d" },
+    ]);
+    expect(g.map((x) => [x.gruppe, x.felder.map((f) => f.k)])).toEqual([
+      ["Eins", ["a", "c"]], ["Zwei", ["b"]], [null, ["d"]],
+    ]);
   });
 
   it("sucht in Beschriftung und Schlüssel", () => {

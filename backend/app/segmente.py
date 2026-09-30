@@ -295,6 +295,11 @@ async def felder_fuer(conn: asyncpg.Connection, entity: str) -> list[dict[str, A
     if entity not in CUSTOM_SPALTE:
         return liste
 
+    # Beträge stehen in Cent. Die Oberfläche zeigt und filtert sie in Euro
+    # und rechnet an genau einer Stelle um — dieser Schalter sagt ihr, wo.
+    for eintrag in liste:
+        eintrag["betrag"] = eintrag["schluessel"] == "open_amount_cents"
+
     for d in await eigenschaften.definitionen(conn, entity):
         art = art_aus_eigenschaft.get(d["kind"], "text")
         liste.append(
@@ -310,9 +315,54 @@ async def felder_fuer(conn: asyncpg.Connection, entity: str) -> list[dict[str, A
                 "zahl": art == "zahl",
                 "eigen": True,
                 "operatoren": OPERATOREN[art],
+                "betrag": d["kind"] == "currency",
             }
         )
-    return liste
+    return await _nach_gruppen(conn, entity, liste)
+
+
+async def _nach_gruppen(
+    conn: asyncpg.Connection, entity: str, liste: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Ordnet die Felder wie unter *Einstellungen › Eigenschaften*.
+
+    Jedes Feld bekommt seine Gruppe (`gruppe`), und die Reihenfolge folgt
+    Gruppe und Platz — dieselbe wie auf der Datensatzseite. Umbenannte
+    feste Felder heißen auch hier, wie die Organisation sie genannt hat.
+
+    Liest nur; die Vorgaben legt das erste Öffnen der Eigenschaften oder
+    einer Datensatzseite an. Solange es keine gibt, bleibt die Liste, wie
+    sie ist, ohne Gruppen.
+    """
+    zeilen = await conn.fetch(
+        """
+        select d.key, d.label, d.is_system, g.label as gruppe,
+               g.position as gpos, d.position as fpos
+          from public.property_definitions d
+          join public.property_groups g on g.id = d.group_id
+         where d.entity = $1 and d.is_active
+        """,
+        entity,
+    )
+    if not zeilen:
+        return liste
+    ort: dict[str, Any] = {}
+    for z in zeilen:
+        schluessel = z["key"] if z["is_system"] else CUSTOM_PRAEFIX + z["key"]
+        ort[schluessel] = z
+    for eintrag in liste:
+        z = ort.get(eintrag["schluessel"])
+        eintrag["gruppe"] = z["gruppe"] if z else None
+        if z and z["is_system"]:
+            eintrag["text"] = z["label"]
+    unbekannt = (10**9, 10**9)
+    return sorted(
+        liste,
+        key=lambda e: (
+            (ort[e["schluessel"]]["gpos"], ort[e["schluessel"]]["fpos"])
+            if e["schluessel"] in ort else unbekannt
+        ),
+    )
 
 
 def _relatives_datum(tage: Any) -> datetime:
@@ -451,15 +501,22 @@ def bedingung_zu_sql(entity: str, b: Bedingung, args: list[Any]) -> str:
         args.append([str(w) for w in werte])
         return f"({ausdruck})::text = any(${len(args)}::text[])"
 
-    if art in ("zahl",) and op in ("ist", "groesser", "kleiner"):
+    # Eine eigene Eigenschaft kommt hier als Text an — ihre Art kennt diese
+    # Stelle nicht. „größer" und „kleiner" sind aber nur als Zahl sinnvoll;
+    # bis 26.9.3 fielen sie in den Textzweig und scheiterten mit
+    # „Unbekannter Operator". „ist" bleibt bei eigenen ein Textvergleich.
+    eigen_zahl = b.feld.startswith(CUSTOM_PRAEFIX) and op in ("groesser", "kleiner")
+    if (art in ("zahl",) and op in ("ist", "groesser", "kleiner")) or eigen_zahl:
         try:
             args.append(float(b.wert))
         except (TypeError, ValueError) as exc:
             raise Ungueltig(f"„{b.wert}“ ist keine Zahl.") from exc
         zeichen = {"ist": "=", "groesser": ">", "kleiner": "<"}[op]
-        # Bei einer eigenen Eigenschaft steht die Zahl als Text in JSON.
-        guss = "::numeric" if not b.feld.startswith(CUSTOM_PRAEFIX) else "::numeric"
-        return f"(nullif({ausdruck}::text,'')){guss} {zeichen} ${len(args)}"
+        # Bei einer eigenen Eigenschaft steht die Zahl als Text in JSON. Ein
+        # Wert, der keine Zahl ist (alter Freitext), zählt als leer statt
+        # die ganze Abfrage mit einem Cast-Fehler abzubrechen.
+        zahl = f"(case when {ausdruck}::text ~ '^-?[0-9]+(\\.[0-9]+)?$' then {ausdruck}::text::numeric end)"
+        return f"{zahl} {zeichen} ${len(args)}"
 
     if art == "datum" or (b.feld.startswith(CUSTOM_PRAEFIX) and op in ("nach", "vor", "letzte_tage", "aelter_als_tage")):
         guss = f"(nullif({ausdruck}::text,''))::timestamptz"

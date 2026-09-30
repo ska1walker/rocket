@@ -155,3 +155,27 @@ async def test_neue_arten_lassen_sich_filtern(datenbank):
         felder = {f["schluessel"]: f for f in (await k.get("/api/ansichten/felder", params={"entity": "companies"})).json()["felder"]}
         assert felder["custom.betreuer"]["art"] == "person"
         assert felder["custom.portal"]["art"] == "text"
+
+
+async def test_zahlenfilter_auf_eigene_eigenschaften(datenbank):
+    """„größer" und „kleiner" gingen auf eigenen Zahlen und Beträgen nicht —
+    der Vergleich landete im Textzweig („Unbekannter Operator")."""
+    import json as _json
+
+    async with klient_fuer("pf-zahlfilter") as k:
+        await k.post("/api/eigenschaften", json={"entity": "companies", "label": "Budget", "kind": "currency"})
+        await k.post("/api/eigenschaften", json={"entity": "companies", "label": "Standorte", "kind": "number"})
+        await k.post("/api/companies", json={"name": "Groß", "custom": {"budget": 250000, "standorte": 12}})
+        await k.post("/api/companies", json={"name": "Klein", "custom": {"budget": 10000, "standorte": 2}})
+        await k.post("/api/companies", json={"name": "Leer"})
+
+        async def namen(bed):
+            r = await k.get("/api/companies", params={"filter": _json.dumps([bed])})
+            assert r.status_code == 200, r.text
+            return sorted(f["name"] for f in r.json())
+
+        assert await namen({"feld": "custom.budget", "operator": "groesser", "wert": "100000"}) == ["Groß"]
+        assert await namen({"feld": "custom.budget", "operator": "kleiner", "wert": 100000}) == ["Klein"]
+        assert await namen({"feld": "custom.standorte", "operator": "groesser", "wert": "5"}) == ["Groß"]
+        r = await k.get("/api/companies", params={"filter": _json.dumps([{"feld": "custom.budget", "operator": "groesser", "wert": "viel"}])})
+        assert r.status_code == 400

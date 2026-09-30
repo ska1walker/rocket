@@ -1,6 +1,6 @@
 # Plan: Eigenschaften in Gruppen, nach HubSpots Muster
 
-> **Stand:** 30. September 2026 · **Status:** Stufen A und B umgesetzt (26.9.3), C und D geplant
+> **Stand:** 30. September 2026 · **Status:** umgesetzt — A und B in 26.9.3, C und D in 26.9.4
 > **Entschieden von Kai am 30.9.2026:**
 > - **Alle Felder in Gruppen**: Auch die festen (Name, Adresse, Telefon …)
 >   gehören einer Gruppe an und lassen sich verschieben. Löschen lassen sie
@@ -124,7 +124,7 @@ um.
 - **Anlegen-Dialoge:** Zu den festen Pflichtangaben kommen die Felder mit
   `im_anlegen` dazu, in Gruppenreihenfolge.
 
-## Stufe C — Pflichtfelder und neue Feldarten
+## Stufe C — Pflichtfelder und neue Feldarten ✅ 26.9.4
 
 **Pflicht:**
 - Beim Anlegen und beim PATCH prüft das Backend, dass kein Pflichtfeld leer
@@ -150,7 +150,7 @@ Kein Datei-Feld: Dateien haben ihren Ort in den Dokumenten am Datensatz.
 Keine Berechnungsfelder: Rechnen gehört ins Backend, nicht in eine
 Formel, die jemand in den Einstellungen tippt.
 
-## Stufe D — Listen und Filter
+## Stufe D — Listen und Filter ✅ 26.9.4
 
 - Die Spaltenwahl in `segmentliste` und der Filterbau zeigen die Felder
   **nach Gruppen**, mit Suche.
@@ -211,8 +211,8 @@ Formel, die jemand in den Einstellungen tippt.
 |---|---|---|
 | A | Gruppen, Systemeigenschaften, API, Verwaltung mit Ziehen | 26.9.3 ✅ |
 | B | Datensatzseite in Abschnitten, Anlegen-Dialoge | 26.9.3 ✅ (zusammen mit A, sonst sieht man die Gruppen nirgends) |
-| C | Pflichtfelder, neue Arten | nächste Version |
-| D | Spaltenwahl und Filter nach Gruppen | danach |
+| C | Pflichtfelder, neue Arten | 26.9.4 ✅ |
+| D | Spaltenwahl und Filter nach Gruppen | 26.9.4 ✅ |
 
 ## Entschieden (30.9.2026)
 

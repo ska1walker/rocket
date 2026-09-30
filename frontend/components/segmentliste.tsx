@@ -27,6 +27,7 @@ import type {
   Segmentfeld,
 } from "@/lib/typen";
 import { Filterbau } from "@/components/filterbau";
+import { gruppieren, passt } from "@/lib/anordnung";
 import { Stufenpille } from "@/components/stufe";
 import { Mehrfachplaettchen } from "@/components/mehrfachauswahl";
 import { Prioritaetspille } from "@/components/prioritaet";
@@ -99,6 +100,7 @@ export function Segmentliste({
   const [lage, setLage] = useState<Lage | null>(null);
   const [filterOffen, setFilterOffen] = useState(false);
   const [spaltenOffen, setSpaltenOffen] = useState(false);
+  const [spaltensuche, setSpaltensuche] = useState("");
   const [gewaehlt, setGewaehlt] = useState<string[]>([]);
   const [speichernOffen, setSpeichernOffen] = useState(false);
   const [neuerName, setNeuerName] = useState("");
@@ -403,11 +405,25 @@ export function Segmentliste({
       {spaltenOffen && (
         <div className="block" style={{ marginBottom: "var(--am-raum-4)" }}>
           <div className="block-inhalt">
-            <p style={{ fontSize: "0.8125rem", color: "var(--am-text-sekundaer)", marginBottom: "var(--am-raum-3)" }}>
-              Welche Spalten die Tabelle zeigt. Die Reihenfolge folgt der Feldliste.
-            </p>
+            <div className="spaltenwahl-kopf">
+              <p>
+                Welche Spalten die Tabelle zeigt — geordnet wie unter Einstellungen ›
+                Eigenschaften.
+              </p>
+              <input
+                className="input"
+                type="search"
+                value={spaltensuche}
+                onChange={(e) => setSpaltensuche(e.target.value)}
+                placeholder="Feld suchen"
+                aria-label="Feld suchen"
+              />
+            </div>
+            {gruppieren(felder.filter((f) => passt(spaltensuche, f.text, f.schluessel))).map((g) => (
+            <fieldset className="spaltenwahl-gruppe" key={g.gruppe ?? "ohne"}>
+            {g.gruppe && <legend>{g.gruppe}</legend>}
             <div className="spaltenwahl">
-              {felder.map((f) => (
+              {g.felder.map((f) => (
                 <label key={f.schluessel}>
                   <input
                     type="checkbox"
@@ -425,6 +441,8 @@ export function Segmentliste({
                 </label>
               ))}
             </div>
+            </fieldset>
+            ))}
           </div>
         </div>
       )}
@@ -620,7 +638,7 @@ function Zelle({
     const treffer = feld.optionen.find((o) => o.wert === String(roh));
     if (treffer) return <>{treffer.text}</>;
   }
-  if (feld.schluessel === "open_amount_cents") return <>{euro(Number(roh))}</>;
+  if (feld.betrag || feld.schluessel === "open_amount_cents") return <>{euro(Number(roh))}</>;
   if (feld.art === "person") {
     return <>{personen.find((p) => p.id === String(roh))?.name ?? "—"}</>;
   }

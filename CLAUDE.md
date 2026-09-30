@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 26.9.3 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3 Eigenschaften in Gruppen. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket 26.9.1 läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert)
+> **Status:** 26.9.4 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket 26.9.1 läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert)
 > **Letzte Aktualisierung:** 30. September 2026
 
 ---
@@ -42,7 +42,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 
 | Teil | Zustand |
 |---|---|
-| Schema + Zeilensicherheit | 34 Migrationen, alle Fachtabellen unter FORCE |
+| Schema + Zeilensicherheit | 35 Migrationen, alle Fachtabellen unter FORCE |
 | Backend | rund 210 API-Pfade, FastAPI + asyncpg |
 | Oberfläche | Start, Board, Angebote, Prognose, Firmen, Kontakte, Listen, Kampagnen, Tickets, Aufgaben, Fragen, Erkenntnisse, Eingang, Besprechungen, Einfuhr, Einstellungen; Kopfleiste zum Suchen und Anlegen von überall; kurze Navigation mit „Mehr" und Favoriten |
 | Angebote | Katalog, Positionen, Summen, Druckfassung mit Briefkopf |
@@ -57,7 +57,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Tickets | eigene Pipeline, SLA-Uhr ab Absendezeit; Eingang aus API, Bot oder Formular über einen gemeinsamen Weg (`ticketeingang.py`) |
 | Dokumente | Dateien am Datensatz, wie in HubSpot |
 | Datenbank-Blick | `/datenbank` für Verwalter: Tabellen blättern, lesendes SQL, CSV — unter Zeilensicherheit; jede Abfrage vorher mit pglast geprüft (nur SELECT, Tabellen aus `FREI`, Funktionen aus einer Erlaubnisliste), `READ ONLY`, 10 s, protokolliert (`app/datenbank.py`, BETRIEB.md „Datenbank ansehen") |
-| Eigenschaften | nach HubSpot: je Objekt Gruppen, feste und eigene Felder gemeinsam, ordnen per Ziehen (auch Tastatur), Datensatzseite in aufklappbaren Abschnitten, einzeln oder alles bearbeiten, Felder im Anlegen-Dialog (seit 26.9.3, `docs/BETRIEB.md` „Eigenschaften in Gruppen"); eigene: Text, Zahl, Datum, Ja/Nein, Auswahl, Mehrfachauswahl — geprüft beim Schreiben |
+| Eigenschaften | nach HubSpot: je Objekt Gruppen, feste und eigene Felder gemeinsam, ordnen per Ziehen (auch Tastatur), Datensatzseite in aufklappbaren Abschnitten, einzeln oder alles bearbeiten, Felder im Anlegen-Dialog, Pflichtfelder, Spaltenwahl und Filter nach Gruppen (seit 26.9.3/26.9.4, `docs/BETRIEB.md` „Eigenschaften in Gruppen"); eigene: Text, langer Text, Zahl, Betrag, Datum, Ja/Nein, Auswahl, Mehrfachauswahl, URL, E-Mail, Telefon, Person — geprüft beim Schreiben |
 | Pipelines | mehrere nebeneinander, Stufen anlegen/ändern/ordnen/löschen mit Zielangabe |
 | Kontakte | anlegen, bearbeiten, löschen; Hauptfirma plus weitere Firmen |
 | Segmentierung | Bedingungen auf jedes Feld (auch eigene), gespeicherte Ansichten als Reiter, wählbare Spalten, Sortierung am Kopf, Auswahl und Stapeländerung — dieselbe Komponente für Firmen und Kontakte |
@@ -67,7 +67,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | 690 Backend, 68 Frontend |
+| Tests | 704 Backend, 69 Frontend |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.9.1 läuft seit 30.9.2026 auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.9.1` am 30.9.2026, Chart als Anhang). Katalogeintrag `rocket` 26.9.1 **im Markt** (`bayerhazard/aimighty-market` PR #81, am 30.9.2026 im Katalog der Box bestätigt); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
@@ -80,7 +80,7 @@ Postfach über IMAP/SMTP mit Anbieter-Voreinstellungen (Microsoft 365 nur
 per OAuth-Freigabe des Postfachs, kein SSO), feinere Rechte.
 
 **Offen:** Stufe 2 (persönliches Postfach) und Stufe 3 (feinere Rechte)
-aus `docs/PLAN-TEAM.md`; Eigenschaften Stufe C (Pflichtfelder, neue Arten) und D (Spalten und Filter nach Gruppen) aus `docs/PLAN-EIGENSCHAFTEN.md`.
+aus `docs/PLAN-TEAM.md`.
 
 ## Plattform-Kontext: Olares OS
 
