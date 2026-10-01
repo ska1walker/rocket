@@ -1971,6 +1971,30 @@ Erkenntnissen (Gold-800 auf Blau-50, 4,45:1); es nimmt hell Gold-900 wie
 die Stufenpille „Opportunity“. Seitdem läuft der Rundgang **mit** der
 axe-Regel `color-contrast`, hell und dunkel.
 
+## Untermenü der Einstellungen (seit 26.10.4)
+
+Bis 26.10.3 eine Reihe von sechs Pillen über dem Inhalt — ohne Symbol,
+ohne Gruppen, ohne Fokusring, auf dem Handy einfach umgebrochen. Kai
+fand das nicht schön gelöst. Seitdem nach Stand der Technik (HubSpot,
+Stripe, GitHub): **am Desktop eine senkrechte, mitlaufende Liste links**
+in drei Gruppen (Konto · Vertrieb · System) mit Symbolen, **auf dem
+Handy eine Übersichtsliste** mit Kurzbeschreibung, aus der man in einen
+Bereich wechselt; „‹ Alle Einstellungen“ führt zurück. Entschieden von
+Kai am 1.10.2026: Übersichtsliste auf dem Handy, nur Bereiche (keine
+Blöcke) in der Navigation. Baustein HB-UNTERNAV (`docs/MODULE.md`), damit
+Relay ihn übernehmen kann. Alle Adressen `?bereich=` gelten weiter.
+
+**Nebenbei offen: React #418 im Rundgang.** Zweimal bei rund 600
+Aufrufen in der CI (Prognose, Kampagnen am Handy) trat ein
+Hydrierungsfehler auf; lokal ließ er sich auch mit 800 Aufrufen, frischen
+Kontexten und sechsfach gedrosselter CPU nicht nachstellen, und der
+minifizierte Fehler verschweigt, welches Element abweicht. Verdacht ohne
+Beweis: `IconMark` von Next (rendert auf dem Server `<meta
+name="«nxt-icon»">`, im Browser nichts; es gibt ihn erst, seit es Icons
+gibt). Der Rundgang hängt deshalb bei #418 Server-HTML, DOM danach und
+alle Konsolenmeldungen an den Bericht — der nächste Fall liefert den
+Beweis. Der Test bleibt streng.
+
 ## Symbol der Web-App (seit 26.9.7)
 
 Bis 26.9.6 gab die Oberfläche kein Symbol an. iOS baute beim „Teilen →

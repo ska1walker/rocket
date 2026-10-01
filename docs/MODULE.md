@@ -1,6 +1,6 @@
 # Module der Oberfläche — Bausteinkatalog
 
-> **Stand:** 30. September 2026 · Rocket 26.10.3
+> **Stand:** 30. September 2026 · Rocket 26.10.4
 > **Für wen:** alle, die an Rocket, Relay, Insilo oder einer weiteren
 > AImighty-App bauen. Rocket ist nur die erste App, in der die Bausteine
 > beschrieben sind.
@@ -76,7 +76,8 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | HB-TABELLE | Werkzeugleiste, Datentabelle, Rollfläche | CSS | ● |
 | HB-ZEITLEISTE | Verlauf mit KI-Punkt | `zeitleiste.tsx` | ◐ Darstellung / ○ Daten |
 | HB-BOARD | Brett mit Spalten und Karten, auch per Tastatur | CSS, `brett.tsx` | ● CSS / ○ Seite |
-| HB-EINSTELLUNGEN | Unterpunkte und Block-Muster der Einstellungen | CSS, `einstellungen/page.tsx` | ● Muster |
+| HB-UNTERNAV | Zweite Navigationsebene: senkrecht links, auf dem Handy Übersichtsliste | `unternavigation.tsx` + CSS | ● |
+| HB-EINSTELLUNGEN | Bereiche und Block-Muster der Einstellungen | CSS, `einstellungen/page.tsx` | ● Muster |
 | HB-DRUCK | A4-Dokument und Druck | CSS | ● CSS / ○ Seite |
 | RK-SEGMENTLISTE | Listen mit Ansichten, Filter, Spalten, Stapel | `segmentliste.tsx`, `filterbau.tsx` | ○ (◐ Filterbau) |
 | RK-FELDGRUPPEN | Eigenschaften in Gruppen am Datensatz | `feldgruppen.tsx`, `lib/feldwerte.ts`, `lib/anordnung.ts` | ○ (◐ lib) |
@@ -573,12 +574,37 @@ verschoben". Jede Karte trägt `data-karte` und verweist auf den Hinweis.
 Rocket nutzt es für Leads und Tickets; für Relay taugt es etwa für
 Postzustände.
 
-### HB-EINSTELLUNGEN — Unterpunkte und Block-Muster ● Muster
+### HB-UNTERNAV — Zweite Navigationsebene ● (seit 26.10.4)
+
+![Unternavigation am Desktop](module/hb-unternav.png)
+![Unternavigation auf dem Handy](module/hb-unternav-handy.png)
+
+Für Seiten mit mehreren Bereichen, zuerst die Einstellungen. Stand der
+Technik wie bei HubSpot, Stripe, GitHub:
+
+- **Desktop (≥1024px):** senkrechte Liste links neben dem Inhalt
+  (15rem), mitlaufend (`position: sticky`), in Gruppen mit Titel. Jeder
+  Eintrag mit Symbol (lucide, 18px); gewählt mit Auswahlfläche, kräftiger
+  Schrift und einer Goldmarke am Rand — Gold trägt keinen Text.
+- **Handy:** dieselbe Liste als Übersicht mit Kurzbeschreibung und „›“,
+  wie die iPhone-Einstellungen. Ist ein Bereich gewählt, steht nur er da;
+  oben „‹ Alle Einstellungen · Bereich“.
+- **Steuerung ohne JavaScript:** `.unternav-seite[data-auswahl="ja|nein"]`
+  und CSS — Server und Browser rendern dasselbe.
+- **Markup:** `nav[aria-label]` > Gruppen `role="group"` mit
+  `aria-labelledby` > `a.unternav-eintrag` mit `aria-current="page"`,
+  sichtbarer Fokusring.
+- **Übernahme:** `components/unternavigation.tsx` und den CSS-Abschnitt
+  `[HB-UNTERNAV]` kopieren; die Seite liefert Gruppen und Einträge
+  (`href`, `text`, `beschreibung`, `symbol`).
+
+### HB-EINSTELLUNGEN — Bereiche und Block-Muster ● Muster
 
 ![Einstellungen](module/hb-einstellungen.png)
 
-- **Unterpunkte** `nav.unterpunkte > a.unterpunkt(.aktiv)` mit
-  `?bereich=`.
+- **Bereiche** über HB-UNTERNAV in drei Gruppen (Konto, Vertrieb,
+  System), Adresse `?bereich=` (bis 26.10.3 eine Pillenreihe
+  `nav.unterpunkte`).
 - **Jeder Bereich ist eine Folge von Blöcken:**
   - `.block-kopf` mit Titel und Stand („eingerichtet" als HB-PILLE);
   - darunter HB-ERKLAERUNG, dann Felder;
