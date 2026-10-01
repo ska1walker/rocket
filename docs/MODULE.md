@@ -8,9 +8,10 @@
 > **Seit Paket 3 (1.10.2026) stehen die `AM-` und `HB-` Bausteine auch im
 > CI-Repo**, je Kennung in `bauteile/<KENNUNG>.md` mit Bild und geprüftem
 > CSS (`ska1walker/aimighty-ci`, `bauteile/README.md`). Für Relay, Insilo und
-> jede weitere App ist das die Referenz. Bis Paket 4 ist Rocket die Quelle:
-> Wer hier einen Baustein ändert, holt ihn danach ins CI
-> (`python3 werkzeug/bauteile.py …/frontend/app/globals.css`).
+> jede weitere App ist das die Referenz. **Seit Paket 4 (26.10.11) ist das CI
+> die Quelle:** Ein Baustein ändert sich dort, Rocket holt einen Stand
+> `ci-YY.M.n` nach `frontend/ci/` (`scripts/ci-holen.mjs`), und
+> `ci-stand.test.ts` hält `globals.css` gleich (BETRIEB.md, „Stand aus dem CI“).
 
 ## Worum es geht
 

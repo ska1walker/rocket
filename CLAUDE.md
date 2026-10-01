@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, AI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 26.10.10 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf (26.10.2 macht ihn fehlertolerant); 26.10.3 hebt den gedämpften Text auf #567595 und prüft den Kontrast in der CI; 26.10.4 gibt den Einstellungen eine senkrechte Navigation (Handy: Übersichtsliste, HB-UNTERNAV); 26.10.5 nimmt die Token aus dem CI-Repo (`tokens/app.css`, Abgleich Paket 1), behebt vier Kontrastfehler (Rand, Fokusring, Lösch-Knopf) und rechnet den Kontrast aus den Token; 26.10.6 setzt Paket 2 um (Löschen rot mit Wort, „AI“ statt „KI“, Rakete im App-Icon, Schatten nur für Schwebendes, Fristen mit Uhr und Wort, Maße aus dem CI). 26.10.7 setzt Paket 5 um (Grundgerüst aller AImighty-Apps: Seitentitel 28 px, jeder Knopf 8 px, gewählter Eintrag getönt, Symbolknöpfe mit Tooltip, im Tab nur die Rakete und „Seite · Rocket“) und bringt jedes Release über die Action `markt.yml` von selbst in den Markt. 26.10.8 bringt Rocket im Markt auch auf Deutsch (`olares/markt/beschreibung.*.md`, Notizen mit `## Deutsch`) und unter „Applications“; der gewählte Navigationseintrag ist nur noch eine Goldkante ohne Fläche (CI G1 nachgeschärft). 26.10.9 zeichnet jedes Symbol aus dem CI-Set (HB-SYMBOL statt lucide-react, 16/20/24/40, Strich 1,5 px; ABGLEICH R2), 26.10.10 die Rollenzeichen an der Produktleiter und „lokal“ im Nachweis. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); über den Markt aktualisiert, seit 1.10.2026 mit Passwort, zuletzt auf 26.10.7
+> **Status:** 26.10.11 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf (26.10.2 macht ihn fehlertolerant); 26.10.3 hebt den gedämpften Text auf #567595 und prüft den Kontrast in der CI; 26.10.4 gibt den Einstellungen eine senkrechte Navigation (Handy: Übersichtsliste, HB-UNTERNAV); 26.10.5 nimmt die Token aus dem CI-Repo (`tokens/app.css`, Abgleich Paket 1), behebt vier Kontrastfehler (Rand, Fokusring, Lösch-Knopf) und rechnet den Kontrast aus den Token; 26.10.6 setzt Paket 2 um (Löschen rot mit Wort, „AI“ statt „KI“, Rakete im App-Icon, Schatten nur für Schwebendes, Fristen mit Uhr und Wort, Maße aus dem CI). 26.10.7 setzt Paket 5 um (Grundgerüst aller AImighty-Apps: Seitentitel 28 px, jeder Knopf 8 px, gewählter Eintrag getönt, Symbolknöpfe mit Tooltip, im Tab nur die Rakete und „Seite · Rocket“) und bringt jedes Release über die Action `markt.yml` von selbst in den Markt. 26.10.8 bringt Rocket im Markt auch auf Deutsch (`olares/markt/beschreibung.*.md`, Notizen mit `## Deutsch`) und unter „Applications“; der gewählte Navigationseintrag ist nur noch eine Goldkante ohne Fläche (CI G1 nachgeschärft). 26.10.9 zeichnet jedes Symbol aus dem CI-Set (HB-SYMBOL statt lucide-react, 16/20/24/40, Strich 1,5 px; ABGLEICH R2), 26.10.10 die Rollenzeichen an der Produktleiter und „lokal“ im Nachweis; 26.10.11 holt Token, Zeichen und Bausteine als Stand aus dem CI (Paket 4, `frontend/ci/`) und richtet das Suchfeld an der Linie der Seite aus. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); über den Markt aktualisiert, seit 1.10.2026 mit Passwort, zuletzt auf 26.10.7
 > **Letzte Aktualisierung:** 1. Oktober 2026
 
 ---
@@ -67,7 +67,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | 708 Backend, 92 Frontend, 151 im Browser (Playwright, CI-Job „oberfläche“) |
+| Tests | 708 Backend, 96 Frontend, 151 im Browser (Playwright, CI-Job „oberfläche“) |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.10.7 läuft auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`; 26.9.1 installiert am 30.9.2026, am selben Tag auf 26.9.4 aktualisiert — das erste Update über den Markt, mit den Migrationen 0033–0035; am 1.10.2026 auf 26.10.2, eingerichtet über den Einrichtungscode für den vorhandenen Zugang `kaivostudio`, Bestand erhalten; am selben Tag auf 26.10.3, 26.10.5 und 26.10.7). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.10.10` am 1.10.2026, Chart als Anhang). Katalogeintrag `rocket` **26.10.10 im Markt** (`bayerhazard/aimighty-market` PR #93, 1.10.2026, von der Action; vorher 26.10.9 mit PR #92; vorher 26.10.8 mit PR #91, deutsch und unter „Applications“; vorher 26.10.7 mit PR #90, enthält 26.10.6 — der erste Eintrag durch die Action `markt.yml`; vorher 26.10.5 mit PR #89, enthält 26.10.4; vorher 26.10.3 mit PR #88, 26.10.2 mit PR #87, 26.10.1 mit PR #86, 26.9.7 mit PR #85, enthält 26.9.6; 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
@@ -188,12 +188,15 @@ einer anderen Box falsch.
 
 ## Designsystem
 
-**Die Werte kommen aus dem CI-Repo** `ska1walker/aimighty-ci`: Der
-Token-Block oben in `frontend/app/globals.css` ist seit 26.10.5 eine
-unveränderte Kopie von `tokens/app.css` (entschieden von Kai am 1.10.2026).
-**Einen Wert ändert man dort**, kopiert den Block hierher und prüft mit
-`werkzeug/app-abgleich.py`; eine Abweichung von CI-Regeln geht nur über
-einen Eintrag in `ABGLEICH.md` im CI-Repo, nie still. Die Bauteile darunter
+**Token, Zeichen und Bausteine kommen aus dem CI-Repo** `ska1walker/aimighty-ci`
+(Paket 4, Kai 1.10.2026, seit 26.10.11): Rocket hält einen Stand `ci-YY.M.n`
+als Kopie unter `frontend/ci/` (mit `stand.json`), geholt mit
+`node scripts/ci-holen.mjs --von <klon> --stand ci-YY.M.n` — nie `main`, nie
+zur Bauzeit. Der Token-Block oben in `globals.css` ist `ci/tokens/app.css`,
+jeder `AM-`/`HB-` Abschnitt ist `ci/bauteile/<KENNUNG>.css`;
+`lib/__tests__/ci-stand.test.ts` wacht. **Ändern nur im CI**, dann neu
+holen; eine Abweichung von CI-Regeln geht nur über einen Eintrag in
+`ABGLEICH.md` im CI-Repo, nie still (`docs/BETRIEB.md` „Stand aus dem CI“). Die Bauteile darunter
 stammen aus dem AImighty-Paket über Insilo; darunter steht ein eigener
 Abschnitt mit den CRM-Bauteilen.
 **Dieser Abschnitt enthält keinen einzigen Farbwert, nur `--am-*`.** Wer
@@ -214,7 +217,7 @@ eine Farbe ändern will, ändert das Token.
 - **Jedes Zeichen kommt aus dem CI-Set** (`marke/icons/ui/` im CI-Repo), über
   HB-SYMBOL (`components/symbol.tsx`, erzeugt nach `lib/symbole.tsx`) — nie
   aus `lucide-react` oder direkt aus Lucide; fehlt eins, kommt es erst ins
-  CI-Set. Größen nur 16/20/24/40, Strich immer 1,5 px (seit 26.10.9,
+  CI-Set und kommt mit dem nächsten Stand. Größen nur 16/20/24/40, Strich immer 1,5 px (seit 26.10.9,
   ABGLEICH R2; `docs/BETRIEB.md` „Ein Icon-Set für alle Apps“).
 
 - **Das Symbol der Web-App ist das Rocket-Icon** aus `docs/icon/rocket.svg`
@@ -283,10 +286,10 @@ der Lieferung und liest die Token über `var(--am-*)`.
    Datei und im CSS-Abschnitt steht; ein neuer Baustein bekommt sie an
    allen drei Stellen. **Jede Kopfzeile `/* ── … ─` in `globals.css` trägt
    eine Kennung** (`abschnitte.test.ts` wacht): Aus diesen Abschnitten
-   schneidet das CI-Repo seine `bauteile/` (Paket 3). Ändert sich ein `AM-`
-   oder `HB-` Baustein, danach im CI-Repo `python3 werkzeug/bauteile.py
-   …/frontend/app/globals.css` laufen lassen und die Bilder mit
-   `frontend/scripts/modulbilder.mjs` neu aufnehmen. Werte nie am Bauteil setzen — ein Text mit Rolle
+   stammen die `bauteile/` des CI (Paket 3). Ein `AM-` oder `HB-` Baustein
+   ändert sich zuerst im CI (seit Paket 4; Entwurf aus Rocket mit
+   `werkzeug/bauteile.py … --uebernehmen`), dann neuen Stand holen und die
+   Bilder mit `frontend/scripts/modulbilder.mjs` neu aufnehmen. Werte nie am Bauteil setzen — ein Text mit Rolle
    nimmt eine Klasse aus HB-TEXT, nicht `style`. Jeder Dialog ist ein
    `Dialog` oder eine `Rueckfrage` (`components/dialog.tsx`: Fokus, Tab,
    Escape inklusive); Spalten, die das Handy nicht trägt, kommen aus

@@ -896,12 +896,13 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
       grid-template-rows: auto minmax(0, 1fr);
     }
 
-    /* Der Markenblock ist genau so breit wie die Navigationsspalte
-       (abzüglich Polster und Abstand). Dadurch beginnt die Suche exakt
-       an der Kante der Inhaltsspalte, und die senkrechte Trennlinie der
-       Spalte läuft von der Kopfleiste bis nach unten durch. */
+    /* Der Markenblock ist so breit wie die Navigationsspalte plus der Rand
+       der Inhaltsspalte (abzüglich Polster und Abstand). Dadurch beginnt die
+       Suche auf derselben Linie wie Seitentitel und Blöcke darunter — vorher
+       stand sie an der Spaltenkante, 32 px links von allem anderen (Kai,
+       1.10.2026). */
     .kopfleiste-marke {
-      width: calc(var(--huelle-nav-breite) - var(--am-raum-4) - var(--am-raum-3));
+      width: calc(var(--huelle-nav-breite) + var(--am-raum-8) - var(--am-raum-4) - var(--am-raum-3));
     }
 
     .huelle.hat-ablage {

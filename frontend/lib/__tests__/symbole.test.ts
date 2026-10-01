@@ -7,7 +7,8 @@ import { strich } from "@/components/symbol";
 /**
  * Ein Icon-Set für alle Apps (ABGLEICH.md, R2; Kai, 1.10.2026): Rocket
  * zeichnet nur aus dem CI-Set, über HB-SYMBOL. Der Test hält drei Dinge fest:
- * kein Import aus lucide-react, lib/symbole.tsx ist aus symbole/ erzeugt, und
+ * kein Import aus lucide-react, lib/symbole.tsx ist aus der CI-Kopie (ci/marke/icons/ui/)
+ * erzeugt, und
  * der Strich bleibt bei jeder Größe 1,5 px.
  */
 
@@ -30,7 +31,7 @@ describe("HB-SYMBOL", () => {
     expect(readFileSync(join(FRONTEND, "package.json"), "utf8")).not.toContain("lucide");
   });
 
-  it("lib/symbole.tsx ist aus symbole/ erzeugt", () => {
+  it("lib/symbole.tsx ist aus ci/marke/icons/ui/ erzeugt", () => {
     expect(() =>
       execFileSync("node", [join(FRONTEND, "scripts", "symbole-erzeugen.mjs"), "--pruefen"], { stdio: "pipe" }),
     ).not.toThrow();
