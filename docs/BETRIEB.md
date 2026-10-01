@@ -1957,10 +1957,19 @@ rollenden Bereichen), Kästen ohne Abstand zum Vorgänger, Zeichen im
 Leerzustand außer Mitte; ein eigener Test führt einen Leerzustand
 herbei. Gegen den alten Stand fällt er an allen vier Stellen oben.
 
-**Offen, weil es das Designsystem betrifft:** Gedämpfter Text
-(`--am-text-gedaempft` = Blau-500) erreicht auf der Grundfläche Blau-25
-nur 4,36:1, Gold-800 auf Blau-50 4,45:1 — knapp unter 4,5. Das ist eine
-Entscheidung über die Token, nicht über ein Bauteil.
+**Kontrast, entschieden in 26.10.3:** Gedämpfter Text
+(`--am-text-gedaempft`) war Blau-500 (`#587898`) und erreichte auf der
+Grundfläche Blau-25 nur 4,36:1. Kai entschied am 1.10.2026 für `#567595`
+— derselbe Farbton, 4,54:1 auf Blau-25 und 4,80:1 auf Weiß. Das ist eine
+bewusste Abweichung vom Paket und steht am Token. Auf Blau-50 (4,34:1) und
+Blau-100 (3,96:1) bliebe auch dieser Wert darunter; axe fand über alle
+Seiten aber keinen gedämpften Text auf diesen Flächen. Würde er dort
+nötig, trüge `#4f6c8a` auch auf Blau-100 (4,51:1).
+
+Der einzige übrige Befund war das Schildchen „Wunsch“ auf den
+Erkenntnissen (Gold-800 auf Blau-50, 4,45:1); es nimmt hell Gold-900 wie
+die Stufenpille „Opportunity“. Seitdem läuft der Rundgang **mit** der
+axe-Regel `color-contrast`, hell und dunkel.
 
 ## Symbol der Web-App (seit 26.9.7)
 

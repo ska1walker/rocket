@@ -120,7 +120,12 @@
 
   --am-text-primaer: var(--am-blau-900);
   --am-text-sekundaer: var(--am-blau-600);
-  --am-text-gedaempft: var(--am-blau-500);
+  /* Abweichung vom Paket, entschieden von Kai am 1.10.2026: Blau-500
+     (#587898) erreichte auf der Grundfläche Blau-25 nur 4,36:1. #567595
+     liegt im selben Farbton und schafft 4,54:1 (Weiß 4,80:1). Auf Blau-50
+     (Menü) und Blau-100 (Dialog) bleibt es mit 4,34:1 und 3,96:1 darunter
+     — siehe docs/BETRIEB.md, „GUI-Prüfung“. */
+  --am-text-gedaempft: #567595;
   --am-text-deaktiviert: var(--am-blau-400);
 
   --am-handlung-ruhend: #002f56;
@@ -3854,7 +3859,10 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
   .erkenntnis-art[data-art="lob"] { color: var(--am-erfolg); }
   .erkenntnis-art[data-art="kritik"] { color: var(--am-achtung); }
-  .erkenntnis-art[data-art="wunsch"] { color: var(--am-gold-beschriftung); }
+  /* Gold-800 auf Fläche-2 lag bei 4,45:1 — hell deshalb Gold-900, wie die
+     Stufenpille „Opportunity“; dunkel trägt die Gold-Beschriftung. */
+  .erkenntnis-art[data-art="wunsch"] { color: var(--am-gold-900); }
+  .dunkel .erkenntnis-art[data-art="wunsch"] { color: var(--am-gold-beschriftung); }
   .erkenntnis-art[data-art="einwand"] { color: var(--am-handlung-ruhend); }
 
   .themen { display: grid; gap: var(--am-raum-4); max-width: 860px; }

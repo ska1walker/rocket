@@ -1,6 +1,6 @@
 # Module der Oberfläche — Bausteinkatalog
 
-> **Stand:** 30. September 2026 · Rocket 26.10.1
+> **Stand:** 30. September 2026 · Rocket 26.10.3
 > **Für wen:** alle, die an Rocket, Relay, Insilo oder einer weiteren
 > AImighty-App bauen. Rocket ist nur die erste App, in der die Bausteine
 > beschrieben sind.
@@ -880,5 +880,6 @@ ist akut; es ist die Liste für eine ruhige Stunde.
 - **Doppelte Wege:** Stammdaten und Feldgruppen tun dasselbe in zwei
   Bauarten. Angebote und Tickets nutzen noch Stammdaten; sie bleiben
   bewusst ohne Gruppen (Entscheidung zu den Eigenschaften, 30.9.2026).
-- **Kontrast:** Gedämpfter Text liegt auf der Grundfläche bei 4,36:1 —
-  eine Entscheidung über AM-TOKEN (BETRIEB.md, „GUI-Prüfung").
+- ~~**Kontrast:**~~ Erledigt in 26.10.3: `--am-text-gedaempft` hell auf
+  `#567595` (Kai, 1.10.2026), „Wunsch“ auf Gold-900; die CI prüft den
+  Kontrast seitdem mit (BETRIEB.md, „GUI-Prüfung").
