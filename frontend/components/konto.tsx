@@ -3,7 +3,7 @@
 // Modul HB-KONTO — docs/MODULE.md
 
 import { useQuery } from "@tanstack/react-query";
-import { ChevronsUpDown, Globe, KeyRound, LogOut, Server } from "@/lib/symbole";
+import { ChevronsUpDown, Globe, KeyRound, LogOut, Lokal } from "@/lib/symbole";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -175,7 +175,7 @@ export function Nachweiszeile() {
   const stand = nachweis(einstellungen.data);
   if (!stand) return null;
 
-  const Zeichen = stand.extern ? Globe : Server;
+  const Zeichen = stand.extern ? Globe : Lokal;
   const titel = stand.extern
     ? stand.ziele.map((z) => `${z.was}: ${z.host}`).join(" · ")
     : "Kein eingetragenes Ziel außerhalb dieser Box";

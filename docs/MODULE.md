@@ -90,6 +90,7 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | RK-TICKET | Tickets, Antwort per Mail | `app/tickets`, `ticket-antwort.tsx` | ○ |
 | RK-BRIEFING | Tagesbriefing | `briefing.tsx` | ○ |
 | RK-PROGNOSE | Prognose | `app/prognose` | ○ |
+| RK-PRODUKT | Rollenzeichen der Produktleiter | `produktzeichen.tsx` + CSS | ◐ Zuordnung |
 | RK-DOKUMENTE | Dateien am Datensatz | `dokumente.tsx` | ◐ |
 | RK-EINFUHR | CSV-Einfuhr | `einfuhr.tsx` | ○ (● CSS) |
 | RK-DATENBANK | Datenbank-Blick | `app/datenbank` | ○ |
@@ -778,6 +779,18 @@ Modell eine Reihenfolge vor (in HB-AI).
 
 `app/prognose/page.tsx`: Zeitraum, sechs Kennzahlen (HB-KENNZAHL),
 darunter `datensatz-zwei` mit Monaten, Verlustgründen und Produkten.
+
+### RK-PRODUKT — Rollenzeichen der Produktleiter ◐
+
+`components/produktzeichen.tsx`: Assistent, Analyst und Experte tragen die
+Rollenzeichen aus dem CI-Set (`rolle-assistent`, `rolle-analyst`,
+`rolle-experte`), wie auf der Website. `Produktzeichen` gibt das Zeichen zu
+einem Produktschlüssel, `MitProduktzeichen` setzt es vor einen Namen und hält
+bei anderen Produkten den Platz frei, damit die Namen untereinander stehen.
+Im Einsatz im Produktkatalog (Einstellungen › Vertrieb) und in der Prognose
+„Nach Produkt“. Leistung, Sonstiges und eigene Katalogeinträge bekommen kein
+Zeichen. Übertragbar ist die Zuordnung, nicht die Datei: Eine andere App
+mit derselben Produktleiter nimmt dieselben drei Zeichen.
 
 ### RK-DOKUMENTE — Dateien am Datensatz ◐
 

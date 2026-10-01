@@ -1692,6 +1692,17 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     overflow-x: auto;
   }
 
+  /* ── Produktleiter [RK-PRODUKT] ────────────────────────────────────────
+     Rollenzeichen vor Assistent, Analyst, Experte (CI-Set, ABGLEICH R2). */
+  .mit-produktzeichen {
+    display: flex;
+    align-items: center;
+    gap: var(--am-raum-2);
+    min-width: 0;
+  }
+  .produktzeichen { color: var(--am-text-sekundaer); }
+  .produktzeichen-platz { flex: none; width: 1rem; }
+
   /* ── Eigenschaftsliste [RK-STAMMDATEN] ────────────────────────────────────────────── */
   .eigenschaft {
     display: grid;
@@ -2451,6 +2462,12 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     width: 100%;
     min-width: 10rem;
   }
+  /* Mit Rollenzeichen davor [RK-PRODUKT]: Zeichen und Feld zusammen so breit
+     wie sonst das Feld allein — sonst fehlt der Platz den Zahlenspalten. */
+  .tabelle td > .mit-produktzeichen > input.input {
+    width: 100%;
+    min-width: calc(10rem - 1rem - var(--am-raum-2));
+  }
 
   .tabelle input.input,
   .tabelle select.input {
@@ -2461,6 +2478,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
 
   .tabelle td.zahl input.input {
+    min-width: 4.5rem;
     text-align: right;
     font-family: var(--am-schrift-mono);
     font-variant-numeric: tabular-nums;

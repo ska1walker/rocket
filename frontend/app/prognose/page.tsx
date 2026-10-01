@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, suchparameter } from "@/lib/api";
 import { euro, PRODUKT_TEXT } from "@/lib/format";
+import { MitProduktzeichen } from "@/components/produktzeichen";
 import type { Prognose } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";
 import { Fehler, Laedt } from "@/components/zustaende";
@@ -220,7 +221,7 @@ export default function PrognoseSeite() {
                       const gesamt = pr.gewonnen + pr.verloren;
                       return (
                         <tr key={pr.produkt}>
-                          <td className="haupt">{PRODUKT_TEXT[pr.produkt] ?? pr.produkt}</td>
+                          <td className="haupt"><MitProduktzeichen produkt={pr.produkt}>{PRODUKT_TEXT[pr.produkt] ?? pr.produkt}</MitProduktzeichen></td>
                           <td className="zahl">{pr.gewonnen}</td>
                           <td className="zahl">{pr.verloren}</td>
                           <td className="zahl">
