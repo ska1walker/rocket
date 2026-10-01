@@ -83,8 +83,8 @@ danach prüfte Claude nach. Jetzt läuft nach jedem erfolgreichen `release`
 auf `main` die Action `.github/workflows/markt.yml`:
 
 1. holt den Chart-Anhang des Release und **Marcs `main` frisch**;
-2. baut den Eintrag mit `scripts/markt-eintrag.py`: Version, Notizen vorn in
-   `upgradeDescription`, Chart-Schlüssel frisch kodiert, alte Rocket-Schlüssel
+2. baut den Eintrag mit `scripts/markt-eintrag.py`: Version, Kategorien aus
+   `olares/OlaresManifest.yaml`, Notizen vorn in `upgradeDescription`, Chart-Schlüssel frisch kodiert, alte Rocket-Schlüssel
    weg, `CANONICAL_EPOCH_MS` streng darüber. Kennt der Markt die Version
    schon, endet sie still;
 3. **beweist ihn mit wrangler** (`scripts/markt-beweis.sh`: Hash, Chart
@@ -254,6 +254,8 @@ Sechster Durchlauf: Rocket 26.10.2, PR #87, 1.10.2026 — Einrichtungscode fehle
 Siebter Durchlauf: Rocket 26.10.3, PR #88, 1.10.2026 — Kontrast des gedämpften Texts (#567595), Kontrastprüfung in der CI. Marcs `main` unverändert seit 26.10.2 (d2c2a34); `CANONICAL_EPOCH_MS` 4375000000000 → 4376000000000. Lokal mit wrangler bewiesen; auf Kais Wunsch von Claude gestartet, diesmal ohne Rückfrage gemergt; auf `main` byte-gleich geprüft (sha256 `8529ee6e…f948`, keine alten Schlüssel). Keine Datenbankänderung. Von Kai auf der Box aktualisiert, läuft (1.10.2026).
 
 Achter Durchlauf: Rocket 26.10.5, PR #89, 1.10.2026 — Token aus dem CI-Repo (`tokens/app.css`), vier Kontrastfehler behoben; enthält 26.10.4 (Einstellungsnavigation), das nie im Markt war. Marcs `main` hatte sich seit 26.10.3 bewegt (71568a6): vier eigene Einträge, dazu zwei Änderungen am Markt selbst — Beschreibungen dürfen je Sprache stehen (`loc()` in `_lib.ts`, auch `de-DE`), und die Kategorie „Applications“ steht vorn in der Navigation. Für Rocket ändert das nichts, ein einfacher englischer Text gilt weiter. `CANONICAL_EPOCH_MS` 4380000000000 → 4381000000000. Lokal mit wrangler bewiesen; auf Kais Wunsch von Claude gestartet, ohne Rückfrage gemergt; auf `main` byte-gleich geprüft (sha256 `b413f923…31c5`, keine alten Schlüssel). Keine Datenbankänderung. Von Kai auf der Box aktualisiert, läuft (1.10.2026).
+
+Neunter Durchlauf: Rocket 26.10.7, PR #90, 1.10.2026 — **der erste ohne Sitzung**, gebaut, bewiesen und gemergt von der Action `markt.yml` drei Minuten nach dem Release (Merge 31d6b82, Cloudflare-Deploy grün). Nimmt 26.10.6 mit: Dessen Eintrag (Zweig `rocket-26.10.6`) kam nie an; Marc hatte inzwischen `main` bewegt (eigene Einträge mit deutschen Beschreibungen, Open Design entfernt) und den Zeitstempel selbst auf 4382000000000 gehoben — genau den Wert des ersten 26.10.6-Zweigs, der damit nicht mehr darüber lag. Die Action rechnete auf frischem `main` 4383000000000. Auf `main` byte-gleich geprüft (sha256 `ec4b3924…4d63`, keine alten Schlüssel). Keine Datenbankänderung.
 
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
