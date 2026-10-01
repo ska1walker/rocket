@@ -64,10 +64,10 @@ for (const [name, muster] of SEITEN) {
   test(`${name} (${muster}) ${thema}`, async ({ page, context, baseURL }, testInfo) => {
     await context.addCookies([{ name: "rocket-darstellung", value: thema, url: baseURL! }]);
     const fehler: string[] = [];
-    // Spurensicherung für React #418 (Hydrierung): zweimal bei rund 600
-    // Aufrufen in CI aufgetreten, lokal nicht nachstellbar. Der minifizierte
-    // Fehler verschweigt, welches Element abweicht — deshalb hängen Server-HTML,
-    // DOM danach und alle Konsolenmeldungen am Bericht, wenn er kommt.
+    // Spurensicherung: Server-HTML, DOM danach und alle Konsolenmeldungen
+    // hängen am Bericht, sobald ein Fehler kam. Ein minifizierter React-Fehler
+    // verschweigt, welches Element abweicht — so ließ sich #418 auf die Marke
+    // `«nxt-icon»` von Next zurückführen (BETRIEB.md, „#418“).
     const konsole: string[] = [];
     let serverHtml = "";
     page.on("console", (m) => konsole.push(`[${m.type()}] ${m.text()}`));
@@ -80,11 +80,6 @@ for (const [name, muster] of SEITEN) {
     });
 
     await page.goto(await aufloesen(page, muster), { waitUntil: "networkidle" });
-    if (fehler.some((f) => f.includes("#418"))) {
-      await testInfo.attach("server.html", { body: serverHtml, contentType: "text/html" });
-      await testInfo.attach("dom-danach.html", { body: await page.content(), contentType: "text/html" });
-      await testInfo.attach("konsole.txt", { body: konsole.join("\n"), contentType: "text/plain" });
-    }
 
     const lage = await page.evaluate(() => {
       const kopf = document.querySelector(".seitenkopf");
@@ -139,6 +134,18 @@ for (const [name, muster] of SEITEN) {
       .filter((v) => v.impact === "critical" || v.impact === "serious")
       .map((v) => `axe ${v.id}: ${v.nodes.slice(0, 2).map((n) => n.target.join(" ")).join(" ; ")}`);
 
+    // Ein Skriptfehler kommt oft erst nach dem Laden — deshalb wird hier am
+    // Ende gesichert, nicht direkt hinter goto (dort kam #418 noch nicht an).
+    if (fehler.length) {
+      await testInfo.attach("server.html", { body: serverHtml, contentType: "text/html" });
+      await testInfo.attach("dom-danach.html", { body: await page.content(), contentType: "text/html" });
+      await testInfo.attach("konsole.txt", { body: konsole.join("\n"), contentType: "text/plain" });
+    }
+
+    // Die Marke `<meta name="«nxt-icon»">` rendert Next nur, wenn Symbole über
+    // die Metadaten laufen; bleibt sie im HTML stehen, folgt #418. Rocket
+    // bindet die Symbole selbst ein (app/layout.tsx), also gibt es sie nie.
+    expect(serverHtml.includes("nxt-icon"), "Next-Marke «nxt-icon» im Server-HTML").toBe(false);
     expect(fehler, "Fehler beim Laden").toEqual([]);
     expect(lage.ueberlauf, "Seite breiter als der Bildschirm").toBeLessThanOrEqual(1);
     expect(lage.ueberschriften, "genau eine h1").toBe(1);

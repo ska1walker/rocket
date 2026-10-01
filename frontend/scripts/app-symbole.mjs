@@ -37,8 +37,8 @@ function form(art) {
 }
 
 const ZIELE = [
-  ["app/icon1.png", "tab", 32],
-  ["app/apple-icon.png", "voll", 180],
+  ["public/icon-32.png", "tab", 32],
+  ["public/apple-touch-icon.png", "voll", 180],
   ["public/symbol/rocket-192.png", "rund", 192],
   ["public/symbol/rocket-512.png", "rund", 512],
   ["public/symbol/rocket-maskable-512.png", "voll", 512],
