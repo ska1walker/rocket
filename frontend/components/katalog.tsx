@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import type { Product, Verlustgrund } from "@/lib/typen";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { Erklaerung } from "@/components/erklaerung";
+import { MitProduktzeichen } from "@/components/produktzeichen";
 
 const ART: Record<string, string> = { system: "System", hardware: "Hardware", service: "Leistung", subscription: "Laufend" };
 
@@ -33,7 +34,7 @@ export function Katalogblock() {
           <tbody>
             {produkte.data!.map((p) => (
               <tr key={p.id} style={{ cursor: "default", opacity: p.is_active ? 1 : 0.5 }}>
-                <td><input className="input" aria-label="Name" defaultValue={p.name} onBlur={(e) => e.target.value.trim() && e.target.value !== p.name && aendern.mutate({ id: p.id, name: e.target.value.trim() })} /></td>
+                <td><MitProduktzeichen produkt={p.key}><input className="input" aria-label="Name" defaultValue={p.name} onBlur={(e) => e.target.value.trim() && e.target.value !== p.name && aendern.mutate({ id: p.id, name: e.target.value.trim() })} /></MitProduktzeichen></td>
                 <td>{ART[p.kind] ?? p.kind}</td>
                 <td className="zahl"><input className="input" type="number" min="0" step="100" aria-label="Preis" defaultValue={p.list_price_cents / 100} onBlur={(e) => { const c = Math.round(Number(e.target.value) * 100); if (c !== p.list_price_cents) aendern.mutate({ id: p.id, list_price_cents: c }); }} /></td>
                 <td className="zahl"><input className="input" type="number" min="0" aria-label="Servicetage" defaultValue={p.default_service_days ?? ""} onBlur={(e) => { const t = e.target.value === "" ? null : Number(e.target.value); if (t !== p.default_service_days) aendern.mutate({ id: p.id, default_service_days: t }); }} /></td>

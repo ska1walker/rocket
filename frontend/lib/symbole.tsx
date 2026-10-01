@@ -49,6 +49,7 @@ export const LayoutDashboard = symbol("start", <><rect width="7" height="9" x="3
 export const LifeBuoy = symbol("ticket", <><circle cx="12" cy="12" r="10" /><path d="m4.93 4.93 4.24 4.24" /><path d="m14.83 9.17 4.24-4.24" /><path d="m14.83 14.83 4.24 4.24" /><path d="m9.17 14.83-4.24 4.24" /><circle cx="12" cy="12" r="4" /></>);
 export const Lightbulb = symbol("erkenntnis", <><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></>);
 export const ListChecks = symbol("liste", <><path d="M13 5h8" /><path d="M13 12h8" /><path d="M13 19h8" /><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /></>);
+export const Lokal = symbol("lokal", <><path d="M3.8 10.4 12 3.6l8.2 6.8V19a1.4 1.4 0 0 1-1.4 1.4H5.2A1.4 1.4 0 0 1 3.8 19Z"/><circle cx="12" cy="13.6" r="2.1"/></>);
 export const Lock = symbol("schloss", <><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>);
 export const LogOut = symbol("abmelden", <><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /></>);
 export const Mail = symbol("post", <><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /><rect x="2" y="4" width="20" height="16" rx="2" /></>);
@@ -64,9 +65,11 @@ export const Pencil = symbol("bearbeiten", <><path d="M21.174 6.812a1 1 0 0 0-3.
 export const Play = symbol("lauf-gestartet", <><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" /></>);
 export const Plus = symbol("plus", <><path d="M5 12h14" /><path d="M12 5v14" /></>);
 export const Printer = symbol("drucken", <><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" /><rect x="6" y="14" width="12" height="8" rx="1" /></>);
+export const RolleAnalyst = symbol("rolle-analyst", <><path d="M4 20h16"/><path d="M7 20v-5"/><path d="M12 20V9"/><path d="M17 20V4.5"/></>);
+export const RolleAssistent = symbol("rolle-assistent", <><path d="M4 11.5a7.5 7 0 0 1 7.5-7h1a7.5 7 0 0 1 0 14H8l-4 3.5v-4.2A7 7 0 0 1 4 11.5Z"/></>);
+export const RolleExperte = symbol("rolle-experte", <><path d="M12 3.2 20.8 12 12 20.8 3.2 12Z"/><path d="M8.6 12.1 11 14.5l4.4-4.4"/></>);
 export const Save = symbol("speichern", <><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" /><path d="M7 3v4a1 1 0 0 0 1 1h7" /></>);
 export const Search = symbol("suche", <><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></>);
-export const Server = symbol("node", <><rect width="20" height="8" x="2" y="2" rx="2" ry="2" /><rect width="20" height="8" x="2" y="14" rx="2" ry="2" /><line x1="6" x2="6.01" y1="6" y2="6" /><line x1="6" x2="6.01" y1="18" y2="18" /></>);
 export const Settings = symbol("einstellungen", <><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" /><circle cx="12" cy="12" r="3" /></>);
 export const ShieldCheck = symbol("geschuetzt", <><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></>);
 export const SlidersHorizontal = symbol("eigenschaften", <><path d="M10 5H3" /><path d="M12 19H3" /><path d="M14 3v4" /><path d="M16 17v4" /><path d="M21 12h-9" /><path d="M21 19h-5" /><path d="M21 5h-7" /><path d="M8 10v4" /><path d="M8 12H3" /></>);

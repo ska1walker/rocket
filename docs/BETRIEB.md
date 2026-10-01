@@ -2034,6 +2034,15 @@ Das fand beim ersten Lauf zwei Zeichen, die eine Flex-Zeile neben langem Text
 auf 11 px gestaucht hatte — dagegen steht jetzt `svg[data-symbol] {
 flex-shrink: 0 }`.
 
+**Die eigenen Zeichen des CI** (seit 26.10.10): Die Produktleiter trägt die
+Rollenzeichen — Assistent, Analyst und Experte im Produktkatalog und in der
+Prognose „Nach Produkt“ (RK-PRODUKT). Die Nachweiszeile unten links zeigt
+`lokal` (Haus mit Punkt), solange kein Ziel außerhalb der Box eingetragen ist;
+vorher stand dort ein Server. Damit ist R2 aus dem Abgleich vollständig.
+Dabei fiel auf, dass Zahlenfelder in bearbeitbaren Tabellen keine
+Mindestbreite hatten, obwohl der Kommentar es versprach: „14500“ stand im
+Katalog als „1450“. Sie haben jetzt 4,5rem.
+
 ## Token aus dem CI (seit 26.10.5)
 
 **Die Werte kommen seit 26.10.5 aus dem CI-Repo.** Der Token-Block oben in
