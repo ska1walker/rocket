@@ -1414,6 +1414,15 @@ dieselbe Hürde wie beim vergessenen Passwort — der Zugang zur Box:
   Bremse wie die Anmeldung. Danach ist die Datei weg, und
   `POST /api/anmeldung/einrichten` antwortet mit 409.
 
+**Nachgezogen in 26.10.2:** Auf Kais Box kam nur „Der Code stimmt nicht“
+— zuerst stand eine eingefügte Adresse im Feld (iOS füllte ein Feld mit
+`autocomplete="one-time-code"` selbst), danach passte der Code nicht.
+Seitdem gleicht Rocket O→0 und I/L→1 an (im Code kommen sie nie vor),
+die Seite prüft die Form vor dem Senden und zählt so keinen Versuch, die
+Meldung nennt Form und Datei, und das Pod-Log schreibt bei jedem
+Fehlversuch, ob die Datei da war und wie viele Zeichen ankamen — nie den
+Code.
+
 **Für eine Box, die vor 26.10.1 ohne Passwort lief:** Nach dem Update kommt
 niemand mehr über die Olares-Sitzung herein. Die Anmeldeseite zeigt
 „Rocket einrichten“; der Code liegt in der Dateien-App, der Zugang steht

@@ -743,3 +743,24 @@ async def test_andere_beenden_laesst_das_eigene_stehen(datenbank, monkeypatch):
         assert (await x.get("/api/companies")).status_code == 401
         assert (await y.get("/api/companies")).status_code == 401
         assert len((await k.get("/api/anmeldung/geraete")).json()) == 1
+
+
+async def test_einrichtungscode_mit_o_statt_null_passt(datenbank, monkeypatch, eigene_ablage):
+    """In der Dateien-App sehen 0 und O gleich aus; im Code kommt O nie vor.
+
+    Kai bekam am 1.10.2026 nur „Der Code stimmt nicht“. Jetzt passt ein
+    O für eine 0 (und I/L für eine 1), und die Meldung nennt Form und Datei.
+    """
+    await _leerraeumen()
+    eigen_an(monkeypatch)
+    async with klient_fuer("") as k:
+        await k.get("/api/anmeldung/lage")
+        code = _einrichtungscode()
+        falsch = await k.post("/api/anmeldung/einrichten",
+                              json={"code": "https://github.com/x", "name": "erste", "passwort": GUT})
+        assert falsch.status_code == 403
+        assert "rocket-einrichten.txt" in falsch.json()["detail"]
+        verwechselt = code.replace("0", "O").replace("1", "l")
+        r = await k.post("/api/anmeldung/einrichten",
+                         json={"code": verwechselt, "name": "erste", "passwort": GUT})
+        assert r.status_code == 200, r.text

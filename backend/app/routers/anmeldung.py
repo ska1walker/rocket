@@ -326,7 +326,13 @@ async def einrichten(
             einrichtung.bereitstellen(vorhanden[2] if vorhanden else None)
             if not einrichtung.stimmt(daten.code):
                 await kern.versuch_merken(sperre, kennungen)
-                raise HTTPException(403, "Der Code stimmt nicht.")
+                log.warning("Einrichtung abgewiesen: %s", einrichtung.befund(daten.code))
+                raise HTTPException(
+                    403,
+                    "Der Code stimmt nicht. Er hat die Form 1A2B-3C4D-5E6F und steht in "
+                    f"{einrichtung.wo_liegt_die_datei()} — nicht in der Datei zum Zurücksetzen "
+                    "des Passworts.",
+                )
 
             if vorhanden is not None:
                 user_id, org_id, zugang = vorhanden
