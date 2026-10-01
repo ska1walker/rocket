@@ -276,6 +276,8 @@ Dreizehnter Durchlauf: Rocket 26.10.11, PR #94, 1.10.2026 — von der Action, dr
 
 Vierzehnter Durchlauf: Rocket 26.10.12, PR #95, 1.10.2026 — von der Action: React #418 behoben (Symbole selbst im `<head>`, keine Icon-Marke von Next mehr). Marc hatte `main` seit 26.10.11 zweimal bewegt (eigene App `aimllmgemma4vllm`, Zeitstempel auf 4391000000000); die Action rechnete auf frischem `main` 4392000000000. Auf `main` byte-gleich geprüft (sha256 `835eeb7f…e0c3`, keine alten Schlüssel). Keine Datenbankänderung.
 
+Fünfzehnter Durchlauf: Rocket 26.10.13, PR #96, 1.10.2026 — von der Action, zwei Minuten nach dem Release: Dichteschalter (Weit/Normal/Kompakt). Marc hatte `main` seit 26.10.12 bewegt (eigene App `aimllmgemma4vllm`, Zeitstempel als globale Höchstmarke auf 4400000000000); die Action rechnete auf frischem `main` 4401000000000. Auf `main` byte-gleich geprüft (sha256 `5d2b6b5d…3455`, keine alten Schlüssel). Keine Datenbankänderung.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
