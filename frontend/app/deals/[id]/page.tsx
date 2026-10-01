@@ -27,6 +27,7 @@ import { Feldgruppen } from "@/components/feldgruppen";
 import { Notizkasten } from "@/components/notizkasten";
 import { Dokumente } from "@/components/dokumente";
 import { Rueckfrage } from "@/components/dialog";
+import { Ueberfaellig } from "@/components/ueberfaellig";
 
 export default function DealSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -187,6 +188,7 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
             pfad={`/api/deals/${id}`}
             abfrageSchluessel={["deal", id]}
             zurueckNach="/deals"
+            loeschknopf={`${wort} löschen`}
             loeschtext={`Der ${wort} verschwindet vom Board und aus der Prognose. Verlauf und Angebote bleiben 30 Tage wiederherstellbar.`}
             kopfrechts={<Dealstufe name={d.stage_name} art={d.stage_kind} />}
             werte={d as unknown as Record<string, unknown>}
@@ -209,10 +211,10 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
               stage_name: { zeige: () => <Dealstufe name={d.stage_name} art={d.stage_kind} /> },
               close_date: {
                 zeige: (v) => (
-                  <span className={ueberfaellig ? "fg-ueberfaellig" : undefined}>
+                  <Ueberfaellig ueberfaellig={!!ueberfaellig} className={ueberfaellig ? "fg-ueberfaellig" : ""}>
                     {datum(String(v))}
                     {ueberfaellig && " · überfällig"}
-                  </span>
+                  </Ueberfaellig>
                 ),
               },
             }}
@@ -250,7 +252,7 @@ export default function DealSeite({ params }: { params: Promise<{ id: string }> 
             <section className="block">
               <div className="block-inhalt">
                 <div className="ki-block">
-                  <div className="ki-block-kopf">Vorschlag der KI</div>
+                  <div className="ki-block-kopf">AI-Vorschlag</div>
                   <p className="ki-block-text">{d.ai_summary}</p>
                 </div>
               </div>

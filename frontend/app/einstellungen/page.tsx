@@ -43,7 +43,7 @@ const BEREICHE = [
   { schluessel: "vertrieb", text: "Vertrieb", beschreibung: "Pipelines und Stufen, Produktkatalog, Verlustgründe", symbol: TrendingUp },
   { schluessel: "eigenschaften", text: "Eigenschaften", beschreibung: "Felder und Gruppen für Firmen, Kontakte und Leads", symbol: SlidersHorizontal },
   { schluessel: "email", text: "E-Mail", beschreibung: "Konto, Absenderadresse, Marketing, Postfach, Relay", symbol: Mail },
-  { schluessel: "ki", text: "KI und Programme", beschreibung: "Sprachmodell, Sprachausgabe, Ergänzen, Insilo, Programme", symbol: Cpu },
+  { schluessel: "ki", text: "AI und Programme", beschreibung: "Sprachmodell, Sprachausgabe, Ergänzen, Insilo, Programme", symbol: Cpu },
   { schluessel: "daten", text: "Daten", beschreibung: "Sicherung, Import und Export, Datenbank, Datenwege", symbol: Database },
 ] as const;
 
@@ -96,15 +96,15 @@ function KIBlock({ e }: { e: OrgSettings }) {
   return (
     <section className="block">
       <div className="block-kopf">
-        <h2>KI-Assistent</h2>
+        <h2>Sprachmodell</h2>
         <span className="stufe" data-art={e.llm_ready ? "won" : undefined}>
           {e.llm_ready ? "eingerichtet" : "nicht eingerichtet"}
         </span>
       </div>
       <div className="block-inhalt">
         <Erklaerung
-          kurz="Der KI-Assistent braucht ein Sprachmodell — meist die LiteLLM-App auf dieser Box."
-          lang={<>Rocket bringt kein eigenes Modell mit. Es spricht einen OpenAI-kompatiblen Endpunkt an. Es gibt bewusst keine Vorgabe: Jede geratene Adresse wäre auf einer anderen Box falsch. Solange hier nichts steht, bleiben die KI-Funktionen gesperrt und sagen das — statt in einen Verbindungsfehler zu laufen.</>}
+          kurz="Rocket braucht ein Sprachmodell — meist die LiteLLM-App auf dieser Box."
+          lang={<>Rocket bringt kein eigenes Modell mit. Es spricht einen OpenAI-kompatiblen Endpunkt an. Es gibt bewusst keine Vorgabe: Jede geratene Adresse wäre auf einer anderen Box falsch. Solange hier nichts steht, bleiben die AI-Funktionen gesperrt und sagen das — statt in einen Verbindungsfehler zu laufen.</>}
         />
         <form onSubmit={(ev) => { ev.preventDefault(); speichern.mutate(); }}>
           <div className="feld">
@@ -148,11 +148,11 @@ function Datenwege({ e }: { e: OrgSettings }) {
       <div className="block-inhalt">
         <Erklaerung
           kurz="Alles bleibt auf dieser Box — außer dem, was Sie hier ausdrücklich an eine fremde Adresse schicken."
-          lang={<>Steht bei KI-Assistent oder Suchdienst eine fremde Adresse, gehen die Inhalte der Anfragen dorthin. Diese Übersicht nennt sie beim Namen, statt pauschal „lokal“ zu behaupten.</>}
+          lang={<>Steht bei Sprachmodell oder Suchdienst eine fremde Adresse, gehen die Inhalte der Anfragen dorthin. Diese Übersicht nennt sie beim Namen, statt pauschal „lokal“ zu behaupten.</>}
         />
         <dl>
           <div className="eigenschaft"><dt>Datenbank, Suche, Anhänge</dt><dd>auf dieser Box</dd></div>
-          <div className="eigenschaft"><dt>KI-Assistent</dt><dd>{e.llm_ready ? e.llm_base_url : "nicht eingerichtet — keine Anfragen"}</dd></div>
+          <div className="eigenschaft"><dt>Sprachmodell</dt><dd>{e.llm_ready ? e.llm_base_url : "nicht eingerichtet — keine Anfragen"}</dd></div>
           <div className="eigenschaft"><dt>Sprachausgabe</dt><dd>{e.tts_ready ? `Skripte der Podcasts an ${e.tts_endpoint_url}` : "nicht eingerichtet — keine Anfragen"}</dd></div>
           <div className="eigenschaft"><dt>Automatisch ergänzen</dt><dd>{e.suche_endpoint_url ? `Firmen- und Personennamen an ${e.suche_endpoint_url}; Websites der Firmen` : "nur die Websites der Firmen — kein Suchdienst eingetragen"}</dd></div>
           <div className="eigenschaft"><dt>E-Mail</dt><dd>{e.smtp_ready ? `über ${e.smtp_host}` : "kein Konto eingetragen"}{e.marketing_versand === "brevo" && e.brevo_api_key_set ? " · Marketing über Brevo" : ""}</dd></div>

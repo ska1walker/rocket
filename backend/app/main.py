@@ -427,7 +427,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="rocket",
-    description="KI-gestütztes CRM für den AImighty-Vertrieb",
+    description="AI-gestütztes CRM für den AImighty-Vertrieb",
     version="0.1.0",
     lifespan=lifespan,
 )

@@ -122,7 +122,7 @@ export default function BesprechungSeite() {
             )}
             {b.insilo_link ? null : (
               <p className="protokoll-fuss">
-                Der Wortlaut bleibt in Insilo. Mit der Adresse von Insilo unter Einstellungen › KI und Programme › Verbundene Programme
+                Der Wortlaut bleibt in Insilo. Mit der Adresse von Insilo unter Einstellungen › AI und Programme › Verbundene Programme
                 steht hier ein Link dorthin.
               </p>
             )}

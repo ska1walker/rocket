@@ -149,6 +149,7 @@ export default function KontaktSeite({ params }: { params: Promise<{ id: string 
             pfad={`/api/contacts/${id}`}
             abfrageSchluessel={["kontakt", id]}
             zurueckNach="/kontakte"
+            loeschknopf="Kontakt löschen"
             loeschtext="Der Kontakt wird aus allen Listen genommen. Verlauf und Zuordnungen bleiben 30 Tage wiederherstellbar."
             kopfrechts={<Stufenpille stufe={k.lifecycle_stage} />}
             werte={k as unknown as Record<string, unknown>}

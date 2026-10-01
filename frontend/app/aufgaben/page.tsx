@@ -21,6 +21,7 @@ import { Segmentliste } from "@/components/segmentliste";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
 import { useNeuGewuenscht } from "@/lib/neu";
 import { reiterTaste } from "@/lib/tasten";
+import { Ueberfaellig } from "@/components/ueberfaellig";
 
 type Reiter = "heute" | "ueberfaellig" | "bevorstehend" | "alle" | "erledigt";
 
@@ -333,13 +334,13 @@ function Aufgabenzeile({
         </select>
       )}
 
-      <span className="frist" data-ueberfaellig={ueberfaellig ? "true" : undefined}>
+      <Ueberfaellig ueberfaellig={!!ueberfaellig}>
         {erledigt
           ? `erledigt ${datumZeit(aufgabe.completed_at)}`
           : aufgabe.due_at
             ? frist(aufgabe.due_at)
             : "ohne Frist"}
-      </span>
+      </Ueberfaellig>
     </div>
   );
 }

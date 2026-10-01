@@ -97,7 +97,7 @@ async def status(user: CurrentUser = Depends(get_current_user)) -> Status:
     if not cfg.eingerichtet:
         hint = "Kein Sprachmodell hinterlegt — ohne Modell entsteht kein Skript."
     elif not tts.eingerichtet:
-        hint = "Keine Sprachausgabe hinterlegt. Die Adresse steht unter Einstellungen › KI und Programme."
+        hint = "Keine Sprachausgabe hinterlegt. Die Adresse steht unter Einstellungen › AI und Programme."
     return Status(llm_ready=cfg.eingerichtet, tts_ready=tts.eingerichtet, hint=hint)
 
 
@@ -143,7 +143,7 @@ async def erzeugen(payload: Auftrag, user: CurrentUser = Depends(get_current_use
             raise HTTPException(409, "Es ist kein Sprachmodell hinterlegt. Ohne Modell entsteht kein Skript.")
         tts = await podcast.load_tts_config(conn, user.org_id)
         if not tts.eingerichtet:
-            raise HTTPException(409, "Es ist keine Sprachausgabe hinterlegt. Die Adresse steht unter Einstellungen › KI und Programme.")
+            raise HTTPException(409, "Es ist keine Sprachausgabe hinterlegt. Die Adresse steht unter Einstellungen › AI und Programme.")
         da = await conn.fetchval(
             f"select exists (select 1 from public.{payload.entity} where id = $1 and deleted_at is null)",
             payload.entity_id,

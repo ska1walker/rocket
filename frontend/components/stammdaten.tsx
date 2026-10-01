@@ -46,6 +46,7 @@ export function Stammdaten({
   abfrageSchluessel,
   zurueckNach,
   loeschtext,
+  loeschknopf,
   kopfrechts,
 }: {
   titel: string;
@@ -55,6 +56,8 @@ export function Stammdaten({
   abfrageSchluessel: unknown[];
   zurueckNach: string;
   loeschtext: string;
+  /** Der Lösch-Knopf sagt, was verschwindet: „Firma löschen“, nicht „Löschen“ (CI, R1). */
+  loeschknopf: string;
   kopfrechts?: React.ReactNode;
 }) {
   const client = useQueryClient();
@@ -161,7 +164,7 @@ export function Stammdaten({
             label="Löschen bestätigen"
             text={loeschtext}
             beiSchliessen={() => setLoeschen(false)}
-            knopf={<button type="button" className="btn btn-primaer" onClick={() => entfernen.mutate()} disabled={entfernen.isPending}>Löschen</button>}
+            knopf={<button type="button" className="btn btn-gefahr" onClick={() => entfernen.mutate()} disabled={entfernen.isPending}>{loeschknopf}</button>}
           >
             {entfernen.isError && <Fehler text={(entfernen.error as Error).message} />}
           </Rueckfrage>

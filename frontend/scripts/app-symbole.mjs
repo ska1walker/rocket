@@ -2,7 +2,8 @@
 //
 // Ohne sie baut iOS beim „Zum Home-Bildschirm" eine Kachel aus dem ersten
 // Buchstaben des Titels. Gerendert wird mit Chromium und der Geist aus dem
-// Repo, damit das „R" dasselbe ist wie im Markt-Icon.
+// Repo. Seit 1.10.2026 trägt das Wappen die Rakete statt des „R“ (Figma,
+// „Icon-Labor“, Abschnitt 0); auch das Markt-Icon icon.png entsteht hier.
 //
 //   ROCKET_CHROMIUM=/opt/pw-browsers/chromium node scripts/app-symbole.mjs
 //
@@ -35,6 +36,8 @@ const ZIELE = [
   ["public/symbol/rocket-192.png", "rund", 192],
   ["public/symbol/rocket-512.png", "rund", 512],
   ["public/symbol/rocket-maskable-512.png", "voll", 512],
+  // Das Markt-Icon (OlaresManifest: icon, featuredImage) — dieselbe Kachel.
+  ["../icon.png", "rund", 512],
 ];
 
 const browser = await chromium.launch({ executablePath: process.env.ROCKET_CHROMIUM || undefined });

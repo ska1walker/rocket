@@ -145,7 +145,7 @@ export default function BesprechungenSeite() {
           ) : (
             <Leer
               titel="Noch keine Besprechung"
-              text="Gespräche kommen aus Insilo — auf derselben Box von selbst über den gemeinsamen Ordner, sonst über einen Webhook. Beides unter Einstellungen › KI und Programme."
+              text="Gespräche kommen aus Insilo — auf derselben Box von selbst über den gemeinsamen Ordner, sonst über einen Webhook. Beides unter Einstellungen › AI und Programme."
             />
           )
         )}

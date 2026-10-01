@@ -114,7 +114,7 @@ export const AKTIVITAET_TEXT: Record<string, string> = {
   task: "Aufgabe",
   stage_change: "Stufenwechsel",
   quote: "Angebot",
-  ai: "KI",
+  ai: "AI",
   system: "System",
 };
 

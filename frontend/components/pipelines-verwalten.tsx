@@ -153,7 +153,7 @@ export function Pipelinesblock() {
             label="Stufe löschen"
             text="Liegen Geschäfte auf dieser Stufe, wandern sie auf die gewählte — mit Eintrag im Verlauf."
             beiSchliessen={() => setLoeschZiel(null)}
-            knopf={<button type="button" className="btn btn-primaer" onClick={() => stufeLoeschen.mutate({ id: loeschZiel.stage.id, zielId: ziel || null })} disabled={stufeLoeschen.isPending}>Löschen</button>}
+            knopf={<button type="button" className="btn btn-gefahr" onClick={() => stufeLoeschen.mutate({ id: loeschZiel.stage.id, zielId: ziel || null })} disabled={stufeLoeschen.isPending}>Stufe löschen</button>}
           >
               <div className="feld">
                 <label htmlFor="loeschziel">Leads verschieben nach</label>

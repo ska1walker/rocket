@@ -67,7 +67,7 @@ export default function ErkenntnisseSeite() {
 
         {d && !d.llm_ready && (
           <p className="erfassung-hinweis warnung" style={{ marginBottom: "var(--am-raum-4)" }}>
-            Dafür braucht Rocket ein Sprachmodell. <Link href="/einstellungen?bereich=ki">Unter KI und Programme eintragen.</Link>
+            Dafür braucht Rocket ein Sprachmodell. <Link href="/einstellungen?bereich=ki">Unter AI und Programme eintragen.</Link>
           </p>
         )}
 

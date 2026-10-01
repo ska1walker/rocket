@@ -54,6 +54,20 @@
      verschiebt beide Linien gemeinsam — das ist der Zweck. */
   --am-kopfhoehe: 5rem;
   --am-leistenhoehe: 3.5rem;
+  /* Breite der Navigation am Desktop — für alle Anwendungen gleich, damit
+     die Kante beim Wechsel zwischen ihnen nicht springt (ABGLEICH R9). */
+  --am-navigation-breite: 15rem; /* 240px */
+
+  /* ── Ebenen — wer über wem liegt (ABGLEICH R9) ────────────────────── */
+  --am-ebene-tabellenkopf: 10;
+  --am-ebene-seitenkopf: 20;
+  --am-ebene-navigation: 40;
+  --am-ebene-kopfleiste: 50;
+  --am-ebene-menue: 60;
+  --am-ebene-suche: 70;
+  --am-ebene-assistent: 90;
+  --am-ebene-dialog: 100;
+  --am-ebene-ueber-dialog: 200; /* Palette, Klappliste in einem Dialog */
 
   /* ── Radien — Vorschlag, siehe Paket-README "Was noch fehlt" ──────── */
   --am-radius-klein: 0.25rem;
@@ -112,6 +126,9 @@
   --am-achtung-rand: #eec8af;
   --am-fehler-flaeche: #ffedeb;
   --am-fehler-rand: #f3c4be;
+  /* Lösch-Knopf beim Überfahren — heller wie die Handlung, nicht dunkler
+     (ABGLEICH R1). Weiß darauf 4,59:1; weiter aufhellen hieße durchfallen. */
+  --am-fehler-hover: #b9584f;
 
   /* ── Halbsemantische Ebene, Hellmodus (Vorgabe) ───────────────────── */
   --am-seite: #ffffff;
@@ -142,13 +159,12 @@
   --am-handlung-aktiv: #002140;
   --am-handlung-text: #ffffff;
 
-  /* Der Schatten schwebender Felder — Klappmenüs, Suchtreffer. Drei
-     Bauteile verwendeten ihn, bevor es ihn gab, und schwebten deshalb
-     ohne (gefunden am 15.9.2026 vom Tokentest). */
+  /* Der eine Schatten: nur für das, was schwebt — Klappmenü, Suchtreffer,
+     Popover, Dialog, Assistent —, immer zusammen mit dem betonten Rand.
+     Karten, Tafeln, Spalten und Knöpfe tragen nie einen (ABGLEICH R6,
+     Kai 01.10.2026). */
   --am-schatten-1: 0 8px 24px rgb(5 23 41 / 12%), 0 1px 2px rgb(5 23 41 / 8%);
-  /* Große schwebende Flächen (Assistent) und das Schild darüber — standen
-     bis 26.9.5 als Wert am Bauteil. */
-  --am-schatten-2: 0 16px 40px rgb(5 23 41 / 22%);
+  /* Das schwebende Schild des Assistenten unten rechts. */
   --am-schatten-schild: 0 6px 16px rgb(5 23 41 / 28%);
 
   /* Schrift auf einer satten Fläche, die in beiden Modi dunkel bleibt
@@ -204,7 +220,6 @@ html.dunkel {
   --am-handlung-aktiv: var(--am-gold-600);
   --am-handlung-text: var(--am-blau-900);
   --am-schatten-1: 0 8px 24px rgb(0 0 0 / 40%), 0 1px 2px rgb(0 0 0 / 30%);
-  --am-schatten-2: 0 16px 40px rgb(0 0 0 / 45%);
   --am-schatten-schild: 0 6px 16px rgb(0 0 0 / 45%);
 
   --am-erfolg: #55c483;
@@ -219,6 +234,7 @@ html.dunkel {
   --am-achtung-rand: #5f371a;
   --am-fehler-flaeche: #371b18;
   --am-fehler-rand: #62332e;
+  --am-fehler-hover: #f9948a; /* Blau 900 darauf 8,30:1 */
 
   /* Der Ring folgt der Handlung wie im Auftritt (kern/schaltflaechen.md):
      Gold 500, 8,06:1 auf der Seite, 6,19:1 auf Fläche 3. Gold 900 kam
@@ -333,7 +349,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .btn:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   /* **Eine Größe.** Vorher gab es drei: 40 px, 32 px und ein nie
@@ -369,9 +385,11 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .btn-primaer:hover { background: var(--am-handlung-hover); }
   .btn-primaer:active { background: var(--am-handlung-aktiv); }
 
+  /* Schrift in Textfarbe, Rand betont (ABGLEICH R1): Im Dunkeln wäre die
+     Handlungsfarbe Gold, und Gold für sekundär ist gesperrt. */
   .btn-sekundaer {
     background: transparent;
-    color: var(--am-handlung-ruhend);
+    color: var(--am-text-primaer);
     border-color: var(--am-rand-betont-farbe);
   }
   .btn-sekundaer:hover { background: var(--am-flaeche-2); }
@@ -443,7 +461,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .feld select:focus-visible,
   .feld textarea:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   .feld.fehler input,
@@ -541,8 +559,10 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     width: 1.125rem;
     height: 1.125rem;
     border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(5, 23, 41, 0.25);
+    /* Kein Schatten (ABGLEICH R6): Der Knauf hebt sich durch seinen Rand ab. */
+    background: var(--am-text-auf-farbe);
+    border: var(--am-rand-ruhend) solid var(--am-rand-betont-farbe);
+    box-sizing: border-box;
     transform: translateY(-50%);
     transition: transform var(--am-dauer-schnell) var(--am-kurve);
   }
@@ -698,7 +718,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     border-bottom: 1px solid var(--am-trennlinie);
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: var(--am-ebene-kopfleiste);
   }
 
   .kopfleiste-marke {
@@ -746,7 +766,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     padding-bottom: max(var(--am-raum-2), env(safe-area-inset-bottom));
     position: sticky;
     bottom: 0;
-    z-index: 40;
+    z-index: var(--am-ebene-navigation);
   }
 
   /* Die Gruppierung trägt erst ab der Seitenspalte. */
@@ -798,8 +818,9 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     gap: var(--am-raum-1);
     padding: var(--am-raum-2);
     background: var(--am-flaeche-1);
-    border-top: 1px solid var(--am-trennlinie);
-    box-shadow: 0 -8px 24px rgba(5, 23, 41, 0.12);
+    /* Schwebt über der Leiste: betonter Rand und der eine Schatten (R6). */
+    border-top: 1px solid var(--am-rand-betont-farbe);
+    box-shadow: var(--am-schatten-1);
   }
 
   .huelle-nav-item {
@@ -861,7 +882,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
          brauchen zusammen 227 px. Bei 220 lief die Beschriftung aus ihrem
          Kasten heraus und der Fokusring des Knopfes legte sich über das
          letzte Zeichen. */
-      --huelle-nav-breite: 240px;
+      --huelle-nav-breite: var(--am-navigation-breite);
       grid-template-columns: var(--huelle-nav-breite) minmax(0, 1fr);
       /* Zeile 1 die Kopfleiste über alles, Zeile 2 der Rest. */
       grid-template-rows: auto minmax(0, 1fr);
@@ -1003,13 +1024,13 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
       left: var(--huelle-nav-breite);
       top: 0;
       bottom: 0;
-      z-index: 60;
+      z-index: var(--am-ebene-menue);
       width: min(760px, calc(100vw - var(--huelle-nav-breite) - var(--am-raum-8)));
       padding: var(--am-raum-6) var(--am-raum-6) var(--am-raum-8);
       overflow-y: auto;
       background: var(--am-flaeche-1);
-      border-right: 1px solid var(--am-trennlinie);
-      box-shadow: 16px 0 40px rgba(5, 23, 41, 0.16);
+      border-right: 1px solid var(--am-rand-betont-farbe);
+      box-shadow: var(--am-schatten-1);
     }
     .huelle-mehr-hinweis {
       margin: 0 0 var(--am-raum-4);
@@ -1029,7 +1050,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     }
     .huelle-nav-stern:hover { background: var(--am-flaeche-2); color: var(--am-text-primaer); }
     .huelle-nav-eintrag.ist-favorit .huelle-nav-stern { color: var(--am-gold-beschriftung); }
-    .huelle-nav-stern:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+    .huelle-nav-stern:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 
     .huelle-klapp {
       display: inline-flex;
@@ -1046,7 +1067,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
       cursor: pointer;
     }
     .huelle-klapp:hover { background: var(--am-flaeche-2); color: var(--am-text-primaer); }
-    .huelle-klapp:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+    .huelle-klapp:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 
     /* Eingeklappt: Symbole zentriert, Beschriftung als Tooltip, Gruppen
        durch eine Linie getrennt statt durch eine Überschrift. */
@@ -1091,7 +1112,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     }
     .nachweis svg { flex: none; }
     .nachweis:hover { color: var(--am-text-primaer); background: var(--am-flaeche-2); }
-    .nachweis:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+    .nachweis:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
     .nachweis[data-extern="true"] svg { color: var(--am-gold-beschriftung); }
 
     .huelle-inhalt {
@@ -1213,7 +1234,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
   .notiz-wahl[data-mitte] { align-items: center; margin-bottom: var(--am-raum-2); }
 
-  /* Hinweis oder Fehler neben einem KI-Knopf [HB-KI]. */
+  /* Hinweis oder Fehler neben einem AI-Knopf [HB-AI]. */
   .ki-hinweis { font-size: 0.75rem; color: var(--am-text-gedaempft); }
   .ki-hinweis[data-art="fehler"] { color: var(--am-fehler); }
 
@@ -1328,7 +1349,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .darstellung-knopf:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   /* ── Seitenkopf [HB-SEITENKOPF] ───────────────────────────────────────────────────
@@ -1338,7 +1359,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .seitenkopf {
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: var(--am-ebene-seitenkopf);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1423,7 +1444,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .suchfeld input:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   .werkzeugleiste select {
@@ -1455,7 +1476,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .tabelle thead th {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: var(--am-ebene-tabellenkopf);
     text-align: left;
     font-weight: 600;
     font-size: 0.75rem;
@@ -1563,12 +1584,8 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: transparent;
   }
 
-  .stufe[data-stufe="disqualified"],
-  .stufe[data-art="lost"] {
-    color: var(--am-fehler);
-    border-color: var(--am-fehler-rand);
-    background: var(--am-fehler-flaeche);
-  }
+  /* „Verloren“ und „Disqualifiziert“ sind Ergebnisse, keine Fehler: neutral
+     wie die übrigen Stufen (ABGLEICH R7). Rot bleibt dem Handlungsbedarf. */
 
   .stufe[data-stufe="qualified"] {
     color: var(--am-hinweis);
@@ -1919,7 +1936,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     margin-top: var(--am-raum-1);
   }
 
-  /* ── KI-Block [HB-KI] ─────────────────────────────────────────────────────
+  /* ── AI-Block [HB-AI] ─────────────────────────────────────────────────────
      Ergebnisse eines Modells stehen abgesetzt und beschriftet. Wer in
      einem Jahr auf diese Seite sieht, muss erkennen, was ein Mensch
      geschrieben hat und was nicht. */
@@ -1971,7 +1988,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .notiz-feld textarea:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   /* ── Wer gerade arbeitet [HB-KONTO] ──────────────────────────────────────────
@@ -2004,7 +2021,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .person-knopf:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   .person-kreis {
@@ -2183,9 +2200,9 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     top: calc(100% + var(--am-raum-1));
     right: 0;
     min-width: 220px;
-    z-index: 60;
+    z-index: var(--am-ebene-menue);
     padding: var(--am-raum-1);
-    border: 1px solid var(--am-rand);
+    border: 1px solid var(--am-rand-betont-farbe);
     border-radius: var(--am-radius-mittel);
     background: var(--am-flaeche-1);
     box-shadow: var(--am-schatten-1);
@@ -2223,7 +2240,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     left: 0;
     right: 0;
     min-width: 220px;
-    z-index: 60;
+    z-index: var(--am-ebene-menue);
     padding: var(--am-raum-2);
     border: 1px solid var(--am-rand);
     border-radius: var(--am-radius-mittel);
@@ -2633,7 +2650,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .dialog-schicht {
     position: fixed;
     inset: 0;
-    z-index: 100;
+    z-index: var(--am-ebene-dialog);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2693,7 +2710,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .input:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   .input::placeholder { color: var(--am-text-deaktiviert); }
@@ -2926,7 +2943,8 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     border-color: var(--am-fehler);
   }
 
-  .btn-gefahr:hover { filter: brightness(0.92); }
+  /* Beim Überfahren heller wie jede Handlung, nicht dunkler (ABGLEICH R1). */
+  .btn-gefahr:hover { background: var(--am-fehler-hover); border-color: var(--am-fehler-hover); }
 
   /* Die Auswahlspalte ist schmal und klickt nicht die Zeile mit. */
   .tabelle th.wahlspalte,
@@ -3050,7 +3068,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .sicht-knopf:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   /* Die Stufen als Schritte: wo steht das Anliegen, was ist der nächste
@@ -3095,7 +3113,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .stufenschritt:focus-visible {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
   }
 
   /* ── Aufgabenliste [RK-AUFGABEN] ────────────────────────────────────────────────
@@ -3240,7 +3258,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .mehrfach-feld[data-offen="true"] {
     outline: 2px solid var(--am-fokus-ring);
-    outline-offset: 1px;
+    outline-offset: 2px;
     border-color: var(--am-rand-betont-farbe);
   }
 
@@ -3299,14 +3317,14 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
 
   .mehrfach-plaettchen button:hover { background: var(--am-rand); color: var(--am-text-primaer); }
-  .mehrfach-plaettchen button:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+  .mehrfach-plaettchen button:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 
   /* Fest positioniert am Körper — siehe Portal in mehrfachauswahl.tsx. */
   .mehrfach-tafel {
     position: fixed;
-    z-index: 200;
+    z-index: var(--am-ebene-ueber-dialog);
     min-width: 15rem;
-    border: var(--am-rand-ruhend) solid var(--am-rand);
+    border: var(--am-rand-ruhend) solid var(--am-rand-betont-farbe);
     border-radius: var(--am-radius-mittel);
     background: var(--am-seite);
     box-shadow: var(--am-schatten-1);
@@ -3442,7 +3460,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     font-size: 0.9375rem;
   }
 
-  .optionszeile input:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+  .optionszeile input:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
   .dunkel .optionszeile input { background: var(--am-flaeche-1); }
 
   .optionszeile[data-archiviert="true"] input {
@@ -3482,11 +3500,14 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     max-height: min(calc(100dvh - var(--am-raum-8)), 46rem);
     padding: 0;
     overflow: hidden;
+    /* Schwebt über der Deckschicht: betonter Rand, der eine Schatten (R6). */
+    border-color: var(--am-rand-betont-farbe);
+    box-shadow: var(--am-schatten-1);
   }
   /* Breiten als Varianten statt inline am Bauteil (HB-DIALOG). */
   .dialog-karte[data-breite="normal"] { width: 100%; max-width: 35rem; }
-  .dialog-karte[data-breite="schmal"] { width: 100%; max-width: 30rem; }
-  .dialog-karte[data-breite="breit"] { width: 100%; max-width: 39rem; }
+  .dialog-karte[data-breite="schmal"] { width: 100%; max-width: 27.5rem; } /* 440 px */
+  .dialog-karte[data-breite="breit"] { width: 100%; max-width: 45rem; } /* 720 px */
   /* Mitgebrachter Text zum Lesen (Eingang): Umbrüche bleiben, Schrift wie sonst. */
   .lesetext { margin: 0; white-space: pre-wrap; font-family: var(--am-schrift-sans); font-size: 0.875rem; line-height: 1.6; }
 
@@ -3520,7 +3541,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     cursor: pointer;
   }
   .dialog-zu:hover { background: var(--am-flaeche-2); color: var(--am-text-primaer); }
-  .dialog-zu:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+  .dialog-zu:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 
   /* Das Formular muss Mitte und Fuß umschließen, sonst löst der Knopf im
      Fuß kein submit aus. Es ist selbst der Flex-Behälter. */
@@ -3613,7 +3634,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     resize: vertical;
   }
 
-  .erfassung-wurf textarea:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+  .erfassung-wurf textarea:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
   .erfassung-wurf textarea::placeholder { color: var(--am-text-deaktiviert); }
 
   .erfassung-bild {
@@ -3684,7 +3705,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     position: fixed;
     right: var(--am-raum-6);
     bottom: calc(var(--am-raum-6) + env(safe-area-inset-bottom));
-    z-index: 90;
+    z-index: var(--am-ebene-assistent);
     width: auto;
     height: 3.25rem;
     padding: 0;
@@ -3710,15 +3731,15 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     position: fixed;
     right: var(--am-raum-6);
     bottom: calc(var(--am-raum-6) + 3.25rem + var(--am-raum-3) + env(safe-area-inset-bottom));
-    z-index: 90;
+    z-index: var(--am-ebene-assistent);
     width: min(26rem, calc(100vw - 2 * var(--am-raum-6)));
     height: min(36rem, calc(100dvh - 8rem));
     display: flex;
     flex-direction: column;
-    border: var(--am-rand-ruhend) solid var(--am-rand);
+    border: var(--am-rand-ruhend) solid var(--am-rand-betont-farbe);
     border-radius: var(--am-radius-mittel);
     background: var(--am-seite);
-    box-shadow: var(--am-schatten-2);
+    box-shadow: var(--am-schatten-1);
     overflow: hidden;
   }
 
@@ -3817,7 +3838,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     font-size: 0.875rem;
     line-height: 1.5;
   }
-  .assistent-eingabe textarea:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+  .assistent-eingabe textarea:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
   .assistent-senden {
     width: var(--am-ziel-zeiger);
     height: var(--am-ziel-zeiger);
@@ -3937,7 +3958,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
 
   .wegwahl button {
-    border: 0;
+    border: var(--am-rand-ruhend) solid transparent;
     border-radius: var(--am-radius-klein);
     background: transparent;
     padding: var(--am-raum-1) var(--am-raum-3);
@@ -3952,10 +3973,11 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .wegwahl button.aktiv {
     background: var(--am-seite);
     color: var(--am-text-primaer);
-    box-shadow: var(--am-schatten-1);
+    /* Gewählt ist es durch Fläche und Rand — ein Knopf schwebt nicht (R6). */
+    border-color: var(--am-rand-betont-farbe);
   }
 
-  .wegwahl button:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+  .wegwahl button:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 
   .finden-kandidaten { margin-top: var(--am-raum-2); }
   .finden-kandidaten ul { list-style: none; margin: var(--am-raum-2) 0 0; padding: 0; display: grid; gap: var(--am-raum-2); }
@@ -3981,7 +4003,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .finden-kandidat:hover:not(:disabled) { border-color: var(--am-handlung-ruhend); }
   .finden-kandidat.aktiv { border-color: var(--am-gold-500); }
   .finden-kandidat:disabled { cursor: default; opacity: 0.7; }
-  .finden-kandidat:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+  .finden-kandidat:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
   .finden-kandidat-name { grid-area: name; font-size: 0.875rem; font-weight: 500; }
   .finden-kandidat-unter { grid-area: unter; font-size: 0.75rem; color: var(--am-text-sekundaer); line-height: 1.4; }
   .finden-kandidat-aktion { grid-area: aktion; font-size: 0.75rem; font-weight: 500; color: var(--am-handlung-ruhend); white-space: nowrap; }
@@ -4085,7 +4107,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .dunkel .finden-balken { background: var(--am-flaeche-1); }
   .dunkel .finden-balken::after { background: var(--am-gold-beschriftung); }
   .finden-person:hover { border-color: var(--am-handlung-ruhend); }
-  .finden-person:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+  .finden-person:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
   .dunkel .finden-person { background: var(--am-flaeche-2); }
 
   .finden-belege {
@@ -4320,7 +4342,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   font-size: 0.9375rem;
 }
 .kopfsuche-feld::placeholder { color: var(--am-text-gedaempft); }
-.kopfsuche-feld:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+.kopfsuche-feld:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 
 /* Das Kürzel steht im Feld, solange nichts darin steht — danach wäre es
    nur noch ein Hindernis vor dem eigenen Text. */
@@ -4338,13 +4360,13 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   top: calc(100% + var(--am-raum-1));
   left: 0;
   right: 0;
-  z-index: 70;
+  z-index: var(--am-ebene-suche);
   min-width: min(20rem, calc(100vw - var(--am-raum-6)));
   max-height: min(70vh, 34rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--am-raum-1) 0;
-  border: 1px solid var(--am-rand);
+  border: 1px solid var(--am-rand-betont-farbe);
   border-radius: var(--am-radius-mittel);
   background: var(--am-flaeche-1);
   box-shadow: var(--am-schatten-1);
@@ -4538,7 +4560,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   font-size: 0.8125rem;
 }
 .mitglied-rolle:hover { border-color: var(--am-rand-betont-farbe); }
-.mitglied-rolle:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+.mitglied-rolle:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 
 .mitglied-rolle-fest {
   font-size: 0.8125rem;
@@ -4770,7 +4792,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 .eig-griff:hover:not(:disabled) { background: var(--am-flaeche-2); color: var(--am-text-primaer); }
-.eig-griff:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+.eig-griff:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 .eig-griff:disabled { cursor: default; opacity: 0.35; }
 
 .eig-name {
@@ -4902,7 +4924,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 .fg-zeile:hover .fg-stift,
 .fg-stift:focus-visible { opacity: 1; }
 .fg-stift:hover { background: var(--am-flaeche-2); color: var(--am-text-primaer); }
-.fg-stift:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+.fg-stift:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 @media (hover: none) { .fg-stift { opacity: 1; } }
 
 .fg-leer { color: var(--am-text-gedaempft); }
@@ -4932,6 +4954,9 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 .fg-lang { white-space: pre-wrap; }
 .fg-verweis { text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
 .fg-ueberfaellig { color: var(--am-fehler); }
+/* Überschrittene Frist: Uhr und Wort neben dem Rot (R7) — Komponente Ueberfaellig. */
+[data-ueberfaellig="true"] { display: inline-flex; align-items: center; gap: var(--am-raum-1); }
+.ueberfaellig-zeichen { flex: none; }
 
 .fg-einzeln { display: flex; gap: var(--am-raum-1); align-items: flex-start; }
 .fg-einzeln .input,
@@ -4956,7 +4981,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 /* Rückfrage vor einem Schritt mit Folgen [HB-DIALOG] — vorher viermal
    mit eigenen Inline-Maßen gebaut. */
-.rueckfrage { width: 100%; max-width: 27.5rem; }
+.rueckfrage { width: 100%; max-width: 27.5rem; border-color: var(--am-rand-betont-farbe); box-shadow: var(--am-schatten-1); }
 .rueckfrage h2 { font-size: 1.125rem; margin-bottom: var(--am-raum-3); }
 .rueckfrage-text { font-size: 0.875rem; color: var(--am-text-sekundaer); margin-bottom: var(--am-raum-4); }
 
@@ -5196,7 +5221,7 @@ select,
   line-height: 1.5;
   resize: vertical;
 }
-.db-sql:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 1px; }
+.db-sql:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
 .db-leiste {
   display: flex;
   flex-wrap: wrap;

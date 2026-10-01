@@ -205,7 +205,7 @@ def _suchantwort_pruefen(antwort: httpx.Response, suche: Suchdienst) -> None:
     raise SucheGestoert(
         f"{name} hat den Schlüssel abgelehnt ({antwort.status_code}). "
         f"Gefragt wurde {ziel}. Der Schlüssel des Suchdienstes steht unter "
-        "Einstellungen › KI und Programme — er ist ein anderer als der des Sprachmodells."
+        "Einstellungen › AI und Programme — er ist ein anderer als der des Sprachmodells."
     )
 
 
@@ -347,7 +347,7 @@ async def suchen(client: httpx.AsyncClient, suche: Suchdienst, anfrage: str, *, 
     if suche.art in ("tavily", "brave") and not suche.api_key:
         raise SucheNichtEingerichtet(
             f"{DIENSTNAME[suche.art]} verlangt einen Zugangsschlüssel, und es ist keiner "
-            "lesbar hinterlegt. Unter Einstellungen › KI und Programme eintragen — "
+            "lesbar hinterlegt. Unter Einstellungen › AI und Programme eintragen — "
             "steht dort „hinterlegt“ und es geht trotzdem nicht, ist der Tresorschlüssel "
             "unter /app/data verloren und der Schlüssel muss neu eingegeben werden."
         )
@@ -412,7 +412,7 @@ async def suchen(client: httpx.AsyncClient, suche: Suchdienst, anfrage: str, *, 
                     + " weisen sie ab. Das trifft selbst betriebene Instanzen mit der Zeit "
                     "regelmäßig, und es geht nicht von allein weg. Zwei Wege: in der "
                     "SearXNG-Konfiguration einen Anbieter mit eigenem Schlüssel hinterlegen, "
-                    "oder unter Einstellungen › KI und Programme Tavily oder Brave eintragen."
+                    "oder unter Einstellungen › AI und Programme Tavily oder Brave eintragen."
                 )
         rohe = [(t.get("url"), t.get("title"), t.get("content")) for t in treffer]
 

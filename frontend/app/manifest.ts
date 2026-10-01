@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Rocket — Vertrieb",
     short_name: "Rocket",
-    description: "KI-gestütztes CRM für den AImighty-Vertrieb. Läuft auf der eigenen Box.",
+    description: "AI-gestütztes CRM für den AImighty-Vertrieb. Läuft auf der eigenen Box.",
     lang: "de",
     start_url: "/",
     display: "standalone",

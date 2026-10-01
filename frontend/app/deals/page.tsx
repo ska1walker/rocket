@@ -13,6 +13,7 @@ import { Fehler, Laedt } from "@/components/zustaende";
 import { DealAnlegen } from "@/components/deal-anlegen";
 import { useNeuGewuenscht } from "@/lib/neu";
 import { BRETT_HINWEIS_ID, BrettHinweis, useBrettTastatur } from "@/components/brett";
+import { Ueberfaellig } from "@/components/ueberfaellig";
 
 export default function BoardSeite() {
   const client = useQueryClient();
@@ -206,18 +207,16 @@ export default function BoardSeite() {
                 </div>
                 <div className="deal-karte-fuss">
                   <span className="deal-karte-betrag">{euro(deal.amount_cents)}</span>
-                  <span
-                    className="deal-karte-datum"
-                    data-ueberfaellig={
-                      spalte.stage.kind === "open" &&
-                      deal.close_date &&
-                      new Date(deal.close_date) < new Date()
-                        ? "true"
-                        : undefined
-                    }
-                  >
-                    {datum(deal.close_date)}
-                  </span>
+                  {(() => {
+                    const drueber =
+                      spalte.stage.kind === "open" && !!deal.close_date && new Date(deal.close_date) < new Date();
+                    return (
+                      <Ueberfaellig ueberfaellig={drueber} className="deal-karte-datum">
+                        {datum(deal.close_date)}
+                        {drueber && " · überfällig"}
+                      </Ueberfaellig>
+                    );
+                  })()}
                 </div>
               </Link>
             ))}
