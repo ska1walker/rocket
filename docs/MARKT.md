@@ -202,6 +202,8 @@ Sechster Durchlauf: Rocket 26.10.2, PR #87, 1.10.2026 — Einrichtungscode fehle
 
 Siebter Durchlauf: Rocket 26.10.3, PR #88, 1.10.2026 — Kontrast des gedämpften Texts (#567595), Kontrastprüfung in der CI. Marcs `main` unverändert seit 26.10.2 (d2c2a34); `CANONICAL_EPOCH_MS` 4375000000000 → 4376000000000. Lokal mit wrangler bewiesen; auf Kais Wunsch von Claude gestartet, diesmal ohne Rückfrage gemergt; auf `main` byte-gleich geprüft (sha256 `8529ee6e…f948`, keine alten Schlüssel). Keine Datenbankänderung. Von Kai auf der Box aktualisiert, läuft (1.10.2026).
 
+Achter Durchlauf: Rocket 26.10.5, PR #89, 1.10.2026 — Token aus dem CI-Repo (`tokens/app.css`), vier Kontrastfehler behoben; enthält 26.10.4 (Einstellungsnavigation), das nie im Markt war. Marcs `main` hatte sich seit 26.10.3 bewegt (71568a6): vier eigene Einträge, dazu zwei Änderungen am Markt selbst — Beschreibungen dürfen je Sprache stehen (`loc()` in `_lib.ts`, auch `de-DE`), und die Kategorie „Applications“ steht vorn in der Navigation. Für Rocket ändert das nichts, ein einfacher englischer Text gilt weiter. `CANONICAL_EPOCH_MS` 4380000000000 → 4381000000000. Lokal mit wrangler bewiesen; auf Kais Wunsch von Claude gestartet, ohne Rückfrage gemergt; auf `main` byte-gleich geprüft (sha256 `b413f923…31c5`, keine alten Schlüssel). Keine Datenbankänderung. Von Kai auf der Box aktualisiert, läuft (1.10.2026).
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
