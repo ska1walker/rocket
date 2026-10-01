@@ -53,6 +53,10 @@ async def test_faellige_und_ueberfaellige_aufgaben(datenbank):
     ueberfaellig = next(p for p in b["faellige_aufgaben"] if p["titel"] == "Längst überfällig")
     assert ueberfaellig["hinweis"] == "überfällig"
     assert ueberfaellig["tage"] == 5
+    # Die Oberfläche zeigt dann Uhr und Wort (R7), ohne das Wort zu vergleichen.
+    assert ueberfaellig["ueberfaellig"] is True
+    heute = next(p for p in b["faellige_aufgaben"] if p["titel"] == "Heute fällig")
+    assert heute["ueberfaellig"] is False
 
 
 async def test_geschaeft_mit_verstrichenem_datum(datenbank):

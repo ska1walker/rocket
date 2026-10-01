@@ -91,6 +91,7 @@ export function Knopfmenue({
         aria-expanded={offen}
         aria-controls={id}
         aria-label={`${text} — weitere Wege`}
+        title={`${text} — weitere Wege`}
         onClick={() => setOffen((o) => !o)}
       >
         <ChevronDown size={16} aria-hidden="true" />

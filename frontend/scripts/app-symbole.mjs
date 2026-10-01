@@ -7,7 +7,8 @@
 //
 //   ROCKET_CHROMIUM=/opt/pw-browsers/chromium node scripts/app-symbole.mjs
 //
-// Zwei Formen: „rund" ist die Kachel wie im Markt (Favicon, Manifest), „voll"
+// Drei Formen: „tab" ist das Zeichen im Browser-Tab, „rund" die Kachel wie im
+// Markt (Manifest), „voll"
 // füllt das Quadrat ohne Ecken und Rand — iOS und Android runden selbst, eine
 // eigene Rundung gäbe dort schwarze Ecken.
 
@@ -19,10 +20,15 @@ import { chromium } from "@playwright/test";
 const hier = dirname(fileURLToPath(import.meta.url));
 const frontend = join(hier, "..");
 const quelle = readFileSync(join(frontend, "..", "docs", "icon", "rocket.svg"), "utf8");
+// Das Zeichen im Browser-Tab (ABGLEICH G7): nur die Rakete. Als SVG folgt es
+// der Tableiste; Safari nimmt kein SVG-Favicon und bekommt dieses PNG in
+// einem Gold dazwischen, das auf hellen und dunklen Leisten trägt.
+const tab = readFileSync(join(frontend, "..", "docs", "icon", "tab.svg"), "utf8");
 const schrift = readFileSync(join(frontend, "app", "fonts", "Geist-Variable.woff2")).toString("base64");
 
 function form(art) {
   if (art === "rund") return quelle;
+  if (art === "tab") return tab.replace(/<style>[\s\S]*?<\/style>/, "").replace("<g ", '<g stroke="#b08a3e" ');
   const voll = quelle
     .replace('<g clip-path="url(#kachel)">', "<g>")
     .replace(/<rect x="1" y="1" width="158"[^>]*\/>/, "");
@@ -31,7 +37,7 @@ function form(art) {
 }
 
 const ZIELE = [
-  ["app/icon.png", "rund", 64],
+  ["app/icon1.png", "tab", 32],
   ["app/apple-icon.png", "voll", 180],
   ["public/symbol/rocket-192.png", "rund", 192],
   ["public/symbol/rocket-512.png", "rund", 512],
@@ -44,7 +50,7 @@ const browser = await chromium.launch({ executablePath: process.env.ROCKET_CHROM
 const seite = await browser.newPage();
 for (const [ziel, art, groesse] of ZIELE) {
   await seite.setViewportSize({ width: groesse, height: groesse });
-  const svg = form(art).replace(/width="512" height="512"/, `width="${groesse}" height="${groesse}"`);
+  const svg = form(art).replace(/width="(512|32)" height="(512|32)"/, `width="${groesse}" height="${groesse}"`);
   await seite.setContent(
     `<style>@font-face{font-family:Geist;src:url(data:font/woff2;base64,${schrift}) format("woff2");font-weight:100 900}
      html,body{margin:0;background:transparent}svg{display:block}</style>${svg}`,

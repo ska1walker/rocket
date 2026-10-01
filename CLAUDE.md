@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, AI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 26.10.6 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf (26.10.2 macht ihn fehlertolerant); 26.10.3 hebt den gedämpften Text auf #567595 und prüft den Kontrast in der CI; 26.10.4 gibt den Einstellungen eine senkrechte Navigation (Handy: Übersichtsliste, HB-UNTERNAV); 26.10.5 nimmt die Token aus dem CI-Repo (`tokens/app.css`, Abgleich Paket 1), behebt vier Kontrastfehler (Rand, Fokusring, Lösch-Knopf) und rechnet den Kontrast aus den Token; 26.10.6 setzt Paket 2 um (Löschen rot mit Wort, „AI“ statt „KI“, Rakete im App-Icon, Schatten nur für Schwebendes, Fristen mit Uhr und Wort, Maße aus dem CI). Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); über den Markt aktualisiert, seit 1.10.2026 mit Passwort, zuletzt auf 26.10.5
+> **Status:** 26.10.7 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf (26.10.2 macht ihn fehlertolerant); 26.10.3 hebt den gedämpften Text auf #567595 und prüft den Kontrast in der CI; 26.10.4 gibt den Einstellungen eine senkrechte Navigation (Handy: Übersichtsliste, HB-UNTERNAV); 26.10.5 nimmt die Token aus dem CI-Repo (`tokens/app.css`, Abgleich Paket 1), behebt vier Kontrastfehler (Rand, Fokusring, Lösch-Knopf) und rechnet den Kontrast aus den Token; 26.10.6 setzt Paket 2 um (Löschen rot mit Wort, „AI“ statt „KI“, Rakete im App-Icon, Schatten nur für Schwebendes, Fristen mit Uhr und Wort, Maße aus dem CI). 26.10.7 setzt Paket 5 um (Grundgerüst aller AImighty-Apps: Seitentitel 28 px, jeder Knopf 8 px, gewählter Eintrag getönt, Symbolknöpfe mit Tooltip, im Tab nur die Rakete und „Seite · Rocket“) und bringt jedes Release über die Action `markt.yml` von selbst in den Markt. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); über den Markt aktualisiert, seit 1.10.2026 mit Passwort, zuletzt auf 26.10.5
 > **Letzte Aktualisierung:** 1. Oktober 2026
 
 ---
@@ -213,7 +213,7 @@ eine Farbe ändern will, ändert das Token.
   — Favicon, Apple-Touch-Icon (Home-Bildschirm) und Manifest, erzeugt mit
   `frontend/scripts/app-symbole.mjs`. Nie ein Platzhalter, nie ein
   anderes Bild; ändert sich das Icon, alle neu erzeugen (festgelegt von
-  Kai am 30.9.2026, `docs/BETRIEB.md` „Symbol der Web-App"). Seit 26.10.6 trägt das Wappen die Rakete statt des „R“ (Figma „Icon-Labor“, Abschnitt 0); auch das Markt-Icon `icon.png` kommt aus `app-symbole.mjs`.
+  Kai am 30.9.2026, `docs/BETRIEB.md` „Symbol der Web-App"). Seit 26.10.6 trägt das Wappen die Rakete statt des „R“ (Figma „Icon-Labor“, Abschnitt 0); auch das Markt-Icon `icon.png` kommt aus `app-symbole.mjs`. **Im Browser-Tab steht nur die Rakete** (`docs/icon/tab.svg`, seit 26.10.7, CI G7): Bei 16 px wäre die Kachel ein Fleck, und alle AImighty-Apps sähen gleich aus; der Tab-Titel nennt zuerst die Seite („Firmen · Rocket“).
 
 - **Die AImighty-Wortmarke oben links bleibt** (`components/marke.tsx`),
   obwohl der Markt für seine Apps „kein Markenname, kein Logo" vorgibt —
@@ -327,16 +327,24 @@ der Lieferung und liest die Token über `var(--am-*)`.
    (baut die Abbilder, legt Tag und Release mit dem Chart als Anhang an).
    Claude pusht keine Tags, das lässt die Sitzung nicht zu; Kai muss
    dafür nichts mehr von Hand tun. Das Chart wird immer als Paket geprüft
-   (`olares-cli chart lint dist/rocket-YY.M.n.tgz`), und **erst nach einer
-   laufenden Installation auf einer Box** geht der Eintrag per PR in
-   `bayerhazard/aimighty-market`. **Marc veröffentlicht dort selbst Apps
+   (`olares-cli chart lint dist/rocket-YY.M.n.tgz`). **Seit 26.10.7 geht
+   der Eintrag in `bayerhazard/aimighty-market` von selbst:** Nach dem
+   Release baut die Action `markt.yml` ihn auf Marcs frischem `main`,
+   beweist ihn mit wrangler, öffnet den PR und mergt ihn (Kai, 1.10.2026,
+   „ganz automatisch“; `docs/MARKT.md`, „Der Weg in den Markt“). Dafür
+   gehört in **jeden Release-PR** die Notiz `olares/markt/<version>.md`
+   (`# Titel`, darunter Englisch ab `v<version>: `) — `check-chart.sh`
+   verlangt sie. Claude prüft nach dem Merge den Lauf von `markt` und den
+   Eintrag auf `main` wie jeden anderen Build. Ohne das Geheimnis
+   `MARKT_TOKEN` gilt der alte Weg unten. **Marc veröffentlicht dort selbst Apps
    und ändert den Markt** — vor jedem Eintrag `upstream/main` frisch
    holen, darauf bauen, nachlesen, was sich seit dem letzten
    Rocket-Eintrag an `functions/` geändert hat, und gegen genau diesen
    Stand mit wrangler beweisen (`docs/MARKT.md`, „Der Markt bewegt sich
    auch ohne uns", festgelegt 30.9.2026). Den PR in Marcs Repo öffnet eine
    Sitzung, die **Kai selbst startet**; Claude liefert Zweig und fertigen
-   Auftrag (`docs/MARKT.md`, „Kai startet die Sitzung“, festgelegt 1.10.2026). Die Regeln dahinter stehen im Skill
+   Auftrag (`docs/MARKT.md`, „Kai startet die Sitzung“, festgelegt 1.10.2026) —
+   seit 26.10.7 nur noch der Rückfallweg, wenn die Action nicht kann. Die Regeln dahinter stehen im Skill
    `insilo/.claude/skills/olares-release/SKILL.md`; was der Markt selbst
    verlangt (Version an 5 Stellen, frisches base64, jede Änderung = neue
    Version) und wo Rocket bewusst abweicht, steht in `docs/MARKT.md`.

@@ -527,6 +527,8 @@ export interface Posten {
   tage: number | null;
   /** Wohin der Posten führt, wenn weder Lead noch Firma es sagen. */
   pfad: string | null;
+  /** Frist verstrichen: Wort und Uhr, nicht nur Farbe. */
+  ueberfaellig?: boolean;
 }
 
 export interface Briefing {

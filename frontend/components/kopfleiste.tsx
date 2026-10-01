@@ -40,6 +40,7 @@ function NeuMenue() {
         ref={knopf}
         // Auf schmalen Schirmen weicht das Wort — der Name bleibt.
         aria-label="Erstellen"
+        title="Erstellen"
         aria-haspopup="menu"
         aria-expanded={offen}
         aria-controls={id}

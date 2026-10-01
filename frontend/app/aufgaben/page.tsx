@@ -284,6 +284,7 @@ function Aufgabenzeile({
         type="button"
         className="aufgabe-haken"
         aria-label={erledigt ? "Wieder öffnen" : "Als erledigt abhaken"}
+        title={erledigt ? "Wieder öffnen" : "Als erledigt abhaken"}
         disabled={laeuft}
         onClick={() => beiSetzen({ status: erledigt ? "open" : "done" })}
       >

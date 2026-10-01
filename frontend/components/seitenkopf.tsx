@@ -1,6 +1,7 @@
 // Modul HB-SEITENKOPF — docs/MODULE.md
 
 import Link from "next/link";
+import { TabTitel } from "@/components/tab-titel";
 
 export function Seitenkopf({
   titel,
@@ -15,6 +16,7 @@ export function Seitenkopf({
 }) {
   return (
     <header className="seitenkopf">
+      <TabTitel seite={titel} />
       <div>
         {pfad && (
           <div className="seitenkopf-pfad">

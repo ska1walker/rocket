@@ -106,6 +106,17 @@ for (const [name, muster] of SEITEN) {
 
     const lageFunde = await page.evaluate(lagePruefen);
 
+    // Ein Knopf, der nur ein Zeichen trägt, braucht einen Namen und einen
+    // Tooltip mit demselben Wort (ABGLEICH G4 im CI, medien/app.md).
+    const symbolknoepfe = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>("button, a[href], [role=button]")]
+        .filter((e) => e.offsetParent && e.innerText.trim() === "")
+        // Die Marke ist ein Bild mit Namen, kein Symbolknopf.
+        .filter((e) => e.getAttribute("role") !== "switch" && !e.closest("label") && !e.querySelector("img"))
+        .filter((e) => !(e.getAttribute("aria-label") || e.getAttribute("aria-labelledby")) || !e.getAttribute("title"))
+        .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).split(" ")[0]} „${e.getAttribute("aria-label") ?? ""}“`),
+    );
+
     const axe = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "best-practice"])
       .analyze();
@@ -118,6 +129,7 @@ for (const [name, muster] of SEITEN) {
     expect(lage.ueberschriften, "genau eine h1").toBe(1);
     expect(lage.heraus, "ragt aus dem Seitenkopf").toEqual([]);
     expect(lageFunde, "Rand, Abstand, Mitte (e2e/lage.ts)").toEqual([]);
+    expect([...new Set(symbolknoepfe)], "Symbolknopf ohne Namen oder Tooltip").toEqual([]);
     expect(schwer, "axe critical/serious").toEqual([]);
   });
 }
@@ -135,11 +147,30 @@ test("Web-App-Symbole: Apple-Touch-Icon, Favicon und Manifest", async ({ page })
   expect(hrefs.every(Boolean), "Link-Tags im Kopf").toBe(true);
   const manifest = await (await page.request.get(hrefs[2]!)).json();
   expect(manifest.short_name).toBe("Rocket");
-  for (const pfad of [hrefs[0]!, hrefs[1]!, ...manifest.icons.map((i: { src: string }) => i.src)]) {
+  for (const pfad of [hrefs[0]!, ...manifest.icons.map((i: { src: string }) => i.src)]) {
     const antwort = await page.request.get(pfad);
     expect(antwort.status(), pfad).toBe(200);
     expect(antwort.headers()["content-type"], pfad).toBe("image/png");
   }
+  // Im Tab nur die Rakete (ABGLEICH G7): als SVG, das der Tableiste folgt,
+  // und als PNG für Safari, das kein SVG-Favicon nimmt.
+  const tab = await page.evaluate(() =>
+    [...document.querySelectorAll('link[rel="icon"]')].map((l) => l.getAttribute("href")!),
+  );
+  const arten = [];
+  for (const pfad of tab) {
+    const antwort = await page.request.get(pfad);
+    expect(antwort.status(), pfad).toBe(200);
+    arten.push(antwort.headers()["content-type"]);
+  }
+  expect(arten.sort(), "Tab-Zeichen als SVG und PNG").toEqual(["image/png", "image/svg+xml"]);
+  expect(await page.title(), "Titel ohne Seitenkopf").toBe("Rocket");
+});
+
+// Der Tab nennt zuerst die Seite, dann die Anwendung (ABGLEICH G7).
+test("Tab-Titel: Seite · Rocket", async ({ page }) => {
+  await page.goto("/firmen", { waitUntil: "networkidle" });
+  await expect(page).toHaveTitle("Firmen · Rocket");
 });
 
 // Ein Leerzustand erscheint mit Beispieldaten fast nirgends — deshalb einmal

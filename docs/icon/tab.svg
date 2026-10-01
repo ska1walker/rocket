@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="-1 -1 26 26">
+<!-- Das Zeichen im Browser-Tab: nur die Rakete, ohne Kachel und Wappen.
+     Bei 16 px wäre die Kachel ein goldener Punkt mit blauem Fleck, und alle
+     AImighty-Apps sähen gleich aus (ABGLEICH G7 im CI, medien/app.md).
+     Die Farbe folgt der Tableiste: hell Gold 800, dunkel Gold 500. -->
+<style>
+  g { stroke: #8c6c1f; }
+  @media (prefers-color-scheme: dark) { g { stroke: #caa960; } }
+</style>
+<g fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/>
+</g>
+</svg>

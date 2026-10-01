@@ -36,6 +36,8 @@ class Posten(BaseModel):
     tage: int | None = None
     # Wohin der Posten führt, wenn weder Lead noch Firma es sagen.
     pfad: str | None = None
+    # Frist verstrichen — die Oberfläche zeigt dann Wort und Uhr (ABGLEICH R7).
+    ueberfaellig: bool = False
 
 
 class Briefing(BaseModel):
@@ -149,6 +151,7 @@ async def _sammeln(user: CurrentUser) -> Briefing:
                 art="aufgabe",
                 titel=z["title"],
                 hinweis="überfällig" if z["due_at"].date() < heute else "heute fällig",
+                ueberfaellig=z["due_at"].date() < heute,
                 deal_id=str(z["deal_id"]) if z["deal_id"] else None,
                 company_id=str(z["company_id"]) if z["company_id"] else None,
                 tage=(heute - z["due_at"].date()).days,
