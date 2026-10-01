@@ -13,7 +13,7 @@ import {
   Search,
   Trash2,
   X,
-} from "lucide-react";
+} from "@/lib/symbole";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -316,7 +316,7 @@ export function Segmentliste({
                 aria-label={`Ansicht „${a.name}" löschen`}
                 onClick={() => loeschenAnsicht.mutate(a.id)}
               >
-                <X size={12} aria-hidden="true" />
+                <X size={16} aria-hidden="true" />
               </button>
             )}
           </span>
@@ -340,7 +340,7 @@ export function Segmentliste({
           aria-expanded={filterOffen}
           onClick={() => setFilterOffen((o) => !o)}
         >
-          <FilterZeichen size={14} aria-hidden="true" />
+          <FilterZeichen size={16} aria-hidden="true" />
           Filter
           {scharf.length > 0 && <span className="zahlpille">{scharf.length}</span>}
         </button>
@@ -351,7 +351,7 @@ export function Segmentliste({
           aria-expanded={spaltenOffen}
           onClick={() => setSpaltenOffen((o) => !o)}
         >
-          <Columns3 size={14} aria-hidden="true" />
+          <Columns3 size={16} aria-hidden="true" />
           Spalten
         </button>
 
@@ -370,7 +370,7 @@ export function Segmentliste({
             })}
             title="Diese Liste als CSV — mit Filter, Spalten und Sortierung von hier"
           >
-            <Download size={14} aria-hidden="true" />
+            <Download size={16} aria-hidden="true" />
             Exportieren
           </a>
         )}
@@ -381,7 +381,7 @@ export function Segmentliste({
             className="btn btn-sekundaer btn-klein"
             onClick={() => (aktiveAnsicht ? speichern.mutate() : setSpeichernOffen(true))}
           >
-            <Bookmark size={14} aria-hidden="true" />
+            <Bookmark size={16} aria-hidden="true" />
             {aktiveAnsicht ? "Ansicht aktualisieren" : "Als Ansicht speichern"}
           </button>
         )}
@@ -503,7 +503,7 @@ export function Segmentliste({
                   aria-label="Bedingung entfernen"
                   onClick={() => setLage({ ...lage, filter: lage.filter.filter((_, j) => j !== i) })}
                 >
-                  <X size={11} aria-hidden="true" />
+                  <X size={16} aria-hidden="true" />
                 </button>
               </span>
             );
@@ -561,9 +561,9 @@ export function Segmentliste({
                         {f.text}
                         {lage.sort_feld === f.schluessel &&
                           (lage.sort_richtung === "asc" ? (
-                            <ArrowUp size={12} aria-hidden="true" />
+                            <ArrowUp size={16} aria-hidden="true" />
                           ) : (
-                            <ArrowDown size={12} aria-hidden="true" />
+                            <ArrowDown size={16} aria-hidden="true" />
                           ))}
                       </button>
                     </th>
@@ -785,7 +785,7 @@ function Stapelleiste({
         </>
       ) : (
         <button type="button" className="btn btn-still btn-klein" onClick={() => setSicher(true)}>
-          <Trash2 size={14} aria-hidden="true" />
+          <Trash2 size={16} aria-hidden="true" />
           Löschen
         </button>
       )}

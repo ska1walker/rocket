@@ -3,7 +3,7 @@
 // Modul HB-ASSISTENT — docs/MODULE.md
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowUp, Check, ExternalLink, X } from "lucide-react";
+import { ArrowUp, Check, ExternalLink, X } from "@/lib/symbole";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -132,7 +132,7 @@ export function Assistent() {
                   ))}
                   {e.navigation && (
                     <p className="assistent-hinweis">
-                      <ExternalLink size={12} aria-hidden="true" /> Geöffnet: <Link href={e.navigation}>{e.navigation}</Link>
+                      <ExternalLink size={16} aria-hidden="true" /> Geöffnet: <Link href={e.navigation}>{e.navigation}</Link>
                     </p>
                   )}
                 </div>
@@ -198,7 +198,7 @@ function Karte({ karte, client }: { karte: AssistentKarte; client: ReturnType<ty
     <div className={`assistent-karte ${stand}`}>
       <div className="assistent-karte-kopf">
         <strong>{karte.titel}</strong>
-        {stand === "ausgefuehrt" && <span className="stufe" data-art="won"><Check size={12} aria-hidden="true" /> erledigt</span>}
+        {stand === "ausgefuehrt" && <span className="stufe" data-art="won"><Check size={16} aria-hidden="true" /> erledigt</span>}
         {stand === "verworfen" && <span className="stufe">verworfen</span>}
       </div>
       <dl className="assistent-karte-zeilen">

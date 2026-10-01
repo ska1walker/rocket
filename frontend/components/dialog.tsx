@@ -10,7 +10,7 @@
 // Die Kinder sind Mitte und Fuß: `.dialog-koerper` (rollt allein) und
 // `.dialog-fuss` (bleibt stehen, darin die Knöpfe).
 
-import { X } from "lucide-react";
+import { X } from "@/lib/symbole";
 import { useDialogfalle } from "@/components/dialogfalle";
 
 export function Dialog({
@@ -37,7 +37,7 @@ export function Dialog({
         <div className="dialog-kopf">
           <h2>{titel}</h2>
           <button type="button" className="dialog-zu" aria-label="Schließen" onClick={beiSchliessen}>
-            <X size={18} aria-hidden="true" />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
         <form

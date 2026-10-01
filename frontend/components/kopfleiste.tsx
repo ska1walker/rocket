@@ -19,7 +19,7 @@
 // Nachweis ist kein Bedienelement, sondern die Aussage des Produkts —
 // oben würde daraus ein Symbol neben anderen, und der Satz wäre weg.
 
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus } from "@/lib/symbole";
 import Link from "next/link";
 import { useId } from "react";
 import { neuPfad, NEU_ZIELE } from "@/lib/neu";
@@ -52,7 +52,7 @@ function NeuMenue() {
             Zeichen bleibt — dort ist es der einzige Weg, es zu erkennen. */}
         <Plus size={16} aria-hidden="true" className="kopf-neu-zeichen" />
         <span className="kopf-neu-text">Erstellen</span>
-        <ChevronDown size={14} aria-hidden="true" />
+        <ChevronDown size={16} aria-hidden="true" />
       </button>
 
       {offen && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { UserSearch } from "lucide-react";
+import { UserSearch } from "@/lib/symbole";
 import Link from "next/link";
 import { use } from "react";
 import { api, suchparameter } from "@/lib/api";
@@ -160,7 +160,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
               <h2>Kontakte</h2>
               <div className="block-kopf-aktionen">
                 <button type="button" className="btn btn-still btn-klein" onClick={() => setSuchenOffen((o) => !o)} aria-expanded={suchenOffen} title="Ansprechpartner aus Website und Suchtreffern finden">
-                  <UserSearch size={14} aria-hidden="true" />
+                  <UserSearch size={16} aria-hidden="true" />
                   Finden
                 </button>
                 <button type="button" className="btn btn-still btn-klein" onClick={() => setKontaktOffen(true)}>Anlegen</button>

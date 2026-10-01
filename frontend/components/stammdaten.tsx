@@ -3,7 +3,7 @@
 // Modul RK-STAMMDATEN — docs/MODULE.md
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "@/lib/symbole";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -109,7 +109,7 @@ export function Stammdaten({
           {kopfrechts}
           {!bearbeiten && (
             <button type="button" className="btn btn-still btn-klein" onClick={() => setBearbeiten(true)} aria-label="Bearbeiten" title="Bearbeiten">
-              <Pencil size={14} aria-hidden="true" />
+              <Pencil size={16} aria-hidden="true" />
             </button>
           )}
         </span>
@@ -139,7 +139,7 @@ export function Stammdaten({
               </button>
               <button type="button" className="btn btn-still btn-klein" onClick={() => { setBearbeiten(false); setEntwurf({}); }}>Abbrechen</button>
               <button type="button" className="btn btn-still btn-klein" style={{ marginLeft: "auto", color: "var(--am-fehler)" }} onClick={() => setLoeschen(true)}>
-                <Trash2 size={14} aria-hidden="true" /> Löschen
+                <Trash2 size={16} aria-hidden="true" /> Löschen
               </button>
             </div>
           </form>

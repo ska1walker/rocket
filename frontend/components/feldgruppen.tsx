@@ -3,7 +3,7 @@
 // Modul RK-FELDGRUPPEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Check, ChevronDown, Eye, EyeOff, Pencil, Trash2, X } from "lucide-react";
+import { AlertCircle, Check, ChevronDown, Eye, EyeOff, Pencil, Trash2, X } from "@/lib/symbole";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api, suchparameter } from "@/lib/api";
@@ -167,11 +167,11 @@ export function Feldgruppen({
             title={leereAus ? "Leere Felder zeigen" : "Leere Felder ausblenden"}
             onClick={() => merken.mutate({ leere_ausblenden: !leereAus })}
           >
-            {leereAus ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+            {leereAus ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
           </button>
           {!alle && (
             <button type="button" className="btn btn-still btn-klein btn-symbol" onClick={() => { setEinzeln(null); setAlle(true); }} aria-label="Alles bearbeiten" title="Alles bearbeiten">
-              <Pencil size={14} aria-hidden="true" />
+              <Pencil size={16} aria-hidden="true" />
             </button>
           )}
         </span>
@@ -205,7 +205,7 @@ export function Feldgruppen({
                     aria-expanded={offen}
                     onClick={() => klappen(g.key)}
                   >
-                    <ChevronDown size={14} aria-hidden="true" className="fg-pfeil" />
+                    <ChevronDown size={16} aria-hidden="true" className="fg-pfeil" />
                     <span>{g.label}</span>
                     {!offen && <span className="fg-stand">{gefuellt} gefüllt</span>}
                   </button>
@@ -317,10 +317,10 @@ function Feldzeile({
           >
             <Eingabe feld={feld} id={`fg-${feld.key}`} roh={roh} setRoh={setRoh} optionen={optionen} autoFocus />
             <button type="submit" className="btn btn-primaer btn-klein btn-symbol" aria-label={`${feld.label} speichern`} disabled={laeuft}>
-              <Check size={14} aria-hidden="true" />
+              <Check size={16} aria-hidden="true" />
             </button>
             <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label="Abbrechen" onClick={beiAbbruch}>
-              <X size={14} aria-hidden="true" />
+              <X size={16} aria-hidden="true" />
             </button>
           </form>
           {feld.description && <p className="feld-hinweis">{feld.description}</p>}
@@ -344,7 +344,7 @@ function Feldzeile({
             title={`${feld.label} bearbeiten`}
             onClick={() => { setRoh(alsEingabe(feld, wert)); setEigenerFehler(null); beiOeffnen(); }}
           >
-            <Pencil size={12} aria-hidden="true" />
+            <Pencil size={16} aria-hidden="true" />
           </button>
         )}
       </dd>
@@ -371,7 +371,7 @@ function Wert({
   if (istLeer(wert) && feld.required)
     return (
       <span className="fg-fehlt">
-        <AlertCircle size={12} aria-hidden="true" /> fehlt
+        <AlertCircle size={16} aria-hidden="true" /> fehlt
       </span>
     );
   if (istLeer(wert)) return <span className="fg-leer">—</span>;
@@ -538,7 +538,7 @@ function Formular({
         </button>
         <button type="button" className="btn btn-still btn-klein" onClick={beiAbbruch}>Abbrechen</button>
         <button type="button" className="btn btn-still btn-klein fg-loeschknopf" onClick={beiLoeschen}>
-          <Trash2 size={14} aria-hidden="true" /> Löschen
+          <Trash2 size={16} aria-hidden="true" /> Löschen
         </button>
       </div>
     </form>

@@ -3,7 +3,7 @@
 // Modul RK-ANREICHERUNG — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "@/lib/symbole";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { anzahl, datumZeit } from "@/lib/format";
@@ -111,7 +111,7 @@ export function Anreicherungsblock({
           disabled={!bereit || laeuft}
           title={bereit ? undefined : status.data?.hint}
         >
-          <Sparkles size={14} aria-hidden="true" />
+          <Sparkles size={16} aria-hidden="true" />
           {laeuft ? "Liest …" : "Anreichern"}
         </button>
       </div>

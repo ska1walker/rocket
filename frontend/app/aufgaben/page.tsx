@@ -3,7 +3,7 @@
 // Modul RK-AUFGABEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle } from "@/lib/symbole";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api, suchparameter } from "@/lib/api";
@@ -288,7 +288,7 @@ function Aufgabenzeile({
         disabled={laeuft}
         onClick={() => beiSetzen({ status: erledigt ? "open" : "done" })}
       >
-        {erledigt ? <CheckCircle2 size={18} aria-hidden="true" /> : <Circle size={18} aria-hidden="true" />}
+        {erledigt ? <CheckCircle2 size={20} aria-hidden="true" /> : <Circle size={20} aria-hidden="true" />}
       </button>
 
       <div className="aufgabe-mitte">

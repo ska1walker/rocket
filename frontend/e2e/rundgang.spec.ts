@@ -117,6 +117,21 @@ for (const [name, muster] of SEITEN) {
         .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).split(" ")[0]} „${e.getAttribute("aria-label") ?? ""}“`),
     );
 
+    // HB-SYMBOL (ABGLEICH R2): jedes sichtbare Zeichen in 16, 20, 24 oder 40,
+    // der Strich gerendert 1,5 px — auch wenn CSS die Größe verändert.
+    const zeichen = await page.evaluate(() =>
+      [...document.querySelectorAll<SVGSVGElement>("svg[data-symbol]")]
+        .filter((s) => s.getBoundingClientRect().width > 0)
+        .flatMap((s) => {
+          const breite = Math.round(s.getBoundingClientRect().width);
+          const strich = (parseFloat(getComputedStyle(s).strokeWidth) * breite) / 24;
+          const name = s.getAttribute("data-symbol");
+          return [16, 20, 24, 40].includes(breite) && Math.abs(strich - 1.5) < 0.05
+            ? []
+            : [`${name}: ${breite} px, Strich ${strich.toFixed(2)}`];
+        }),
+    );
+
     const axe = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "best-practice"])
       .analyze();
@@ -130,6 +145,7 @@ for (const [name, muster] of SEITEN) {
     expect(lage.heraus, "ragt aus dem Seitenkopf").toEqual([]);
     expect(lageFunde, "Rand, Abstand, Mitte (e2e/lage.ts)").toEqual([]);
     expect([...new Set(symbolknoepfe)], "Symbolknopf ohne Namen oder Tooltip").toEqual([]);
+    expect([...new Set(zeichen)], "Zeichen außerhalb 16/20/24/40 oder Strich nicht 1,5").toEqual([]);
     expect(schwer, "axe critical/serious").toEqual([]);
   });
 }

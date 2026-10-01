@@ -3,7 +3,7 @@
 // Modul RK-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy } from "lucide-react";
+import { Copy } from "@/lib/symbole";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { datumZeit } from "@/lib/format";
@@ -94,7 +94,7 @@ export function Quellenblock() {
                   navigator.clipboard.writeText(`${basis}${neu.pfad}\n${neu.secret}`)
                 }
               >
-                <Copy size={14} aria-hidden="true" />
+                <Copy size={16} aria-hidden="true" />
                 Beides kopieren
               </button>
               <button

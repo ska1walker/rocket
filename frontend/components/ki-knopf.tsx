@@ -3,7 +3,7 @@
 // Modul HB-AI — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "@/lib/symbole";
 import { api } from "@/lib/api";
 import type { KIErgebnis, KIStatus } from "@/lib/typen";
 
@@ -48,7 +48,7 @@ export function KiKnopf({
         disabled={!bereit || lauf.isPending}
         title={bereit ? undefined : status.data?.hint}
       >
-        <Sparkles size={14} aria-hidden="true" />
+        <Sparkles size={16} aria-hidden="true" />
         {lauf.isPending ? "Denkt nach …" : text}
       </button>
       {!bereit && status.data?.hint && (

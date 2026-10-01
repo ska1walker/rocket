@@ -2,7 +2,7 @@
 
 // Modul HB-ERKLAERUNG — docs/MODULE.md
 
-import { Info } from "lucide-react";
+import { Info } from "@/lib/symbole";
 import { useEffect, useId, useRef, useState } from "react";
 
 /**
@@ -44,7 +44,7 @@ export function Erklaerung({ kurz, lang }: { kurz: React.ReactNode; lang?: React
             aria-controls={id}
             onClick={() => setOffen((o) => !o)}
           >
-            <Info size={15} aria-hidden="true" />
+            <Info size={16} aria-hidden="true" />
           </button>
         )}
       </p>

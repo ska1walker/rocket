@@ -50,6 +50,7 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | AM-HUELLE | Hülle: Raster aus Kopfleiste, Spalte, Inhalt | `globals.css` | ● |
 | AM-LEER | Leerzustand | `globals.css` | ● |
 | HB-MARKE | AImighty-Wortmarke | `marke.tsx` | ● |
+| HB-SYMBOL | Zeichen aus dem CI-Set: 16/20/24/40, Strich 1,5 px | `symbol.tsx`, `lib/symbole.tsx` (erzeugt) | ● |
 | HB-DARSTELLUNG | Hell / Dunkel / System | `darstellung.tsx` | ◐ Cookie-Name |
 | HB-NAVIGATION | Seitenspalte, „Mehr", Favoriten, Einklappen | `huelle.tsx`, `navigation.tsx` | ◐ Ziele, Favoritenquelle |
 | HB-KOPFLEISTE | Leiste oben: Marke, Suche, Erstellen | `kopfleiste.tsx` | ◐ Produktwort, Ziele |
@@ -200,6 +201,18 @@ eingeklappt 64 px.
 In Rocket gebaut, aber ohne CRM-Fachlichkeit. Diese Teile sind der
 Kandidat für „überall gleich": Wer sie in Relay braucht, nimmt sie von
 hier und behält die Kennung.
+
+### HB-SYMBOL — Zeichen ●
+
+Jedes Zeichen der Oberfläche, aus dem CI-Set (`marke/icons/ui/` im CI-Repo,
+112 Zeichen aus Lucide 1.31.0 und eigene). `components/symbol.tsx` ist der
+Rumpf: `currentColor`, Größe nur 16 · 20 · 24 · 40 (der Typ lässt keine
+andere zu), Strich bei jeder Größe 1,5 px, `data-symbol` mit dem CI-Namen.
+Die Zeichen selbst erzeugt `scripts/symbole-erzeugen.mjs` nach
+`lib/symbole.tsx`, mit den Exportnamen von lucide-react. Eine andere App
+übernimmt `symbol.tsx` und das Skript und trägt ihre eigene Namensliste ein.
+Begründung und Weg eines neuen Zeichens: `docs/BETRIEB.md`, „Ein Icon-Set
+für alle Apps“.
 
 ### HB-MARKE — Wortmarke ●
 
@@ -601,7 +614,7 @@ Technik wie bei HubSpot, Stripe, GitHub:
 
 - **Desktop (≥1024px):** senkrechte Liste links neben dem Inhalt
   (15rem), mitlaufend (`position: sticky`), in Gruppen mit Titel. Jeder
-  Eintrag mit Symbol (lucide, 18px); gewählt mit Auswahlfläche, kräftiger
+  Eintrag mit Symbol (HB-SYMBOL, 20 px); gewählt mit Auswahlfläche, kräftiger
   Schrift und einer Goldmarke am Rand — Gold trägt keinen Text.
 - **Handy:** dieselbe Liste als Übersicht mit Kurzbeschreibung und „›“,
   wie die iPhone-Einstellungen. Ist ein Bereich gewählt, steht nur er da;

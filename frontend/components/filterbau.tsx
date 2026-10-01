@@ -2,7 +2,7 @@
 
 // Modul RK-SEGMENTLISTE — docs/MODULE.md
 
-import { Plus, X } from "lucide-react";
+import { Plus, X } from "@/lib/symbole";
 import { gruppieren } from "@/lib/anordnung";
 import { OHNE_WERT, OPERATOR_TEXT } from "@/lib/format";
 import { Mehrfachauswahl } from "@/components/mehrfachauswahl";
@@ -127,14 +127,14 @@ export function Filterbau({
               aria-label="Bedingung entfernen"
               onClick={() => beiAendern(bedingungen.filter((_, j) => j !== i))}
             >
-              <X size={14} aria-hidden="true" />
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
         );
       })}
 
       <button type="button" className="btn btn-still btn-klein" onClick={hinzu}>
-        <Plus size={14} aria-hidden="true" />
+        <Plus size={16} aria-hidden="true" />
         Bedingung
       </button>
     </div>

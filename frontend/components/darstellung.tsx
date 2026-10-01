@@ -16,7 +16,7 @@
  * Benutzerkonto nichts verloren.
  */
 
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "@/lib/symbole";
 import { useEffect, useState } from "react";
 
 export const DARSTELLUNG_COOKIE = "rocket-darstellung";
@@ -103,7 +103,7 @@ export function Darstellungsschalter() {
             wende(wert);
           }}
         >
-          <Zeichen size={14} strokeWidth={1.75} aria-hidden="true" />
+          <Zeichen size={16} aria-hidden="true" />
           <span className="nur-vorleser">{text}</span>
         </button>
       ))}

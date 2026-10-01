@@ -3,7 +3,7 @@
 // Modul RK-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, KeyRound, Pencil, UserMinus } from "lucide-react";
+import { Copy, KeyRound, Pencil, UserMinus } from "@/lib/symbole";
 import { useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { lage, passwortAendern } from "@/lib/anmeldung";
@@ -162,7 +162,7 @@ export function Mitgliederblock() {
                           setEntwurf(m.display_name ?? "");
                         }}
                       >
-                        <Pencil size={14} aria-hidden="true" />
+                        <Pencil size={16} aria-hidden="true" />
                       </button>
                       </span>
                       {/* Die Kennung ist der Name, mit dem sich diese Person
@@ -226,7 +226,7 @@ export function Mitgliederblock() {
                     onClick={() => einladen.mutate(m.id)}
                     disabled={einladen.isPending}
                   >
-                    <KeyRound size={14} aria-hidden="true" />
+                    <KeyRound size={16} aria-hidden="true" />
                   </button>
                   {m.zugang === "sitzplatz" && m.id !== wer.data?.user_id && (
                     <button
@@ -236,7 +236,7 @@ export function Mitgliederblock() {
                       aria-label={`${m.display_name ?? m.olares_username} aus der Organisation entfernen`}
                       onClick={() => entfernen.mutate(m.id)}
                     >
-                      <UserMinus size={14} aria-hidden="true" />
+                      <UserMinus size={16} aria-hidden="true" />
                     </button>
                   )}
                 </td>
@@ -285,7 +285,7 @@ export function Mitgliederblock() {
                   }
                 }}
               >
-                <Copy size={14} aria-hidden="true" /> {kopiert ? "Kopiert" : "Kopieren"}
+                <Copy size={16} aria-hidden="true" /> {kopiert ? "Kopiert" : "Kopieren"}
               </button>
             </div>
             {/* Der Klartext des Tokens existiert genau einmal, hier. Gespeichert

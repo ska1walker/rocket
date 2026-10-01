@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "@/lib/symbole";
 import { useEffect } from "react";
 import { fehlerMelden } from "@/components/fehlermelder";
 

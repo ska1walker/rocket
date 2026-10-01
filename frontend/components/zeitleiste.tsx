@@ -3,7 +3,7 @@
 // Modul HB-ZEITLEISTE — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Sparkles, Trash2 } from "lucide-react";
+import { Pencil, Sparkles, Trash2 } from "@/lib/symbole";
 import Link from "next/link";
 import { useState } from "react";
 import { api, suchparameter } from "@/lib/api";
@@ -112,7 +112,7 @@ export function Zeitleiste({
                 <li key={a.id} data-art={a.kind}>
                   <div className="zeitleiste-kopf">
                     <span className="zeitleiste-art">
-                      {a.kind === "ai" && <Sparkles size={11} aria-hidden="true" />}{" "}
+                      {a.kind === "ai" && <Sparkles size={16} aria-hidden="true" />}{" "}
                       {AKTIVITAET_TEXT[a.kind] ?? a.kind}
                     </span>
                     {a.subject && <span className="zeitleiste-betreff">{a.subject}</span>}
@@ -141,8 +141,8 @@ export function Zeitleiste({
                   )}
                   {MENSCHLICH.includes(a.kind) && !besprechungVon(a) && bearbeite?.id !== a.id && (
                     <div className="btn-reihe" style={{ marginTop: "var(--am-raum-1)" }}>
-                      <button type="button" className="btn btn-still btn-klein" aria-label="Eintrag bearbeiten" onClick={() => setBearbeite({ id: a.id, body: a.body ?? "" })}><Pencil size={12} aria-hidden="true" /></button>
-                      <button type="button" className="btn btn-still btn-klein" aria-label="Eintrag zurücknehmen" onClick={() => zuruecknehmen.mutate(a.id)}><Trash2 size={12} aria-hidden="true" /></button>
+                      <button type="button" className="btn btn-still btn-klein" aria-label="Eintrag bearbeiten" onClick={() => setBearbeite({ id: a.id, body: a.body ?? "" })}><Pencil size={16} aria-hidden="true" /></button>
+                      <button type="button" className="btn btn-still btn-klein" aria-label="Eintrag zurücknehmen" onClick={() => zuruecknehmen.mutate(a.id)}><Trash2 size={16} aria-hidden="true" /></button>
                     </div>
                   )}
                   {a.kind === "ai" && typeof a.payload?.modell === "string" && (

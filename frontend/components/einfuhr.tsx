@@ -13,7 +13,7 @@
 // hinterher, dass die Spalte „Telefon" auf „Mobil" gelegt wurde.
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Download, Upload } from "lucide-react";
+import { AlertTriangle, Download, Upload } from "@/lib/symbole";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { api } from "@/lib/api";
@@ -213,7 +213,7 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
                 hidden
                 onChange={(e) => { waehlen(e.target.files); e.target.value = ""; }}
               />
-              <Upload size={28} aria-hidden="true" className="einfuhr-ablage-zeichen" />
+              <Upload size={24} aria-hidden="true" className="einfuhr-ablage-zeichen" />
               <p className="einfuhr-ablage-satz">CSV-Datei hierher ziehen</p>
               <button
                 type="button"
@@ -231,11 +231,11 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
             <div className="einfuhr-vorlagen">
               <span>Noch keine Datei? Leere Vorlage mit den richtigen Spalten:</span>
               <a className="btn btn-still btn-klein" href="/api/einfuhr/vorlage?entity=contacts" download>
-                <Download size={14} aria-hidden="true" />
+                <Download size={16} aria-hidden="true" />
                 Kontakte
               </a>
               <a className="btn btn-still btn-klein" href="/api/einfuhr/vorlage?entity=companies" download>
-                <Download size={14} aria-hidden="true" />
+                <Download size={16} aria-hidden="true" />
                 Firmen
               </a>
             </div>

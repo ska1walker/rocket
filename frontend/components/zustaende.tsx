@@ -1,6 +1,6 @@
 // Modul HB-ZUSTAND — docs/MODULE.md
 
-import { AlertTriangle, Inbox } from "lucide-react";
+import { AlertTriangle, Inbox } from "@/lib/symbole";
 
 export function Laedt({ text = "Wird geladen …" }: { text?: string }) {
   return (
@@ -23,7 +23,7 @@ export function Fehler({ text }: { text: string }) {
 export function Leer({ titel, text }: { titel: string; text: string }) {
   return (
     <div className="leerzustand">
-      <Inbox size={24} aria-hidden="true" />
+      <Inbox size={40} aria-hidden="true" />
       <p className="leerzustand-titel">{titel}</p>
       <p>{text}</p>
     </div>

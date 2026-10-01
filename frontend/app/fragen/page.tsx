@@ -3,7 +3,7 @@
 // Modul RK-WISSEN — docs/MODULE.md
 
 import { useMutation } from "@tanstack/react-query";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles } from "@/lib/symbole";
 import Link from "next/link";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -60,7 +60,7 @@ export default function FragenSeite() {
             className="btn btn-primaer"
             disabled={stellen.isPending || frage.trim().length < 3}
           >
-            <Sparkles size={14} aria-hidden="true" />
+            <Sparkles size={16} aria-hidden="true" />
             {stellen.isPending ? "Sucht …" : "Fragen"}
           </button>
         </form>
@@ -122,7 +122,7 @@ export default function FragenSeite() {
                 <div className="block-inhalt">
                   <div className="ki-block">
                     <div className="ki-block-kopf">
-                      <Sparkles size={11} aria-hidden="true" /> Aus dem Bestand beantwortet
+                      <Sparkles size={16} aria-hidden="true" /> Aus dem Bestand beantwortet
                     </div>
                     <p className="ki-block-text">{stellen.data.antwort}</p>
                   </div>

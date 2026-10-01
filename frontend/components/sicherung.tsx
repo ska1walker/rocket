@@ -3,7 +3,7 @@
 // Modul RK-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Download, Save } from "lucide-react";
+import { AlertTriangle, Download, Save } from "@/lib/symbole";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { datumZeit } from "@/lib/format";
@@ -78,11 +78,11 @@ export function Sicherungsblock() {
             onClick={() => sichern.mutate()}
             disabled={sichern.isPending}
           >
-            <Save size={14} aria-hidden="true" />
+            <Save size={16} aria-hidden="true" />
             {sichern.isPending ? "Sichert …" : "Jetzt sichern"}
           </button>
           <a className="btn btn-sekundaer btn-klein" href="/api/sicherung/ausfuhr" download>
-            <Download size={14} aria-hidden="true" />
+            <Download size={16} aria-hidden="true" />
             Ausfuhr herunterladen
           </a>
         </div>

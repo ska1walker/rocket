@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, AI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 26.10.8 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf (26.10.2 macht ihn fehlertolerant); 26.10.3 hebt den gedämpften Text auf #567595 und prüft den Kontrast in der CI; 26.10.4 gibt den Einstellungen eine senkrechte Navigation (Handy: Übersichtsliste, HB-UNTERNAV); 26.10.5 nimmt die Token aus dem CI-Repo (`tokens/app.css`, Abgleich Paket 1), behebt vier Kontrastfehler (Rand, Fokusring, Lösch-Knopf) und rechnet den Kontrast aus den Token; 26.10.6 setzt Paket 2 um (Löschen rot mit Wort, „AI“ statt „KI“, Rakete im App-Icon, Schatten nur für Schwebendes, Fristen mit Uhr und Wort, Maße aus dem CI). 26.10.7 setzt Paket 5 um (Grundgerüst aller AImighty-Apps: Seitentitel 28 px, jeder Knopf 8 px, gewählter Eintrag getönt, Symbolknöpfe mit Tooltip, im Tab nur die Rakete und „Seite · Rocket“) und bringt jedes Release über die Action `markt.yml` von selbst in den Markt. 26.10.8 bringt Rocket im Markt auch auf Deutsch (`olares/markt/beschreibung.*.md`, Notizen mit `## Deutsch`) und unter „Applications“; der gewählte Navigationseintrag ist nur noch eine Goldkante ohne Fläche (CI G1 nachgeschärft). Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); über den Markt aktualisiert, seit 1.10.2026 mit Passwort, zuletzt auf 26.10.7
+> **Status:** 26.10.9 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf (26.10.2 macht ihn fehlertolerant); 26.10.3 hebt den gedämpften Text auf #567595 und prüft den Kontrast in der CI; 26.10.4 gibt den Einstellungen eine senkrechte Navigation (Handy: Übersichtsliste, HB-UNTERNAV); 26.10.5 nimmt die Token aus dem CI-Repo (`tokens/app.css`, Abgleich Paket 1), behebt vier Kontrastfehler (Rand, Fokusring, Lösch-Knopf) und rechnet den Kontrast aus den Token; 26.10.6 setzt Paket 2 um (Löschen rot mit Wort, „AI“ statt „KI“, Rakete im App-Icon, Schatten nur für Schwebendes, Fristen mit Uhr und Wort, Maße aus dem CI). 26.10.7 setzt Paket 5 um (Grundgerüst aller AImighty-Apps: Seitentitel 28 px, jeder Knopf 8 px, gewählter Eintrag getönt, Symbolknöpfe mit Tooltip, im Tab nur die Rakete und „Seite · Rocket“) und bringt jedes Release über die Action `markt.yml` von selbst in den Markt. 26.10.8 bringt Rocket im Markt auch auf Deutsch (`olares/markt/beschreibung.*.md`, Notizen mit `## Deutsch`) und unter „Applications“; der gewählte Navigationseintrag ist nur noch eine Goldkante ohne Fläche (CI G1 nachgeschärft). 26.10.9 zeichnet jedes Symbol aus dem CI-Set (HB-SYMBOL statt lucide-react, 16/20/24/40, Strich 1,5 px; ABGLEICH R2). Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); über den Markt aktualisiert, seit 1.10.2026 mit Passwort, zuletzt auf 26.10.7
 > **Letzte Aktualisierung:** 1. Oktober 2026
 
 ---
@@ -67,7 +67,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | 708 Backend, 84 Frontend, 149 im Browser (Playwright, CI-Job „oberfläche“) |
+| Tests | 708 Backend, 89 Frontend, 151 im Browser (Playwright, CI-Job „oberfläche“) |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.10.7 läuft auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`; 26.9.1 installiert am 30.9.2026, am selben Tag auf 26.9.4 aktualisiert — das erste Update über den Markt, mit den Migrationen 0033–0035; am 1.10.2026 auf 26.10.2, eingerichtet über den Einrichtungscode für den vorhandenen Zugang `kaivostudio`, Bestand erhalten; am selben Tag auf 26.10.3, 26.10.5 und 26.10.7). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.10.8` am 1.10.2026, Chart als Anhang). Katalogeintrag `rocket` **26.10.8 im Markt** (`bayerhazard/aimighty-market` PR #91, 1.10.2026, deutsch und unter „Applications“; vorher 26.10.7 mit PR #90, enthält 26.10.6 — der erste Eintrag durch die Action `markt.yml`; vorher 26.10.5 mit PR #89, enthält 26.10.4; vorher 26.10.3 mit PR #88, 26.10.2 mit PR #87, 26.10.1 mit PR #86, 26.9.7 mit PR #85, enthält 26.9.6; 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
@@ -169,7 +169,7 @@ Bewusst derselbe wie Insilo — was dort trägt, muss hier nicht neu
 gelernt werden.
 
 **Oberfläche:** Next.js 15 (App Router) · TypeScript strict · Tailwind v4
-· TanStack Query · lucide-react. Kein next-intl: Das CRM ist ein
+· TanStack Query · Zeichen aus dem CI-Set (HB-SYMBOL, seit 26.10.9 statt lucide-react). Kein next-intl: Das CRM ist ein
 internes Werkzeug und bleibt einsprachig deutsch.
 
 **Backend:** FastAPI · asyncpg (kein ORM) · Pydantic v2 · httpx.
@@ -207,7 +207,15 @@ eine Farbe ändern will, ändert das Token.
   Punkt in der Zeitleiste, Beschriftung „AI“, Modellname darunter (seit 26.10.6 „AI“, nicht „KI“ — CI `kern/wording.md`, ein Test wacht darüber). Nicht
   aus Zierde: In einem Jahr muss unterscheidbar sein, was ein Mensch
   notiert hat.
-- **Keine Verläufe, kein Glas, keine Parallaxe, keine AI-Funken.**
+- **Keine Verläufe, kein Glas, keine Parallaxe, keine AI-Funken.** „Funken“
+  meint Effekte (Glitzer, Schimmer, Sterne als Schmuck). Das Strichzeichen
+  `ai` (Funken, `Sparkles`) bleibt das Zeichen für AI (Kai, 1.10.2026).
+
+- **Jedes Zeichen kommt aus dem CI-Set** (`marke/icons/ui/` im CI-Repo), über
+  HB-SYMBOL (`components/symbol.tsx`, erzeugt nach `lib/symbole.tsx`) — nie
+  aus `lucide-react` oder direkt aus Lucide; fehlt eins, kommt es erst ins
+  CI-Set. Größen nur 16/20/24/40, Strich immer 1,5 px (seit 26.10.9,
+  ABGLEICH R2; `docs/BETRIEB.md` „Ein Icon-Set für alle Apps“).
 
 - **Das Symbol der Web-App ist das Rocket-Icon** aus `docs/icon/rocket.svg`
   — Favicon, Apple-Touch-Icon (Home-Bildschirm) und Manifest, erzeugt mit

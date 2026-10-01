@@ -3,7 +3,7 @@
 // Modul RK-ANLEGEN — docs/MODULE.md
 
 import { useMutation } from "@tanstack/react-query";
-import { ClipboardPaste, ImageUp, Sparkles, X } from "lucide-react";
+import { ClipboardPaste, ImageUp, Sparkles, X } from "@/lib/symbole";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { api } from "@/lib/api";
@@ -80,7 +80,7 @@ export function Erfassung({
   return (
     <div className="erfassung">
       <div className="erfassung-kopf">
-        <Sparkles size={14} aria-hidden="true" />
+        <Sparkles size={16} aria-hidden="true" />
         <span>
           {art === "contact"
             ? "Signatur, Visitenkarte oder Notiz hineinwerfen"
@@ -139,7 +139,7 @@ export function Erfassung({
                 setBild(null);
               }}
             >
-              <X size={12} aria-hidden="true" />
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
         )}
@@ -151,11 +151,11 @@ export function Erfassung({
           className="btn btn-still btn-klein"
           onClick={() => dateiwahl.current?.click()}
         >
-          <ImageUp size={14} aria-hidden="true" />
+          <ImageUp size={16} aria-hidden="true" />
           Bild wählen
         </button>
         <span className="erfassung-tipp">
-          <ClipboardPaste size={12} aria-hidden="true" />
+          <ClipboardPaste size={16} aria-hidden="true" />
           Ein Bildschirmausschnitt lässt sich direkt einfügen
         </span>
         <span style={{ flex: 1 }} />

@@ -3,7 +3,7 @@
 // Modul HB-SUCHE — docs/MODULE.md
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles } from "@/lib/symbole";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
@@ -172,7 +172,7 @@ export function Suchfeld() {
               onClick={() => frage.mutate(text.trim())}
               disabled={frage.isPending}
             >
-              <Sparkles size={15} aria-hidden="true" />
+              <Sparkles size={16} aria-hidden="true" />
               <span className="suchpalette-titel">{frage.isPending ? "Sieht nach …" : `Frage stellen: „${text.trim()}“`}</span>
               <kbd>↵</kbd>
             </button>
