@@ -274,6 +274,8 @@ Zwölfter Durchlauf: Rocket 26.10.10, PR #93, 1.10.2026 — von der Action: Roll
 
 Dreizehnter Durchlauf: Rocket 26.10.11, PR #94, 1.10.2026 — von der Action, drei Minuten nach dem Release: Token, Zeichen und Bausteine aus dem CI-Stand `ci-26.10.2` (Paket 4), Suchfeld auf der Linie der Seite. Marcs `main` unverändert seit 26.10.10; die Action rechnete 4390000000000. Gleich danach hat Marc eine eigene App aktualisiert und den Zeitstempel auf 4391000000000 gehoben — Rockets Schlüssel blieb dabei unberührt. Auf `main` byte-gleich geprüft (sha256 `453e6639…a581`, keine alten Schlüssel). Keine Datenbankänderung.
 
+Vierzehnter Durchlauf: Rocket 26.10.12, PR #95, 1.10.2026 — von der Action: React #418 behoben (Symbole selbst im `<head>`, keine Icon-Marke von Next mehr). Marc hatte `main` seit 26.10.11 zweimal bewegt (eigene App `aimllmgemma4vllm`, Zeitstempel auf 4391000000000); die Action rechnete auf frischem `main` 4392000000000. Auf `main` byte-gleich geprüft (sha256 `835eeb7f…e0c3`, keine alten Schlüssel). Keine Datenbankänderung.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
