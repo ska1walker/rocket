@@ -73,6 +73,45 @@ veraltet sein, ohne dass Git einen Konflikt meldet. Deshalb gilt
    der neue auf `main` auf und nimmt den alten in seine Notizen mit** —
    den alten Zweig nicht nachträglich einreichen.
 
+## Wer den PR in Marcs Repo öffnet und mergt: Kai startet die Sitzung
+
+Claude bereitet alles vor — Zweig im Fork auf frischem `upstream/main`,
+Zeitstempel, Chart, wrangler-Beweis — und gibt Kai einen fertigen Auftrag.
+**Kai startet die Markt-Sitzung selbst** (Umgebung „Standard“, Quelle
+`bayerhazard/aimighty-market`) und fügt den Auftrag ein. Festgelegt von Kai
+am 1.10.2026.
+
+Warum: Eine Sitzung, die Claude anlegt, wertet eine Freigabe, die über
+Claude kommt, nicht als Kais eigene. Bei 26.9.6, 26.9.7 und 26.10.2 hielt
+sie deshalb vor dem PR an und fragte nach; bei 26.10.1 nicht — verlässlich
+war das nie. Startet Kai die Sitzung, kommt der Auftrag von ihm, und sie
+arbeitet durch. Claude verfolgt danach `upstream/main`, prüft den Chart dort
+byte-gleich und trägt den Durchlauf hier ein.
+
+Die Vorlage (Claude füllt Version, Commit, Basis, Prüfsumme und Zeitstempel):
+
+```
+Bitte öffne und merge einen Pull Request in bayerhazard/aimighty-market
+für Rocket <VERSION>.
+
+Vorbereitet im Fork ska1walker/aimighty-market, Zweig `rocket-<VERSION>`,
+Commit <SHA>, ein Commit auf main <BASIS>. Er ändert nur:
+- functions/_apps.ts: rocket-Version <ALT> -> <VERSION>, neuer Absatz vorn
+  in upgradeDescription.
+- functions/_lib.ts: CHARTS-Schlüssel `rocket-<ALT>.tgz` ersetzt durch
+  `rocket-<VERSION>.tgz` (base64 des Release-Anhangs
+  https://github.com/ska1walker/rocket/releases/download/v<VERSION>/rocket-<VERSION>.tgz,
+  sha256 <PRÜFSUMME>) und CANONICAL_EPOCH_MS <ALT_EPOCH> -> <NEU_EPOCH>.
+
+1. Prüfen: nur diese zwei Dateien und nur diese Stellen; mergt sauber;
+   Zeitstempel streng über dem auf main; sha256 des dekodierten Charts.
+2. PR öffnen (Titel „rocket <VERSION>: <kurz>“), auf Checks warten, mergen
+   wie im Repo üblich. Kein Rebase, kein Force-Push; bei Konflikt oder
+   roter Prüfung nur berichten.
+3. `merged: true` und den Cloudflare-Deploy auf main bestätigen, in drei
+   bis fünf Zeilen berichten.
+```
+
 ## Regeln, die bei jedem Markt-PR gelten
 
 - **`CANONICAL_EPOCH_MS` in `functions/_lib.ts` hochzählen** — streng über

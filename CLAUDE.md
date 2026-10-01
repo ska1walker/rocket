@@ -328,7 +328,9 @@ der Lieferung und liest die Token über `var(--am-*)`.
    holen, darauf bauen, nachlesen, was sich seit dem letzten
    Rocket-Eintrag an `functions/` geändert hat, und gegen genau diesen
    Stand mit wrangler beweisen (`docs/MARKT.md`, „Der Markt bewegt sich
-   auch ohne uns", festgelegt 30.9.2026). Die Regeln dahinter stehen im Skill
+   auch ohne uns", festgelegt 30.9.2026). Den PR in Marcs Repo öffnet eine
+   Sitzung, die **Kai selbst startet**; Claude liefert Zweig und fertigen
+   Auftrag (`docs/MARKT.md`, „Kai startet die Sitzung“, festgelegt 1.10.2026). Die Regeln dahinter stehen im Skill
    `insilo/.claude/skills/olares-release/SKILL.md`; was der Markt selbst
    verlangt (Version an 5 Stellen, frisches base64, jede Änderung = neue
    Version) und wo Rocket bewusst abweicht, steht in `docs/MARKT.md`.
