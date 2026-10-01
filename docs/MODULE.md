@@ -1,9 +1,16 @@
 # Module der Oberfläche — Bausteinkatalog
 
-> **Stand:** 30. September 2026 · Rocket 26.10.4
+> **Stand:** 1. Oktober 2026 · Rocket 26.10.10
 > **Für wen:** alle, die an Rocket, Relay, Insilo oder einer weiteren
 > AImighty-App bauen. Rocket ist nur die erste App, in der die Bausteine
 > beschrieben sind.
+>
+> **Seit Paket 3 (1.10.2026) stehen die `AM-` und `HB-` Bausteine auch im
+> CI-Repo**, je Kennung in `bauteile/<KENNUNG>.md` mit Bild und geprüftem
+> CSS (`ska1walker/aimighty-ci`, `bauteile/README.md`). Für Relay, Insilo und
+> jede weitere App ist das die Referenz. Bis Paket 4 ist Rocket die Quelle:
+> Wer hier einen Baustein ändert, holt ihn danach ins CI
+> (`python3 werkzeug/bauteile.py …/frontend/app/globals.css`).
 
 ## Worum es geht
 
@@ -49,6 +56,8 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | AM-KARTE | Karte | `globals.css` | ● |
 | AM-HUELLE | Hülle: Raster aus Kopfleiste, Spalte, Inhalt | `globals.css` | ● |
 | AM-LEER | Leerzustand | `globals.css` | ● |
+| AM-BASIS | Grundstil: Schrift, Seite, Zahlen, Bewegung reduziert | `globals.css` | ● |
+| AM-PAKET | Paketgut ohne Nutzer: Streifen, Deckschicht, `am-tabelle` | `globals.css` | — |
 | HB-MARKE | AImighty-Wortmarke | `marke.tsx` | ● |
 | HB-SYMBOL | Zeichen aus dem CI-Set: 16/20/24/40, Strich 1,5 px | `symbol.tsx`, `lib/symbole.tsx` (erzeugt) | ● |
 | HB-DARSTELLUNG | Hell / Dunkel / System | `darstellung.tsx` | ◐ Cookie-Name |
