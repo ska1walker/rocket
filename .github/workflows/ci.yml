@@ -112,9 +112,8 @@ jobs:
   oberflaeche:
     name: oberfläche · Rundgang im Browser
     runs-on: ubuntu-latest
-    # Ein Lauf braucht 6 bis 15 Minuten, je nachdem wie schnell die Pakete
-    # für den Browser kommen. Am 1.10.2026 hing „install browser“ über
-    # 20 Minuten — ohne Grenze wären es sechs Stunden gewesen.
+    # Ein Lauf braucht rund sechs Minuten. Am 1.10.2026 hing „install
+    # browser“ über 20 Minuten — ohne Grenze wären es sechs Stunden gewesen.
     timeout-minutes: 30
     services:
       postgres:
@@ -176,10 +175,24 @@ jobs:
       - name: sample data
         run: python scripts/seed-dev.py http://localhost:8000
 
+      # Der Browser liegt im Zwischenspeicher, Schlüssel ist die Version von
+      # Playwright aus dem Lockfile. Systempakete holen wir nicht mehr mit
+      # (`--with-deps`): Das Abbild von GitHub bringt alles mit, was Chromium
+      # braucht, und der apt-Lauf dafür kostete bis zu zehn Minuten (1.10.2026).
+      - name: playwright version
+        id: pw
+        working-directory: frontend
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
       - name: install browser
         working-directory: frontend
-        timeout-minutes: 15
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 10
+        run: npx playwright install chromium
 
       - name: tour
         working-directory: frontend
