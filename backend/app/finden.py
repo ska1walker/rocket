@@ -124,7 +124,7 @@ async def kandidaten(client: httpx.AsyncClient, cfg: LLMConfig, einr: Einrichtun
     if not einr.suche.eingerichtet:
         raise an.SucheNichtEingerichtet(
             "Ohne Suchdienst findet Rocket keine Firma, die es noch nicht kennt — "
-            "unter Einstellungen → KI und Programme einen eintragen."
+            "unter Einstellungen → AI und Programme einen eintragen."
         )
 
     # Zwei Anfragen: die Beschreibung, wie sie ist, und dieselbe mit

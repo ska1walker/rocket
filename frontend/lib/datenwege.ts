@@ -64,7 +64,7 @@ export function istIntern(adresse: string | null | undefined, eigeneZone = ""): 
 export function datenziele(e: OrgSettings | undefined): Datenziel[] {
   if (!e) return [];
   const kandidaten: [string, string | null | undefined][] = [
-    ["KI-Assistent", e.llm_ready ? e.llm_base_url : null],
+    ["Sprachmodell", e.llm_ready ? e.llm_base_url : null],
     ["Sprachausgabe", e.tts_ready ? e.tts_endpoint_url : null],
     ["Suchdienst", e.suche_endpoint_url],
     ["E-Mail", e.smtp_ready ? e.smtp_host : null],

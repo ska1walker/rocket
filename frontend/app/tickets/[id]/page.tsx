@@ -14,6 +14,7 @@ import { Stammdaten } from "@/components/stammdaten";
 import { Prioritaetspille } from "@/components/prioritaet";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { Dokumente } from "@/components/dokumente";
+import { Ueberfaellig } from "@/components/ueberfaellig";
 
 export default function TicketSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -70,9 +71,7 @@ export default function TicketSeite({ params }: { params: Promise<{ id: string }
       >
         <Prioritaetspille prioritaet={t.prioritaet} />
         {t.offen && (
-          <span className="frist" data-ueberfaellig={t.ueberfaellig ? "true" : undefined}>
-            {frist(t.faellig_am)}
-          </span>
+          <Ueberfaellig ueberfaellig={!!t.ueberfaellig}>{frist(t.faellig_am)}</Ueberfaellig>
         )}
       </Seitenkopf>
 
@@ -108,6 +107,7 @@ export default function TicketSeite({ params }: { params: Promise<{ id: string }
             pfad={`/api/tickets/${id}`}
             abfrageSchluessel={["ticket", id]}
             zurueckNach="/tickets"
+            loeschknopf="Ticket löschen"
             loeschtext="Das Ticket wird aus allen Listen genommen. Verlauf und Aufgaben bleiben 30 Tage wiederherstellbar."
             werte={t as unknown as Record<string, unknown>}
             felder={[

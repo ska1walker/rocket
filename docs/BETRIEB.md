@@ -323,7 +323,7 @@ er allein von Insilo.
   gelöscht"** — Besprechung und Aktivität werden weich gelöscht. **Ein
   leerer Ordner löscht nichts**: Er sieht genauso aus wie einer, der nach
   einer Neuinstallation noch nicht gefüllt ist.
-- **Einstellungen › KI und Programme › Insilo auf dieser Box** zeigt, wie
+- **Einstellungen › AI und Programme › Insilo auf dieser Box** zeigt, wie
   viele Protokolle im Ordner liegen, wie viele übernommen sind und wann
   zuletzt gelesen wurde. „Jetzt lesen" beweist die Einrichtung. Dort
   steht auch die Adresse von Insilo für „In Insilo öffnen" — die Datei
@@ -351,7 +351,7 @@ nicht über den FRP-Server nach draußen (gemessen 15.9.2026).
 
 #### Einrichten
 
-1. In Rocket unter *Einstellungen › KI und Programme › Verbundene
+1. In Rocket unter *Einstellungen › AI und Programme › Verbundene
    Programme* eine Quelle der Art „Insilo — Besprechungen" anlegen.
    Adresse und Geheimnis werden **einmal** gezeigt.
 2. In Insilo unter *Einstellungen › Webhooks* beides eintragen, Ereignis
@@ -639,7 +639,7 @@ Post geht über das SMTP-Konto oder — wenn gewählt und eingerichtet —
 und Text mit Platzhaltern, mehr nicht.
 
 Die Einstellungen sind seit 0.2.1 in fünf Unterpunkte gegliedert (Firma
-und Team, Vertrieb, E-Mail, KI und Programme, Daten); jeder Block sagt in
+und Team, Vertrieb, E-Mail, AI und Programme, Daten); jeder Block sagt in
 einem Satz, wozu er da ist, und hält das Kleingedruckte hinter dem
 Symbol (`components/erklaerung.tsx`).
 
@@ -871,7 +871,7 @@ Jeder Lauf liegt in `anreicherungen`: gelesene Adressen mit Bytes,
 gestellte Suchanfragen, Vorschlag, Übernommenes. Das ist der Nachweis,
 was die Box verlassen hat.
 
-**Region.** Seit 0.3.0 geht ein Länderkürzel mit (*Einstellungen → KI
+**Region.** Seit 0.3.0 geht ein Länderkürzel mit (*Einstellungen → AI
 und Programme → Region der Suche*, Vorgabe DE): Brave als `country`,
 SearXNG als Sprache `de-DE`. Ohne Region liefert „Baustoffhandel“ Fürth,
 wenn man Tecklenburg meint.
@@ -1238,7 +1238,7 @@ Fragen für den Termin. Zum Anhören auf dem Weg, auch am Handy, nach der
 Olares-Anmeldung. Nichts verlässt die Box.
 
 **Drei Schritte, alle auf der Box.** Der Kontext ist dieselbe
-Zusammenstellung wie für die KI-Zusammenfassung (`routers/ki._kontext_firma`),
+Zusammenstellung wie für die AI-Zusammenfassung (`routers/ki._kontext_firma`),
 dazu offene Tickets, Aussagen aus den Erkenntnissen (mit Zitat), offene
 Aufgaben und Angebote. Das Sprachmodell schreibt daraus ein Skript in
 acht bis vierzehn Segmenten mit Sprecherwechsel — als JSON, mit dem
@@ -1251,7 +1251,7 @@ Xing-Rahmen nur einmal). Die Folge liegt unter
 Zeile und wird nie neu abgeleitet, weil die Organisation nach einer
 Wiederherstellung eine neue Kennung trägt.
 
-**Die Sprachausgabe** steht unter *Einstellungen › KI und Programme ›
+**Die Sprachausgabe** steht unter *Einstellungen › AI und Programme ›
 Sprachausgabe*: ein OpenAI-kompatibler Dienst (`POST /v1/audio/speech`),
 auf der Box **Speaches**. Die Adresse ist je Installation anders —
 `kubectl get svc -A | grep speaches` nennt sie, auf Kais Box
@@ -1809,7 +1809,7 @@ wurde. So ist es im ersten Browserlauf aufgefallen. Die Formulare tragen
   alter Datensatz ohne Wert lässt sich weiter ändern; die Datensatzseite
   zeigt „fehlt" mit Zeichen. Pflichtfelder erscheinen immer im
   Anlegen-Dialog, der vor dem Absenden prüft.
-- **Ausgenommen** sind Einfuhr, Anreicherung und KI — sie legen über
+- **Ausgenommen** sind Einfuhr, Anreicherung und AI — sie legen über
   eigene Wege an. Eine Messeliste scheitert sonst an einem Feld, das auf
   ihr nicht steht. Nie Pflicht werden können Gerechnetes, die
   Marketing-Einwilligung und der Absagegrund.
@@ -1973,6 +1973,24 @@ Erkenntnissen (Gold-800 auf Blau-50, 4,45:1); es nimmt hell Gold-900 wie
 die Stufenpille „Opportunity“. Seitdem läuft der Rundgang **mit** der
 axe-Regel `color-contrast`, hell und dunkel.
 
+## Abgleich mit dem CI, Paket 2 (seit 26.10.6)
+
+Die Regeln aus dem Abgleich (`ABGLEICH.md` im CI-Repo, Paket 2), entschieden
+von Kai am 1.10.2026 und in Rocket umgesetzt:
+
+| | Was | Wo in Rocket |
+|---|---|---|
+| R1 | **Löschen ist rot und sagt, was verschwindet:** „Firma löschen“, „Stufe löschen“, nicht „Löschen“. Beim Überfahren wird der Knopf heller (`--am-fehler-hover`). Sekundäre Knöpfe tragen die Textfarbe (im Dunkeln vorher Gold, für sekundär gesperrt). Fokusring mit 2 px Abstand überall | `Stammdaten`/`Feldgruppen` (`loeschknopf`), `pipelines-verwalten.tsx`, `.btn-*` |
+| R3 | **„AI“, nicht „KI“**, in Oberfläche, Meldungen, Manifest und Doku. Ausgeschrieben deutsch nur in erklärendem Text. Die Einstellung heißt „Sprachmodell“, der Bereich „AI und Programme“ | `lib/__tests__/wording.test.ts` meldet jedes neue „KI“ in Oberfläche und Backend-Meldungen |
+| R5 | **App-Icon mit Rakete statt „R“.** Die Anwender-Apps tragen ein Zeichen im Wappen (Figma, „Icon-Labor“, Abschnitt 0) | `docs/icon/rocket.svg`, alle PNG und das Markt-Icon `icon.png` aus `scripts/app-symbole.mjs` |
+| R6 | **Schatten nur für das, was schwebt:** Menüs, Suchtreffer, Mehrfachauswahl, „Mehr“, Dialog, Assistent — mit betontem Rand und dem einen `--am-schatten-1`. Der Knauf des Schalters und die gewählte Wegwahl haben keinen Schatten mehr, sondern einen Rand | `globals.css` |
+| R7 | **Rot für Handlungsbedarf, immer mit Uhr und Wort:** „seit 3 Tagen überfällig“, am Lead-Board „· überfällig“. „Verloren“ und „Disqualifiziert“ sind neutral | `components/ueberfaellig.tsx` |
+| R9 | **Maße aus dem CI:** Dialoge 440/560/720, Navigation `--am-navigation-breite`, jede Ebene `--am-ebene-*` | `globals.css` |
+
+Offen aus Paket 2 ist R2, das eine Icon-Set für alle Apps. Erst wird im
+CI-Repo der Erzeuger gebaut und das Set um Rockets Zeichen erweitert, dann
+stellt Rocket von `lucide-react` auf das Set um.
+
 ## Token aus dem CI (seit 26.10.5)
 
 **Die Werte kommen seit 26.10.5 aus dem CI-Repo.** Der Token-Block oben in
@@ -2043,6 +2061,14 @@ des Titels, Android und der Browser-Reiter ein leeres Blatt.
 
 **Es gilt ein Symbol: das Rocket-Icon aus `docs/icon/rocket.svg`** (Marcs
 Idee 6, dasselbe wie im Markt). Nie ein anderes Bild, nie ein Platzhalter.
+
+**Seit 26.10.6 trägt das Wappen die Rakete statt des „R“.** Die Anwender-Apps
+von AImighty tragen ein Zeichen im Wappen: Insilo das Mikrofon, Relay den
+Papierflieger, Wings die Feder, Rewind das Zurückspulen. Entschieden von Kai
+und Marc am 1.10.2026, festgehalten in Figma („Icon-Labor“, Abschnitt 0) und
+im CI (`medien/app.md`, „App-Icons“). Gezeichnet ist es wie Rewind: Lucide,
+goldene Linie, Strich 3,4. Das Markt-Icon `icon.png` im Wurzelordner
+entsteht seitdem mit demselben Skript.
 
 | Datei | Größe | Form | Wofür |
 |---|---|---|---|

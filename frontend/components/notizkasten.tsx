@@ -86,7 +86,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
                 rows={5}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Tippen Sie das Gespräch hin, wie es war. Was daraus wird — Notiz, Aufgaben, nächster Schritt — schlägt die KI vor."
+                placeholder="Tippen Sie das Gespräch hin, wie es war. Was daraus wird — Notiz, Aufgaben, nächster Schritt — schlägt Rocket vor."
                 aria-label="Gesprächsnotiz"
               />
             </div>

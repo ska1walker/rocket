@@ -87,6 +87,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
             pfad={`/api/companies/${id}`}
             abfrageSchluessel={["firma", id]}
             zurueckNach="/firmen"
+            loeschknopf="Firma löschen"
             loeschtext="Die Firma wird aus allen Listen genommen. Kontakte und Leads bleiben bestehen und lassen sich 30 Tage wiederherstellen."
             kopfrechts={<Stufenpille stufe={f.lifecycle_stage} />}
             werte={f as unknown as Record<string, unknown>}
@@ -107,7 +108,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
               <div className="block-inhalt">
                 <div className="ki-block">
                   <div className="ki-block-kopf">
-                    Von der KI · {datum(f.ai_summary_at)}
+                    AI-Zusammenfassung · {datum(f.ai_summary_at)}
                   </div>
                   <p className="ki-block-text">{f.ai_summary}</p>
                 </div>

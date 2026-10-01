@@ -1,9 +1,9 @@
 # Rocket — Projekt-Briefing für Claude Code
 
-> **Produkt:** Rocket — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
+> **Produkt:** Rocket — schlankes, AI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 26.10.5 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf (26.10.2 macht ihn fehlertolerant); 26.10.3 hebt den gedämpften Text auf #567595 und prüft den Kontrast in der CI; 26.10.4 gibt den Einstellungen eine senkrechte Navigation (Handy: Übersichtsliste, HB-UNTERNAV); 26.10.5 nimmt die Token aus dem CI-Repo (`tokens/app.css`, Abgleich Paket 1), behebt vier Kontrastfehler (Rand, Fokusring, Lösch-Knopf) und rechnet den Kontrast aus den Token. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); über den Markt aktualisiert, seit 1.10.2026 mit Passwort, zuletzt auf 26.10.5
+> **Status:** 26.10.6 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf (26.10.2 macht ihn fehlertolerant); 26.10.3 hebt den gedämpften Text auf #567595 und prüft den Kontrast in der CI; 26.10.4 gibt den Einstellungen eine senkrechte Navigation (Handy: Übersichtsliste, HB-UNTERNAV); 26.10.5 nimmt die Token aus dem CI-Repo (`tokens/app.css`, Abgleich Paket 1), behebt vier Kontrastfehler (Rand, Fokusring, Lösch-Knopf) und rechnet den Kontrast aus den Token; 26.10.6 setzt Paket 2 um (Löschen rot mit Wort, „AI“ statt „KI“, Rakete im App-Icon, Schatten nur für Schwebendes, Fristen mit Uhr und Wort, Maße aus dem CI). Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); über den Markt aktualisiert, seit 1.10.2026 mit Passwort, zuletzt auf 26.10.5
 > **Letzte Aktualisierung:** 1. Oktober 2026
 
 ---
@@ -48,7 +48,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Angebote | Katalog, Positionen, Summen, Druckfassung mit Briefkopf |
 | Qualifizierung | sechs Felder, gerechnete Punktzahl, Verlustgründe |
 | Prognose | gewichtet, Trefferquote, Verlustanalyse, nach Produkt |
-| KI | Notiz→Struktur, Tagesbriefing, Fragen an den Bestand, Angebotsvorschlag, Qualifizierung aus dem Verlauf, Anschreiben, Erkenntnisse aus Gesprächsnotizen, Firma/Kontakt aus Beschreibung finden, Assistent (Aufträge in Worten, Handlung nur über Karte), Gesprächsvorbereitung als Podcast (zwei Stimmen, gesprochen auf der Box) |
+| AI | Notiz→Struktur, Tagesbriefing, Fragen an den Bestand, Angebotsvorschlag, Qualifizierung aus dem Verlauf, Anschreiben, Erkenntnisse aus Gesprächsnotizen, Firma/Kontakt aus Beschreibung finden, Assistent (Aufträge in Worten, Handlung nur über Karte), Gesprächsvorbereitung als Podcast (zwei Stimmen, gesprochen auf der Box) |
 | Insilo-Kopplung | auf derselben Box über Insilos gemeinsamen Ordner wie Relay (seit 0.11.0, `app/insilo_ablage.py`), sonst signierter Webhook; Besprechungen als eigener Bereich mit Vorschlag, nie automatisch zugeordnet; Protokoll ohne Wortlaut (`docs/BETRIEB.md` „Insilo anschließen") |
 | Anmeldung | eigene Anmeldung seit 0.6.0 (`ANMELDUNG_MODUS=eigen`, Entrance `public` seit 0.6.9): Einladung, Sitzungen, Geräteübersicht, Bremse nach Fehlversuchen; zweiter Faktor (TOTP, Wiederherstellungscodes, Pflicht für alle als Schalter) seit 26.9.2; Erstinstallation mit Code aus `/app/data` (seit 26.10.1, kein Kopf mehr); Rückweg per Datei unter `/app/data` (setzt auch den Faktor zurück) oder per Mail (Faktor bleibt); Anmeldungen im Audit-Log |
 | Zusammenarbeit | jede Person mit eigenem Zugang; Rollen `owner`/`admin`/`member`/`viewer`, Eigentümerin vergibt `admin` (seit 0.9.2); Besitz, Filter „Nur meine"; den Sitzplatz-Wechsel gibt es seit 26.9.2 nicht mehr — jede Person meldet sich selbst an |
@@ -67,7 +67,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | 708 Backend, 82 Frontend, 149 im Browser (Playwright, CI-Job „oberfläche“) |
+| Tests | 708 Backend, 84 Frontend, 149 im Browser (Playwright, CI-Job „oberfläche“) |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.10.5 läuft auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`; 26.9.1 installiert am 30.9.2026, am selben Tag auf 26.9.4 aktualisiert — das erste Update über den Markt, mit den Migrationen 0033–0035; am 1.10.2026 auf 26.10.2, eingerichtet über den Einrichtungscode für den vorhandenen Zugang `kaivostudio`, Bestand erhalten; am selben Tag auf 26.10.3 und 26.10.5). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.10.5` am 1.10.2026, Chart als Anhang). Katalogeintrag `rocket` **26.10.5 im Markt** (`bayerhazard/aimighty-market` PR #89, 1.10.2026, enthält 26.10.4; vorher 26.10.3 mit PR #88, 26.10.2 mit PR #87, 26.10.1 mit PR #86, 26.9.7 mit PR #85, enthält 26.9.6; 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
@@ -203,17 +203,17 @@ eine Farbe ändern will, ändert das Token.
   handelt es, weil Blau auf Blau nicht trägt. Beides steckt in den Token.
 - **Farbe trägt eine Aussage nie allein.** Jede Stufenpille hat Text,
   jeder Fehler ein Zeichen und einen Satz.
-- **Was die KI geschrieben hat, ist als solches erkennbar** — goldener
-  Punkt in der Zeitleiste, Beschriftung „KI", Modellname darunter. Nicht
+- **Was die AI geschrieben hat, ist als solches erkennbar** — goldener
+  Punkt in der Zeitleiste, Beschriftung „AI“, Modellname darunter (seit 26.10.6 „AI“, nicht „KI“ — CI `kern/wording.md`, ein Test wacht darüber). Nicht
   aus Zierde: In einem Jahr muss unterscheidbar sein, was ein Mensch
   notiert hat.
-- **Keine Verläufe, kein Glas, keine Parallaxe, keine KI-Funken.**
+- **Keine Verläufe, kein Glas, keine Parallaxe, keine AI-Funken.**
 
 - **Das Symbol der Web-App ist das Rocket-Icon** aus `docs/icon/rocket.svg`
   — Favicon, Apple-Touch-Icon (Home-Bildschirm) und Manifest, erzeugt mit
   `frontend/scripts/app-symbole.mjs`. Nie ein Platzhalter, nie ein
   anderes Bild; ändert sich das Icon, alle neu erzeugen (festgelegt von
-  Kai am 30.9.2026, `docs/BETRIEB.md` „Symbol der Web-App").
+  Kai am 30.9.2026, `docs/BETRIEB.md` „Symbol der Web-App"). Seit 26.10.6 trägt das Wappen die Rakete statt des „R“ (Figma „Icon-Labor“, Abschnitt 0); auch das Markt-Icon `icon.png` kommt aus `app-symbole.mjs`.
 
 - **Die AImighty-Wortmarke oben links bleibt** (`components/marke.tsx`),
   obwohl der Markt für seine Apps „kein Markenname, kein Logo" vorgibt —
@@ -286,7 +286,7 @@ der Lieferung und liest die Token über `var(--am-*)`.
    Abstand und Mitte. Prüfen heißt auch hinsehen: Bilder jeder
    geänderten Seite in hell und dunkel, mit und ohne Daten.
 
-5. **Bei KI-Funktionen** gelten vier Regeln, jede teuer bezahlt:
+5. **Bei AI-Funktionen** gelten vier Regeln, jede teuer bezahlt:
 
    - **Zahlen kommen nie aus dem Modell.** Preise aus dem Katalog,
      Zählungen aus der Datenbank. Ein Modell, das einen Betrag erfindet,
@@ -311,7 +311,7 @@ der Lieferung und liest die Token über `var(--am-*)`.
    Protokoll am falschen Kunden ist schlimmer als eines im Eingangskorb.
 
 8. **Bei der Anreicherung** (`app/anreicherung.py`) kommt eine fünfte
-   KI-Regel dazu: **Kontaktdaten nur wörtlich belegt.** E-Mail, Telefon,
+   AI-Regel dazu: **Kontaktdaten nur wörtlich belegt.** E-Mail, Telefon,
    LinkedIn, Website, Straße, PLZ und Beschäftigtenzahl müssen in der
    gelesenen Quelle stehen, sonst fallen sie weg — egal, wie sicher das
    Modell klingt. Vorhandene Werte werden nie überschrieben, nur zum

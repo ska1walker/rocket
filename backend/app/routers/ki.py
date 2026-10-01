@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/ki", tags=["ki"])
 
 SYSTEM = (
     "Du unterstützt den Vertrieb von AImighty. AImighty liefert lokal betriebene "
-    "KI-Systeme an den deutschen Mittelstand — Hardware, Software und Einführung aus "
+    "AI-Systeme an den deutschen Mittelstand — Hardware, Software und Einführung aus "
     "einer Hand, ohne Cloud. Die drei Produkte: Assistent (9.900 €, ein Werkzeug), "
     "Analyst (14.500 €, ein Kollege), Experte (14.500 € plus Leistungen, ein Prozess). "
     "Antworte auf Deutsch, in der Sie-Form, sachlich und ohne Werbesprache. "

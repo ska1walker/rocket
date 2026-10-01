@@ -18,6 +18,7 @@ import { Fehler, Laedt } from "@/components/zustaende";
 import { useNeuGewuenscht } from "@/lib/neu";
 import { BRETT_HINWEIS_ID, BrettHinweis, useBrettTastatur } from "@/components/brett";
 import { reiterTaste } from "@/lib/tasten";
+import { Ueberfaellig } from "@/components/ueberfaellig";
 
 type Sicht = "brett" | "tabelle";
 type Reiter = "alle" | "meine" | "offen";
@@ -257,9 +258,9 @@ function Ticketkarte({ ticket, beiTaste }: { ticket: Ticket; beiTaste: (e: React
       <div className="deal-karte-fuss">
         <span className="deal-karte-datum">{ticket.besitzer_name ?? "Nicht zugewiesen"}</span>
         {ticket.offen && (
-          <span className="deal-karte-datum" data-ueberfaellig={ticket.ueberfaellig ? "true" : undefined}>
+          <Ueberfaellig ueberfaellig={!!ticket.ueberfaellig} className="deal-karte-datum">
             {frist(ticket.faellig_am)}
-          </span>
+          </Ueberfaellig>
         )}
       </div>
     </Link>

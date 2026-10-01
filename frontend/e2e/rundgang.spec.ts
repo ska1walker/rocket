@@ -43,7 +43,7 @@ const SEITEN: [string, string][] = [
   ["Einstellungen Vertrieb", "/einstellungen?bereich=vertrieb"],
   ["Einstellungen Eigenschaften", "/einstellungen?bereich=eigenschaften"],
   ["Einstellungen E-Mail", "/einstellungen?bereich=email"],
-  ["Einstellungen KI", "/einstellungen?bereich=ki"],
+  ["Einstellungen AI", "/einstellungen?bereich=ki"],
   ["Einstellungen Daten", "/einstellungen?bereich=daten"],
   ["Anmelden", "/anmelden"],
   ["Passwort vergessen", "/passwort-vergessen"],

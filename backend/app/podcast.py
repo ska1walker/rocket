@@ -231,7 +231,7 @@ async def kontext(user: CurrentUser, entity: str, entity_id: UUID) -> tuple[str,
 
 SYSTEM_PODCAST = (
     "Du schreibst kurze Gesprächsvorbereitungen als Podcast für den Vertrieb von AImighty. "
-    "AImighty liefert lokal betriebene KI-Systeme an den deutschen Mittelstand — Hardware, "
+    "AImighty liefert lokal betriebene AI-Systeme an den deutschen Mittelstand — Hardware, "
     "Software und Einführung aus einer Hand, ohne Cloud. Zwei Stimmen: die MODERATORIN führt "
     "durch die Folge, stellt die Fragen und fasst zusammen; der KOLLEGE aus dem Vertrieb kennt "
     "den Bestand und antwortet daraus. Beide sprechen den Hörer als „Sie“ an, wenn sie ihn "

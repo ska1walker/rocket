@@ -137,7 +137,7 @@ export function Finden({
           {!status.data!.llm_ready
             ? "Dafür braucht Rocket ein Sprachmodell."
             : "Dafür braucht Rocket einen Suchdienst — ohne ihn findet es keine Firma, die es noch nicht kennt."}{" "}
-          <Link href="/einstellungen?bereich=ki">Unter KI und Programme eintragen.</Link>
+          <Link href="/einstellungen?bereich=ki">Unter AI und Programme eintragen.</Link>
         </p>
       ) : (
         <>

@@ -353,6 +353,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
             pfad={`/api/quotes/${id}`}
             abfrageSchluessel={["angebot", id]}
             zurueckNach="/angebote"
+            loeschknopf="Angebot löschen"
             loeschtext="Das Angebot verschwindet aus der Liste. Die Nummer wird nicht neu vergeben."
             werte={q as unknown as Record<string, unknown>}
             felder={[

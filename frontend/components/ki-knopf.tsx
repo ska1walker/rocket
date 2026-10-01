@@ -1,6 +1,6 @@
 "use client";
 
-// Modul HB-KI — docs/MODULE.md
+// Modul HB-AI — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";

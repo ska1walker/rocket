@@ -1,4 +1,9 @@
-"""rocket-App-Icon nach Idee 6 (Marc): Sandgrund, dunkelblaues Wappen, Buchstabe.
+"""rocket-App-Icon nach Idee 6 (Marc): Sandgrund, dunkelblaues Wappen, Zeichen.
+
+Seit 1.10.2026 trägt das Wappen ein Zeichen statt des Buchstabens (Figma,
+„Icon-Labor“, Abschnitt 0; CI medien/app.md, „App-Icons“). Die Quelle ist
+jetzt docs/icon/rocket.svg; frontend/scripts/app-symbole.mjs rendert daraus
+alle PNG. Dieses Skript erzeugt nur noch die frühere Buchstaben-Fassung.
 Alle Maße im 160er-Raster aus Figma (Knoten 301:164), gerendert mit 3,2-fach."""
 import sys, resvg_py
 buchstabe = sys.argv[1] if len(sys.argv) > 1 else "C"

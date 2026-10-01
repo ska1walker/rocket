@@ -69,12 +69,12 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | HB-FAKTOR | Zweiter Faktor: Codefeld, Codeliste | `zweiter-faktor.tsx` | ● / ○ |
 | HB-FEHLERMELDER | Oberflächenfehler ins Pod-Log | `fehlermelder.tsx` | ◐ Endpunkt |
 | HB-ASSISTENT | Schild, Panel, Karte zum Bestätigen | `assistent.tsx`, `schild.tsx` | ◐ Endpunkt, Beispiele |
-| HB-KI | KI-Kennzeichnung: Block, Knopf, goldener Punkt | CSS, `ki-knopf.tsx` | ● / ◐ |
+| HB-AI | AI-Kennzeichnung: Block, Knopf, goldener Punkt | CSS, `ki-knopf.tsx` | ● / ◐ |
 | HB-PILLE | Stufen- und Dringlichkeitspille | `stufe.tsx`, `prioritaet.tsx` | ● CSS / ◐ Werte |
 | HB-KENNZAHL | Kennzahlen und Balken | CSS | ● |
 | HB-BLOCK | Datensatzseite und Block | CSS | ● |
 | HB-TABELLE | Werkzeugleiste, Datentabelle, Rollfläche | CSS | ● |
-| HB-ZEITLEISTE | Verlauf mit KI-Punkt | `zeitleiste.tsx` | ◐ Darstellung / ○ Daten |
+| HB-ZEITLEISTE | Verlauf mit AI-Punkt | `zeitleiste.tsx` | ◐ Darstellung / ○ Daten |
 | HB-BOARD | Brett mit Spalten und Karten, auch per Tastatur | CSS, `brett.tsx` | ● CSS / ○ Seite |
 | HB-UNTERNAV | Zweite Navigationsebene: senkrecht links, auf dem Handy Übersichtsliste | `unternavigation.tsx` + CSS | ● |
 | HB-EINSTELLUNGEN | Bereiche und Block-Muster der Einstellungen | CSS, `einstellungen/page.tsx` | ● Muster |
@@ -308,6 +308,9 @@ ist dieselbe wie die der Marke links — die Linie reißt nicht.
 - **Fehler** hat immer Zeichen und Satz und `role="alert"`. Farbe trägt
   die Aussage nie allein.
 - Die Hinweiszeile ersetzt den ungenutzten Paket-Streifen `.streifen`.
+- **Überfällig** (`components/ueberfaellig.tsx`, seit 26.10.6): Frist oder
+  Datum, das überschritten sein kann. Ist es überschritten, steht eine Uhr
+  und ein Wort neben dem Rot (CI, ABGLEICH R7).
 
 ### HB-SCHALTER — Ein/Aus ●
 
@@ -486,13 +489,13 @@ Seite an `/api/fehler`. Wirft selbst nie; schickt keine Formulardaten.
 
 **Übernahme:** Endpunkt `/api/assistent` und die Beispiele tauschen.
 
-### HB-KI — KI-Kennzeichnung ● / ◐
+### HB-AI — AI-Kennzeichnung ● / ◐
 
 Was ein Modell geschrieben hat, ist als solches erkennbar — in einem Jahr
 muss man unterscheiden können, was ein Mensch notiert hat.
 
-- **KI-Block** `.ki-block`, `.ki-block-kopf`, `.ki-block-text` ●:
-  Goldrand auf Goldfläche, Kopf versal („Vorschlag der KI"). Kein
+- **AI-Block** `.ki-block`, `.ki-block-kopf`, `.ki-block-text` ●:
+  Goldrand auf Goldfläche, Kopf versal („AI-Vorschlag"). Kein
   Bauteil, das Markup steht an den Stellen.
 - **Zeitleiste:** goldener Punkt `li[data-art="ai"]`, Zeichen ✦ und
   „Modell: …" darunter — nie nur Farbe.
@@ -559,8 +562,8 @@ Enter. Eine Liste ohne eigene Seite je Zeile (Aufgaben) hat beides nicht.
 
 `components/zeitleiste.tsx` → `Zeitleiste({ bezug })`. Oben das Feld
 zum Festhalten, darunter `ul.zeitleiste` mit Punkt, Art, Betreff, Zeit und
-Text. Menschliche Einträge lassen sich ändern und zurücknehmen, KI-Einträge
-tragen die Kennzeichnung aus HB-KI.
+Text. Menschliche Einträge lassen sich ändern und zurücknehmen, AI-Einträge
+tragen die Kennzeichnung aus HB-AI.
 
 **Übernahme:** Die Darstellung (Klassen `.zeitleiste*`) passt für jeden
 Verlauf, auch einen Nachrichtenfaden. Die Datenquelle `/api/activities`
@@ -747,7 +750,7 @@ von hier kopiert.
 
 `components/briefing.tsx` → `Tagesbriefing()`. Sieben Gruppen, jede
 erklärt ihre Regel („warum steht das hier"); auf Wunsch schlägt das
-Modell eine Reihenfolge vor (in HB-KI).
+Modell eine Reihenfolge vor (in HB-AI).
 
 ### RK-PROGNOSE — Prognose ○
 
@@ -815,7 +818,7 @@ fachlich nah — dort liegt der Versand ohnehin.
 ### RK-WISSEN — Fragen, Erkenntnisse, Eingang, Besprechungen ○
 
 `app/fragen` (Antwort mit nummerierten Fundstellen `.fundstellen`, im
-KI-Block), `app/erkenntnisse` (was Kunden sagen, in Themen),
+AI-Block), `app/erkenntnisse` (was Kunden sagen, in Themen),
 `app/eingang` und `app/besprechungen` mit `besprechung-zuordnen.tsx`
 (Insilo-Protokolle, Vorschlag statt Zuordnung von selbst) und
 `insilo-ablage.tsx` (Stand der gemeinsamen Ablage).
