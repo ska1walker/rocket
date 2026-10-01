@@ -13,6 +13,7 @@
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { lagePruefen } from "./lage";
 
 const SEITEN: [string, string][] = [
   ["Start", "/"],
@@ -59,8 +60,10 @@ async function aufloesen(page: Page, pfad: string): Promise<string> {
   return pfad.replace(m[0], liste[0].id);
 }
 
+for (const thema of ["hell", "dunkel"] as const)
 for (const [name, muster] of SEITEN) {
-  test(`${name} (${muster})`, async ({ page }) => {
+  test(`${name} (${muster}) ${thema}`, async ({ page, context, baseURL }) => {
+    await context.addCookies([{ name: "rocket-darstellung", value: thema, url: baseURL! }]);
     const fehler: string[] = [];
     page.on("pageerror", (e) => fehler.push(`Skriptfehler: ${e.message}`));
     page.on("response", (r) => {
@@ -89,6 +92,8 @@ for (const [name, muster] of SEITEN) {
       };
     });
 
+    const lageFunde = await page.evaluate(lagePruefen);
+
     const axe = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "best-practice"])
       .disableRules(["color-contrast"])
@@ -101,6 +106,7 @@ for (const [name, muster] of SEITEN) {
     expect(lage.ueberlauf, "Seite breiter als der Bildschirm").toBeLessThanOrEqual(1);
     expect(lage.ueberschriften, "genau eine h1").toBe(1);
     expect(lage.heraus, "ragt aus dem Seitenkopf").toEqual([]);
+    expect(lageFunde, "Rand, Abstand, Mitte (e2e/lage.ts)").toEqual([]);
     expect(schwer, "axe critical/serious").toEqual([]);
   });
 }
@@ -123,4 +129,13 @@ test("Web-App-Symbole: Apple-Touch-Icon, Favicon und Manifest", async ({ page })
     expect(antwort.status(), pfad).toBe(200);
     expect(antwort.headers()["content-type"], pfad).toBe("image/png");
   }
+});
+
+// Ein Leerzustand erscheint mit Beispieldaten fast nirgends — deshalb einmal
+// absichtlich herbeigeführt: Das Zeichen stand bis 26.9.7 links vom Text.
+test("Leerzustand: Zeichen mittig über dem Text", async ({ page }) => {
+  await page.goto("/kontakte", { waitUntil: "networkidle" });
+  await page.getByPlaceholder("Name, E-Mail oder Firma").fill("zz-gibt-es-nicht-zz");
+  await expect(page.locator(".leerzustand")).toBeVisible();
+  expect(await page.evaluate(lagePruefen)).toEqual([]);
 });

@@ -1903,6 +1903,34 @@ ROCKET_CHROMIUM=/opt/pw-browsers/chromium npm run e2e   # in einer Claude-Sitzun
 ROCKET_URL=http://localhost:3000 npm run e2e    # anderer Port
 ```
 
+**Übersehen und nachgezogen in 26.10.1** — Kai fand es auf seiner Box:
+
+- Der Hinweis „noch kein Passwort“ (und die beiden anderen Hinweise der
+  Einstellungen) stand ohne Seitenrand direkt in der Seite: bündig an
+  der Navigation, ohne Abstand unter den Reitern. Jetzt in
+  `.seitenhinweise`, im Rand der Blöcke, mit Zeichen.
+- Das Zeichen jedes Leerzustands stand links, der Text mittig darunter
+  — die Grundregeln machen jedes SVG zum Block, und ein Block folgt
+  `text-align` nicht.
+- Auf der Einfuhr klebte die Ablagefläche ohne Abstand an der Auswahl,
+  und der erste Satz saß fast auf der Linie des Seitenkopfs.
+- Die Druckfassung behielt auf dem Handy die A4-Ränder; die Positionen
+  liefen rechts hinaus.
+- Der Hinweistext selbst war zu freundlich: „kommt herein, wer an dieser
+  Box angemeldet ist“. Solange niemand ein Passwort hat, gilt der Kopf
+  `X-Bfl-User` — und den kann bei offenem Entrance jeder mitschicken.
+
+**Warum die Prüfung es nicht sah:** Der Rundgang prüfte, was sich zählen
+lässt — Fehlerantworten, Überlauf der Seite, den Seitenkopf, axe. Ob ein
+Kasten im Rand steht, ob er an seinem Nachbarn klebt, ob ein Zeichen
+mittig sitzt, prüfte er nicht; die Bilder der GUI-Prüfung waren
+überwiegend hell und mit Beispieldaten, in denen kaum ein Leerzustand
+vorkommt. Seit 26.10.1 prüft `frontend/e2e/lage.ts` jede Seite in hell
+**und** dunkel auf drei Dinge: Text am Rand des Inhalts (außer in
+rollenden Bereichen), Kästen ohne Abstand zum Vorgänger, Zeichen im
+Leerzustand außer Mitte; ein eigener Test führt einen Leerzustand
+herbei. Gegen den alten Stand fällt er an allen vier Stellen oben.
+
 **Offen, weil es das Designsystem betrifft:** Gedämpfter Text
 (`--am-text-gedaempft` = Blau-500) erreicht auf der Grundfläche Blau-25
 nur 4,36:1, Gold-800 auf Blau-50 4,45:1 — knapp unter 4,5. Das ist eine

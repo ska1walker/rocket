@@ -159,7 +159,7 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
 
   return (
     <div className="einfuhr">
-      <div>
+      <div className="einfuhr-schritt">
         <Erklaerung
           kurz="Kontakte oder Firmen aus einer Tabelle anlegen. Vorhandene Datensätze werden nie überschrieben — Dubletten werden übersprungen und genannt."
           lang={

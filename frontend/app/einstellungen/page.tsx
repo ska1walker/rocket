@@ -3,7 +3,7 @@
 // Modul HB-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Info } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -177,9 +177,11 @@ function Inhalt() {
         ))}
       </nav>
 
-      <Passworthinweis />
-      <Tresorhinweis e={e} />
-      <Rollenhinweis />
+      <div className="seitenhinweise">
+        <Passworthinweis />
+        <Tresorhinweis e={e} />
+        <Rollenhinweis />
+      </div>
 
       <div className="datensatz datensatz-lesespalte">
         {bereich === "firma" && (
@@ -256,7 +258,8 @@ function Rollenhinweis() {
   if (!rolle || rolle === "owner" || rolle === "admin") return null;
 
   return (
-    <div className="hinweis" data-art="achtung" style={{ maxWidth: 640, marginBottom: "var(--am-raum-4)" }}>
+    <div className="hinweis" data-art="achtung">
+      <Info size={16} aria-hidden="true" />
       <span>
         Sie können hier alles <strong>ansehen</strong>. Ändern lassen sich Einstellungen,
         Zugangsdaten, Team und Sicherung nur von der Eigentümerin oder einer Person, die sie
@@ -273,7 +276,9 @@ function Rollenhinweis() {
  * Olares-Kopf den ersten noch herein — sonst wäre eine frisch installierte
  * App eine Sackgasse, 401 auf alles und niemand, der einen Zugang anlegen
  * könnte. Diese Ausnahme schließt sich mit dem ersten Passwort endgültig.
- * Bis dahin schützt allein Olares, und das gehört auf den Bildschirm.
+ * Bis dahin schützt nichts: Der Entrance ist `public`, und den Kopf kann
+ * jeder mitschicken. Bis 26.9.7 stand hier, es komme herein, „wer an dieser
+ * Box angemeldet ist“ — das war zu freundlich.
  */
 function Passworthinweis() {
   const wer = useQuery({
@@ -283,12 +288,13 @@ function Passworthinweis() {
   if (!wer.data || wer.data.passwort_gesetzt) return null;
 
   return (
-    <div className="hinweis" data-art="achtung" style={{ maxWidth: 640, marginBottom: "var(--am-raum-4)" }}>
+    <div className="hinweis" data-art="achtung" role="alert">
+      <AlertTriangle size={16} aria-hidden="true" />
       <span>
-        <strong>Sie haben noch kein Passwort.</strong> Solange niemand hier eines hat, kommt
-        herein, wer an dieser Box angemeldet ist. Setzen Sie eines über das Schlüsselsymbol
-        in Ihrer eigenen Zeile unter „Wer hier arbeitet" — damit gilt der Olares-Zugang für
-        Rocket nicht mehr.
+        <strong>Rocket ist noch nicht geschützt.</strong> Solange hier niemand ein Passwort
+        hat, prüft Rocket keine eigene Anmeldung — und die Adresse ist von außen erreichbar.
+        Setzen Sie jetzt ein Passwort über das Schlüsselsymbol in Ihrer eigenen Zeile unter
+        „Wer hier arbeitet“. Damit schließt sich diese Ausnahme endgültig.
       </span>
     </div>
   );
@@ -310,7 +316,7 @@ function Tresorhinweis({ e }: { e: OrgSettings }) {
   if (!verloren || verloren.length === 0) return null;
 
   return (
-    <div className="hinweis" data-art="fehler" role="alert" style={{ maxWidth: 640, marginBottom: "var(--am-raum-4)" }}>
+    <div className="hinweis" data-art="fehler" role="alert">
       <AlertTriangle size={16} aria-hidden="true" />
       <span>
         <strong>
