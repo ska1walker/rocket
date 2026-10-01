@@ -2741,3 +2741,30 @@ Adressen der Symbole bleiben, wie sie waren.
   dem Laden, und der Skriptfehler kam erst danach: Beim Fall vom 1.10.2026
   fehlten deshalb die Anhänge.
 
+## Dichte: Weit, Normal, Kompakt (seit 26.10.13)
+
+Im Kontomenü unten links steht unter „Darstellung“ eine zweite Wahl,
+**„Dichte“**. Sie stellt den einen Hebel `--am-skalierung` aus dem CI um, an
+dem alle Abstände und die Zeilenhöhe hängen (`tokens/app.css`, ABGLEICH T5;
+Kai, 1.10.2026: „bau den Schalter kompakt“):
+
+| Stufe | Faktor | Tabellenzeile | Am `<html>` |
+|---|---|---|---|
+| Weit (Vorgabe) | 1,1 | 53 px | — |
+| Normal | 1,0 | ≈ 50 px | `data-dichte="normal"` |
+| Kompakt | 0,9 | 48 px | `data-dichte="kompakt"` |
+
+- **Nur Maße.** Schrift, Farbe und Kontrast bleiben; der Test prüft die
+  Schriftgröße mit.
+- **Je Gerät**, als Cookie `rocket-dichte`, wie die Darstellung. Ein Skript
+  im `<head>` setzt die Stufe vor dem ersten Anstrich, sonst rückte die Seite
+  nach dem Laden zusammen.
+- **Nicht am Touchscreen.** Dort steht der Hebel ohnehin auf 1, die Ziele auf
+  44 px; eine dichtere Stufe nähme nur den Abstand zwischen ihnen. Die Gruppe
+  fehlt im Menü, und das Skript setzt nichts, auch wenn ein Cookie da ist.
+- **Zeichen** `dichte-weit/-normal/-kompakt` (Lucide `rows-2/3/4`) kamen
+  zuerst ins CI-Set (Stand `ci-26.10.3`), dann hierher.
+- `e2e/dichte.spec.ts`: Kompakt macht Zeilen niedriger, Schrift bleibt, die
+  Wahl hält über ein Neuladen, „Weit“ nimmt das Attribut wieder ab; am Handy
+  bleibt es trotz Cookie aus.
+

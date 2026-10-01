@@ -1,6 +1,6 @@
 {
-  "stand": "ci-26.10.2",
-  "commit": "d9882de2751e16e9c06164fd3e8416a58e443cf0",
+  "stand": "ci-26.10.3",
+  "commit": "3a328f15fd34dcbbafce97723d6c87f192cac7dd",
   "quelle": "ska1walker/aimighty-ci",
   "dateien": {
     "bauteile/AM-BASIS.css": "cff2007fa4abb4f864a1e4b453dc427e7fe00827cd6a178df172ce759997f17d",
@@ -56,6 +56,9 @@
     "marke/icons/ui/datenbank.svg": "cd6a00b5be2307c840c7a18b760c0eeabdce4e668b603a54384fff34bb03ccdd",
     "marke/icons/ui/datensicherung.svg": "dbed7c69c466ff9e21ff295a134647039d46d0bd940946103c6778eff815172e",
     "marke/icons/ui/diagramm.svg": "bc90246a1c0163b1ed0b090d31c575470bf3f5f3205a8d83d0a605a65ab25ad0",
+    "marke/icons/ui/dichte-kompakt.svg": "1f556b9248bbabc2a2a64319ea8f229335f2b82c09d034bda36e271baebe3dc3",
+    "marke/icons/ui/dichte-normal.svg": "a06945ac1600d2710cbd71376dccd01772719a780357501647c7fcfdda3a281a",
+    "marke/icons/ui/dichte-weit.svg": "0687a212d93f0a12eb22a0aba2ecb16175c70b8a87cfb081cc833129d5e49e4e",
     "marke/icons/ui/dokument.svg": "83e5115cefd13a82d87de4086e5465ce6447839b0e4e405a7849082c1cedf7c2",
     "marke/icons/ui/dokumente.svg": "43de68e20c7c58fba50e979d4043b5e2ad7479fe1693f386b0e397e0e26cda1c",
     "marke/icons/ui/drucken.svg": "3fa7225a5073b78bc8a8810b61bcb5c66d214fb3ade6e1b19296b6eaaeae231f",

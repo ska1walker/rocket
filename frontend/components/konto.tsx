@@ -13,7 +13,7 @@ import { nachweis } from "@/lib/datenwege";
 import { initialenAusName } from "@/lib/format";
 import type { OrgSettings } from "@/lib/typen";
 import { useWer } from "@/lib/wer";
-import { Darstellungsschalter } from "@/components/darstellung";
+import { Darstellungsschalter, Dichteschalter } from "@/components/darstellung";
 
 /**
  * Der Fuß der Navigation: eine Zeile für das Konto, eine für den Nachweis.
@@ -115,6 +115,7 @@ function Kontomenue({
       <div>
         <p className="konto-abschnitt">Darstellung</p>
         <Darstellungsschalter />
+        <Dichteteil />
       </div>
 
       <Abmeldeteil />
@@ -185,5 +186,18 @@ export function Nachweiszeile() {
       <Zeichen size={16} aria-hidden="true" />
       <span>{stand.text}</span>
     </Link>
+  );
+}
+
+/** Die Dichte — nur am Zeiger; am Touchscreen fällt der ganze Teil weg. */
+function Dichteteil() {
+  const [zeiger, setZeiger] = useState(false);
+  useEffect(() => setZeiger(!window.matchMedia("(pointer: coarse)").matches), []);
+  if (!zeiger) return null;
+  return (
+    <>
+      <p className="konto-abschnitt">Dichte</p>
+      <Dichteschalter />
+    </>
   );
 }
