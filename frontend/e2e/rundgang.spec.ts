@@ -5,11 +5,9 @@
 // Aufgabenliste mit 400), ein Skriptfehler, eine Seite breiter als der
 // Bildschirm (Angebotspositionen als 30-px-Streifen), ein Seitenkopf, aus dem
 // etwas herausragt (die Knopfreihe am Lead), und Befunde der Stufen
-// „critical" und „serious" von axe.
-//
-// Ausgenommen ist nur die axe-Regel color-contrast: Der gedämpfte Text liegt
-// mit 4,36:1 knapp unter 4,5 — eine offene Entscheidung über die Token
-// (AM-TOKEN), keine eines Bauteils. Fällt sie, fällt die Ausnahme.
+// „critical" und „serious" von axe — seit 26.10.3 einschließlich des
+// Kontrasts: Kai hob den gedämpften Text auf #567595 (1.10.2026), und das
+// letzte Schildchen darunter („Wunsch“) bekam Gold-900.
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
@@ -96,7 +94,6 @@ for (const [name, muster] of SEITEN) {
 
     const axe = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "best-practice"])
-      .disableRules(["color-contrast"])
       .analyze();
     const schwer = axe.violations
       .filter((v) => v.impact === "critical" || v.impact === "serious")
