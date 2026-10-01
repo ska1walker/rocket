@@ -112,9 +112,10 @@ jobs:
   oberflaeche:
     name: oberfläche · Rundgang im Browser
     runs-on: ubuntu-latest
-    # Ein Lauf braucht rund sechs Minuten. Am 1.10.2026 hing „install
-    # browser“ über 20 Minuten — ohne Grenze wären es sechs Stunden gewesen.
-    timeout-minutes: 20
+    # Ein Lauf braucht 6 bis 15 Minuten, je nachdem wie schnell die Pakete
+    # für den Browser kommen. Am 1.10.2026 hing „install browser“ über
+    # 20 Minuten — ohne Grenze wären es sechs Stunden gewesen.
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:16
@@ -177,6 +178,7 @@ jobs:
 
       - name: install browser
         working-directory: frontend
+        timeout-minutes: 15
         run: npx playwright install --with-deps chromium
 
       - name: tour
