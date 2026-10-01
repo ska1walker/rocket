@@ -1,23 +1,23 @@
-// HB-SYMBOL — erzeugt lib/symbole.tsx aus den Zeichen in symbole/.
+// HB-SYMBOL — erzeugt lib/symbole.tsx aus den Zeichen des CI-Stands.
 //
-// symbole/ ist eine unveränderte Kopie der benutzten Zeichen aus dem CI-Repo
-// (ska1walker/aimighty-ci, marke/icons/ui/). Ein Zeichen kommt zuerst dort
-// ins Set, über dessen Erzeuger, dann hierher (ABGLEICH.md, R2; Kai,
-// 1.10.2026). Rocket zeichnet nichts direkt aus Lucide.
+// Die Zeichen liegen in der Kopie des CI-Stands, ci/marke/icons/ui/ (geholt
+// mit scripts/ci-holen.mjs, ABGLEICH.md Paket 4). Ein Zeichen kommt zuerst
+// ins CI-Set, über dessen Erzeuger, dann mit einem neuen Stand hierher
+// (ABGLEICH.md, R2; Kai, 1.10.2026). Rocket zeichnet nichts direkt aus Lucide.
 //
 //   node scripts/symbole-erzeugen.mjs                 # schreibt lib/symbole.tsx
-//   node scripts/symbole-erzeugen.mjs --ci ../../aimighty-ci   # holt erst die Kopie neu
 //   node scripts/symbole-erzeugen.mjs --pruefen       # Rückgabe 1, wenn etwas abweicht
 //
 // Die Exportnamen bleiben die von lucide-react, damit eine Datei nur ihre
 // Importzeile ändert. Die Liste unten hält Exportname ↔ CI-Name fest.
 
-import { copyFileSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const hier = dirname(fileURLToPath(import.meta.url));
 const frontend = join(hier, "..");
+const ZEICHEN = join(frontend, "ci", "marke", "icons", "ui");
 
 export const NAMEN = {
   AlertCircle: "fehler",
@@ -113,13 +113,13 @@ const KOPF =
 
 /** Die Kinder eines CI-Zeichens als JSX. Der Rumpf muss genau der des Sets sein. */
 export function inhalt(name) {
-  const text = readFileSync(join(frontend, "symbole", `${name}.svg`), "utf8");
+  const text = readFileSync(join(ZEICHEN, `${name}.svg`), "utf8");
   if (!text.startsWith(KOPF) || !text.endsWith("</svg>")) {
-    throw new Error(`symbole/${name}.svg hat nicht den Rumpf des CI-Sets`);
+    throw new Error(`ci/marke/icons/ui/${name}.svg hat nicht den Rumpf des CI-Sets`);
   }
   const kinder = text.slice(KOPF.length, -"</svg>".length).trim();
   if (/[{}]|-[a-z]+=|style=|class=/.test(kinder)) {
-    throw new Error(`symbole/${name}.svg: Attribut, das als JSX nicht trägt`);
+    throw new Error(`ci/marke/icons/ui/${name}.svg: Attribut, das als JSX nicht trägt`);
   }
   return kinder.replace(/ \/> </g, " /><");
 }
@@ -128,7 +128,7 @@ export function erzeugen() {
   const zeilen = Object.entries(NAMEN).map(
     ([exp, name]) => `export const ${exp} = symbol("${name}", <>${inhalt(name)}</>);`,
   );
-  return `// HB-SYMBOL — erzeugt von scripts/symbole-erzeugen.mjs aus symbole/, nicht von Hand ändern.
+  return `// HB-SYMBOL — erzeugt von scripts/symbole-erzeugen.mjs aus ci/marke/icons/ui/, nicht von Hand ändern.
 // Die Zeichen kommen aus dem CI-Set (aimighty-ci, marke/icons/ui/), Lucide 1.31.0, ISC.
 import { symbol } from "@/components/symbol";
 
@@ -137,22 +137,11 @@ ${zeilen.join("\n")}
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const ci = process.argv.indexOf("--ci");
-  if (ci > 0) {
-    for (const name of new Set(Object.values(NAMEN))) {
-      copyFileSync(join(process.argv[ci + 1], "marke", "icons", "ui", `${name}.svg`), join(frontend, "symbole", `${name}.svg`));
-    }
-  }
   const datei = join(frontend, "lib", "symbole.tsx");
   if (process.argv.includes("--pruefen")) {
-    const fehler = [];
-    if (readFileSync(datei, "utf8") !== erzeugen()) fehler.push("lib/symbole.tsx ist nicht aus symbole/ erzeugt");
-    const benutzt = new Set(Object.values(NAMEN));
-    for (const f of readdirSync(join(frontend, "symbole"))) {
-      if (f.endsWith(".svg") && !benutzt.has(f.slice(0, -4))) fehler.push(`symbole/${f} wird nicht benutzt`);
-    }
-    for (const f of fehler) console.error(f);
-    process.exit(fehler.length ? 1 : 0);
+    const gleich = readFileSync(datei, "utf8") === erzeugen();
+    if (!gleich) console.error("lib/symbole.tsx ist nicht aus ci/marke/icons/ui/ erzeugt");
+    process.exit(gleich ? 0 : 1);
   }
   writeFileSync(datei, erzeugen());
   console.log(`lib/symbole.tsx: ${Object.keys(NAMEN).length} Zeichen`);

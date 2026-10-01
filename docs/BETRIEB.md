@@ -2023,9 +2023,41 @@ App auf (wie der Rundgang, mit Beispieldaten), hell und dunkel, nach
 eigene Gestalt (HB-TASTATUR, AM-BASIS, HB-SYMBOL als Regel) und HB-FAKTOR,
 den es nur im Modus `eigen` gibt.
 
-**Bis Paket 4** ist Rocket die Quelle, das CI hält die geprüfte Referenz. Ob
-eine App die Bausteine künftig aus dem CI holt und ihre CI rot wird, wenn sie
-abweicht, entscheidet Paket 4.
+**Bis Paket 4** war Rocket die Quelle. Seit 26.10.11 ist es das CI — siehe
+den nächsten Abschnitt.
+
+## Stand aus dem CI (Paket 4, seit 26.10.11)
+
+Kai hat am 1.10.2026 entschieden (ABGLEICH.md, Paket 4): **Das CI ist die
+Quelle für alles** — Token, Zeichen und Bausteine. Rocket ändert nichts
+davon selbst, sondern holt einen Stand.
+
+- **Ein Stand ist ein Tag `ci-YY.M.n`** im CI-Repo. Ihn setzt dort die
+  Action `stand.yml` nach jedem Merge, der das Paket ändert
+  (`werkzeug/stand.py`, Liste `PAKET`). Apps holen nie `main`.
+- **Rocket hält eine Kopie im Repo**, ohne Netz: `frontend/ci/` spiegelt
+  die Ablage des CI (`tokens/app.css`, `marke/icons/ui/`, `bauteile/*.css`,
+  `werkzeug/bauteile.py`), dazu `stand.json` mit Tag, Commit und der
+  sha256 jeder Datei. Das CI-Repo ist privat; gebaut und geprüft wird nur
+  gegen die Kopie.
+- **Holen** beim Entwickeln, aus einem Klon des CI-Repos:
+  `node scripts/ci-holen.mjs --von ../../aimighty-ci --stand ci-26.10.2`
+  (aus `frontend/`). Das Skript liest die Dateien des Tags mit `git show`,
+  nicht den ausgecheckten Stand, und erzeugt danach `lib/symbole.tsx` neu.
+- **Was wacht** (`lib/__tests__/ci-stand.test.ts`, läuft mit vitest):
+  Die Kopie passt zu ihren Prüfsummen; der Token-Block in `globals.css` ist
+  `ci/tokens/app.css`; jeder `AM-`/`HB-` Abschnitt in `globals.css` ist
+  gleich `ci/bauteile/<KENNUNG>.css` (geprüft mit dem `bauteile.py` aus der
+  Kopie). Eine Abweichung macht die CI rot.
+
+**Eine Änderung an einem Baustein** geht so: im CI ändern (oder dort mit
+`werkzeug/bauteile.py <rocket>/frontend/app/globals.css --uebernehmen` aus
+einem Rocket-Entwurf übernehmen), PR mergen, Tag abwarten, in Rocket holen.
+Die erste so: Das Suchfeld der Kopfleiste beginnt seit `ci-26.10.2` auf der
+Linie der Seitentitel statt an der Spaltenkante (AM-HUELLE, Kai 1.10.2026).
+Bei eingeklappter Navigation bleibt es an der Kante, wie vorher.
+
+`RK-` Abschnitte bleiben Rockets eigene Sache und werden nicht geprüft.
 
 ## Ein Icon-Set für alle Apps (seit 26.10.9)
 
@@ -2041,8 +2073,9 @@ am 1.10.2026 entschieden: **alle Apps zeichnen aus diesem einen Set**
    (gebündelt, ISC). Mit 26.10.9 wuchs es von 57 auf 112 Zeichen — um alles,
    was Rocket zeichnet. Gleiches Zeichen, ein Name: Rockets `X` ist dort
    `schliessen`, `Sparkles` ist `ai`.
-2. `frontend/symbole/` ist eine unveränderte Kopie der benutzten Zeichen.
-   Neu holen: `node scripts/symbole-erzeugen.mjs --ci ../../aimighty-ci`.
+2. `frontend/ci/marke/icons/ui/` ist eine unveränderte Kopie des Sets aus
+   einem CI-Stand (seit 26.10.11, siehe „Stand aus dem CI“; vorher
+   `frontend/symbole/`).
 3. `scripts/symbole-erzeugen.mjs` schreibt daraus `lib/symbole.tsx`. Die
    Exportnamen sind die von lucide-react (`Search`, `Sparkles` …), eine
    Datei ändert nur ihre Importzeile. Nie von Hand ändern.
@@ -2050,8 +2083,8 @@ am 1.10.2026 entschieden: **alle Apps zeichnen aus diesem einen Set**
 
 **Ein Zeichen fehlt?** Erst ins CI-Set (Lucide-Datei nach
 `werkzeug/lucide-1.31.0/icons/`, eine Zeile im Erzeuger), dann hier eine
-Zeile in `NAMEN` und das Skript mit `--ci` laufen lassen. Nie direkt aus
-Lucide.
+Zeile in `NAMEN`, den neuen Stand holen (`scripts/ci-holen.mjs`). Nie
+direkt aus Lucide.
 
 **Größen nur 16 · 20 · 24 · 40**, der Typ lässt keine andere zu: 16 neben
 Text und in Knöpfen (vorher 11 bis 16), 20 in der Navigation (vorher 18), 24
@@ -2065,7 +2098,7 @@ AI-Funken“ meint Effekte — Glitzer, Schimmer, Sterne als Schmuck —, nicht
 dieses Strichzeichen.
 
 **Geprüft wird es zweimal:** `lib/__tests__/symbole.test.ts` meldet jeden
-Import aus `lucide-react` und jede Abweichung zwischen `symbole/` und
+Import aus `lucide-react` und jede Abweichung zwischen der CI-Kopie und
 `lib/symbole.tsx`; der Rundgang misst jedes sichtbare Zeichen und meldet
 eine Größe außerhalb 16/20/24/40 oder einen Strich, der nicht 1,5 px ist.
 Das fand beim ersten Lauf zwei Zeichen, die eine Flex-Zeile neben langem Text

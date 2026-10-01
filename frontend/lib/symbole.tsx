@@ -1,4 +1,4 @@
-// HB-SYMBOL — erzeugt von scripts/symbole-erzeugen.mjs aus symbole/, nicht von Hand ändern.
+// HB-SYMBOL — erzeugt von scripts/symbole-erzeugen.mjs aus ci/marke/icons/ui/, nicht von Hand ändern.
 // Die Zeichen kommen aus dem CI-Set (aimighty-ci, marke/icons/ui/), Lucide 1.31.0, ISC.
 import { symbol } from "@/components/symbol";
 
