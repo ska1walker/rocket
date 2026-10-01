@@ -95,6 +95,16 @@ function Maske() {
       setFehler("Die beiden Passwörter stimmen nicht überein.");
       return;
     }
+    // Die Form vorher prüfen: Eine eingefügte Adresse oder ein halber Code
+    // soll keinen der zehn Versuche kosten, die die Bremse erlaubt.
+    const zeichen = code.toUpperCase().replace(/[^0-9A-Z]/g, "").replace(/O/g, "0").replace(/[IL]/g, "1");
+    if (!/^[0-9A-F]{12}$/.test(zeichen)) {
+      setFehler(
+        "Das sieht nicht nach dem Code aus. Er hat zwölf Zeichen aus 0–9 und A–F, etwa 1A2B-3C4D-5E6F — " +
+          "bitte genau die Zeile „Code:“ aus der Datei übernehmen.",
+      );
+      return;
+    }
     setLaeuft(true);
     try {
       await einrichten(code.trim(), name.trim(), passwort);
@@ -104,9 +114,7 @@ function Maske() {
       setFehler(
         f.status === 429
           ? "Zu viele Versuche. Bitte warten Sie eine Viertelstunde."
-          : f.status === 403
-            ? "Der Code stimmt nicht. Bitte nehmen Sie ihn genau so aus der Datei."
-            : f.status === 409
+          : f.status === 409
               ? "Rocket ist schon eingerichtet. Bitte laden Sie die Seite neu und melden sich an."
               : f.message,
       );
@@ -138,8 +146,9 @@ function Maske() {
             className="input"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            autoComplete="one-time-code"
+            autoComplete="off"
             autoCapitalize="characters"
+            placeholder="1A2B-3C4D-5E6F"
             spellCheck={false}
             required
             autoFocus

@@ -58,8 +58,33 @@ def wo_liegt_die_datei() -> str:
     return " › ".join((*ORDNER_IN_DATEIEN, DATEI))
 
 
+# Der Code besteht nur aus 0–9 und A–F. Was in der Dateien-App wie eine
+# Ziffer aussieht, aber als Buchstabe getippt wird, zählt als die Ziffer:
+# O, I und L kommen im Code nie vor, die Angleichung kann also nichts
+# Falsches passend machen (Kai, 1.10.2026: „der Code funktioniert nicht“).
+_GLEICH_AUSSEHEND = str.maketrans({"O": "0", "I": "1", "L": "1"})
+
+
 def _blank(code: str) -> str:
-    return "".join(z for z in code if z.isalnum()).upper()
+    return "".join(z for z in code if z.isalnum()).upper().translate(_GLEICH_AUSSEHEND)
+
+
+def befund(code: str) -> str:
+    """Was beim Fehlversuch ins Pod-Log geht — nie der Code selbst.
+
+    Genug, um von außen zu sehen, woran es lag: keine Datei, falsche
+    Länge, fremde Zeichen (etwa eine eingefügte Adresse) oder schlicht
+    ein anderer Code.
+    """
+    gelesen = _lesen()
+    eingabe = _blank(code)
+    teile = [
+        f"Datei {'da' if gelesen else 'fehlt'} ({_pfad()})",
+        f"{len(eingabe)} Zeichen eingegeben, 12 erwartet",
+    ]
+    if any(z not in "0123456789ABCDEF" for z in eingabe):
+        teile.append("Zeichen außerhalb von 0–9/A–F")
+    return "; ".join(teile)
 
 
 def _lesen() -> tuple[str | None, str] | None:
