@@ -3,16 +3,14 @@
 
 /* ═══════════════════════════════════════════════════════════════════════
    AImighty-Designsystem — Quelle der Werte [AM-TOKEN]
-   Übernommen aus dem InSilo_Design-Paket (tokens/globals.css), abgeleitet
-   aus AImighty claude/Marke-Regeln.md und claude/Anwendung.md.
-
-   Wer einen Wert ändert, ändert ihn HIER, nicht am Bauteil.
+   Dieser Block ist eine unveränderte Kopie von tokens/app.css aus dem
+   CI-Repo (ska1walker/aimighty-ci) — dort ist die Quelle, entschieden am
+   1.10.2026 (ABGLEICH.md, T1). Wer einen Wert ändern will, ändert ihn
+   dort und kopiert ihn hierher; geprüft wird mit
+   `python3 werkzeug/app-abgleich.py …/frontend/app/globals.css`.
 
    Die Schriften lädt next/font/local in app/layout.tsx (self-hosted,
    nie vom Google-CDN) und reicht sie als --font-geist-* herein.
-
-   Die früheren Insilo-Tokens (--gold, --surface-soft, …) sind entfallen —
-   jedes Bauteil liest --am-*.
    ═══════════════════════════════════════════════════════════════════════ */
 
 :root {
@@ -68,8 +66,13 @@
   --am-rand-betont: 2px;
 
   /* ── Bewegung — nur die dokumentierten Ausnahmen ──────────────────── */
-  --am-dauer-kurz: 120ms;
-  --am-dauer-lang: 200ms;
+  /* Dieselbe Leiter und Kurve wie im Auftritt (kern/bewegung.md,
+     ABGLEICH T6, Kai 01.10.2026). Bis dahin trug die App --am-dauer-kurz
+     und --am-dauer-lang; sie entfallen. */
+  --am-dauer-schnell: 120ms;  /* Hover, Fokus, Farbwechsel */
+  --am-dauer-mittel: 200ms;   /* Aufklappen, Einblenden */
+  --am-dauer-langsam: 320ms;  /* Menü, Overlay */
+  --am-kurve: cubic-bezier(0.2, 0, 0, 1); /* kein Federn, kein Überschwingen */
 
   /* ── Hanseatenblau — Flächenleiter, Farbton 249,9 ─────────────────── */
   --am-blau-25: #f5f9fc;
@@ -92,7 +95,8 @@
   --am-gold-500: #caa960; /* das eine Markengold */
   --am-gold-600: #b7974e;
   --am-gold-700: #a4843a;
-  --am-gold-800: #8b6c1f; /* Gold als Text auf Weiß, 4,93:1 */
+  --am-gold-800: #8c6c1f; /* Gold als Text auf Weiß, 4,91:1 — derselbe Wert
+                              wie --am-gold-text im Auftritt (ABGLEICH T3) */
   --am-gold-900: #71560f;
 
   /* ── Zustandsfarben — Text und Rand, keine Fläche außer im Formular ─ */
@@ -116,16 +120,21 @@
   --am-flaeche-3: var(--am-blau-100);  /* Dialog, Popover */
   --am-trennlinie: var(--am-blau-200);
   --am-rand: var(--am-blau-200);
-  --am-rand-betont-farbe: var(--am-blau-300);
+  /* Der Rand, an dem man ein Bedienelement erkennt (sekundärer Knopf,
+     offenes Auswahlfeld) — WCAG 1.4.11 verlangt 3:1. Blau 300 kam auf
+     1,86:1 (ABGLEICH T9). Blau 500, der Wendepunkt: Weiß 4,61 ·
+     Fläche 1 4,36 · Fläche 3 3,80:1. */
+  --am-rand-betont-farbe: var(--am-blau-500);
 
   --am-text-primaer: var(--am-blau-900);
   --am-text-sekundaer: var(--am-blau-600);
-  /* Abweichung vom Paket, entschieden von Kai am 1.10.2026: Blau-500
-     (#587898) erreichte auf der Grundfläche Blau-25 nur 4,36:1. #567595
-     liegt im selben Farbton und schafft 4,54:1 (Weiß 4,80:1). Auf Blau-50
-     (Menü) und Blau-100 (Dialog) bleibt es mit 4,34:1 und 3,96:1 darunter
-     — siehe docs/BETRIEB.md, „GUI-Prüfung“. */
-  --am-text-gedaempft: #567595;
+  /* Eine eigene Rolle, keine Leiterstufe (ABGLEICH T9, Kai 01.10.2026).
+     #4f6c8a trägt auf jeder hellen Fläche: Weiß 5,46 · Fläche 1 5,16 ·
+     Fläche 2 4,94 · Fläche 3 4,51:1. Fläche 2 ist jede Zeile unter dem
+     Zeiger — dort fiel #567595 auf 4,34:1, im Dialog auf 3,96:1.
+     Blau 500 bleibt, wie es ist: Es ist der Wendepunkt für Zeichen, die in
+     beiden Modi tragen müssen (Pfeil im Auswahlfeld, Balken). */
+  --am-text-gedaempft: #4f6c8a;
   --am-text-deaktiviert: var(--am-blau-400);
 
   --am-handlung-ruhend: #002f56;
@@ -175,11 +184,17 @@ html.dunkel {
   --am-flaeche-1: var(--am-blau-800);
   --am-flaeche-2: var(--am-blau-700);
   --am-flaeche-3: var(--am-blau-700);
-  --am-rand-betont-farbe: var(--am-blau-600);
+  /* Blau 600 kam im Dunkeln auf 2,34:1 (ABGLEICH T9). Blau 400: Seite
+     6,29 · Fläche 3 4,83:1. */
+  --am-rand-betont-farbe: var(--am-blau-400);
   --am-trennlinie: var(--am-blau-700);
   --am-rand: var(--am-blau-700);
 
-  --am-text-primaer: #ffffff;
+  /* Gebrochenes Weiß wie im Auftritt: reines Weiß überstrahlt auf
+     Hanseatenblau beim langen Lesen. 16,08:1 auf der Seite, 12,35:1 auf
+     Fläche 3 (ABGLEICH T3, Kai 01.10.2026). Weiß bleibt nur auf satten
+     Flächen: --am-text-auf-farbe. */
+  --am-text-primaer: #eef2f6;
   --am-text-sekundaer: var(--am-blau-200);
   --am-text-gedaempft: var(--am-blau-300);
   --am-text-deaktiviert: var(--am-blau-400);
@@ -205,7 +220,10 @@ html.dunkel {
   --am-fehler-flaeche: #371b18;
   --am-fehler-rand: #62332e;
 
-  --am-fokus-ring: var(--am-gold-900);
+  /* Der Ring folgt der Handlung wie im Auftritt (kern/schaltflaechen.md):
+     Gold 500, 8,06:1 auf der Seite, 6,19:1 auf Fläche 3. Gold 900 kam
+     auf 2,62:1 (ABGLEICH T9). */
+  --am-fokus-ring: var(--am-gold-500);
 
   /* Auf Hanseatenblau trägt das Markengold: 7,2:1 auf der Navigationsfläche,
      8,1:1 auf der Grundfläche. Es ist zugleich die Handlungsfarbe im
@@ -233,14 +251,12 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 @layer base {
-  :root {
-    /* Die früheren Insilo-Farbtoken (--gold, --surface-soft, --text-meta …)
-       sind entfallen — alle Bauteile lesen jetzt --am-*. Geblieben sind nur
-       die Bewegungswerte: das AImighty-Paket gibt Dauern vor, aber keine
-       Beschleunigungskurve. */
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --duration-fast: 150ms;
-    --duration-medium: 250ms;
+  /* Bewegung reduziert: Der Zustand stellt sich sofort ein, der Weg fällt
+     weg — derselbe Knopf, nur ohne Übergang (kern/bewegung.md im CI:
+     „ist fertig“, nicht „steht still“). Die beiden Schleifen (Schild,
+     Suchbalken) haben eigene Fassungen weiter unten. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0s !important; }
   }
 
   html {
@@ -308,9 +324,9 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     justify-content: center;
     gap: var(--am-raum-2);
     transition:
-      background var(--am-dauer-kurz) ease,
-      color var(--am-dauer-kurz) ease,
-      border-color var(--am-dauer-kurz) ease;
+      background var(--am-dauer-schnell) var(--am-kurve),
+      color var(--am-dauer-schnell) var(--am-kurve),
+      border-color var(--am-dauer-schnell) var(--am-kurve);
     height: var(--am-ziel-zeiger);
     padding: 0 var(--am-raum-6);
   }
@@ -476,14 +492,14 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     display: inline-grid;
     place-content: center;
     vertical-align: -0.2em;
-    transition: background-color 120ms ease, border-color 120ms ease;
+    transition: background-color var(--am-dauer-schnell) var(--am-kurve), border-color var(--am-dauer-schnell) var(--am-kurve);
   }
   input[type="checkbox"]::before {
     content: "";
     width: 0.625rem;
     height: 0.625rem;
     transform: scale(0);
-    transition: transform 100ms ease;
+    transition: transform var(--am-dauer-schnell) var(--am-kurve);
     background: currentColor;
     clip-path: polygon(14% 44%, 0 62%, 40% 100%, 100% 22%, 84% 8%, 40% 66%);
   }
@@ -516,7 +532,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     border-radius: var(--am-radius-voll);
     background: var(--am-flaeche-2);
     cursor: pointer;
-    transition: background-color 140ms ease, border-color 140ms ease;
+    transition: background-color var(--am-dauer-schnell) var(--am-kurve), border-color var(--am-dauer-schnell) var(--am-kurve);
   }
   .schalter-knauf {
     position: absolute;
@@ -528,7 +544,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: #fff;
     box-shadow: 0 1px 2px rgba(5, 23, 41, 0.25);
     transform: translateY(-50%);
-    transition: transform 140ms ease;
+    transition: transform var(--am-dauer-schnell) var(--am-kurve);
   }
   .schalter:hover { border-color: var(--am-handlung-ruhend); }
   .schalter.an { background: var(--am-handlung-ruhend); border-color: var(--am-handlung-ruhend); }
@@ -803,7 +819,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     color: var(--am-text-sekundaer);
     text-align: center;
     cursor: pointer;
-    transition: color var(--am-dauer-kurz) ease;
+    transition: color var(--am-dauer-schnell) var(--am-kurve);
   }
 
   .huelle-nav-item:hover { color: var(--am-text-primaer); }
@@ -970,7 +986,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
       color: var(--am-text-gedaempft);
       cursor: pointer;
       opacity: 0;
-      transition: opacity var(--am-dauer-kurz) ease, color var(--am-dauer-kurz) ease;
+      transition: opacity var(--am-dauer-schnell) var(--am-kurve), color var(--am-dauer-schnell) var(--am-kurve);
     }
 
     .huelle-nav-eintrag:hover .huelle-nav-stern,
@@ -1454,7 +1470,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .tabelle tbody tr {
     border-bottom: 1px solid var(--am-trennlinie);
-    transition: background var(--am-dauer-kurz) ease;
+    transition: background var(--am-dauer-schnell) var(--am-kurve);
   }
   /* Nur eine Zeile, die irgendwohin führt, zeigt die Hand. Mit der
      Tastatur führt der Link in der ersten Spalte (.zeilen-ziel) dorthin —
@@ -1807,8 +1823,8 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: var(--am-seite);
     cursor: grab;
     transition:
-      border-color var(--am-dauer-kurz) ease,
-      transform var(--am-dauer-kurz) ease;
+      border-color var(--am-dauer-schnell) var(--am-kurve),
+      transform var(--am-dauer-schnell) var(--am-kurve);
   }
 
   .deal-karte:hover { border-color: var(--am-rand-betont-farbe); }
@@ -2081,7 +2097,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     border: 2px dashed var(--am-rand);
     border-radius: var(--am-radius-gross);
     background: var(--am-flaeche-1);
-    transition: border-color var(--am-dauer-kurz), background var(--am-dauer-kurz);
+    transition: border-color var(--am-dauer-schnell) var(--am-kurve), background var(--am-dauer-schnell) var(--am-kurve);
   }
 
   .einfuhr-ablage.ueber {
@@ -2901,9 +2917,12 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   .stapel-frage { color: var(--am-fehler); font-weight: 600; }
 
+  /* Schrift auf der Fehlerfläche wie auf der Handlung: hell Weiß (5,92:1),
+     dunkel Blau 900 (7,37:1). Weiß auf dem hellen Rot des Dunkelmodus kam
+     auf 2,45:1 (ABGLEICH T9). */
   .btn-gefahr {
     background: var(--am-fehler);
-    color: var(--am-text-auf-farbe);
+    color: var(--am-handlung-text);
     border-color: var(--am-fehler);
   }
 
@@ -3194,7 +3213,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   /* Die Zahl der überfälligen ist die einzige, die rot sein darf. */
   .zahlpille[data-warnung="true"] { background: var(--am-fehler); }
-  .dunkel .zahlpille[data-warnung="true"] { background: var(--am-fehler); color: var(--am-text-auf-farbe); }
+  .dunkel .zahlpille[data-warnung="true"] { background: var(--am-fehler); color: var(--am-handlung-text); }
 }
 
 @layer components {
@@ -3676,7 +3695,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: transparent;
     box-shadow: none;
     cursor: pointer;
-    transition: transform var(--am-dauer-kurz) ease;
+    transition: transform var(--am-dauer-schnell) var(--am-kurve);
   }
   .assistent-knopf svg {
     height: 3.25rem;
@@ -4852,7 +4871,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 .fg-gruppe-kopf:hover { background: var(--am-flaeche-1); }
 .fg-gruppe-kopf:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: -2px; }
-.fg-pfeil { flex: none; color: var(--am-text-gedaempft); transition: transform var(--am-dauer-kurz); }
+.fg-pfeil { flex: none; color: var(--am-text-gedaempft); transition: transform var(--am-dauer-schnell) var(--am-kurve); }
 .fg-gruppe-kopf[aria-expanded="false"] .fg-pfeil { transform: rotate(-90deg); }
 .fg-stand { margin-left: auto; font-size: 0.6875rem; font-weight: 500; color: var(--am-text-gedaempft); }
 .fg-archiv { cursor: default; color: var(--am-text-sekundaer); }

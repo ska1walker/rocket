@@ -111,6 +111,9 @@ die App — sonst laufen die Apps auseinander.
 ### AM-TOKEN — Token
 
 `globals.css`, Kopf bis „Bauteile". Alles andere liest nur `var(--am-*)`.
+**Seit 26.10.5 eine unveränderte Kopie von `tokens/app.css` aus dem
+CI-Repo** (`ska1walker/aimighty-ci`) — Werte ändern sich dort, nicht hier
+(BETRIEB.md, „Token aus dem CI“). Relay und Insilo holen dieselbe Datei.
 
 - **Farbe:** Hanseatenblau `--am-blau-25…950` (900 Grundfläche, 500
   Wendepunkt), Gold `--am-gold-200…900` (500 das eine Markengold, 800 Gold
@@ -130,6 +133,10 @@ die App — sonst laufen die Apps auseinander.
   HB-DARSTELLUNG. Eine eigene Rollenverteilung, kein Filter: Flächen
   werden Blau 900/800/700, **Handlung wird Gold** (Blau auf Blau trägt
   nicht).
+- **Bewegung:** `--am-dauer-schnell/-mittel/-langsam` (120/200/320 ms),
+  `--am-kurve`; unter `prefers-reduced-motion` ohne Übergang.
+- **Kontrast:** `lib/__tests__/kontrast.test.ts` rechnet jedes Paar aus
+  den Token, auch Rand (`--am-rand-betont-farbe`) und Fokusring (3:1).
 - **Schrift:** Geist, lokal über `next/font/local`, nie vom CDN.
 
 ### AM-KNOPF — Knöpfe
@@ -906,6 +913,6 @@ ist akut; es ist die Liste für eine ruhige Stunde.
 - **Doppelte Wege:** Stammdaten und Feldgruppen tun dasselbe in zwei
   Bauarten. Angebote und Tickets nutzen noch Stammdaten; sie bleiben
   bewusst ohne Gruppen (Entscheidung zu den Eigenschaften, 30.9.2026).
-- ~~**Kontrast:**~~ Erledigt in 26.10.3: `--am-text-gedaempft` hell auf
-  `#567595` (Kai, 1.10.2026), „Wunsch“ auf Gold-900; die CI prüft den
+- ~~**Kontrast:**~~ Erledigt in 26.10.3, nachgezogen in 26.10.5: `--am-text-gedaempft` hell auf
+  `#4f6c8a` (Kai, 1.10.2026; vorher `#567595`), „Wunsch“ auf Gold-900; die CI prüft den
   Kontrast seitdem mit (BETRIEB.md, „GUI-Prüfung").
