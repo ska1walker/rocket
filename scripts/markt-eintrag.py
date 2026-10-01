@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import base64
 import hashlib
+import json
 import re
 import sys
 from pathlib import Path
@@ -38,19 +39,82 @@ def version_tupel(v: str) -> tuple[int, ...]:
     return tuple(int(t) for t in v.split("."))
 
 
-def notiz_lesen(datei: Path) -> tuple[str, str]:
-    """`# Titel` in der ersten Zeile, danach ein Absatz, der mit `v<version>:` beginnt."""
-    zeilen = datei.read_text(encoding="utf-8").strip().splitlines()
+def notiz_lesen(datei: Path) -> tuple[str, str, str | None]:
+    """`# Titel`, darunter Englisch ab `v<version>: `; optional nach einer Zeile
+    `## Deutsch` derselbe Inhalt auf Deutsch, ebenfalls ab `v<version>: `."""
+    roh = datei.read_text(encoding="utf-8").strip()
+    teile = re.split(r"^## Deutsch\s*$", roh, maxsplit=1, flags=re.MULTILINE)
+    zeilen = teile[0].strip().splitlines()
     if not zeilen or not zeilen[0].startswith("# "):
         raise SystemExit(f"{datei}: erste Zeile muss '# <Titel>' sein")
     titel = zeilen[0][2:].strip()
-    text = " ".join(z.strip() for z in zeilen[1:] if z.strip())
     version = datei.stem
-    if not text.startswith(f"v{version}: "):
-        raise SystemExit(f"{datei}: der Text muss mit 'v{version}: ' beginnen")
+    en = " ".join(z.strip() for z in zeilen[1:] if z.strip())
+    de = " ".join(z.strip() for z in teile[1].splitlines() if z.strip()) if len(teile) > 1 else None
+    for sprache, text in (("Englisch", en), ("Deutsch", de)):
+        if text is None:
+            continue
+        if not text.startswith(f"v{version}: "):
+            raise SystemExit(f"{datei}: {sprache} muss mit 'v{version}: ' beginnen")
+        kein_template(text, datei)
+    return titel, en, de
+
+
+def kein_template(text: str, quelle: Path | str) -> None:
     if "`" in text or "${" in text:
-        raise SystemExit(f"{datei}: kein Backtick und kein '${{' — der Text steht in einem Template-String")
-    return titel, text
+        raise SystemExit(f"{quelle}: kein Backtick und kein '${{' — der Text steht in einem Template-String")
+
+
+def texte_lesen(datei: Path) -> tuple[str, str]:
+    """`# Kurz` (eine Zeile) und `# Beschreibung` (Markdown) für den Markt."""
+    roh = datei.read_text(encoding="utf-8")
+    m = re.match(r"\s*# Kurz\s*\n(.+?)\n\s*# Beschreibung\s*\n(.+)", roh, flags=re.DOTALL)
+    if not m:
+        raise SystemExit(f"{datei}: erwartet '# Kurz' und '# Beschreibung'")
+    kurz, lang = m.group(1).strip(), m.group(2).strip()
+    if "\n" in kurz or '"' in kurz:
+        raise SystemExit(f"{datei}: Kurzbeschreibung ist eine Zeile ohne Anführungszeichen")
+    kein_template(lang, datei)
+    return kurz, lang
+
+
+FELD = "\n      "  # Einrückung der Felder unter metadata in _apps.ts
+
+
+def feld_ersetzen(block: str, name: str, wert: str) -> str:
+    """Ersetzt ein metadata-Feld samt Wert, gleich in welcher Form es dasteht."""
+    m = re.search(re.escape(FELD + name + ":"), block)
+    if not m:
+        raise SystemExit(f"_apps.ts: {name} im Rocket-Eintrag nicht gefunden")
+    n = re.compile(re.escape(FELD) + r"[A-Za-z]+:").search(block, m.end())
+    ende = n.start() if n else len(block)
+    trenner = "" if wert.startswith("\n") else " "
+    return block[: m.start()] + FELD + name + ":" + trenner + wert + "," + block[ende:]
+
+
+def feld_lesen(block: str, name: str) -> dict[str, str]:
+    """Liest einen Text- oder Sprachen-Wert: `...` | "..." | { en: ..., de: ... }."""
+    m = re.search(re.escape(FELD + name + ":"), block)
+    if not m:
+        raise SystemExit(f"_apps.ts: {name} im Rocket-Eintrag nicht gefunden")
+    n = re.compile(re.escape(FELD) + r"[A-Za-z]+:").search(block, m.end())
+    roh = block[m.end() : n.start() if n else len(block)].strip().rstrip(",").strip()
+    def wert(s: str) -> str:
+        s = s.strip().rstrip(",").strip()
+        if s[:1] == "`":
+            return s[1:-1]
+        return json.loads(s)
+    if roh.startswith("{"):
+        paare = re.findall(r'(\w+)\s*:\s*(`[^`]*`|"(?:[^"\\]|\\.)*")', roh)
+        return {k: wert(v) for k, v in paare}
+    return {"en": wert(roh)}
+
+
+def sprachen(werte: dict[str, str], als_template: bool) -> str:
+    def text(s: str) -> str:
+        return f"`{s}`" if als_template else json.dumps(s, ensure_ascii=False)
+    zeilen = "".join(f"{FELD}  {k}: {text(s)}," for k, s in werte.items())
+    return "{" + zeilen + FELD + "}"
 
 
 def kategorien_lesen(manifest: Path) -> list[str]:
@@ -85,6 +149,7 @@ def main() -> None:
     a.add_argument("--notizen", type=Path, required=True)
     a.add_argument("--pr-text", type=Path)
     a.add_argument("--manifest", type=Path, help="olares/OlaresManifest.yaml — Kategorien von dort")
+    a.add_argument("--texte", type=Path, help="Ordner mit beschreibung.en.md und beschreibung.de.md")
     arg = a.parse_args()
 
     v = arg.version
@@ -105,7 +170,7 @@ def main() -> None:
         raise SystemExit(3)
 
     neue = sorted(
-        (d for d in arg.notizen.glob("*.md") if version_tupel(alt) < version_tupel(d.stem) <= version_tupel(v)),
+        (d for d in arg.notizen.glob("*.md") if re.fullmatch(r"\d+\.\d+\.\d+", d.stem) and version_tupel(alt) < version_tupel(d.stem) <= version_tupel(v)),
         key=lambda d: version_tupel(d.stem),
         reverse=True,
     )
@@ -113,7 +178,9 @@ def main() -> None:
         raise SystemExit(f"Notiz {arg.notizen}/{v}.md fehlt")
     notizen = [notiz_lesen(d) for d in neue]
     titel = notizen[0][0]
-    texte = " ".join(t for _, t in notizen)
+    neu_en = " ".join(en for _, en, _ in notizen)
+    # Eine Version ohne deutsche Notiz steht auch im Deutschen auf Englisch.
+    neu_de = " ".join(de or en for _, en, de in notizen)
 
     block = block.replace(f'version: "{alt}"', f'version: "{v}"', 1)
     if arg.manifest:
@@ -126,10 +193,19 @@ def main() -> None:
         )
         if n != 1:
             raise SystemExit("_apps.ts: categories im Rocket-Eintrag nicht gefunden")
-    m = re.search(r"upgradeDescription:\s*\n\s*`", block)
-    if not m:
-        raise SystemExit("_apps.ts: upgradeDescription nicht gefunden")
-    block = block[: m.end()] + texte + " " + block[m.end():]
+    bisher = feld_lesen(block, "upgradeDescription")
+    upgrade = {"en": neu_en + " " + bisher["en"]}
+    if arg.texte:
+        upgrade["de"] = neu_de + " " + bisher.get("de", bisher["en"])
+    elif "de" in bisher:
+        upgrade["de"] = neu_en + " " + bisher["de"]
+    block = feld_ersetzen(block, "upgradeDescription", sprachen(upgrade, als_template=True) if len(upgrade) > 1 else f"{FELD}  `{upgrade['en']}`")
+
+    if arg.texte:
+        kurz_en, lang_en = texte_lesen(arg.texte / "beschreibung.en.md")
+        kurz_de, lang_de = texte_lesen(arg.texte / "beschreibung.de.md")
+        block = feld_ersetzen(block, "description", sprachen({"en": kurz_en, "de": kurz_de}, als_template=False))
+        block = feld_ersetzen(block, "fullDescription", sprachen({"en": lang_en, "de": lang_de}, als_template=True))
     apps = apps[:anfang] + block + apps[ende:]
 
     # ── _lib.ts ───────────────────────────────────────────────────────────

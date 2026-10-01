@@ -103,7 +103,16 @@ gemergt.
 **Die Notiz schreibt der Release-PR.** Je Version eine Datei
 `olares/markt/<version>.md`: erste Zeile `# <kurzer Titel>` (wird
 „rocket <version>: <Titel>“), darunter Englisch, beginnend mit
-`v<version>: `, ohne Backtick. `scripts/check-chart.sh` fehlt sie, und der PR
+`v<version>: `, ohne Backtick; nach einer Zeile `## Deutsch` derselbe Text auf
+Deutsch, ebenfalls ab `v<version>: ` (seit 26.10.8, Kai, 1.10.2026: Der Markt
+zeigt Rocket auch auf Deutsch, wie Marcs Apps).
+
+**Die Beschreibung im Markt** steht ebenfalls hier, in
+`olares/markt/beschreibung.de.md` und `beschreibung.en.md` (`# Kurz`, eine
+Zeile; `# Beschreibung`, Markdown). Die Action schreibt sie bei jedem Eintrag
+als `{ en, de }` in Marcs `_apps.ts`; der Markt wählt die Sprache der Box
+(`loc()` in `_lib.ts`, `de-DE`). Ältere Notizen ohne deutschen Teil stehen im
+Deutschen auf Englisch. `scripts/check-chart.sh` fehlt sie, und der PR
 ist rot — die Notiz wird mit dem Code gelesen, nicht am Ende erfunden. Kam
 eine Version nie im Markt an, nimmt die nächste ihre Notiz mit.
 

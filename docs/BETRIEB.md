@@ -2067,10 +2067,13 @@ davon umsetzt:
   Navigationszeilen, Einklappen, Lesezeichen und die Ansichtsknöpfe der
   Tickets hatten 4 px — Kai fiel der Unterschied neben dem Suchfeld auf.
   Die Höhe stimmte schon: Suchfeld und Knopf sind beide 40 px.
-- **Gewählter Eintrag in der Navigation:** getönte Fläche mit Goldmarke am
-  Rand, wie in der Unternavigation — nie ein Rahmen, der gehört allein dem
-  Fokus. Vorher nur Goldschrift; in Insilo ist es ein Rahmen und sieht aus
-  wie der Fokus.
+- **Gewählter Eintrag in der Navigation:** in 26.10.7 eine getönte goldene
+  Fläche — auf der Box „keine elegante Lösung“ (Kai). Seit 26.10.8 nur eine
+  Goldkante, fette Schrift und das Zeichen in Gold, keine Fläche; in der
+  Seitenleiste wie in den Einstellungen. Verglichen wurden auch ein ruhiges
+  Blau (im Dunkeln nicht vom Überfahren zu unterscheiden) und Blau mit Kante.
+  Nie ein Rahmen, der gehört allein dem Fokus; in Insilo ist es ein Rahmen
+  und sieht aus wie der Fokus.
 - **Symbolknöpfe** (G4): Jeder Knopf, der nur ein Zeichen trägt, hat Namen
   **und** Tooltip mit demselben Wort. Der Rundgang prüft das auf jeder Seite
   („Symbolknopf ohne Namen oder Tooltip“); beim ersten Lauf fehlte der

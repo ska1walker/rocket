@@ -111,7 +111,16 @@ else
   head -1 "olares/markt/$MV.md" | grep -q '^# ' || melde "olares/markt/$MV.md: erste Zeile '# <Titel>'"
   sed -n 2p "olares/markt/$MV.md" | grep -q "^v$MV: " || melde "olares/markt/$MV.md: Text beginnt mit 'v$MV: '"
   ! grep -q '`' "olares/markt/$MV.md" || melde "olares/markt/$MV.md: kein Backtick"
+  # Der Markt zeigt Rocket auch auf Deutsch (Kai, 1.10.2026): nach einer
+  # Zeile „## Deutsch“ derselbe Text auf Deutsch.
+  awk '/^## Deutsch[[:space:]]*$/{f=1;next} f&&NF{print;exit}' "olares/markt/$MV.md" | grep -q "^v$MV: " \
+    || melde "olares/markt/$MV.md: deutscher Teil fehlt — Zeile '## Deutsch', darunter 'v$MV: …'"
 fi
+for SPRACHE in de en; do
+  grep -q '^# Kurz' "olares/markt/beschreibung.$SPRACHE.md" 2>/dev/null \
+    && grep -q '^# Beschreibung' "olares/markt/beschreibung.$SPRACHE.md" \
+    || melde "olares/markt/beschreibung.$SPRACHE.md fehlt oder hat nicht '# Kurz' und '# Beschreibung'"
+done
 
 echo "→ helm lint und helm template"
 helm lint olares -f olares/values-olares-stub.yaml > /dev/null || melde "helm lint fehlgeschlagen"

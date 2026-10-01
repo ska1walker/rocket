@@ -996,14 +996,16 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
     .huelle-nav-item:hover { background: var(--am-flaeche-2); }
 
-    /* Gewählt: getönte Fläche wie in der Unternavigation, nie ein Rahmen —
-       ein Rahmen gehört allein dem Fokus (ABGLEICH G1). Gold markiert am
-       Rand und im Zeichen; als Schrift läge es auf der Fläche unter 4,5:1. */
+    /* Gewählt: eine Goldkante am Rand, fette dunkle Schrift, keine Fläche —
+       eine goldene Fläche war zu laut, eine blaue sah aus wie das Überfahren
+       (Kai, 1.10.2026, CI G1). Ein Rahmen gehört allein dem Fokus. */
     .huelle-nav-item.aktiv {
-      background: var(--am-auswahl-flaeche);
+      background: transparent;
       color: var(--am-text-primaer);
-      box-shadow: inset 3px 0 0 var(--am-gold-auszeichnung);
+      box-shadow: inset 2px 0 0 var(--am-gold-auszeichnung);
+      border-radius: 0 var(--am-radius-mittel) var(--am-radius-mittel) 0;
     }
+    .huelle-nav-item.aktiv:hover { background: var(--am-flaeche-2); }
     .huelle-nav-item.aktiv svg { color: var(--am-gold-beschriftung); }
 
     /* Das Lesezeichen: unsichtbar, bis man hinzeigt — und gefüllt, wenn es gilt.
@@ -4323,13 +4325,15 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .unternav-gruppe li + li { border-top: 0; }
   .unternav-gruppe .unternav-eintrag { border-radius: var(--am-radius-mittel); padding: var(--am-raum-2) var(--am-raum-3); min-height: var(--am-ziel-zeiger); }
   .unternav-beschreibung, .unternav-pfeil, .unternav-zurueck { display: none; }
-  /* Gewählt: ruhige Fläche, kräftige Schrift, Goldmarke am Rand — Gold
-     zeichnet aus, es trägt hier keinen Text (Gold-800 auf Fläche-2 läge
-     unter 4,5:1). */
+  /* Gewählt wie in der Seitenleiste: Goldkante, fette dunkle Schrift, keine
+     Fläche (Kai, 1.10.2026, CI G1). */
   .unternav-eintrag.aktiv {
-    background: var(--am-auswahl-flaeche); color: var(--am-text-primaer); font-weight: 600;
-    box-shadow: inset 3px 0 0 var(--am-gold-auszeichnung);
+    background: transparent; color: var(--am-text-primaer); font-weight: 600;
+    box-shadow: inset 2px 0 0 var(--am-gold-auszeichnung);
+    border-radius: 0 var(--am-radius-mittel) var(--am-radius-mittel) 0;
   }
+  .unternav-eintrag.aktiv:hover { background: var(--am-flaeche-2); }
+  .unternav-eintrag.aktiv svg { color: var(--am-gold-beschriftung); }
 }
 
 .kopfsuche kbd, .kopfsuche-feld-auf kbd {
