@@ -4,7 +4,7 @@
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
 > **Status:** 26.10.1 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); am selben Tag über den Markt von 26.9.1 auf 26.9.4 aktualisiert
-> **Letzte Aktualisierung:** 30. September 2026
+> **Letzte Aktualisierung:** 1. Oktober 2026
 
 ---
 
@@ -69,7 +69,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
 | Tests | 707 Backend, 79 Frontend, 143 im Browser (Playwright, CI-Job „oberfläche“) |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.9.4 läuft auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`; 26.9.1 installiert am 30.9.2026, am selben Tag auf 26.9.4 aktualisiert — das erste Update über den Markt, mit den Migrationen 0033–0035). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
-| Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.9.7` am 30.9.2026, Chart als Anhang). Katalogeintrag `rocket` **26.9.7 im Markt** (`bayerhazard/aimighty-market` PR #85, 30.9.2026, enthält 26.9.6; vorher 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
+| Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.10.1` am 1.10.2026, Chart als Anhang). Katalogeintrag `rocket` **26.10.1 im Markt** (`bayerhazard/aimighty-market` PR #86, 1.10.2026; vorher 26.9.7 mit PR #85, enthält 26.9.6; 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
 **Nicht gebaut, bewusst:** Mehrsprachigkeit (internes Werkzeug),
 Sequenzen (Kampagnen ja, automatische Folgen nein), Kalender-Anbindung,

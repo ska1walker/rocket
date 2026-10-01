@@ -75,6 +75,13 @@ veraltet sein, ohne dass Git einen Konflikt meldet. Deshalb gilt
 
 ## Regeln, die bei jedem Markt-PR gelten
 
+- **`CANONICAL_EPOCH_MS` in `functions/_lib.ts` hochzählen** — streng über
+  den Wert auf `main`. Seit Ende September 2026 tragen alle Apps denselben
+  Deploy-Zeitstempel, und die Box synct nur, was über ihrer höchsten
+  bekannten Marke liegt. Ohne Sprung kann die neue Version unbemerkt
+  liegen bleiben. Rocket 26.9.7 kam ohne an, weil Marc danach selbst
+  hochzählte; 26.10.1 zählt von 4373000000000 auf 4374000000000.
+
 - **Jede Änderung braucht eine neue Version** — auch reine Texte,
   Kategorien oder Titel. Der Hash entsteht nur aus `ID:name:version`;
   ohne Versionssprung synct Olares nicht.
@@ -149,6 +156,8 @@ Zweiter Durchlauf: Rocket 26.9.4, PR #83, 30.9.2026 — Fork-Branch `rocket-26.9
 Dritter Durchlauf: Rocket 26.9.5, PR #84, 30.9.2026 — auf Kais Auftrag vor einer Installation auf der Box eingereicht (die Regel „erst nach laufender Installation" hat er damit bewusst übergangen). Fork-Branch `rocket-26.9.5`, alle vier Endpunkte lokal mit wrangler bewiesen, von der Standard-Sitzung gemergt, auf `main` byte-gleich geprüft (sha256 `e7f50cc2…6545d`). Keine Datenbankänderung gegenüber 26.9.4.
 
 Vierter Durchlauf: Rocket 26.9.7, PR #85, 30.9.2026 — auf Kais Auftrag vor einer Installation auf der Box. Der Eintrag für 26.9.6 (Fork-Branch `rocket-26.9.6`) kam nie an, weil die Markt-Sitzung auf eine Bestätigung wartete; 26.9.7 baut auf Marcs frischem `main` auf (dort hatte sich inzwischen `appModifyTime` geändert) und nimmt 26.9.6 in die Notizen mit. Fork-Branch `rocket-26.9.7`, lokal mit wrangler bewiesen, in einer Standard-Sitzung erst nach Kais Bestätigung dort gemergt, auf `main` byte-gleich geprüft (sha256 `c471aed4…0931`, keine alten Schlüssel). Keine Datenbankänderung gegenüber 26.9.5.
+
+Fünfter Durchlauf: Rocket 26.10.1, PR #86, 1.10.2026 — Einrichtungscode statt Olares-Kopf bei der Erstinstallation, Layout-Korrekturen. Nach der neuen Regel gebaut: Marcs `main` frisch geholt (2c5b31f), seine Änderungen seit 26.9.7 gelesen (Deploy-Zeitstempel für alle Apps, Kategorien kleingeschrieben, drei Apps entfernt, Relay und Wings nach „Utilities“) und daraufhin `CANONICAL_EPOCH_MS` auf 4374000000000 gehoben. Lokal mit wrangler bewiesen, diesmal ohne Rückfrage von der Standard-Sitzung gemergt, auf `main` byte-gleich geprüft (sha256 `45e77567…2710`, keine alten Schlüssel). Keine Datenbankänderung gegenüber 26.9.7.
 
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
