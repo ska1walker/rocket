@@ -236,8 +236,9 @@ ersten Anstrich, sonst blitzt Hell auf.
 - **Handy:** Leiste unten, „Mehr" als Feld darüber.
 - **Tastatur:** `aria-current="page"`, Mehr-Feld als Dialog mit Fokus
   hinein und Escape zurück.
-- **Gewählt** (seit 26.10.7, CI G1): getönte Fläche mit Goldmarke am Rand,
-  wie HB-UNTERNAV — nie ein Rahmen, der gehört dem Fokus. Jede Zeile 8 px
+- **Gewählt** (seit 26.10.8, CI G1): Goldkante am Rand, fette Schrift,
+  Zeichen in Gold, keine Fläche — wie HB-UNTERNAV. 26.10.7 hatte eine
+  goldene Fläche; Kai fand sie zu laut. Nie ein Rahmen, der gehört dem Fokus. Jede Zeile 8 px
   Radius wie jeder Knopf (G3).
 
 **Übernahme:** `lib/navigation.ts` (Ziele und Gruppen) und die
