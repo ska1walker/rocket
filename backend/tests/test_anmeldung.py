@@ -12,6 +12,7 @@ jeder Test seinen eigenen Namen.
 """
 
 import hashlib
+import pathlib
 
 import pytest
 import pytest_asyncio
@@ -302,44 +303,123 @@ async def _leerraeumen():
     auth._bewohnt = False
 
 
-async def test_eine_frische_installation_laesst_den_ersten_herein(datenbank, monkeypatch, eigene_ablage):
-    """Der Fehler, der Marcs eigene Box unbenutzbar machte.
+def _einrichtungscode() -> str:
+    """Der Code aus der Datei — so, wie ihn ein Mensch in der Dateien-App liest."""
+    from app import einrichtung
 
-    Aus dem Markt installiert steht `ANMELDUNG_MODUS=eigen` von Anfang an.
-    Die Datenbank ist leer: kein Nutzer, kein Passwort, keine Einladung —
-    und ohne Ausnahme auch kein Weg, das zu ändern. Es gab 401 auf alles.
+    text = (pathlib.Path(settings.app_data_dir) / einrichtung.DATEI).read_text(encoding="utf-8")
+    return next(z.split(":", 1)[1].strip() for z in text.splitlines() if z.startswith("Code:"))
+
+
+async def test_eine_frische_installation_laesst_niemanden_ueber_den_kopf_herein(
+    datenbank, monkeypatch, eigene_ablage
+):
+    """Bis 26.10.1 war der Kopf vor dem ersten Passwort ein offenes Tor.
+
+    Der Entrance ist `public`, den Kopf `X-Bfl-User` kann jeder setzen, und
+    der Name des Eigentümers steht in der Adresse der Box.
     """
     await _leerraeumen()
     eigen_an(monkeypatch)
-    async with klient_fuer("ersterbewohner") as k:
-        wer = await k.get("/api/mitglieder/wer")
-        assert wer.status_code == 200, "Die Erstinstallation war eine Sackgasse"
-        assert wer.json()["rolle"] == "owner"
-        # Und der Bestand steht bereit, nicht nur die Kennung.
-        assert (await k.get("/api/companies")).status_code == 200
-
-
-async def test_mit_dem_ersten_passwort_ist_der_kopf_endgueltig_tot(datenbank, monkeypatch, eigene_ablage):
-    """Die Tür schließt sich selbst — und bleibt zu."""
-    await _leerraeumen()
-    eigen_an(monkeypatch)
-    async with klient_fuer("hausherr") as k:
-        assert (await k.get("/api/companies")).status_code == 200
-        await _konto(k, "Erste Person")
-    # Ein frischer Klient: derselbe Kopf, aber ohne den Sitzungskeks, den
-    # das Einlösen der Einladung gesetzt hat. Sobald irgendwer ein Passwort
-    # hat, trägt der Kopf nichts mehr — auch nicht der des Eigentümers,
-    # der eben noch hereinkam.
-    async with klient_fuer("hausherr") as k:
-        assert (await k.get("/api/companies")).status_code == 401
-        assert (await k.get("/api/settings")).status_code == 401
-    # Ein fremder Kopf legt jetzt auch niemanden mehr an.
-    async with klient_fuer("spaeter-gast") as k:
+    async with klient_fuer("angreifer") as k:
+        assert (await k.get("/api/mitglieder/wer")).status_code == 401
         assert (await k.get("/api/companies")).status_code == 401
     async with acquire() as conn:
         assert await conn.fetchval(
-            "select count(*) from public.users where olares_username = $1", "spaeter-gast"
+            "select count(*) from public.users where olares_username = 'angreifer'"
         ) == 0
+
+
+async def test_einrichtung_mit_dem_code_aus_dem_datenordner(datenbank, monkeypatch, eigene_ablage):
+    """Der neue Weg herein: Code aus der Datei, Name, Passwort."""
+    from app import einrichtung
+
+    await _leerraeumen()
+    eigen_an(monkeypatch)
+    async with klient_fuer("") as k:
+        lage = (await k.get("/api/anmeldung/lage")).json()
+        assert lage["einrichtung"] is True
+        assert lage["einrichtung_ordner"].endswith(einrichtung.DATEI)
+        datei = pathlib.Path(settings.app_data_dir) / einrichtung.DATEI
+        assert datei.exists() and oct(datei.stat().st_mode)[-3:] == "600"
+        code = _einrichtungscode()
+        # Ein Neustart (zweiter Aufruf) behält den Code.
+        await k.get("/api/anmeldung/lage")
+        assert _einrichtungscode() == code
+
+        falsch = await k.post("/api/anmeldung/einrichten",
+                              json={"code": "AAAA-BBBB-CCCC", "name": "erste", "passwort": GUT})
+        assert falsch.status_code == 403
+        schlecht = await k.post("/api/anmeldung/einrichten",
+                                json={"code": code, "name": "Erste Person!", "passwort": GUT})
+        assert schlecht.status_code == 422
+
+        r = await k.post("/api/anmeldung/einrichten",
+                         json={"code": code.lower().replace("-", " "), "name": "erste", "passwort": GUT})
+        assert r.status_code == 200, r.text
+        wer = await k.get("/api/mitglieder/wer")
+        assert wer.status_code == 200 and wer.json()["rolle"] == "owner"
+        assert (await k.get("/api/companies")).status_code == 200
+
+    assert not datei.exists(), "Nach der Einrichtung ist die Datei weg"
+    async with klient_fuer("") as k:
+        assert (await k.get("/api/anmeldung/lage")).json()["einrichtung"] is False
+        nochmal = await k.post("/api/anmeldung/einrichten",
+                               json={"code": code, "name": "zweite", "passwort": GUT})
+        assert nochmal.status_code == 409
+        anmeldung_ok = await k.post("/api/anmeldung", json={"name": "erste", "passwort": GUT})
+        assert anmeldung_ok.status_code == 200
+
+
+async def test_einrichtung_gibt_der_vorhandenen_eigentuemerin_das_passwort(
+    datenbank, monkeypatch, eigene_ablage
+):
+    """Kais Box: vor 26.10.1 über den Kopf eingerichtet, Bestand da, kein Passwort.
+
+    Die Einrichtung legt keine zweite Organisation an, sondern gibt genau
+    dieser Eigentümerin das Passwort — und der Bestand bleibt.
+    """
+    await _leerraeumen()
+    async with klient_fuer("kaivostudio") as k:
+        firma = await k.post("/api/companies", json={"name": "Schon da GmbH"})
+        assert firma.status_code in (200, 201), firma.text
+    eigen_an(monkeypatch)
+    async with klient_fuer("") as k:
+        await k.get("/api/anmeldung/lage")
+        text = (pathlib.Path(settings.app_data_dir) / "rocket-einrichten.txt").read_text(encoding="utf-8")
+        assert "Zugang: kaivostudio" in text
+        code = _einrichtungscode()
+        fremd = await k.post("/api/anmeldung/einrichten",
+                             json={"code": code, "name": "jemand-anders", "passwort": GUT})
+        assert fremd.status_code == 422
+        r = await k.post("/api/anmeldung/einrichten",
+                         json={"code": code, "name": "KaivoStudio", "passwort": GUT})
+        assert r.status_code == 200, r.text
+        namen = [f["name"] for f in (await k.get("/api/companies")).json()]
+        assert "Schon da GmbH" in namen
+    async with acquire() as conn:
+        assert await conn.fetchval("select count(*) from public.orgs where deleted_at is null") == 1
+
+
+async def test_die_einrichtung_bremst_beim_raten(datenbank, monkeypatch, eigene_ablage):
+    await _leerraeumen()
+    eigen_an(monkeypatch)
+    async with klient_fuer("") as k:
+        await k.get("/api/anmeldung/lage")
+        stati = [
+            (await k.post("/api/anmeldung/einrichten",
+                          json={"code": f"0000-0000-{i:04d}", "name": "rater", "passwort": GUT})).status_code
+            for i in range(12)
+        ]
+    assert stati[0] == 403 and stati[-1] == 429
+
+
+async def test_im_modus_olares_gibt_es_keine_einrichtung(datenbank, eigene_ablage):
+    await _leerraeumen()
+    async with klient_fuer("") as k:
+        assert (await k.get("/api/anmeldung/lage")).json()["einrichtung"] is False
+        r = await k.post("/api/anmeldung/einrichten", json={"code": "x", "name": "y", "passwort": GUT})
+        assert r.status_code == 409
 
 
 async def test_auf_einer_bewohnten_box_gilt_die_ausnahme_nie(datenbank, monkeypatch):

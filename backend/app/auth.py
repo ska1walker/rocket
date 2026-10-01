@@ -413,7 +413,7 @@ async def _aus_sitzung(keks: str) -> CurrentUser | None:
 _bewohnt = False
 
 
-async def _noch_unbewohnt() -> bool:
+async def noch_unbewohnt() -> bool:
     """Hat in dieser Datenbank noch **niemand** ein Passwort?
 
     Das ist die Bedingung der Erstinstallation. Sie ist bewusst nicht „gibt
@@ -430,6 +430,35 @@ async def _noch_unbewohnt() -> bool:
         )
     _bewohnt = bool(vorhanden)
     return not _bewohnt
+
+
+async def eigentuemerin_ohne_passwort() -> tuple[UUID, UUID, str] | None:
+    """Die erste Eigentümerin der Box, wenn sie noch kein Passwort hat.
+
+    Das ist eine Box, die vor 26.10.1 über den Olares-Kopf eingerichtet
+    wurde: Bestand ist da, ein Passwort nicht. Die Einrichtung gibt dann
+    genau ihr das Passwort, statt eine zweite Organisation anzulegen.
+    """
+    async with acquire() as conn:
+        zeile = await conn.fetchrow(
+            """
+            select u.id, r.org_id, u.olares_username
+              from public.users u
+              join public.user_org_roles r on r.user_id = u.id
+              join public.orgs o on o.id = r.org_id
+             where r.role = 'owner' and u.deleted_at is null and o.deleted_at is null
+               and u.passwort_hash is null
+             order by o.created_at, r.joined_at
+             limit 1
+            """
+        )
+    return (zeile["id"], zeile["org_id"], zeile["olares_username"]) if zeile else None
+
+
+def bewohnt_merken() -> None:
+    """Nach dem ersten Passwort: nie wieder in der Datenbank nachsehen."""
+    global _bewohnt
+    _bewohnt = True
 
 
 # Was eine Person tun darf, die den verlangten zweiten Faktor noch nicht
@@ -456,16 +485,13 @@ async def get_current_user(
     wertlos — sonst genügte `curl -H 'X-Bfl-User: kaivostudio'`, um bei
     offenem Entrance der Eigentümer zu sein.
 
-    Die eine Ausnahme ist die **Erstinstallation**, und sie ist keine
-    Bequemlichkeit, sondern die Rettung: Eine frische Datenbank hat keinen
-    Nutzer, kein Passwort und keine Einladung. Ohne Ausnahme wäre eine aus
-    dem Markt installierte App unbenutzbar — 401 auf alles, und niemand,
-    der einen Zugang anlegen könnte. Genau das ist am 8. September einem
-    zweiten Nutzer passiert, der Rocket frisch auf seiner eigenen Box
-    installierte.
-
-    Solange **niemand** ein Passwort hat, zählt der Kopf deshalb weiter;
-    mit dem ersten Passwort ist er endgültig tot.
+    Bis 26.10.1 gab es eine Ausnahme: Solange **niemand** ein Passwort
+    hatte, zählte der Kopf auch im Modus `eigen` — damit eine frische
+    Installation keine Sackgasse ist. Bei offenem Entrance war das ein
+    offenes Tor, und der Name des Eigentümers steht in der Adresse der
+    Box. Die Erstinstallation läuft seitdem über einen Code aus dem
+    Datenordner (`app/einrichtung.py`, `POST /api/anmeldung/einrichten`);
+    im Modus `eigen` gilt der Kopf **nie**.
 
     Den Wechsel auf eine andere Person per Kopf `X-Rocket-Sitzplatz` gibt
     es seit 26.9.2 nicht mehr: Er stammte aus der Zeit eines geteilten
@@ -477,7 +503,7 @@ async def get_current_user(
     if keks:
         angemeldet = await _aus_sitzung(keks)
 
-    if angemeldet is None and (settings.anmeldung_modus != "eigen" or await _noch_unbewohnt()):
+    if angemeldet is None and settings.anmeldung_modus != "eigen":
         name = (x_bfl_user or "").strip() or settings.dev_user.strip()
         if name:
             angemeldet = await _ensure_user_and_org(name)

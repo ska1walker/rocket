@@ -4,6 +4,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Info } from "lucide-react";
+import { lage } from "@/lib/anmeldung";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -276,16 +277,20 @@ function Rollenhinweis() {
  * Olares-Kopf den ersten noch herein — sonst wäre eine frisch installierte
  * App eine Sackgasse, 401 auf alles und niemand, der einen Zugang anlegen
  * könnte. Diese Ausnahme schließt sich mit dem ersten Passwort endgültig.
- * Bis dahin schützt nichts: Der Entrance ist `public`, und den Kopf kann
- * jeder mitschicken. Bis 26.9.7 stand hier, es komme herein, „wer an dieser
- * Box angemeldet ist“ — das war zu freundlich.
+ * Bis 26.10.1 schützte bis dahin nichts: Der Entrance ist `public`, und
+ * den Kopf konnte jeder mitschicken. Seitdem richtet ein Code aus dem
+ * Datenordner Rocket ein (`backend/app/einrichtung.py`).
  */
 function Passworthinweis() {
   const wer = useQuery({
     queryKey: ["wer"],
     queryFn: () => api.get<Wer>("/api/mitglieder/wer"),
   });
-  if (!wer.data || wer.data.passwort_gesetzt) return null;
+  const anmeldelage = useQuery({ queryKey: ["anmeldelage"], queryFn: lage });
+  // Im Modus `olares` schützt Olares; dort ist ein fehlendes Passwort kein
+  // Loch. Im Modus `eigen` kommt seit 26.10.1 ohne Passwort niemand mehr
+  // herein — der Satz bleibt als Absicherung, falls doch.
+  if (!wer.data || wer.data.passwort_gesetzt || anmeldelage.data?.modus !== "eigen") return null;
 
   return (
     <div className="hinweis" data-art="achtung" role="alert">
