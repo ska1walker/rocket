@@ -3,7 +3,7 @@
 // Modul RK-PODCAST — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, Headphones, Trash2 } from "lucide-react";
+import { Download, Headphones, Trash2 } from "@/lib/symbole";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
@@ -75,12 +75,12 @@ function Folge({ p, beiLoeschen, kompakt = false }: { p: Podcast; beiLoeschen?: 
       {!kompakt && (
         <div className="btn-reihe podcast-aktionen">
           <a className="btn btn-still btn-klein" href={audio} download>
-            <Download size={14} aria-hidden="true" /> Herunterladen
+            <Download size={16} aria-hidden="true" /> Herunterladen
           </a>
           <Skript p={p} />
           {beiLoeschen && (
             <button type="button" className="btn btn-still btn-klein" onClick={beiLoeschen} style={{ marginLeft: "auto" }}>
-              <Trash2 size={14} aria-hidden="true" /> Löschen
+              <Trash2 size={16} aria-hidden="true" /> Löschen
             </button>
           )}
         </div>
@@ -129,7 +129,7 @@ export function Podcastblock({ entity, entityId }: { entity: "companies" | "deal
           onClick={() => erzeugen.mutate()}
           title={bereit ? undefined : status.data?.hint}
         >
-          <Headphones size={14} aria-hidden="true" />
+          <Headphones size={16} aria-hidden="true" />
           {laufend ? "Entsteht …" : "Podcast erzeugen"}
         </button>
       </div>

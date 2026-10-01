@@ -3,7 +3,7 @@
 // Modul RK-ANLEGEN — docs/MODULE.md
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "@/lib/symbole";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -99,7 +99,7 @@ export function AngebotAnlegen({
             disabled={!bereit || vorschlag.isPending}
             title={bereit ? undefined : kiStatus.data?.hint}
           >
-            <Sparkles size={14} aria-hidden="true" />
+            <Sparkles size={16} aria-hidden="true" />
             {vorschlag.isPending ? "Denkt nach …" : "Vorschlag erzeugen"}
           </button>
           <button

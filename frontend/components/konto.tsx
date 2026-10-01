@@ -3,7 +3,7 @@
 // Modul HB-KONTO — docs/MODULE.md
 
 import { useQuery } from "@tanstack/react-query";
-import { ChevronsUpDown, Globe, KeyRound, LogOut, Server } from "lucide-react";
+import { ChevronsUpDown, Globe, KeyRound, LogOut, Server } from "@/lib/symbole";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -66,7 +66,7 @@ export function Kontozeile() {
         <span className="person-text">
           <span className="person-name">{name}</span>
         </span>
-        <ChevronsUpDown size={14} aria-hidden="true" className="person-pfeil" />
+        <ChevronsUpDown size={16} aria-hidden="true" className="person-pfeil" />
       </button>
 
       {offen && (
@@ -139,7 +139,7 @@ function Abmeldeteil() {
     <div className="konto-teil">
       <p className="konto-abschnitt">Zugang</p>
       <Link href="/einstellungen?bereich=firma" className="person-eintrag">
-        <KeyRound size={14} aria-hidden="true" />
+        <KeyRound size={16} aria-hidden="true" />
         <span className="person-eintrag-text">Passwort und zweiter Faktor</span>
       </Link>
       <button
@@ -151,7 +151,7 @@ function Abmeldeteil() {
           window.location.assign("/anmelden");
         }}
       >
-        <LogOut size={14} aria-hidden="true" />
+        <LogOut size={16} aria-hidden="true" />
         <span className="person-eintrag-text">Abmelden</span>
       </button>
     </div>
@@ -182,7 +182,7 @@ export function Nachweiszeile() {
 
   return (
     <Link href="/einstellungen?bereich=daten" className="nachweis" data-extern={stand.extern ? "true" : undefined} title={titel}>
-      <Zeichen size={13} strokeWidth={1.75} aria-hidden="true" />
+      <Zeichen size={16} aria-hidden="true" />
       <span>{stand.text}</span>
     </Link>
   );

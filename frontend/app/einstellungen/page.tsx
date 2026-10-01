@@ -3,7 +3,7 @@
 // Modul HB-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ChevronLeft, Cpu, Database, Info, Mail, SlidersHorizontal, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Cpu, Database, Info, Mail, SlidersHorizontal, TrendingUp, Users } from "@/lib/symbole";
 import { lage } from "@/lib/anmeldung";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

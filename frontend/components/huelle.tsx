@@ -22,8 +22,8 @@ import {
   Settings,
   TrendingUp,
   Users,
-  type LucideIcon,
-} from "lucide-react";
+} from "@/lib/symbole";
+import type { SymbolKomponente } from "@/components/symbol";
 import { useEffect, useRef, useState } from "react";
 import { Assistent } from "@/components/assistent";
 import { useNavigationKlapp } from "@/components/navigation";
@@ -47,7 +47,7 @@ import { useFavoriten } from "@/lib/wer";
 //
 // Die Navigation selbst steht in lib/navigation.ts als Daten; hier hängen
 // nur die Symbole daran.
-const ZEICHEN: Record<NavZeichen, LucideIcon> = {
+const ZEICHEN: Record<NavZeichen, SymbolKomponente> = {
   start: LayoutDashboard,
   leads: Handshake,
   angebote: FileText,
@@ -114,7 +114,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
             title={eingeklappt === true ? "Mehr" : undefined}
             onClick={() => setFeldOffen((o) => !o)}
           >
-            <Ellipsis size={18} strokeWidth={1.75} aria-hidden="true" />
+            <Ellipsis size={20} aria-hidden="true" />
             <span>Mehr</span>
           </button>
         </div>
@@ -138,7 +138,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
             aria-controls="huelle-nav-mehr"
             onClick={() => setMobilMehr((o) => !o)}
           >
-            <Ellipsis size={18} strokeWidth={1.75} aria-hidden="true" />
+            <Ellipsis size={20} aria-hidden="true" />
             <span>Mehr</span>
           </button>
         </div>
@@ -226,7 +226,7 @@ function NavLink({ ziel, aktuell, eingeklappt = false, nachrangig = false }: { z
       title={eingeklappt ? ziel.text : undefined}
       data-nachrangig={nachrangig ? "true" : undefined}
     >
-      <Zeichen size={18} strokeWidth={1.75} aria-hidden="true" />
+      <Zeichen size={20} aria-hidden="true" />
       <span>{ziel.text}</span>
     </Link>
   );
@@ -270,7 +270,7 @@ function NavGruppe({
               title={istFavorit ? "Favorit entfernen" : "Als Favorit merken"}
               onClick={() => umschalten(z.pfad)}
             >
-              <Bookmark size={14} strokeWidth={1.75} fill={istFavorit ? "currentColor" : "none"} aria-hidden="true" />
+              <Bookmark size={16} fill={istFavorit ? "currentColor" : "none"} aria-hidden="true" />
             </button>
           </div>
         );

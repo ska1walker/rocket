@@ -3,7 +3,7 @@
 // Modul RK-LEAD — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { Plus, X } from "@/lib/symbole";
 import Link from "next/link";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -77,7 +77,7 @@ export function Beteiligtenblock({ dealId }: { dealId: string }) {
           aria-expanded={offen}
           onClick={() => setOffen((o) => !o)}
         >
-          <Plus size={14} aria-hidden="true" />
+          <Plus size={16} aria-hidden="true" />
           Kontakt
         </button>
       </div>
@@ -117,7 +117,7 @@ export function Beteiligtenblock({ dealId }: { dealId: string }) {
                   disabled={weg.isPending}
                   onClick={() => weg.mutate(b.contact_id)}
                 >
-                  <X size={14} aria-hidden="true" />
+                  <X size={16} aria-hidden="true" />
                 </button>
               </li>
             ))}

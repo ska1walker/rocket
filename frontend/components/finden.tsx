@@ -3,7 +3,7 @@
 // Modul RK-ANLEGEN — docs/MODULE.md
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles } from "@/lib/symbole";
 import Link from "next/link";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -122,7 +122,7 @@ export function Finden({
   return (
     <div className="erfassung finden">
       <div className="erfassung-kopf">
-        <Sparkles size={14} aria-hidden="true" />
+        <Sparkles size={16} aria-hidden="true" />
         <span>
           {festeFirma
             ? `Beschreiben, wen Sie bei ${firma.name} meinen`
@@ -168,7 +168,7 @@ export function Finden({
             </span>
             <span style={{ flex: 1 }} />
             <button type="button" className="btn btn-sekundaer btn-klein" disabled={!bereit || laeuft} onClick={los}>
-              <Search size={14} aria-hidden="true" />
+              <Search size={16} aria-hidden="true" />
               {suchen.isPending || personSuchen.isPending ? "Sucht …" : holen.isPending ? "Liest …" : "Suchen"}
             </button>
           </div>

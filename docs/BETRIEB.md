@@ -1987,9 +1987,52 @@ von Kai am 1.10.2026 und in Rocket umgesetzt:
 | R7 | **Rot für Handlungsbedarf, immer mit Uhr und Wort:** „seit 3 Tagen überfällig“, am Lead-Board „· überfällig“. „Verloren“ und „Disqualifiziert“ sind neutral | `components/ueberfaellig.tsx` |
 | R9 | **Maße aus dem CI:** Dialoge 440/560/720, Navigation `--am-navigation-breite`, jede Ebene `--am-ebene-*` | `globals.css` |
 
-Offen aus Paket 2 ist R2, das eine Icon-Set für alle Apps. Erst wird im
-CI-Repo der Erzeuger gebaut und das Set um Rockets Zeichen erweitert, dann
-stellt Rocket von `lucide-react` auf das Set um.
+R2, das eine Icon-Set für alle Apps, kam mit 26.10.9 — siehe unten.
+
+## Ein Icon-Set für alle Apps (seit 26.10.9)
+
+Bis 26.10.8 zeichnete Rocket mit `lucide-react` direkt: 81 Zeichen in sieben
+Größen von 11 bis 42 px, Strich 2 oder 1,75 im Raster — also umso dicker, je
+größer. Das CI hat dafür ein Set (`marke/icons/ui/` im CI-Repo), und Kai hat
+am 1.10.2026 entschieden: **alle Apps zeichnen aus diesem einen Set**
+(ABGLEICH.md, R2).
+
+**Der Weg eines Zeichens:**
+
+1. Im CI-Repo erzeugt `werkzeug/icons-erzeugen.py` das Set aus Lucide 1.31.0
+   (gebündelt, ISC). Mit 26.10.9 wuchs es von 57 auf 112 Zeichen — um alles,
+   was Rocket zeichnet. Gleiches Zeichen, ein Name: Rockets `X` ist dort
+   `schliessen`, `Sparkles` ist `ai`.
+2. `frontend/symbole/` ist eine unveränderte Kopie der benutzten Zeichen.
+   Neu holen: `node scripts/symbole-erzeugen.mjs --ci ../../aimighty-ci`.
+3. `scripts/symbole-erzeugen.mjs` schreibt daraus `lib/symbole.tsx`. Die
+   Exportnamen sind die von lucide-react (`Search`, `Sparkles` …), eine
+   Datei ändert nur ihre Importzeile. Nie von Hand ändern.
+4. Gezeichnet wird über HB-SYMBOL (`components/symbol.tsx`).
+
+**Ein Zeichen fehlt?** Erst ins CI-Set (Lucide-Datei nach
+`werkzeug/lucide-1.31.0/icons/`, eine Zeile im Erzeuger), dann hier eine
+Zeile in `NAMEN` und das Skript mit `--ci` laufen lassen. Nie direkt aus
+Lucide.
+
+**Größen nur 16 · 20 · 24 · 40**, der Typ lässt keine andere zu: 16 neben
+Text und in Knöpfen (vorher 11 bis 16), 20 in der Navigation (vorher 18), 24
+als Hauptzeichen (vorher 24 und 28), 40 im Leerzustand. **Der Strich ist
+bei jeder Größe 1,5 px** — HB-SYMBOL rechnet ihn im Raster als `1,5 × 24 /
+Größe`. Ein eigenes `strokeWidth` gibt es nicht mehr. Auch der Pfeil im
+`select` (ein Bild in `globals.css`) hat jetzt Strich 2,25 bei 16 px.
+
+**Die Funken bleiben das Zeichen für AI** (Kai, 1.10.2026). „Keine
+AI-Funken“ meint Effekte — Glitzer, Schimmer, Sterne als Schmuck —, nicht
+dieses Strichzeichen.
+
+**Geprüft wird es zweimal:** `lib/__tests__/symbole.test.ts` meldet jeden
+Import aus `lucide-react` und jede Abweichung zwischen `symbole/` und
+`lib/symbole.tsx`; der Rundgang misst jedes sichtbare Zeichen und meldet
+eine Größe außerhalb 16/20/24/40 oder einen Strich, der nicht 1,5 px ist.
+Das fand beim ersten Lauf zwei Zeichen, die eine Flex-Zeile neben langem Text
+auf 11 px gestaucht hatte — dagegen steht jetzt `svg[data-symbol] {
+flex-shrink: 0 }`.
 
 ## Token aus dem CI (seit 26.10.5)
 

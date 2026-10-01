@@ -1,6 +1,6 @@
 // Modul HB-ZUSTAND — docs/MODULE.md
 
-import { Clock } from "lucide-react";
+import { Clock } from "@/lib/symbole";
 
 /**
  * Eine Frist oder ein Datum, das überschritten sein kann.
@@ -21,7 +21,7 @@ export function Ueberfaellig({
 }) {
   return (
     <span className={className} data-ueberfaellig={ueberfaellig ? "true" : undefined}>
-      {ueberfaellig && <Clock size={14} aria-hidden="true" className="ueberfaellig-zeichen" />}
+      {ueberfaellig && <Clock size={16} aria-hidden="true" className="ueberfaellig-zeichen" />}
       {children}
     </span>
   );

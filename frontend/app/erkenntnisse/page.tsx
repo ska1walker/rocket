@@ -3,7 +3,7 @@
 // Modul RK-WISSEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight, Lightbulb, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRight, Lightbulb, Sparkles } from "@/lib/symbole";
 import Link from "next/link";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -55,7 +55,7 @@ export default function ErkenntnisseSeite() {
           {ZEITRAEUME.map((z) => <option key={z.tage} value={z.tage}>{z.text}</option>)}
         </select>
         <button type="button" className="btn btn-primaer" disabled={!d?.llm_ready || laeuft || auswerten.isPending} onClick={() => auswerten.mutate()}>
-          <Sparkles size={14} aria-hidden="true" />
+          <Sparkles size={16} aria-hidden="true" />
           {laeuft ? "Wertet aus …" : d?.offene_notizen ? `Auswerten (${anzahl(d.offene_notizen, "neue Notiz", "neue Notizen")})` : "Neu bündeln"}
         </button>
       </Seitenkopf>
@@ -135,10 +135,10 @@ function Themenkarte({ thema, aussagen }: { thema: Thema; aussagen: Map<string, 
       </header>
       {thema.bedeutung && <p className="thema-bedeutung">{thema.bedeutung}</p>}
       {thema.vorschlag && (
-        <p className="thema-vorschlag"><Lightbulb size={14} aria-hidden="true" /><span><strong>Was zu tun wäre:</strong> {thema.vorschlag}</span></p>
+        <p className="thema-vorschlag"><Lightbulb size={16} aria-hidden="true" /><span><strong>Was zu tun wäre:</strong> {thema.vorschlag}</span></p>
       )}
       <button type="button" className="alsLink thema-auf" aria-expanded={offen} onClick={() => setOffen((o) => !o)}>
-        {offen ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
+        {offen ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
         {offen ? "Gespräche verbergen" : `Gespräche zeigen (${thema.firmen.slice(0, 3).join(", ")}${thema.firmen.length > 3 ? " …" : ""})`}
       </button>
       {offen && (

@@ -5,7 +5,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Archive, ArchiveRestore, ArrowDown, ArrowUp, GripVertical, Lock, Pencil, Plus, Trash2, X,
-} from "lucide-react";
+} from "@/lib/symbole";
 import { useEffect, useState } from "react";
 import { api, suchparameter } from "@/lib/api";
 import { alsReihenfolge, ablageOrt, gruppeSchieben, passt, schritt, verschiebe, type Ort } from "@/lib/anordnung";
@@ -260,7 +260,7 @@ export function Eigenschaftenblock() {
                     className="btn btn-still btn-klein"
                     onClick={() => archivieren.mutate({ id: f.id, aktiv: true })}
                   >
-                    <ArchiveRestore size={14} aria-hidden="true" /> Wiederherstellen
+                    <ArchiveRestore size={16} aria-hidden="true" /> Wiederherstellen
                   </button>
                 </li>
               ))}
@@ -348,17 +348,17 @@ function Gruppenblock({
         )}
         <div className="eig-gruppe-knoepfe">
           <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} nach oben`} title={`Gruppe ${gruppe.label} nach oben`} disabled={erste} onClick={() => beiSchieben(-1)}>
-            <ArrowUp size={14} aria-hidden="true" />
+            <ArrowUp size={16} aria-hidden="true" />
           </button>
           <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} nach unten`} title={`Gruppe ${gruppe.label} nach unten`} disabled={letzte} onClick={() => beiSchieben(1)}>
-            <ArrowDown size={14} aria-hidden="true" />
+            <ArrowDown size={16} aria-hidden="true" />
           </button>
           <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} umbenennen`} title={`Gruppe ${gruppe.label} umbenennen`} onClick={() => setName(gruppe.label)}>
-            <Pencil size={14} aria-hidden="true" />
+            <Pencil size={16} aria-hidden="true" />
           </button>
           {!gruppe.is_system && (
             <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} löschen`} onClick={() => setLoeschen((l) => !l)}>
-              <Trash2 size={14} aria-hidden="true" />
+              <Trash2 size={16} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -452,13 +452,13 @@ function Feldzeile({
             }
           }}
         >
-          <GripVertical size={14} aria-hidden="true" />
+          <GripVertical size={16} aria-hidden="true" />
         </button>
         <span className="eig-name">
           {feld.label}
           {feld.is_system && (
             <span className="eig-fest" title="Festes Feld — verschieben und umbenennen ja, entfernen nein">
-              <Lock size={11} aria-hidden="true" /> fest
+              <Lock size={16} aria-hidden="true" /> fest
             </span>
           )}
           <span className="eig-schluessel">{feld.key}</span>
@@ -478,7 +478,7 @@ function Feldzeile({
             aria-expanded={offen}
             onClick={umschalten}
           >
-            <Pencil size={14} aria-hidden="true" />
+            <Pencil size={16} aria-hidden="true" />
           </button>
           {!feld.is_system && (
             <button
@@ -488,7 +488,7 @@ function Feldzeile({
               title="Archivieren — die Werte bleiben in den Datensätzen"
               onClick={beiArchivieren}
             >
-              <Archive size={14} aria-hidden="true" />
+              <Archive size={16} aria-hidden="true" />
             </button>
           )}
         </span>
@@ -617,7 +617,7 @@ function NeueGruppe({ entity, geaendert }: { entity: PropertyEntity; geaendert: 
         <input id="eig-gruppe-neu" className="input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="IT-Umgebung" />
       </div>
       <button type="submit" className="btn btn-sekundaer btn-klein" disabled={!label.trim() || anlegen.isPending}>
-        <Plus size={14} aria-hidden="true" /> Gruppe
+        <Plus size={16} aria-hidden="true" /> Gruppe
       </button>
       {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
     </form>
@@ -797,10 +797,10 @@ function Optionsfelder({
             </span>
           )}
           <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label="Nach oben" disabled={i === 0} onClick={() => schieben(i, -1)}>
-            <ArrowUp size={14} aria-hidden="true" />
+            <ArrowUp size={16} aria-hidden="true" />
           </button>
           <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label="Nach unten" disabled={i === werte.length - 1} onClick={() => schieben(i, 1)}>
-            <ArrowDown size={14} aria-hidden="true" />
+            <ArrowDown size={16} aria-hidden="true" />
           </button>
           {o.wert ? (
             <button
@@ -814,7 +814,7 @@ function Optionsfelder({
               }
               onClick={() => setze(i, { verborgen: !o.verborgen })}
             >
-              {o.verborgen ? <ArchiveRestore size={14} aria-hidden="true" /> : <Archive size={14} aria-hidden="true" />}
+              {o.verborgen ? <ArchiveRestore size={16} aria-hidden="true" /> : <Archive size={16} aria-hidden="true" />}
             </button>
           ) : null}
           <button
@@ -823,12 +823,12 @@ function Optionsfelder({
             aria-label="Zeile entfernen"
             onClick={() => beiAendern(werte.length === 1 ? [leereOption()] : werte.filter((_, j) => j !== i))}
           >
-            <X size={14} aria-hidden="true" />
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
       ))}
       <button type="button" className="btn btn-still btn-klein" onClick={() => beiAendern([...werte, leereOption()])}>
-        <Plus size={14} aria-hidden="true" />
+        <Plus size={16} aria-hidden="true" />
         Wert
       </button>
     </div>

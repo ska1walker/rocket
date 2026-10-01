@@ -8,7 +8,7 @@
 // „diesen Namen gibt es nicht", keine Registrierung. Wer hier steht und
 // nicht hineingehört, soll nicht einmal erfahren, wer hineingehört.
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle } from "@/lib/symbole";
 import { Marke } from "@/components/marke";
 
 export function Tor({
@@ -52,7 +52,7 @@ export function Tor({
         {/* Farbe trägt die Aussage nie allein: Zeichen und Satz dazu. */}
         {fehler && (
           <p className="feld-fehlertext" role="alert">
-            <AlertCircle size={14} aria-hidden="true" />
+            <AlertCircle size={16} aria-hidden="true" />
             {fehler}
           </p>
         )}

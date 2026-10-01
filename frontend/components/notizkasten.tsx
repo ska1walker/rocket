@@ -3,7 +3,7 @@
 // Modul RK-NOTIZ — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "@/lib/symbole";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { AKTIVITAET_TEXT, datum } from "@/lib/format";
@@ -98,7 +98,7 @@ export function Notizkasten({ bezug }: { bezug: Bezug }) {
                 disabled={!bereit || text.trim().length < 10 || verarbeiten.isPending}
                 title={bereit ? undefined : kiStatus.data?.hint}
               >
-                <Sparkles size={14} aria-hidden="true" />
+                <Sparkles size={16} aria-hidden="true" />
                 {verarbeiten.isPending ? "Liest …" : "Verarbeiten"}
               </button>
               {!bereit && kiStatus.data?.hint && (

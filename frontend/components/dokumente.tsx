@@ -3,7 +3,7 @@
 // Modul RK-DOKUMENTE — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, FileImage, FileSpreadsheet, File as FileZeichen, Upload } from "lucide-react";
+import { FileText, FileImage, FileSpreadsheet, File as FileZeichen, Upload } from "@/lib/symbole";
 import { useRef, useState } from "react";
 import { api, suchparameter } from "@/lib/api";
 import { dateigroesse, datum } from "@/lib/format";
@@ -21,7 +21,7 @@ export type Dokumentbezug = {
 /** Ein Zeichen, das die Art erkennen lässt, bevor man den Namen liest. */
 function Zeichen({ typ }: { typ: string | null }) {
   const art = (typ ?? "").split(";")[0];
-  const gemeinsam = { size: 16, "aria-hidden": true, style: { flexShrink: 0, color: "var(--am-text-gedaempft)" } };
+  const gemeinsam = { size: 16, "aria-hidden": true, style: { flexShrink: 0, color: "var(--am-text-gedaempft)" } } as const;
   if (art.startsWith("image/")) return <FileImage {...gemeinsam} />;
   if (art === "application/pdf") return <FileText {...gemeinsam} />;
   if (art.includes("sheet") || art === "text/csv") return <FileSpreadsheet {...gemeinsam} />;
@@ -146,7 +146,7 @@ export function Dokumente({ bezug }: { bezug: Dokumentbezug }) {
             disabled={hochladen.isPending}
             onClick={() => feld.current?.click()}
           >
-            <Upload size={14} aria-hidden />
+            <Upload size={16} aria-hidden />
             {hochladen.isPending ? "Wird abgelegt …" : "Datei ablegen"}
           </button>
           <p className="dokumente-ablage-satz">

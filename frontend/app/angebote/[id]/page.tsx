@@ -4,7 +4,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { Plus, Printer, Trash2 } from "lucide-react";
+import { Plus, Printer, Trash2 } from "@/lib/symbole";
 import { use, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { ANGEBOT_STATUS_ART, ANGEBOT_STATUS_TEXT, datum, datumZeit, euroGenau } from "@/lib/format";
@@ -104,7 +104,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
           {ANGEBOT_STATUS_TEXT[q.status]}
         </span>
         <Link className="btn btn-sekundaer btn-klein" href={`/angebote/${id}/druck`}>
-          <Printer size={14} aria-hidden="true" />
+          <Printer size={16} aria-hidden="true" />
           Druckfassung
         </Link>
       </Seitenkopf>
@@ -131,7 +131,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
                   ]);
                 }}
               >
-                <Plus size={14} aria-hidden="true" />
+                <Plus size={16} aria-hidden="true" />
                 Position
               </button>
             )}
@@ -272,7 +272,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
                               setZeilen((alt) => alt.filter((_, j) => j !== i));
                             }}
                           >
-                            <Trash2 size={14} aria-hidden="true" />
+                            <Trash2 size={16} aria-hidden="true" />
                           </button>
                         </td>
                       )}

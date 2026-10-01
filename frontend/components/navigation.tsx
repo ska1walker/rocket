@@ -11,7 +11,7 @@
  * Leiste beim Laden von breit auf schmal.
  */
 
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "@/lib/symbole";
 import { useEffect, useState } from "react";
 
 export const NAVIGATION_COOKIE = "rocket-navigation";
@@ -89,7 +89,7 @@ export function Klappschalter({ eingeklappt, umschalten }: { eingeklappt: boolea
       aria-keyshortcuts="Meta+B Control+B"
       aria-expanded={!zu}
     >
-      {zu ? <PanelLeftOpen size={18} strokeWidth={1.75} aria-hidden="true" /> : <PanelLeftClose size={18} strokeWidth={1.75} aria-hidden="true" />}
+      {zu ? <PanelLeftOpen size={20} aria-hidden="true" /> : <PanelLeftClose size={20} aria-hidden="true" />}
     </button>
   );
 }

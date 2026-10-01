@@ -3,7 +3,7 @@
 // Modul RK-DATENBANK — docs/MODULE.md
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Download, Lock, Play } from "lucide-react";
+import { ArrowDown, ArrowUp, Download, Lock, Play } from "@/lib/symbole";
 import { useState } from "react";
 import { api, ApiFehler, suchparameter } from "@/lib/api";
 import type { DbErgebnis, DbSeite, DbUebersicht, Wer } from "@/lib/typen";
@@ -60,8 +60,8 @@ function Ergebnistabelle({
                   <button type="button" onClick={() => sortieren(s)}>
                     {s}
                     {sort === s && (richtung === "asc"
-                      ? <ArrowUp size={12} aria-hidden="true" />
-                      : <ArrowDown size={12} aria-hidden="true" />)}
+                      ? <ArrowUp size={16} aria-hidden="true" />
+                      : <ArrowDown size={16} aria-hidden="true" />)}
                   </button>
                 ) : s}
               </th>

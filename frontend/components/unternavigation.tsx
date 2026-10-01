@@ -13,8 +13,8 @@
  * rendern Server und Browser dasselbe.
  */
 
-import type { LucideIcon } from "lucide-react";
-import { ChevronRight } from "lucide-react";
+import type { SymbolKomponente } from "@/components/symbol";
+import { ChevronRight } from "@/lib/symbole";
 import Link from "next/link";
 import { useId } from "react";
 
@@ -24,7 +24,7 @@ export type UnternavEintrag = {
   /** Ein Satz für die Übersicht auf dem Handy. */
   beschreibung: string;
   href: string;
-  symbol: LucideIcon;
+  symbol: SymbolKomponente;
 };
 
 export type UnternavGruppe = { titel: string; eintraege: UnternavEintrag[] };
@@ -58,7 +58,7 @@ export function Unternavigation({
                     className={`unternav-eintrag${ist ? " aktiv" : ""}`}
                     aria-current={ist ? "page" : undefined}
                   >
-                    <Symbol size={18} strokeWidth={1.75} aria-hidden="true" className="unternav-symbol" />
+                    <Symbol size={20} aria-hidden="true" className="unternav-symbol" />
                     <span className="unternav-text">
                       <span className="unternav-name">{e.text}</span>
                       <span className="unternav-beschreibung">{e.beschreibung}</span>

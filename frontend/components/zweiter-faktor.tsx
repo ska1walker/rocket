@@ -3,7 +3,7 @@
 // Modul HB-FAKTOR — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "@/lib/symbole";
 import { useState } from "react";
 import {
   codesNeu,
@@ -267,7 +267,7 @@ export function Faktorblock() {
         <h2>Zweiter Faktor</h2>
         {s.aktiv && (
           <span className="stufe" data-art="won">
-            <ShieldCheck size={12} aria-hidden="true" /> eingeschaltet
+            <ShieldCheck size={16} aria-hidden="true" /> eingeschaltet
           </span>
         )}
       </div>

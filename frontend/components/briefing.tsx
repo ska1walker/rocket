@@ -3,7 +3,7 @@
 // Modul RK-BRIEFING — docs/MODULE.md
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Clock, FileClock, Inbox, MessageSquareOff, MessagesSquare, Sparkles, Target } from "lucide-react";
+import { AlertTriangle, Clock, FileClock, Inbox, MessageSquareOff, MessagesSquare, Sparkles, Target } from "@/lib/symbole";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { anzahl, euro } from "@/lib/format";
@@ -135,7 +135,7 @@ export function Tagesbriefing() {
           disabled={!bereit || text.isPending}
           title={bereit ? undefined : kiStatus.data?.hint}
         >
-          <Sparkles size={14} aria-hidden="true" />
+          <Sparkles size={16} aria-hidden="true" />
           {text.isPending ? "Ordnet …" : "Reihenfolge vorschlagen"}
         </button>
       </div>
@@ -145,7 +145,7 @@ export function Tagesbriefing() {
         {text.data && (
           <div className="ki-block" style={{ marginBottom: "var(--am-raum-6)" }}>
             <div className="ki-block-kopf">
-              <Sparkles size={11} aria-hidden="true" /> Vorschlag zur Reihenfolge
+              <Sparkles size={16} aria-hidden="true" /> Vorschlag zur Reihenfolge
             </div>
             <p className="ki-block-text">{text.data.text}</p>
           </div>
@@ -157,7 +157,7 @@ export function Tagesbriefing() {
           return (
             <div key={schluessel} className="briefing-gruppe">
               <h3 className="briefing-titel">
-                <Zeichen size={14} aria-hidden="true" />
+                <Zeichen size={16} aria-hidden="true" />
                 {titel}
                 <span className="board-spalte-anzahl">{posten.length}</span>
               </h3>

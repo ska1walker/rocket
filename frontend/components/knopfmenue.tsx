@@ -14,7 +14,7 @@
 // ihn aus, ohne das Menü zu öffnen. Wer nur anlegen will, merkt vom Menü
 // nichts.
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "@/lib/symbole";
 import { useEffect, useId, useRef, useState } from "react";
 import { menueTaste } from "@/lib/tasten";
 

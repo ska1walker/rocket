@@ -3,7 +3,7 @@
 // Modul RK-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Star } from "lucide-react";
+import { ArrowDown, ArrowUp, Star } from "@/lib/symbole";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import type { Pipeline, Stage, StageKind } from "@/lib/typen";
@@ -103,7 +103,7 @@ export function Pipelinesblock() {
                 disabled={pl.is_default}
                 onClick={() => pipelineAendern.mutate({ id: pl.id, is_default: true })}
               >
-                <Star size={14} aria-hidden="true" />{pl.is_default ? "Standard" : "Standard setzen"}
+                <Star size={16} aria-hidden="true" />{pl.is_default ? "Standard" : "Standard setzen"}
               </button>
               <button type="button" className="btn btn-still btn-klein" onClick={() => pipelineLoeschen.mutate(pl.id)}>Löschen</button>
             </div>
@@ -124,8 +124,8 @@ export function Pipelinesblock() {
                         onBlur={(e) => { const p = Number(e.target.value) / 100; if (p !== s.probability) stufeAendern.mutate({ id: s.id, probability: p }); }} />
                     </td>
                     <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                      <button type="button" className="btn btn-still btn-klein" aria-label="nach oben" title="nach oben" disabled={i === 0} onClick={() => verschiebe(pl, i, -1)}><ArrowUp size={14} aria-hidden="true" /></button>
-                      <button type="button" className="btn btn-still btn-klein" aria-label="nach unten" title="nach unten" disabled={i === pl.stages.length - 1} onClick={() => verschiebe(pl, i, 1)}><ArrowDown size={14} aria-hidden="true" /></button>
+                      <button type="button" className="btn btn-still btn-klein" aria-label="nach oben" title="nach oben" disabled={i === 0} onClick={() => verschiebe(pl, i, -1)}><ArrowUp size={16} aria-hidden="true" /></button>
+                      <button type="button" className="btn btn-still btn-klein" aria-label="nach unten" title="nach unten" disabled={i === pl.stages.length - 1} onClick={() => verschiebe(pl, i, 1)}><ArrowDown size={16} aria-hidden="true" /></button>
                       <button type="button" className="btn btn-still btn-klein" onClick={() => { setLoeschZiel({ stage: s, pipeline: pl }); setZiel(""); }}>Löschen</button>
                     </td>
                   </tr>

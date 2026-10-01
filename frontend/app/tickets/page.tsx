@@ -3,7 +3,7 @@
 // Modul RK-TICKET — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Columns3, Table2 } from "lucide-react";
+import { Columns3, Table2 } from "@/lib/symbole";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -106,7 +106,7 @@ export default function TicketsSeite() {
             title="Brett"
             onClick={() => setSicht("brett")}
           >
-            <Columns3 size={15} aria-hidden="true" />
+            <Columns3 size={16} aria-hidden="true" />
             <span className="nur-vorleser">Brett</span>
           </button>
           <button
@@ -116,7 +116,7 @@ export default function TicketsSeite() {
             title="Tabelle"
             onClick={() => setSicht("tabelle")}
           >
-            <Table2 size={15} aria-hidden="true" />
+            <Table2 size={16} aria-hidden="true" />
             <span className="nur-vorleser">Tabelle</span>
           </button>
         </div>

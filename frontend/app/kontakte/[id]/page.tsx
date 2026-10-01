@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "@/lib/symbole";
 import { use, useState } from "react";
 import { api } from "@/lib/api";
 import { personName } from "@/lib/format";
@@ -93,7 +93,7 @@ function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
           disabled={!bereit || !anlass.trim() || entwurf.isPending}
           onClick={() => entwurf.mutate()}
         >
-          <Sparkles size={14} aria-hidden="true" />
+          <Sparkles size={16} aria-hidden="true" />
           {entwurf.isPending ? "Schreibt …" : "Entwurf erzeugen"}
         </button>
 

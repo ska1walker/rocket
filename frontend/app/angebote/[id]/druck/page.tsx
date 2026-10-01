@@ -3,7 +3,7 @@
 // Modul RK-ANGEBOT — docs/MODULE.md
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Printer } from "@/lib/symbole";
 import Link from "next/link";
 import { use } from "react";
 import { api } from "@/lib/api";
@@ -47,11 +47,11 @@ export default function DruckSeite({ params }: { params: Promise<{ id: string }>
     <div className="druck-seite">
       <div className="druck-leiste">
         <Link href={`/angebote/${id}`} className="btn btn-still btn-klein">
-          <ArrowLeft size={14} aria-hidden="true" />
+          <ArrowLeft size={16} aria-hidden="true" />
           Zurück
         </Link>
         <button type="button" className="btn btn-primaer btn-klein" onClick={() => window.print()}>
-          <Printer size={14} aria-hidden="true" />
+          <Printer size={16} aria-hidden="true" />
           Drucken
         </button>
       </div>

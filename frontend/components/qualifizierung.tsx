@@ -3,7 +3,7 @@
 // Modul RK-LEAD — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Sparkles } from "@/lib/symbole";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type {
@@ -121,7 +121,7 @@ export function Qualifizierungsblock({ dealId }: { dealId: string }) {
             disabled={!bereit || ziehen.isPending}
             title={bereit ? undefined : kiStatus.data?.hint}
           >
-            <Sparkles size={14} aria-hidden="true" />
+            <Sparkles size={16} aria-hidden="true" />
             {ziehen.isPending ? "Liest den Verlauf …" : "Aus dem Verlauf ziehen"}
           </button>
         </div>
@@ -221,7 +221,7 @@ export function Qualifizierungsblock({ dealId }: { dealId: string }) {
                   gap: "var(--am-raum-1)",
                 }}
               >
-                <Check size={12} aria-hidden="true" />
+                <Check size={16} aria-hidden="true" />
                 gespeichert
               </span>
             )}

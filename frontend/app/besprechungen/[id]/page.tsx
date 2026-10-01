@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink } from "@/lib/symbole";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -84,7 +84,7 @@ export default function BesprechungSeite() {
       >
         {b.insilo_link && (
           <a className="btn btn-sekundaer" href={b.insilo_link} target="_blank" rel="noopener noreferrer">
-            <ExternalLink size={15} aria-hidden="true" />
+            <ExternalLink size={16} aria-hidden="true" />
             In Insilo öffnen
           </a>
         )}
