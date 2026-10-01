@@ -266,6 +266,8 @@ Achter Durchlauf: Rocket 26.10.5, PR #89, 1.10.2026 — Token aus dem CI-Repo (`
 
 Neunter Durchlauf: Rocket 26.10.7, PR #90, 1.10.2026 — **der erste ohne Sitzung**, gebaut, bewiesen und gemergt von der Action `markt.yml` drei Minuten nach dem Release (Merge 31d6b82, Cloudflare-Deploy grün). Nimmt 26.10.6 mit: Dessen Eintrag (Zweig `rocket-26.10.6`) kam nie an; Marc hatte inzwischen `main` bewegt (eigene Einträge mit deutschen Beschreibungen, Open Design entfernt) und den Zeitstempel selbst auf 4382000000000 gehoben — genau den Wert des ersten 26.10.6-Zweigs, der damit nicht mehr darüber lag. Die Action rechnete auf frischem `main` 4383000000000. Auf `main` byte-gleich geprüft (sha256 `ec4b3924…4d63`, keine alten Schlüssel). Keine Datenbankänderung.
 
+Zehnter Durchlauf: Rocket 26.10.8, PR #91, 1.10.2026 — wieder von der Action, zwei Minuten nach dem Release: erstmals mit deutschen Texten (`{ en, de }` für Beschreibung und „Was ist neu“) und der Kategorie „Applications“ aus dem Manifest. Auf `main` byte-gleich geprüft (sha256 `9b6630ed…b307`, Zeitstempel 4384000000000). Keine Datenbankänderung.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
