@@ -29,8 +29,12 @@ export const metadata: Metadata = {
   // nur der Name der Anwendung.
   title: "Rocket",
   description: "AI-gestütztes CRM für den AImighty-Vertrieb. Läuft auf der eigenen Box.",
-  // Symbole: app/icon.png, app/apple-icon.png und app/manifest.ts (Next hängt
-  // sie selbst an). Unter dem Symbol auf dem Home-Bildschirm steht „Rocket".
+  // Symbole bewusst nicht über die Metadaten (app/icon.*): Dann rendert Next
+  // eine Marke <meta name="«nxt-icon»">, die es nur entfernt, wenn sie in
+  // einem Stück des Datenstroms liegt. Fällt eine Stückgrenze hinein, bleibt
+  // sie stehen und der Browser meldet React #418 (BETRIEB.md, „#418“). Die
+  // Link-Tags stehen deshalb unten im <head>. Unter dem Symbol auf dem
+  // Home-Bildschirm steht „Rocket".
   appleWebApp: { title: "Rocket" },
 };
 
@@ -50,6 +54,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Dasselbe für die eingeklappte Navigation — sonst springt die
             Leiste beim Laden von breit auf schmal. */}
         <script dangerouslySetInnerHTML={{ __html: NAVIGATION_SCRIPT }} />
+        {/* Im Tab nur die Rakete (SVG folgt der Tableiste, PNG für Safari),
+            auf dem Home-Bildschirm die volle Kachel — aus
+            scripts/app-symbole.mjs. */}
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" sizes="any" />
+        <link rel="icon" href="/icon-32.png" type="image/png" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" type="image/png" sizes="180x180" />
       </head>
       <body>
         <Fehlermelder />

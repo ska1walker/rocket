@@ -27,7 +27,7 @@ metadata:
   title: Rocket
   description: Sales CRM that runs entirely on your own box — companies, contacts, deals and an AI assistant that never phones home.
   icon: https://raw.githubusercontent.com/ska1walker/rocket/main/icon.png
-  version: 26.10.11
+  version: 26.10.12
   categories:
     - Applications
 
@@ -103,7 +103,7 @@ permission:
   appCommon: true
 
 spec:
-  versionName: '26.10.11'
+  versionName: '26.10.12'
 
   featuredImage: https://raw.githubusercontent.com/ska1walker/rocket/main/icon.png
   promoteImage:

@@ -2165,16 +2165,8 @@ Kai am 1.10.2026: Übersichtsliste auf dem Handy, nur Bereiche (keine
 Blöcke) in der Navigation. Baustein HB-UNTERNAV (`docs/MODULE.md`), damit
 Relay ihn übernehmen kann. Alle Adressen `?bereich=` gelten weiter.
 
-**Nebenbei offen: React #418 im Rundgang.** Zweimal bei rund 600
-Aufrufen in der CI (Prognose, Kampagnen am Handy) trat ein
-Hydrierungsfehler auf; lokal ließ er sich auch mit 800 Aufrufen, frischen
-Kontexten und sechsfach gedrosselter CPU nicht nachstellen, und der
-minifizierte Fehler verschweigt, welches Element abweicht. Verdacht ohne
-Beweis: `IconMark` von Next (rendert auf dem Server `<meta
-name="«nxt-icon»">`, im Browser nichts; es gibt ihn erst, seit es Icons
-gibt). Der Rundgang hängt deshalb bei #418 Server-HTML, DOM danach und
-alle Konsolenmeldungen an den Bericht — der nächste Fall liefert den
-Beweis. Der Test bleibt streng.
+**React #418 im Rundgang: gefunden und behoben (26.10.12).** Siehe den
+Abschnitt „#418: die Marke von Next“.
 
 ## Abgleich mit dem CI, Paket 5: das Grundgerüst (seit 26.10.7)
 
@@ -2203,8 +2195,8 @@ davon umsetzt:
   Tooltip an rund zwanzig Stellen, darunter die Stifte der Datensatzseite,
   die Griffe der Eigenschaften und das Plus der Kopfleiste am Handy.
 - **Browser-Tab** (G7): nur die Rakete, ohne Kachel und Wappen —
-  `docs/icon/tab.svg`, als `app/icon.svg` mit eigener Farbregel (hell Gold
-  800, dunkel Gold 500) und als `app/icon1.png` für Safari in einem Gold
+  `docs/icon/tab.svg`, als `public/icon.svg` mit eigener Farbregel (hell Gold
+  800, dunkel Gold 500) und als `public/icon-32.png` für Safari in einem Gold
   dazwischen. Die Kachel bleibt Apple-Touch-Icon, Manifest und Markt. Der
   Titel nennt zuerst die Seite: „Firmen · Rocket“ (`components/tab-titel.tsx`,
   aus dem Seitenkopf). Next schreibt den Titel aus den Metadaten nach dem
@@ -2232,15 +2224,17 @@ entsteht seitdem mit demselben Skript.
 
 | Datei | Größe | Form | Wofür |
 |---|---|---|---|
-| `frontend/app/icon.png` | 64 | Kachel mit Ecken | Favicon im Reiter |
-| `frontend/app/apple-icon.png` | 180 | Quadrat ohne Ecken | iOS „Zum Home-Bildschirm" |
+| `frontend/public/icon.svg`, `icon-32.png` | 32 | nur die Rakete | Favicon im Reiter (seit 26.10.7) |
+| `frontend/public/apple-touch-icon.png` | 180 | Quadrat ohne Ecken | iOS „Zum Home-Bildschirm" |
 | `frontend/public/symbol/rocket-192.png`, `-512.png` | 192, 512 | Kachel mit Ecken | Manifest, `purpose: any` |
 | `frontend/public/symbol/rocket-maskable-512.png` | 512 | Quadrat ohne Ecken | Manifest, `purpose: maskable` (Android) |
 
 Die Formen ohne Ecken sind Absicht: iOS und Android runden selbst, eine
-eigene Rundung gäbe dort schwarze Ecken. Next hängt `icon.png`,
-`apple-icon.png` und `app/manifest.ts` (Name „Rocket", `standalone`) von
-selbst in den Kopf.
+eigene Rundung gäbe dort schwarze Ecken. Die Link-Tags für Favicon und
+Apple-Touch-Icon stehen seit 26.10.12 selbst im `<head>` von `app/layout.tsx`
+— nicht mehr als Dateien unter `app/`, die Next von selbst anhängt; warum,
+steht unter „#418“. `app/manifest.ts` (Name „Rocket", `standalone`) hängt
+Next weiter selbst an.
 
 Neu erzeugen, wenn sich das Icon ändert:
 
@@ -2707,3 +2701,43 @@ Seit 0.6.9 steht er auf `public`; am 15.9.2026 kam ein Aufruf aus dem
 Insilo-Pod bis in Rockets eigenen Code durch (401 „Unbekannte oder
 abgeschaltete Quelle", siehe „Insilo anschließen"). Eine
 `options.policies`-Regel ist nicht mehr nötig — das Tor ist die Signatur.
+
+## #418: die Marke von Next (behoben in 26.10.12)
+
+Etwa einmal in 300 Seitenaufrufen, nur auf den CI-Rechnern, meldete der
+Rundgang React #418 („Hydration failed“) — mal auf „Prognose“, mal auf
+„Kampagnen“ am Handy, lokal auch mit 800 Aufrufen und gedrosselter CPU nie.
+Die Meldung trug `args[]=HTML`: Der Server hatte ein Element geschickt, das
+der Browser nicht rendert.
+
+**Die Ursache liegt in Next 15.5.** Sobald die Metadaten Symbole haben — bei
+Rocket seit 26.9.7 die Dateien `app/icon.svg`, `app/icon1.png`,
+`app/apple-icon.png` —, rendert Next eine Marke `IconMark`: auf dem Server
+`<meta name="«nxt-icon»">`, im Browser nichts. Beim Ausliefern sucht
+`createMetadataTransformStream` diese Marke und nimmt sie heraus — aber
+in **jedem Stück des Datenstroms einzeln**. Die Stückgrenzen setzt ein Puffer
+nach dem Zeitverhalten (`scheduleImmediate`). Fällt eine Grenze mitten in
+die Marke, findet die Suche sie in keinem der beiden Stücke, das `<meta>`
+bleibt im HTML, und der Browser meldet #418. Darum selten, darum nur unter
+Last, darum auf wechselnden Seiten, darum erst seit es Symbole gibt.
+
+**Bewiesen** mit Nexts eigenem Strom-Schritt (`continueDynamicPrerender`):
+dasselbe HTML einmal am Stück, einmal mit der Grenze in `«nxt-icon»` — im
+ersten Fall ist die Marke weg, im zweiten steht sie im Ergebnis.
+
+**Behoben, indem es die Marke nicht mehr gibt:** Die Symbole liegen unter
+`public/` (`icon.svg`, `icon-32.png`, `apple-touch-icon.png`), die Link-Tags
+stehen selbst im `<head>` von `app/layout.tsx`, die Metadaten nennen keine.
+Ohne Symbole in den Metadaten rendert Next keine `IconMark`. Aussehen und
+Adressen der Symbole bleiben, wie sie waren.
+
+**Was wacht:**
+
+- `lib/__tests__/keine-icon-marke.test.ts`: keine Symboldatei nach
+  Konvention unter `app/`, keine `icons` in `metadata`.
+- Der Rundgang prüft an jeder Seite, dass das Server-HTML kein `nxt-icon`
+  enthält, und hängt bei jedem Fehler Server-HTML, DOM und Konsole an den
+  Bericht — jetzt am Ende des Tests. Vorher stand die Sicherung direkt hinter
+  dem Laden, und der Skriptfehler kam erst danach: Beim Fall vom 1.10.2026
+  fehlten deshalb die Anhänge.
+
