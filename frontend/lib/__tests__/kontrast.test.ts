@@ -60,7 +60,7 @@ const PAARE: [string, string[], number, string][] = [
   ["--am-erfolg", ["--am-seite"], 4.5, "Zustand als Schrift"],
   ["--am-hinweis", ["--am-seite"], 4.5, "Zustand als Schrift"],
   ["--am-achtung", ["--am-seite"], 4.5, "Zustand als Schrift"],
-  ["--am-fehler", ["--am-seite"], 4.5, "Zustand als Schrift"],
+  ["--am-fehler", ["--am-seite", "--am-flaeche-1"], 4.5, "Zustand als Schrift, auch in Karten (Briefing, Board)"],
   ["--am-handlung-text", ["--am-handlung-ruhend", "--am-handlung-hover", "--am-fehler"], 4.5, "Schrift auf Knopf"],
   ["--am-rand-betont-farbe", ["--am-seite", "--am-flaeche-1", "--am-flaeche-3"], 3, "Rand eines Bedienelements"],
   ["--am-fokus-ring", ["--am-seite", "--am-flaeche-1", "--am-flaeche-3"], 3, "Fokusring"],

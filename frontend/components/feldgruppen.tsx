@@ -170,7 +170,7 @@ export function Feldgruppen({
             {leereAus ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
           </button>
           {!alle && (
-            <button type="button" className="btn btn-still btn-klein btn-symbol" onClick={() => { setEinzeln(null); setAlle(true); }} aria-label="Alles bearbeiten">
+            <button type="button" className="btn btn-still btn-klein btn-symbol" onClick={() => { setEinzeln(null); setAlle(true); }} aria-label="Alles bearbeiten" title="Alles bearbeiten">
               <Pencil size={14} aria-hidden="true" />
             </button>
           )}
@@ -341,6 +341,7 @@ function Feldzeile({
             type="button"
             className="fg-stift"
             aria-label={`${feld.label} bearbeiten`}
+            title={`${feld.label} bearbeiten`}
             onClick={() => { setRoh(alsEingabe(feld, wert)); setEigenerFehler(null); beiOeffnen(); }}
           >
             <Pencil size={12} aria-hidden="true" />

@@ -2053,6 +2053,40 @@ gibt). Der Rundgang hängt deshalb bei #418 Server-HTML, DOM danach und
 alle Konsolenmeldungen an den Bericht — der nächste Fall liefert den
 Beweis. Der Test bleibt streng.
 
+## Abgleich mit dem CI, Paket 5: das Grundgerüst (seit 26.10.7)
+
+Am 1.10.2026 hat Kai Insilo, Relay und Rocket nebeneinandergelegt und
+entschieden, was jede AImighty-Anwendung gleich baut (CI-Repo,
+`ABGLEICH.md` Paket 5, `medien/app.md` „Das Grundgerüst“). Was Rocket
+davon umsetzt:
+
+- **Token** `--am-lesespalte` (720 px) und `--am-seitentitel` (28 px) aus
+  `tokens/app.css`; der Seitentitel war 22 px — kaum mehr als ein
+  Abschnittstitel.
+- **Jeder Knopf 8 px** (G3). „Erstellen“ in der Kopfleiste, die
+  Navigationszeilen, Einklappen, Lesezeichen und die Ansichtsknöpfe der
+  Tickets hatten 4 px — Kai fiel der Unterschied neben dem Suchfeld auf.
+  Die Höhe stimmte schon: Suchfeld und Knopf sind beide 40 px.
+- **Gewählter Eintrag in der Navigation:** getönte Fläche mit Goldmarke am
+  Rand, wie in der Unternavigation — nie ein Rahmen, der gehört allein dem
+  Fokus. Vorher nur Goldschrift; in Insilo ist es ein Rahmen und sieht aus
+  wie der Fokus.
+- **Symbolknöpfe** (G4): Jeder Knopf, der nur ein Zeichen trägt, hat Namen
+  **und** Tooltip mit demselben Wort. Der Rundgang prüft das auf jeder Seite
+  („Symbolknopf ohne Namen oder Tooltip“); beim ersten Lauf fehlte der
+  Tooltip an rund zwanzig Stellen, darunter die Stifte der Datensatzseite,
+  die Griffe der Eigenschaften und das Plus der Kopfleiste am Handy.
+- **Browser-Tab** (G7): nur die Rakete, ohne Kachel und Wappen —
+  `docs/icon/tab.svg`, als `app/icon.svg` mit eigener Farbregel (hell Gold
+  800, dunkel Gold 500) und als `app/icon1.png` für Safari in einem Gold
+  dazwischen. Die Kachel bleibt Apple-Touch-Icon, Manifest und Markt. Der
+  Titel nennt zuerst die Seite: „Firmen · Rocket“ (`components/tab-titel.tsx`,
+  aus dem Seitenkopf). Next schreibt den Titel aus den Metadaten nach dem
+  ersten Zeichnen noch einmal; die Komponente wacht deshalb über `<head>`.
+- **Startseite:** „überfällig“ trägt jetzt auch dort die Uhr (R7 war an der
+  Startseite vorbeigegangen); der Posten bekommt dafür `ueberfaellig` vom
+  Backend, statt dass die Oberfläche das Wort vergleicht.
+
 ## Symbol der Web-App (seit 26.9.7)
 
 Bis 26.9.6 gab die Oberfläche kein Symbol an. iOS baute beim „Teilen →
@@ -2514,8 +2548,17 @@ gescheiterter Bau keinen Tag hinterlässt. Der Tag entsteht mit
 Versionssprung ist kein Release. Das Chart liegt als Anhang am Release —
 dieselbe Datei, die in den Markt geht.
 
-**Erst ausrollen, dann hochladen.** Eine App, die nie `running`
-erreicht hat, gehört in keinen Katalog.
+**Seit 26.10.7 geht der Markteintrag von selbst.** Nach dem Release baut
+die Action `markt.yml` den Eintrag auf Marcs frischem `main`, beweist ihn mit
+wrangler, öffnet den PR und mergt ihn (Kai, 1.10.2026, „ganz automatisch“).
+Was dafür im Release-PR stehen muss: die Notiz `olares/markt/<version>.md`
+(Titel, englischer Text) — `check-chart.sh` verlangt sie. Einzelheiten und
+das Geheimnis `MARKT_TOKEN`: `docs/MARKT.md`, „Der Weg in den Markt“.
+
+**Erst ausrollen, dann hochladen** galt bis 26.10.6: Eine App, die nie
+`running` erreicht hat, gehört in keinen Katalog. Kai hat die Regel mit der
+Action abgelöst; geprüft wird vorher in der CI (Rundgang im Browser) und mit
+wrangler, ausgerollt danach über den Markt.
 
 **Der Markt** ist die eigene Quelle von aimighty
 (`bayerhazard/aimighty-market`, Cloudflare Pages). Ein Eintrag besteht

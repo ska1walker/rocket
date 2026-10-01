@@ -236,6 +236,9 @@ ersten Anstrich, sonst blitzt Hell auf.
 - **Handy:** Leiste unten, „Mehr" als Feld darüber.
 - **Tastatur:** `aria-current="page"`, Mehr-Feld als Dialog mit Fokus
   hinein und Escape zurück.
+- **Gewählt** (seit 26.10.7, CI G1): getönte Fläche mit Goldmarke am Rand,
+  wie HB-UNTERNAV — nie ein Rahmen, der gehört dem Fokus. Jede Zeile 8 px
+  Radius wie jeder Knopf (G3).
 
 **Übernahme:** `lib/navigation.ts` (Ziele und Gruppen) und die
 Favoritenquelle (`useFavoriten` gegen `/api/mitglieder/wer`) tauschen,
@@ -298,6 +301,9 @@ Routen sind Rocket.
 `h1` und Anzahl in einer Zeile, darüber der Rückweg (`← Firmen`), rechts
 die Knöpfe. Er bleibt beim Rollen stehen. Seine Höhe `--am-kopfhoehe`
 ist dieselbe wie die der Marke links — die Linie reißt nicht.
+Der Titel ist `--am-seitentitel` (28 px, in jeder AImighty-Anwendung gleich,
+CI G1). Er setzt auch den Titel im Browser-Tab: zuerst die Seite, dann
+„Rocket“ (`components/tab-titel.tsx`, CI G7).
 
 ### HB-ZUSTAND — Lädt, Fehler, Leer, Hinweis ●
 

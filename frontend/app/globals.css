@@ -57,6 +57,13 @@
   /* Breite der Navigation am Desktop — für alle Anwendungen gleich, damit
      die Kante beim Wechsel zwischen ihnen nicht springt (ABGLEICH R9). */
   --am-navigation-breite: 15rem; /* 240px */
+  /* Lesespalte: Formulare, Einstellungen und Ansichten mit einer Hauptsache
+     stehen höchstens so breit, mittig oder links im Inhalt. Listen, Board,
+     Post und Kalender bleiben fließend (ABGLEICH G1). */
+  --am-lesespalte: 45rem; /* 720px */
+  /* Seitentitel in jeder Anwendung gleich groß: 22 px war kaum mehr als ein
+     Abschnittstitel, 40 px kostet in Listen eine Zeile (ABGLEICH G1). */
+  --am-seitentitel: 1.75rem; /* 28px */
 
   /* ── Ebenen — wer über wem liegt (ABGLEICH R9) ────────────────────── */
   --am-ebene-tabellenkopf: 10;
@@ -740,14 +747,14 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     max-width: 520px;
   }
 
-  /* HubSpots Form: ein Rechteck mit kleinem Radius und knappem Polster,
-     nicht die weiche Kachel der Formularknöpfe. Neben einem Suchfeld von
-     40 px Höhe las sich der runde 24-px-Knopf wie ein Fremdkörper. */
+  /* Ein Rechteck mit knappem Polster, Radius wie jeder Knopf (8 px, ABGLEICH
+     G3). Neben einem Suchfeld von 40 px Höhe las sich der runde 24-px-Knopf
+     wie ein Fremdkörper. */
   .kopf-neu {
     flex: none;
     gap: var(--am-raum-2);
     padding: 0 var(--am-raum-4);
-    border-radius: var(--am-radius-klein);
+    border-radius: var(--am-radius-mittel);
     font-size: 0.875rem;
   }
   /* Das Zeichen trägt erst, wenn das Wort weicht. */
@@ -833,7 +840,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     min-width: var(--am-ziel-beruehrung);
     min-height: var(--am-ziel-beruehrung);
     border: 0;
-    border-radius: var(--am-radius-klein);
+    border-radius: var(--am-radius-mittel);
     background: transparent;
     font: inherit;
     font-size: 0.6875rem;
@@ -989,6 +996,16 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
     .huelle-nav-item:hover { background: var(--am-flaeche-2); }
 
+    /* Gewählt: getönte Fläche wie in der Unternavigation, nie ein Rahmen —
+       ein Rahmen gehört allein dem Fokus (ABGLEICH G1). Gold markiert am
+       Rand und im Zeichen; als Schrift läge es auf der Fläche unter 4,5:1. */
+    .huelle-nav-item.aktiv {
+      background: var(--am-auswahl-flaeche);
+      color: var(--am-text-primaer);
+      box-shadow: inset 3px 0 0 var(--am-gold-auszeichnung);
+    }
+    .huelle-nav-item.aktiv svg { color: var(--am-gold-beschriftung); }
+
     /* Das Lesezeichen: unsichtbar, bis man hinzeigt — und gefüllt, wenn es gilt.
        Gold zeichnet aus, es handelt nicht. */
     .huelle-nav-stern {
@@ -1002,7 +1019,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
       width: 1.5rem;
       height: 1.5rem;
       border: 0;
-      border-radius: var(--am-radius-klein);
+      border-radius: var(--am-radius-mittel);
       background: transparent;
       color: var(--am-text-gedaempft);
       cursor: pointer;
@@ -1061,7 +1078,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
       width: var(--am-ziel-zeiger);
       height: var(--am-ziel-zeiger);
       border: 0;
-      border-radius: var(--am-radius-klein);
+      border-radius: var(--am-radius-mittel);
       background: transparent;
       color: var(--am-text-gedaempft);
       cursor: pointer;
@@ -1334,7 +1351,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     width: 24px;
     height: 24px;
     border: none;
-    border-radius: var(--am-radius-klein);
+    border-radius: var(--am-radius-mittel);
     background: transparent;
     color: var(--am-text-gedaempft);
     cursor: pointer;
@@ -1379,8 +1396,9 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     flex-wrap: wrap;
   }
 
+  /* Seitentitel in jeder AImighty-Anwendung gleich groß (ABGLEICH G1). */
   .seitenkopf h1 {
-    font-size: 1.375rem;
+    font-size: var(--am-seitentitel);
     font-weight: 600;
     line-height: 1.2;
     margin: 0;
@@ -2341,6 +2359,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     font-size: 0.75rem;
     color: var(--am-text-gedaempft);
   }
+  .briefing-hinweis[data-ueberfaellig="true"] { color: var(--am-fehler); font-weight: 600; }
 
   .briefing-betrag {
     margin-left: auto;
@@ -3053,7 +3072,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     width: 30px;
     height: 28px;
     border: none;
-    border-radius: var(--am-radius-klein);
+    border-radius: var(--am-radius-mittel);
     background: transparent;
     color: var(--am-text-gedaempft);
     cursor: pointer;

@@ -39,6 +39,7 @@ export function Erklaerung({ kurz, lang }: { kurz: React.ReactNode; lang?: React
             type="button"
             className="erklaerung-knopf"
             aria-label="Mehr dazu"
+            title="Mehr dazu"
             aria-expanded={offen}
             aria-controls={id}
             onClick={() => setOffen((o) => !o)}

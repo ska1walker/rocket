@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { anzahl, euro } from "@/lib/format";
 import type { Briefing, KIStatus, Posten } from "@/lib/typen";
 import { Fehler, Laedt } from "@/components/zustaende";
+import { Ueberfaellig } from "@/components/ueberfaellig";
 
 const GRUPPEN: {
   schluessel: keyof Briefing;
@@ -65,7 +66,11 @@ function PostenZeile({ p }: { p: Posten }) {
   const inhalt = (
     <>
       <span className="haupt">{p.titel}</span>
-      {p.hinweis && <span className="briefing-hinweis">{p.hinweis}</span>}
+      {p.hinweis && (
+        <Ueberfaellig ueberfaellig={!!p.ueberfaellig} className="briefing-hinweis">
+          {p.hinweis}
+        </Ueberfaellig>
+      )}
       {p.betrag_cents ? <span className="briefing-betrag">{euro(p.betrag_cents)}</span> : null}
     </>
   );

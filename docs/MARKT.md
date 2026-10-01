@@ -73,7 +73,58 @@ veraltet sein, ohne dass Git einen Konflikt meldet. Deshalb gilt
    der neue auf `main` auf und nimmt den alten in seine Notizen mit** —
    den alten Zweig nicht nachträglich einreichen.
 
-## Wer den PR in Marcs Repo öffnet und mergt: Kai startet die Sitzung
+## Der Weg in den Markt: die Action `markt.yml` (seit 26.10.7)
+
+**Ein Release geht ohne Handgriff in den Markt.** Entschieden von Kai am
+1.10.2026 („ganz automatisch“): Der Weg über eine eigene Sitzung je Release
+dauerte zu lange — Claude baute den Eintrag von Hand, Kai startete eine
+Sitzung und fügte den Auftrag ein, die Sitzung fragte manchmal zurück,
+danach prüfte Claude nach. Jetzt läuft nach jedem erfolgreichen `release`
+auf `main` die Action `.github/workflows/markt.yml`:
+
+1. holt den Chart-Anhang des Release und **Marcs `main` frisch**;
+2. baut den Eintrag mit `scripts/markt-eintrag.py`: Version, Notizen vorn in
+   `upgradeDescription`, Chart-Schlüssel frisch kodiert, alte Rocket-Schlüssel
+   weg, `CANONICAL_EPOCH_MS` streng darüber. Kennt der Markt die Version
+   schon, endet sie still;
+3. **beweist ihn mit wrangler** (`scripts/markt-beweis.sh`: Hash, Chart
+   byte-gleich, Version und `chartName`);
+4. pusht den Zweig `rocket-<version>` in den Fork, prüft, dass `main` sich
+   seit dem Bau nicht bewegt hat (sonst bricht sie ab — einfach neu starten),
+   öffnet den PR und **mergt ihn** (Squash, wie bisher);
+5. prüft auf `main`, dass genau `rocket-<version>.tgz` byte-gleich dasteht,
+   und wartet den Cloudflare-Deploy ab.
+
+Im PR steht, was Marc seit dem letzten Rocket-Eintrag an `functions/`
+geändert hat — so bleibt Regel 2 aus „Der Markt bewegt sich auch ohne uns“
+sichtbar, auch ohne Sitzung. Bricht etwas, ist der Lauf rot und nichts ist
+gemergt.
+
+**Die Notiz schreibt der Release-PR.** Je Version eine Datei
+`olares/markt/<version>.md`: erste Zeile `# <kurzer Titel>` (wird
+„rocket <version>: <Titel>“), darunter Englisch, beginnend mit
+`v<version>: `, ohne Backtick. `scripts/check-chart.sh` fehlt sie, und der PR
+ist rot — die Notiz wird mit dem Code gelesen, nicht am Ende erfunden. Kam
+eine Version nie im Markt an, nimmt die nächste ihre Notiz mit.
+
+**Das Geheimnis `MARKT_TOKEN`** (Rocket-Repo › Settings › Secrets and
+variables › Actions) legt Kai selbst an, Claude sieht es nie: ein *classic*
+Personal Access Token von `ska1walker` mit dem Bereich `repo` — ein
+fein granuliertes Token reicht nicht über zwei Eigentümer (Fork und Marcs
+Repo). Es braucht Schreibrecht im Fork und in `bayerhazard/aimighty-market`.
+Läuft es ab, sagt die Action das; ohne Token tut sie nichts und meldet, dass
+der Eintrag von Hand geht.
+
+**Von Hand nachholen:** Actions › markt › *Run workflow*, Version eintragen.
+
+**Damit entfällt:** „erst nach einer laufenden Installation auf einer Box“.
+Kai hatte die Regel seit 26.9.5 mehrfach bewusst übergangen; geprüft wird
+jetzt vor dem Merge in Rocket (CI mit Rundgang im Browser) und vor dem
+Eintrag (wrangler), nicht mehr auf der Box.
+
+## Früher: Kai startet die Sitzung (bis 26.10.6, Rückfallweg ohne Token)
+
+### Wer den PR in Marcs Repo öffnet und mergt: Kai startet die Sitzung
 
 Claude bereitet alles vor — Zweig im Fork auf frischem `upstream/main`,
 Zeitstempel, Chart, wrangler-Beweis — und gibt Kai einen fertigen Auftrag.

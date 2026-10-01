@@ -108,7 +108,7 @@ export function Stammdaten({
         <span style={{ display: "inline-flex", gap: "var(--am-raum-1)", alignItems: "center" }}>
           {kopfrechts}
           {!bearbeiten && (
-            <button type="button" className="btn btn-still btn-klein" onClick={() => setBearbeiten(true)} aria-label="Bearbeiten">
+            <button type="button" className="btn btn-still btn-klein" onClick={() => setBearbeiten(true)} aria-label="Bearbeiten" title="Bearbeiten">
               <Pencil size={14} aria-hidden="true" />
             </button>
           )}

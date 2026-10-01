@@ -156,7 +156,7 @@ export function Mitgliederblock() {
                         type="button"
                         className="btn btn-still btn-klein"
                         aria-label={`${m.display_name ?? m.olares_username} umbenennen`}
-                        title="Namen ändern"
+                        title={`${m.display_name ?? m.olares_username} umbenennen`}
                         onClick={() => {
                           setBearbeitet(m.id);
                           setEntwurf(m.display_name ?? "");

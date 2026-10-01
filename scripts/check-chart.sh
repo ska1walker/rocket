@@ -101,6 +101,18 @@ if [ "$VORHER" != "$(cat olares/templates/configmap-migrations.yaml)" ]; then
   melde "configmap-migrations.yaml war nicht aktuell — sie wurde soeben neu erzeugt, bitte mit committen"
 fi
 
+echo "→ Markt-Notiz zur Version"
+# Die Action markt.yml schreibt die Notiz in den Markt (docs/MARKT.md). Ohne
+# sie bricht sie nach dem Release ab — das soll schon der PR merken.
+MV=$(awk '/^version:/{print $2}' olares/Chart.yaml | tr -d '"')
+if [ ! -f "olares/markt/$MV.md" ]; then
+  melde "olares/markt/$MV.md fehlt — Titel und Text für den Markt (Englisch)"
+else
+  head -1 "olares/markt/$MV.md" | grep -q '^# ' || melde "olares/markt/$MV.md: erste Zeile '# <Titel>'"
+  sed -n 2p "olares/markt/$MV.md" | grep -q "^v$MV: " || melde "olares/markt/$MV.md: Text beginnt mit 'v$MV: '"
+  ! grep -q '`' "olares/markt/$MV.md" || melde "olares/markt/$MV.md: kein Backtick"
+fi
+
 echo "→ helm lint und helm template"
 helm lint olares -f olares/values-olares-stub.yaml > /dev/null || melde "helm lint fehlgeschlagen"
 helm template rocket olares -f olares/values-olares-stub.yaml > /dev/null || melde "helm template fehlgeschlagen"

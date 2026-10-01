@@ -124,8 +124,8 @@ export function Pipelinesblock() {
                         onBlur={(e) => { const p = Number(e.target.value) / 100; if (p !== s.probability) stufeAendern.mutate({ id: s.id, probability: p }); }} />
                     </td>
                     <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
-                      <button type="button" className="btn btn-still btn-klein" aria-label="nach oben" disabled={i === 0} onClick={() => verschiebe(pl, i, -1)}><ArrowUp size={14} aria-hidden="true" /></button>
-                      <button type="button" className="btn btn-still btn-klein" aria-label="nach unten" disabled={i === pl.stages.length - 1} onClick={() => verschiebe(pl, i, 1)}><ArrowDown size={14} aria-hidden="true" /></button>
+                      <button type="button" className="btn btn-still btn-klein" aria-label="nach oben" title="nach oben" disabled={i === 0} onClick={() => verschiebe(pl, i, -1)}><ArrowUp size={14} aria-hidden="true" /></button>
+                      <button type="button" className="btn btn-still btn-klein" aria-label="nach unten" title="nach unten" disabled={i === pl.stages.length - 1} onClick={() => verschiebe(pl, i, 1)}><ArrowDown size={14} aria-hidden="true" /></button>
                       <button type="button" className="btn btn-still btn-klein" onClick={() => { setLoeschZiel({ stage: s, pipeline: pl }); setZiel(""); }}>Löschen</button>
                     </td>
                   </tr>

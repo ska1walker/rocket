@@ -347,13 +347,13 @@ function Gruppenblock({
           </form>
         )}
         <div className="eig-gruppe-knoepfe">
-          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} nach oben`} disabled={erste} onClick={() => beiSchieben(-1)}>
+          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} nach oben`} title={`Gruppe ${gruppe.label} nach oben`} disabled={erste} onClick={() => beiSchieben(-1)}>
             <ArrowUp size={14} aria-hidden="true" />
           </button>
-          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} nach unten`} disabled={letzte} onClick={() => beiSchieben(1)}>
+          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} nach unten`} title={`Gruppe ${gruppe.label} nach unten`} disabled={letzte} onClick={() => beiSchieben(1)}>
             <ArrowDown size={14} aria-hidden="true" />
           </button>
-          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} umbenennen`} onClick={() => setName(gruppe.label)}>
+          <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} umbenennen`} title={`Gruppe ${gruppe.label} umbenennen`} onClick={() => setName(gruppe.label)}>
             <Pencil size={14} aria-hidden="true" />
           </button>
           {!gruppe.is_system && (
@@ -444,6 +444,7 @@ function Feldzeile({
           data-griff={feld.id}
           disabled={!ziehbar}
           aria-label={`${feld.label} verschieben — Pfeiltaste hoch oder runter`}
+          title={`${feld.label} verschieben — Pfeiltaste hoch oder runter`}
           onKeyDown={(e) => {
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
               e.preventDefault();
@@ -473,6 +474,7 @@ function Feldzeile({
             type="button"
             className="btn btn-still btn-klein btn-symbol"
             aria-label={`${feld.label} bearbeiten`}
+            title={`${feld.label} bearbeiten`}
             aria-expanded={offen}
             onClick={umschalten}
           >

@@ -266,6 +266,7 @@ export default function AngebotSeite({ params }: { params: Promise<{ id: string 
                             type="button"
                             className="btn btn-still btn-klein"
                             aria-label={`Position „${z.title}" entfernen`}
+                            title={`Position „${z.title}" entfernen`}
                             onClick={() => {
                               setGeaendert(true);
                               setZeilen((alt) => alt.filter((_, j) => j !== i));
