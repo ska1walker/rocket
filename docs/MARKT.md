@@ -200,6 +200,8 @@ Fünfter Durchlauf: Rocket 26.10.1, PR #86, 1.10.2026 — Einrichtungscode statt
 
 Sechster Durchlauf: Rocket 26.10.2, PR #87, 1.10.2026 — Einrichtungscode fehlertolerant (O/I/L, Formprüfung vor dem Senden). Marcs `main` unverändert seit 26.10.1 (c35957f); `CANONICAL_EPOCH_MS` 4374000000000 → 4375000000000. Lokal mit wrangler bewiesen; die von Claude angelegte Sitzung hielt vor dem PR an und wartete auf Kai — Anlass für die Regel „Kai startet die Sitzung“. Auf `main` byte-gleich geprüft (sha256 `f03a5688…a253`, keine alten Schlüssel). Keine Datenbankänderung. Von Kai auf der Box aktualisiert; die Einrichtung mit dem Code für `kaivostudio` klappte, der Bestand blieb (1.10.2026).
 
+Siebter Durchlauf: Rocket 26.10.3, PR #88, 1.10.2026 — Kontrast des gedämpften Texts (#567595), Kontrastprüfung in der CI. Marcs `main` unverändert seit 26.10.2 (d2c2a34); `CANONICAL_EPOCH_MS` 4375000000000 → 4376000000000. Lokal mit wrangler bewiesen; auf Kais Wunsch von Claude gestartet, diesmal ohne Rückfrage gemergt; auf `main` byte-gleich geprüft (sha256 `8529ee6e…f948`, keine alten Schlüssel). Keine Datenbankänderung.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
