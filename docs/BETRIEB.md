@@ -1855,6 +1855,97 @@ ganze Abfrage mit einem Cast-Fehler abzubrechen.
   Vorgabegruppe am Ziel schon (andere id), schreibt das Zurückspielen die
   Verweise der Eigenschaften um.
 
+## Eigenschaften über die API (seit 26.10.14)
+
+Ein Programm von außen — ein Skript, Make, n8n, Claude — kann Felder und
+Gruppen anlegen, umbenennen, ordnen und abschalten, ohne Browser. Dafür
+gibt es **API-Schlüssel** (Kai, 1.10.2026).
+
+### Schlüssel erzeugen
+
+**Einstellungen › AI und Programme › API-Schlüssel › Erzeugen.** Name
+(wofür, steht später im Protokoll), Bereich (heute nur „Eigenschaften“),
+optional ein Ablaufdatum. Der Schlüssel (`rk_…`) steht **genau einmal**
+da; danach zeigt Rocket nur noch die ersten Zeichen. Verloren heißt:
+widerrufen und neu erzeugen.
+
+Was ein Schlüssel darf:
+
+- **Er handelt im Namen der Person, die ihn erzeugt hat**, mit ihrer
+  jeweils aktuellen Rolle. Ändern dürfen nur Eigentümerin und Verwalter —
+  wird die Person zum Mitglied, liest ihr Schlüssel nur noch; wird sie
+  entfernt, gilt er nicht mehr.
+- **Nur sein Bereich.** `eigenschaften` öffnet `/api/eigenschaften` und
+  nichts sonst. `/api/companies`, Einstellungen, Team, Sicherung → 403.
+  Kein Schlüssel verwaltet Schlüssel.
+- **Kein zweiter Faktor.** Erzeugt wurde er in einer Sitzung, die ihn
+  hatte; er ist selbst das Geheimnis. Gespeichert wird nur der SHA-256
+  (Tabelle `api_schluessel`, Migration 0036; im Datenbank-Blick gesperrt,
+  nicht im Abzug — nach einem Wiederanlauf erzeugt man neue).
+- **Protokoll:** Alles, was er ändert, steht im Audit-Log mit der Person
+  und dem Zugang `api:<Name>`. „Zuletzt benutzt“ zeigt die Liste.
+
+### Aufrufen
+
+Adresse ist die von Rocket im Browser (der Entrance `rocket`); `/api/*`
+geht von dort ans Backend. Beispiele mit `R=https://<rocket-adresse>` und
+`K=rk_…`:
+
+```bash
+# Felder lesen (companies | contacts | deals)
+curl -H "Authorization: Bearer $K" "$R/api/eigenschaften?entity=companies"
+# Alles mit Gruppen, festen Feldern und archivierten
+curl -H "Authorization: Bearer $K" "$R/api/eigenschaften/anordnung?entity=companies"
+
+# Anlegen (kind: text, textarea, number, currency, date, bool, select,
+#          multiselect, url, email, phone, user)
+curl -H "Authorization: Bearer $K" -H 'content-type: application/json' \
+  -X POST "$R/api/eigenschaften" \
+  -d '{"entity":"companies","label":"Branche","kind":"select","options":["Handel","Industrie"]}'
+
+# Umbenennen, Hilfetext, Pflicht — der Schlüssel (key) bleibt
+curl -H "Authorization: Bearer $K" -H 'content-type: application/json' \
+  -X PATCH "$R/api/eigenschaften/<id>" -d '{"label":"Branche (WZ)","required":true}'
+
+# Option umbenennen oder ausblenden: ganze Liste schicken, `wert` bleibt
+curl … -X PATCH "$R/api/eigenschaften/<id>" \
+  -d '{"options":[{"wert":"handel","text":"Groß- und Einzelhandel"},{"wert":"industrie","text":"Industrie","verborgen":true}]}'
+
+# In eine andere Gruppe (ans Ende), Gruppe anlegen oder umbenennen
+curl … -X PATCH "$R/api/eigenschaften/<id>" -d '{"group_id":"<gruppen-id>"}'
+curl … -X POST  "$R/api/eigenschaften/gruppen" -d '{"entity":"companies","label":"Messe"}'
+curl … -X PATCH "$R/api/eigenschaften/gruppen/<gruppen-id>" -d '{"label":"Messen"}'
+
+# Abschalten (Werte bleiben) und zurückholen
+curl … -X DELETE "$R/api/eigenschaften/<id>"
+curl … -X PATCH  "$R/api/eigenschaften/<id>" -d '{"is_active":true}'
+
+# Ganze Anordnung in einem Zug (jede Gruppe, jedes aktive Feld genau einmal)
+curl … -X PUT "$R/api/eigenschaften/reihenfolge" \
+  -d '{"entity":"companies","gruppen":[{"id":"<gruppe>","felder":["<feld>", "…"]}]}'
+```
+
+Antworten: 200/201/204 gut; **400** unzulässige Änderung (etwa Optionen an
+einem festen Feld), **401** Schlüssel unbekannt, widerrufen oder
+abgelaufen, **403** außerhalb des Bereichs oder ohne Verwalterrolle,
+**404** nicht in dieser Organisation, **409** Schlüssel doppelt, Option
+noch in Gebrauch, Gruppe gehört zu einem anderen Objekt oder Anordnung
+nicht mehr aktuell, **422** Eingabe passt nicht zum Format.
+
+### Was es bewusst nicht gibt
+
+- **Endgültig löschen.** `DELETE` schaltet ab; die Werte bleiben in den
+  Datensätzen, und `is_active: true` holt das Feld samt Werten zurück. Ein
+  Skript, das sich vertut, soll keine Daten vernichten können.
+- **Schlüssel oder Typ ändern.** Der Schlüssel steht in Filtern,
+  Ansichten, Einfuhr-Zuordnungen und Abzügen; ein Datum, das zur Zahl
+  wird, ist kein Umbenennen, sondern ein Bruch. Wer das braucht, legt ein
+  neues Feld an und schaltet das alte ab.
+- **Firmen, Kontakte, Leads über Schlüssel.** Heute gibt es nur den Bereich
+  `eigenschaften`. Ein weiterer Bereich ist eine Zeile in
+  `app/api_schluessel.py` (`BEREICHE`) — aber eine Entscheidung, keine
+  Nebensache.
+
 ## GUI-Prüfung — was sie fand (26.9.5)
 
 Am 30.9.2026 lief die ganze Oberfläche durch einen Prüflauf: jede Seite

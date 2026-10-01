@@ -17,6 +17,7 @@ import { Sicherungsblock } from "@/components/sicherung";
 import { Absenderblock } from "@/components/absender";
 import { InsiloAblageblock } from "@/components/insilo-ablage";
 import { Quellenblock } from "@/components/quellen";
+import { ApiSchluesselblock } from "@/components/api-schluessel";
 import { Postfachblock } from "@/components/postfach";
 import { Mitgliederblock, Passwortblock } from "@/components/mitglieder";
 import { Geraeteblock } from "@/components/geraete";
@@ -43,7 +44,7 @@ const BEREICHE = [
   { schluessel: "vertrieb", text: "Vertrieb", beschreibung: "Pipelines und Stufen, Produktkatalog, Verlustgründe", symbol: TrendingUp },
   { schluessel: "eigenschaften", text: "Eigenschaften", beschreibung: "Felder und Gruppen für Firmen, Kontakte und Leads", symbol: SlidersHorizontal },
   { schluessel: "email", text: "E-Mail", beschreibung: "Konto, Absenderadresse, Marketing, Postfach, Relay", symbol: Mail },
-  { schluessel: "ki", text: "AI und Programme", beschreibung: "Sprachmodell, Sprachausgabe, Ergänzen, Insilo, Programme", symbol: Cpu },
+  { schluessel: "ki", text: "AI und Programme", beschreibung: "Sprachmodell, Sprachausgabe, Ergänzen, Insilo, Programme, API-Schlüssel", symbol: Cpu },
   { schluessel: "daten", text: "Daten", beschreibung: "Sicherung, Import und Export, Datenbank, Datenwege", symbol: Database },
 ] as const;
 
@@ -238,6 +239,7 @@ function Inhalt() {
                 <AnreicherungEinstellungen einstellungen={e} />
                 <InsiloAblageblock />
                 <Quellenblock />
+                <ApiSchluesselblock />
               </>
             )}
             {bereich === "daten" && (

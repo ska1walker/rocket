@@ -578,6 +578,25 @@ export interface QuelleNeu extends Quelle {
   secret: string;
 }
 
+/** Ein Schlüssel für Programme von außen (seit 26.10.14). */
+export interface ApiSchluessel {
+  id: string;
+  name: string;
+  /** Die ersten Zeichen — zum Wiedererkennen, nie der ganze Schlüssel. */
+  praefix: string;
+  bereiche: string[];
+  erstellt_von: string | null;
+  erstellt_am: string;
+  zuletzt_benutzt: string | null;
+  laeuft_ab: string | null;
+  widerrufen_am: string | null;
+}
+
+export interface ApiSchluesselNeu extends ApiSchluessel {
+  /** Im Klartext — nur in der Antwort auf das Erzeugen. */
+  schluessel: string;
+}
+
 export interface Eingangsposten {
   id: string;
   event: string;

@@ -105,7 +105,10 @@ for (const [name, muster] of SEITEN) {
     // Tooltip mit demselben Wort (ABGLEICH G4 im CI, medien/app.md).
     const symbolknoepfe = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLElement>("button, a[href], [role=button]")]
-        .filter((e) => e.offsetParent && e.innerText.trim() === "")
+        // checkVisibility statt offsetParent: In einem geschlossenen <details>
+        // hat ein Knopf ein offsetParent, aber keinen gerenderten Text — er
+        // erschien als Symbolknopf ohne Namen, sobald ein Feld archiviert war.
+        .filter((e) => e.checkVisibility() && e.innerText.trim() === "")
         // Die Marke ist ein Bild mit Namen, kein Symbolknopf.
         .filter((e) => e.getAttribute("role") !== "switch" && !e.closest("label") && !e.querySelector("img"))
         .filter((e) => !(e.getAttribute("aria-label") || e.getAttribute("aria-labelledby")) || !e.getAttribute("title"))

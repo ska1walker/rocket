@@ -12,7 +12,7 @@ from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from app import anmeldung as anmeldung_kern
-from app import sicherung
+from app import api_schluessel, sicherung
 from app.config import settings
 from app.db import acquire, acquire_as
 
@@ -366,6 +366,44 @@ async def _ensure_user_and_org(olares_username: str) -> CurrentUser:
     )
 
 
+async def _aus_schluessel(token: str) -> tuple[CurrentUser, tuple[str, ...]] | None:
+    """Wer steckt hinter diesem API-Schlüssel — und wohin darf er?
+
+    Der Schlüssel handelt als die Person, die ihn erzeugt hat. Ist sie
+    gelöscht oder kein Mitglied der Organisation mehr, gilt er nicht.
+    Im Protokoll steht als Zugang `api:<Name des Schlüssels>`, damit man
+    später sieht, dass ein Programm gehandelt hat und welches.
+    """
+    async with acquire() as conn:
+        schluessel = await api_schluessel.pruefen(conn, token)
+        if schluessel is None:
+            return None
+        person = await conn.fetchrow(
+            "select id, olares_username, display_name from public.users "
+            "where id = $1 and deleted_at is null",
+            schluessel.user_id,
+        )
+    if person is None:
+        return None
+    async with acquire_as(schluessel.user_id) as conn:
+        mitglied = await conn.fetchval(
+            "select true from public.user_org_roles where user_id = $1 and org_id = $2",
+            schluessel.user_id, schluessel.org_id,
+        )
+    if not mitglied:
+        return None
+    return (
+        CurrentUser(
+            olares_username=person["olares_username"],
+            user_id=person["id"],
+            org_id=schluessel.org_id,
+            display_name=person["display_name"],
+            login_username=f"api:{schluessel.name}",
+        ),
+        schluessel.bereiche,
+    )
+
+
 async def _aus_sitzung(keks: str) -> CurrentUser | None:
     """Wer steckt hinter diesem Sitzungskeks? Nichts, wenn er nicht (mehr) gilt."""
     async with acquire() as conn:
@@ -496,12 +534,36 @@ async def get_current_user(
     Den Wechsel auf eine andere Person per Kopf `X-Rocket-Sitzplatz` gibt
     es seit 26.9.2 nicht mehr: Er stammte aus der Zeit eines geteilten
     Olares-Zugangs, und mit eigener Anmeldung ist jeder bereits er selbst.
+
+    API-Schlüssel (`Authorization: Bearer rk_…`, seit 26.10.14) gelten nur
+    ohne gültigen Keks und nur für die Pfade ihrer Bereiche. Den zweiten
+    Faktor verlangen sie nicht: Erzeugt wurde der Schlüssel in einer
+    Sitzung, die ihn hatte, und er ist selbst das Geheimnis — ein Programm
+    kann keinen Code aus der Authenticator-App abtippen.
     """
     angemeldet: CurrentUser | None = None
 
     keks = request.cookies.get(anmeldung_kern.KEKS)
     if keks:
         angemeldet = await _aus_sitzung(keks)
+
+    if angemeldet is None:
+        kopf = request.headers.get("authorization", "")
+        art, _, token = kopf.partition(" ")
+        if art.lower() == "bearer" and token.strip():
+            gefunden = await _aus_schluessel(token.strip())
+            if gefunden is None:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Dieser API-Schlüssel gilt nicht (unbekannt, widerrufen oder abgelaufen).",
+                )
+            angemeldet, bereiche = gefunden
+            if not api_schluessel.erlaubt(bereiche, request.url.path):
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"Dieser API-Schlüssel gilt nicht für {request.url.path}.",
+                )
+            return angemeldet
 
     if angemeldet is None and settings.anmeldung_modus != "eigen":
         name = (x_bfl_user or "").strip() or settings.dev_user.strip()

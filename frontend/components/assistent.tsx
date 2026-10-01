@@ -79,6 +79,7 @@ export function Assistent() {
         ref={knopf}
         onClick={() => setOffen((o) => !o)}
         aria-label={offen ? "Assistent schließen" : "Assistent öffnen"}
+        title={offen ? "Assistent schließen" : "Assistent öffnen"}
         aria-expanded={offen}
         aria-controls="assistent-panel"
       >
