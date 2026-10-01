@@ -67,7 +67,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | 708 Backend, 89 Frontend, 151 im Browser (Playwright, CI-Job „oberfläche“) |
+| Tests | 708 Backend, 92 Frontend, 151 im Browser (Playwright, CI-Job „oberfläche“) |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.10.7 läuft auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`; 26.9.1 installiert am 30.9.2026, am selben Tag auf 26.9.4 aktualisiert — das erste Update über den Markt, mit den Migrationen 0033–0035; am 1.10.2026 auf 26.10.2, eingerichtet über den Einrichtungscode für den vorhandenen Zugang `kaivostudio`, Bestand erhalten; am selben Tag auf 26.10.3, 26.10.5 und 26.10.7). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.10.10` am 1.10.2026, Chart als Anhang). Katalogeintrag `rocket` **26.10.10 im Markt** (`bayerhazard/aimighty-market` PR #93, 1.10.2026, von der Action; vorher 26.10.9 mit PR #92; vorher 26.10.8 mit PR #91, deutsch und unter „Applications“; vorher 26.10.7 mit PR #90, enthält 26.10.6 — der erste Eintrag durch die Action `markt.yml`; vorher 26.10.5 mit PR #89, enthält 26.10.4; vorher 26.10.3 mit PR #88, 26.10.2 mit PR #87, 26.10.1 mit PR #86, 26.9.7 mit PR #85, enthält 26.9.6; 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
@@ -281,7 +281,12 @@ der Lieferung und liest die Token über `var(--am-*)`.
    hat, und in `docs/MODULE.md`, ob es den Baustein schon gibt — jeder
    hat dort eine Kennung (`AM-`, `HB-`, `RK-`), die auch im Kopf seiner
    Datei und im CSS-Abschnitt steht; ein neuer Baustein bekommt sie an
-   allen drei Stellen. Werte nie am Bauteil setzen — ein Text mit Rolle
+   allen drei Stellen. **Jede Kopfzeile `/* ── … ─` in `globals.css` trägt
+   eine Kennung** (`abschnitte.test.ts` wacht): Aus diesen Abschnitten
+   schneidet das CI-Repo seine `bauteile/` (Paket 3). Ändert sich ein `AM-`
+   oder `HB-` Baustein, danach im CI-Repo `python3 werkzeug/bauteile.py
+   …/frontend/app/globals.css` laufen lassen und die Bilder mit
+   `frontend/scripts/modulbilder.mjs` neu aufnehmen. Werte nie am Bauteil setzen — ein Text mit Rolle
    nimmt eine Klasse aus HB-TEXT, nicht `style`. Jeder Dialog ist ein
    `Dialog` oder eine `Rueckfrage` (`components/dialog.tsx`: Fokus, Tab,
    Escape inklusive); Spalten, die das Handy nicht trägt, kommen aus

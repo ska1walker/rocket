@@ -1989,6 +1989,44 @@ von Kai am 1.10.2026 und in Rocket umgesetzt:
 
 R2, das eine Icon-Set für alle Apps, kam mit 26.10.9 — siehe unten.
 
+## Bausteine im CI (Paket 3, 1.10.2026)
+
+Die `AM-` und `HB-` Bausteine aus `docs/MODULE.md` stehen jetzt auch im
+CI-Repo, je Kennung in `bauteile/<KENNUNG>.md` (Beschreibung, Bild hell und
+dunkel, Token-Liste) und `bauteile/<KENNUNG>.css` (Referenz). Kai hat am
+1.10.2026 entschieden: Kennungen bleiben, Welle 1 und 2 zusammen, das CSS
+schneidet ein Skript aus Rocket und prüft es (ABGLEICH.md, Paket 3).
+
+**Was Rocket dafür geändert hat — nur Kommentare:** Jeder Abschnitt von
+`globals.css` beginnt mit `/* ── Titel [KENNUNG] ─…`. Vorher hingen unter
+„Kopfleiste [AM-HUELLE]“ auch Navigation und Konto-Fuß und unter „Das Tor
+[HB-TOR]“ Mitglieder, zweiter Faktor, Eigenschaften, Feldgruppen, Überfällig,
+Rückfrage und Geräte; vier Abschnitte hatten gar keine Kennung. Jetzt steht
+jede Regel unter genau einer. Neu sind `[AM-BASIS]` (Grundstil, Zahlen) und
+`[AM-PAKET]` (Paketgut ohne Nutzer: `.streifen`, `.deckschicht`,
+`table.am-tabelle` — bleibt hier, geht nicht ins CI). Das gebaute CSS ist
+byte-gleich mit vorher, bis auf eine Stelle, die die Prüfung fand: Das
+gesetzte Häkchen trug `#fff` statt `var(--am-text-auf-farbe)` (derselbe
+Wert).
+
+**Was wacht:**
+
+- In Rocket `lib/__tests__/abschnitte.test.ts`: Jede Kopfzeile nach dem
+  Token-Block trägt eine Kennung, und jede Kennung steht in `docs/MODULE.md`.
+- Im CI `werkzeug/bauteile.py --pruefen`: Abweichung zwischen Rocket und
+  `bauteile/`, Abschnitte, die mitten in einem Block beginnen oder die
+  Schicht wechseln, Farbwerte statt Token, unbekannte `--am-*`.
+
+**Die Bilder** nimmt `frontend/scripts/modulbilder.mjs` gegen die laufende
+App auf (wie der Rundgang, mit Beispieldaten), hell und dunkel, nach
+`docs/module/`; von dort gehen sie ins CI. Ohne Bild bleiben Bausteine ohne
+eigene Gestalt (HB-TASTATUR, AM-BASIS, HB-SYMBOL als Regel) und HB-FAKTOR,
+den es nur im Modus `eigen` gibt.
+
+**Bis Paket 4** ist Rocket die Quelle, das CI hält die geprüfte Referenz. Ob
+eine App die Bausteine künftig aus dem CI holt und ihre CI rot wird, wenn sie
+abweicht, entscheidet Paket 4.
+
 ## Ein Icon-Set für alle Apps (seit 26.10.9)
 
 Bis 26.10.8 zeichnete Rocket mit `lucide-react` direkt: 81 Zeichen in sieben

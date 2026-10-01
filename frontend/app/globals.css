@@ -266,13 +266,14 @@ html.dunkel {
 html[data-dichte="normal"] { --am-skalierung: 1; }
 html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
-/* ── Zahlen: tabellarisch, rechtsbündig, Geist Mono ───────────────── */
+/* ── Zahlen: tabellarisch, rechtsbündig, Geist Mono [AM-BASIS] ───────────────── */
 .am-zahl {
   font-family: var(--am-schrift-mono);
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
+/* ── Grundstil [AM-BASIS] ─────────────────────────────────────────────────────────── */
 @layer base {
   /* Bewegung reduziert: Der Zustand stellt sich sofort ein, der Weg fällt
      weg — derselbe Knopf, nur ohne Übergang (kern/bewegung.md im CI:
@@ -532,7 +533,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   input[type="checkbox"]:checked {
     border-color: var(--am-handlung-ruhend);
     background: var(--am-handlung-ruhend);
-    color: #fff;
+    color: var(--am-text-auf-farbe);
   }
   input[type="checkbox"]:checked::before { transform: scale(1); }
   input[type="checkbox"]:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
@@ -594,7 +595,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     color: var(--am-text-gedaempft);
   }
 
-  /* ── Zustandsstreifen ─────────────────────────────────────────────
+  /* ── Zustandsstreifen, aus dem Paket, ohne Nutzer [AM-PAKET] ─────────────────────────────────────────────
      Farbe ist nie das einzige Merkmal — jede Meldung trägt Zeichen und
      Satz. Das `zeichen`-Element ist Pflicht, nicht Dekoration. */
   .streifen {
@@ -640,7 +641,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   }
   .streifen-fehler .zeichen { color: var(--am-fehler); }
 
-  /* ── Deckschicht hinter Dialogen ──────────────────────────────────── */
+  /* ── Deckschicht und Auswahlfläche, aus dem Paket, ohne Nutzer [AM-PAKET] ──────────────────────────────────── */
   .deckschicht {
     background: var(--am-deckschicht);
   }
@@ -658,7 +659,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     padding: var(--am-raum-6);
   }
 
-  /* ── Tabelle ──────────────────────────────────────────────────────── */
+  /* ── Tabelle, aus dem Paket, ohne Nutzer [AM-PAKET] ──────────────────────────────────────────────────────── */
   .tabelle-rahmen {
     border: 1px solid var(--am-rand);
     border-radius: var(--am-radius-mittel);
@@ -4532,6 +4533,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   line-height: 1.5;
 }
 
+/* ── Einladung und Mitglieder [RK-EINSTELLUNGEN] ──────────────────────────────────── */
 /* Der Einladungslink zum Weitergeben: sichtbar, ganz, und in einer
    Schrift, in der sich l und 1 unterscheiden. */
 .einladungslink {
@@ -4648,6 +4650,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .einladungslink .input { flex: 1 1 100%; }
 }
 
+/* ── Einrichten und Einladung annehmen [HB-TOR] ───────────────────────────────────── */
 /* Die Kennung entscheidet, wessen Zugang eingerichtet wird — der
    Anzeigename ist nur ein Etikett und kann auf jemand anderen zeigen.
    Deshalb steht sie in der Schrift, in der sich l und 1 unterscheiden. */
@@ -4658,6 +4661,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 .einladung-fuer .mono { font-family: var(--am-schrift-mono); }
 
+/* ── Zweiter Faktor [HB-FAKTOR] ───────────────────────────────────────────────────── */
 /* Der zweite Faktor. Der QR-Code braucht hellen Grund und Ruhezone, auch
    im Dunkelmodus — Kameras lesen hell auf dunkel schlecht. Deshalb die
    feste Palettenstufe statt der wechselnden Fläche. */
@@ -4726,6 +4730,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   border-top: 1px solid var(--am-trennlinie);
 }
 
+/* ── Eigenschaften einrichten [RK-EIGENSCHAFTEN] ──────────────────────────────────── */
 /* Eigenschaften einrichten (Einstellungen › Eigenschaften). Gruppen als
    ruhige Kästen, Felder als dichte Zeilen wie in einer Tabelle — aber als
    Liste, weil sich Zeilen einer Tabelle nicht zwischen Tabellen ziehen
@@ -4871,6 +4876,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 .eig-art { font-size: 0.8125rem; color: var(--am-text-sekundaer); display: flex; flex-direction: column; }
 .eig-anlegen { font-size: 0.6875rem; color: var(--am-text-gedaempft); }
 
+/* ── Zusatzfelder im Anlegen-Dialog [RK-ANLEGEN] ──────────────────────────────────── */
 /* Zusatzfelder im Anlegen-Dialog: abgesetzt, damit klar ist, dass sie aus
    den Einstellungen kommen und nicht zum festen Dialog gehören. */
 .anlege-zusatz {
@@ -4912,6 +4918,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 .eig-volle-breite { grid-column: 1 / -1; }
 
+/* ── Datensatzseite in Gruppen [RK-FELDGRUPPEN] ───────────────────────────────────── */
 /* Die Datensatzseite in Gruppen (components/feldgruppen.tsx). Der Kopf
    einer Gruppe ist ein Knopf über die volle Breite: Zielgröße und
    Tastatur ohne Umweg. Zugeklappt sagt er, wie viel darin gefüllt ist. */
@@ -4976,6 +4983,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 .fg-leer { color: var(--am-text-gedaempft); }
 
+/* ── Spaltenwahl nach Gruppen [RK-SEGMENTLISTE] ───────────────────────────────────── */
 /* Spaltenwahl nach Eigenschaftsgruppen (Stufe D). */
 .spaltenwahl-kopf {
   display: flex;
@@ -5001,10 +5009,12 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 .fg-lang { white-space: pre-wrap; }
 .fg-verweis { text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
 .fg-ueberfaellig { color: var(--am-fehler); }
+/* ── Überfällig [HB-ZUSTAND] ──────────────────────────────────────────────────────── */
 /* Überschrittene Frist: Uhr und Wort neben dem Rot (R7) — Komponente Ueberfaellig. */
 [data-ueberfaellig="true"] { display: inline-flex; align-items: center; gap: var(--am-raum-1); }
 .ueberfaellig-zeichen { flex: none; }
 
+/* ── Datensatzseite in Gruppen, Fortsetzung [RK-FELDGRUPPEN] ──────────────────────── */
 .fg-einzeln { display: flex; gap: var(--am-raum-1); align-items: flex-start; }
 .fg-einzeln .input,
 .fg-einzeln .mehrfachauswahl { flex: 1; min-width: 0; }
@@ -5026,6 +5036,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 .fg-loeschknopf { margin-left: auto; color: var(--am-fehler); }
 
+/* ── Rückfrage [HB-DIALOG] ────────────────────────────────────────────────────────── */
 /* Rückfrage vor einem Schritt mit Folgen [HB-DIALOG] — vorher viermal
    mit eigenen Inline-Maßen gebaut. */
 .rueckfrage { width: 100%; max-width: 27.5rem; border-color: var(--am-rand-betont-farbe); box-shadow: var(--am-schatten-1); }
@@ -5043,6 +5054,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .eig-pflege { padding-left: var(--am-raum-3); }
 }
 
+/* ── Geräte [RK-EINSTELLUNGEN] ────────────────────────────────────────────────────── */
 /* Wo bin ich überall angemeldet. Eine Liste, keine Kartensammlung — die
    Zeilen unterscheiden sich nur durch Gerät und Zeit. */
 .geraeteliste {
