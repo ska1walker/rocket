@@ -133,8 +133,10 @@ def main() -> None:
                     f"- `functions/_apps.ts`: Version {alt} → {v}, Notiz{'en' if len(neue) > 1 else ''} "
                     + ", ".join(d.stem for d in neue)
                     + " vorn in `upgradeDescription`.",
-                    f"- `functions/_lib.ts`: `rocket-{v}.tgz` (Release-Anhang, sha256 `{sha}`), "
-                    f"`CANONICAL_EPOCH_MS` {epoch_alt} → {epoch_neu}.",
+                    (
+                        f"- `functions/_lib.ts`: `rocket-{v}.tgz` (Release-Anhang, sha256 `{sha}`), "
+                        f"`CANONICAL_EPOCH_MS` {epoch_alt} → {epoch_neu}."
+                    ),
                     "",
                     "Vor dem PR lokal mit wrangler bewiesen: Hash, Chart byte-gleich, Detail mit Version und chartName.",
                 ]
