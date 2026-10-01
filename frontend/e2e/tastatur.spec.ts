@@ -124,3 +124,15 @@ test("Rückfrage vor dem Löschen: Fokus auf „Abbrechen“, Escape löscht nic
   await expect(page.getByRole("dialog")).toHaveCount(0);
   expect((await page.request.get(`/api/companies/${firmen[0].id}`)).status()).toBe(200);
 });
+
+test("Einstellungen: Bereich über die Navigation links wählen, Markierung folgt", async ({ page }) => {
+  await page.goto("/einstellungen", { waitUntil: "networkidle" });
+  const nav = page.getByRole("navigation", { name: "Bereiche der Einstellungen" });
+  await expect(nav.getByRole("link", { name: /Firma und Team/ })).toHaveAttribute("aria-current", "page");
+  const email = nav.getByRole("link", { name: /E-Mail/ });
+  await email.focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/bereich=email/);
+  await expect(nav.getByRole("link", { name: /E-Mail/ })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { name: "E-Mail-Konto" })).toBeVisible();
+});

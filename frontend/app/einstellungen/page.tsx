@@ -3,7 +3,7 @@
 // Modul HB-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Cpu, Database, Info, Mail, SlidersHorizontal, TrendingUp, Users } from "lucide-react";
 import { lage } from "@/lib/anmeldung";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -29,6 +29,7 @@ import { Marketingversandblock, Versandblock } from "@/components/versand";
 import { Absenderkontoblock } from "@/components/absenderkonto";
 import { AnreicherungEinstellungen } from "@/components/anreicherung-einstellungen";
 import { Sprachausgabeblock } from "@/components/podcast";
+import { Unternavigation, type UnternavGruppe } from "@/components/unternavigation";
 
 /**
  * Die Einstellungen in sechs Unterpunkten.
@@ -38,15 +39,30 @@ import { Sprachausgabeblock } from "@/components/podcast";
  * wozu er da ist, und hält das Kleingedruckte hinter dem Symbol.
  */
 const BEREICHE = [
-  { schluessel: "firma", text: "Firma und Team" },
-  { schluessel: "vertrieb", text: "Vertrieb" },
-  { schluessel: "eigenschaften", text: "Eigenschaften" },
-  { schluessel: "email", text: "E-Mail" },
-  { schluessel: "ki", text: "KI und Programme" },
-  { schluessel: "daten", text: "Daten" },
+  { schluessel: "firma", text: "Firma und Team", beschreibung: "Firmendaten, Team, Passwort, zweiter Faktor, Geräte", symbol: Users },
+  { schluessel: "vertrieb", text: "Vertrieb", beschreibung: "Pipelines und Stufen, Produktkatalog, Verlustgründe", symbol: TrendingUp },
+  { schluessel: "eigenschaften", text: "Eigenschaften", beschreibung: "Felder und Gruppen für Firmen, Kontakte und Leads", symbol: SlidersHorizontal },
+  { schluessel: "email", text: "E-Mail", beschreibung: "Konto, Absenderadresse, Marketing, Postfach, Relay", symbol: Mail },
+  { schluessel: "ki", text: "KI und Programme", beschreibung: "Sprachmodell, Sprachausgabe, Ergänzen, Insilo, Programme", symbol: Cpu },
+  { schluessel: "daten", text: "Daten", beschreibung: "Sicherung, Import und Export, Datenbank, Datenwege", symbol: Database },
 ] as const;
 
 type Bereich = (typeof BEREICHE)[number]["schluessel"];
+
+/** Drei Gruppen wie in HubSpots Einstellungen: wer, womit verkauft wird, worauf es läuft. */
+const GRUPPEN: { titel: string; schluessel: Bereich[] }[] = [
+  { titel: "Konto", schluessel: ["firma"] },
+  { titel: "Vertrieb", schluessel: ["vertrieb", "eigenschaften", "email"] },
+  { titel: "System", schluessel: ["ki", "daten"] },
+];
+
+const NAVIGATION: UnternavGruppe[] = GRUPPEN.map((g) => ({
+  titel: g.titel,
+  eintraege: g.schluessel.map((k) => {
+    const b = BEREICHE.find((x) => x.schluessel === k)!;
+    return { ...b, href: `/einstellungen?bereich=${b.schluessel}` };
+  }),
+}));
 
 /** Der KI-Assistent: Adresse, Modell, Schlüssel. */
 function KIBlock({ e }: { e: OrgSettings }) {
@@ -149,8 +165,12 @@ function Datenwege({ e }: { e: OrgSettings }) {
 
 function Inhalt() {
   const suche = useSearchParams();
-  const gewaehlt = (suche.get("bereich") as Bereich | null) ?? "firma";
-  const bereich: Bereich = BEREICHE.some((b) => b.schluessel === gewaehlt) ? gewaehlt : "firma";
+  // Ohne gültigen Bereich zeigt der Desktop „Firma und Team“, das Handy die
+  // Übersicht (CSS an `data-auswahl`, siehe HB-UNTERNAV).
+  const gewaehlt = suche.get("bereich") as Bereich | null;
+  const ausgewaehlt = BEREICHE.some((b) => b.schluessel === gewaehlt);
+  const bereich: Bereich = ausgewaehlt ? gewaehlt! : "firma";
+  const bereichName = BEREICHE.find((b) => b.schluessel === bereich)!.text;
 
   const abfrage = useQuery({
     queryKey: ["einstellungen"],
@@ -165,69 +185,71 @@ function Inhalt() {
     <>
       <Seitenkopf titel="Einstellungen" />
 
-      <nav className="unterpunkte" aria-label="Bereiche der Einstellungen">
-        {BEREICHE.map((b) => (
-          <Link
-            key={b.schluessel}
-            href={`/einstellungen?bereich=${b.schluessel}`}
-            className={`unterpunkt${b.schluessel === bereich ? " aktiv" : ""}`}
-            aria-current={b.schluessel === bereich ? "page" : undefined}
-          >
-            {b.text}
-          </Link>
-        ))}
-      </nav>
+      <div className="unternav-seite" data-auswahl={ausgewaehlt ? "ja" : "nein"}>
+        <Unternavigation gruppen={NAVIGATION} aktiv={bereich} label="Bereiche der Einstellungen" />
 
-      <div className="seitenhinweise">
-        <Passworthinweis />
-        <Tresorhinweis e={e} />
-        <Rollenhinweis />
-      </div>
+        <div className="unternav-inhalt">
+          <div className="unternav-zurueck">
+            <Link href="/einstellungen">
+              <ChevronLeft size={16} aria-hidden="true" />
+              Alle Einstellungen
+            </Link>
+            <span aria-hidden="true">·</span>
+            <span>{bereichName}</span>
+          </div>
 
-      <div className="datensatz datensatz-lesespalte">
-        {bereich === "firma" && (
-          <>
-            <Absenderblock />
-            <Mitgliederblock />
-            <Passwortblock />
-            <Faktorblock />
-            <Geraeteblock />
-          </>
-        )}
-        {bereich === "vertrieb" && (
-          <>
-            <Pipelinesblock />
-            <Katalogblock />
-            <Verlustgruendeblock />
-          </>
-        )}
-        {bereich === "eigenschaften" && <Eigenschaftenblock />}
-        {bereich === "email" && (
-          <>
-            <Versandblock />
-            <Absenderkontoblock />
-            <Marketingversandblock />
-            <Postfachblock />
-            <Postausgangblock />
-          </>
-        )}
-        {bereich === "ki" && (
-          <>
-            <KIBlock e={e} />
-            <Sprachausgabeblock e={e} />
-            <AnreicherungEinstellungen einstellungen={e} />
-            <InsiloAblageblock />
-            <Quellenblock />
-          </>
-        )}
-        {bereich === "daten" && (
-          <>
-            <Sicherungsblock />
-            <Einfuhrverweis />
-            <Datenbankverweis />
-            <Datenwege e={e} />
-          </>
-        )}
+          <div className="seitenhinweise">
+            <Passworthinweis />
+            <Tresorhinweis e={e} />
+            <Rollenhinweis />
+          </div>
+
+          <div className="datensatz datensatz-lesespalte">
+            {bereich === "firma" && (
+              <>
+                <Absenderblock />
+                <Mitgliederblock />
+                <Passwortblock />
+                <Faktorblock />
+                <Geraeteblock />
+              </>
+            )}
+            {bereich === "vertrieb" && (
+              <>
+                <Pipelinesblock />
+                <Katalogblock />
+                <Verlustgruendeblock />
+              </>
+            )}
+            {bereich === "eigenschaften" && <Eigenschaftenblock />}
+            {bereich === "email" && (
+              <>
+                <Versandblock />
+                <Absenderkontoblock />
+                <Marketingversandblock />
+                <Postfachblock />
+                <Postausgangblock />
+              </>
+            )}
+            {bereich === "ki" && (
+              <>
+                <KIBlock e={e} />
+                <Sprachausgabeblock e={e} />
+                <AnreicherungEinstellungen einstellungen={e} />
+                <InsiloAblageblock />
+                <Quellenblock />
+              </>
+            )}
+            {bereich === "daten" && (
+              <>
+                <Sicherungsblock />
+                <Einfuhrverweis />
+                <Datenbankverweis />
+                <Datenwege e={e} />
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </>
   );
