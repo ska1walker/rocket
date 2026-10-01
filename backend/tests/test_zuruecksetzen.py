@@ -236,11 +236,13 @@ def test_der_ort_ist_der_klickweg_in_der_dateien_app():
 
 
 def test_ohne_ein_einziges_passwort_erklaert_die_datei_den_anderen_weg():
-    """Eine frische Box lässt die Olares-Sitzung noch durch — das gehört gesagt."""
+    """Eine frische Box wird mit dem Einrichtungscode eingerichtet — die Datei
+    schickt dorthin, nicht mehr zur Olares-Sitzung (die gilt seit 26.10.1
+    im Modus `eigen` nie)."""
     assert zuruecksetzen.anfordern("wer-auch-immer", [], bekannt=False) is None
     text = _datei().read_text(encoding="utf-8")
     assert "noch niemand ein Passwort gesetzt" in text
-    assert "Einstellungen" in text
+    assert "rocket-einrichten.txt" in text
 
 
 def test_die_datei_nennt_keine_absolute_uhrzeit():

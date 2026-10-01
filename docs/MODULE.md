@@ -1,6 +1,6 @@
 # Module der Oberfläche — Bausteinkatalog
 
-> **Stand:** 30. September 2026 · Rocket 26.9.7
+> **Stand:** 30. September 2026 · Rocket 26.10.1
 > **Für wen:** alle, die an Rocket, Relay, Insilo oder einer weiteren
 > AImighty-App bauen. Rocket ist nur die erste App, in der die Bausteine
 > beschrieben sind.
@@ -405,6 +405,8 @@ Was vorher an über sechzig Stellen als Inline-Stil stand, hat einen Namen:
 | `.text-gelungen` | „Gespeichert." und andere Bestätigungen |
 | `.rechts` | rechtsbündige Spalte in `.tabelle` |
 | `.seitenrand` | Meldung unter dem Seitenkopf, auf die Breite des Inhalts eingerückt |
+| `.seitenhinweise` | Hinweise über den Blöcken einer Seite (Einstellungen), im Rand der Blöcke, mit Abstand zu den Reitern (seit 26.10.1) |
+| `.seite-lesespalte` | Seite in Lesebreite ohne Block-Kachel, mit Rand oben (Einfuhr, seit 26.10.1) |
 | `.zeile-unter` | zweite, leisere Zeile in einer Tabellenzelle |
 
 **Regel:** Ein neuer Text mit Rolle nimmt die Klasse, nicht `style`.

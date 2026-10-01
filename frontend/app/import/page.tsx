@@ -30,7 +30,7 @@ function Inhalt() {
       />
       {/* Eine Spalte in Lesebreite, nicht über den ganzen Bildschirm:
           Die Zuordnungstabelle liest man Zeile für Zeile. */}
-      <div style={{ padding: "0 var(--am-raum-8) var(--am-raum-16)", maxWidth: 760 }}>
+      <div className="seite-lesespalte">
         <Einfuhrblock vorwahl={objekt} />
       </div>
     </>

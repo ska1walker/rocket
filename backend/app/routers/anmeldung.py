@@ -19,7 +19,8 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from app import anmeldung as kern
-from app import audit, tresor, versand, zuruecksetzen
+from app import audit, einrichtung, tresor, versand, zuruecksetzen
+from app import auth as auth_kern
 from app import zweiterfaktor as zf
 from app.auth import CurrentUser, get_current_user, verwaltet
 from app.config import settings
@@ -69,6 +70,16 @@ class Lage(BaseModel):
     modus: str
     # Passwort stimmt, der Code aus der App steht noch aus.
     zweiter_faktor: bool = False
+    # Noch niemand hat ein Passwort: Die Anmeldeseite zeigt „Rocket
+    # einrichten“ und sagt, wo die Datei mit dem Code liegt.
+    einrichtung: bool = False
+    einrichtung_ordner: str | None = None
+
+
+class Einrichten(BaseModel):
+    code: str = Field(min_length=1, max_length=100)
+    name: str = Field(min_length=1, max_length=63)
+    passwort: str = Field(min_length=1, max_length=200)
 
 
 class Code(BaseModel):
@@ -199,16 +210,34 @@ async def _protokoll(
         )
 
 
+async def _einrichtung_offen() -> bool:
+    """Wartet diese Installation auf ihre Einrichtung? Dann liegt die Datei."""
+    if settings.anmeldung_modus != "eigen" or not await auth_kern.noch_unbewohnt():
+        return False
+    vorhanden = await auth_kern.eigentuemerin_ohne_passwort()
+    einrichtung.bereitstellen(vorhanden[2] if vorhanden else None)
+    return True
+
+
 @router.get("/anmeldung/lage", response_model=Lage)
 async def lage(request: Request) -> Lage:
-    """Sagt der Oberfläche, ob jemand angemeldet ist. Verrät sonst nichts."""
+    """Sagt der Oberfläche, ob jemand angemeldet ist. Verrät sonst nichts —
+    außer, dass Rocket noch eingerichtet werden muss: Das sieht ohnehin
+    jeder, der die Seite öffnet, und ohne den Satz fände niemand die Datei."""
     keks = request.cookies.get(kern.KEKS)
     vorstufe = request.cookies.get(kern.VORSTUFE_KEKS)
     async with acquire() as conn:
         sitzung = await kern.sitzung_lesen(conn, keks) if keks else None
         if sitzung is None:
             offen = await kern.vorstufe_lesen(conn, vorstufe) if vorstufe else None
-            return Lage(angemeldet=False, modus=settings.anmeldung_modus, zweiter_faktor=offen is not None)
+    if sitzung is None:
+        if await _einrichtung_offen():
+            return Lage(
+                angemeldet=False, modus=settings.anmeldung_modus,
+                einrichtung=True, einrichtung_ordner=einrichtung.wo_liegt_die_datei(),
+            )
+        return Lage(angemeldet=False, modus=settings.anmeldung_modus, zweiter_faktor=offen is not None)
+    async with acquire() as conn:
         name = await conn.fetchval("select display_name from public.users where id = $1", sitzung.user_id)
     return Lage(angemeldet=True, name=name, modus=settings.anmeldung_modus)
 
@@ -242,6 +271,93 @@ async def anmelden(
     await _protokoll(ergebnis.user_id, ergebnis.org_id, "anmeldung", name, {"zweiter_faktor": False})
     _keks_setzen(request, antwort, ergebnis.token)
     return Lage(angemeldet=True, name=daten.name, modus=settings.anmeldung_modus)
+
+
+# Ein fester Schlüssel für die Sperre der Einrichtung: Zwei gleichzeitige
+# Versuche dürfen nicht beide „noch niemand hat ein Passwort“ sehen.
+_EINRICHTUNG_SPERRE = 0x726F636B6574  # „rocket“
+
+
+@router.post("/anmeldung/einrichten", response_model=Lage)
+async def einrichten(
+    daten: Einrichten,
+    request: Request,
+    antwort: Response,
+    user_agent: Annotated[str | None, Header()] = None,
+) -> Lage:
+    """Der erste Zugang — mit dem Code aus dem Datenordner.
+
+    Nur im Modus `eigen` und nur, solange **niemand** ein Passwort hat.
+    Gibt es schon eine Eigentümerin ohne Passwort, bekommt genau sie es
+    (der Name muss ihrer sein, die Datei nennt ihn); sonst entsteht der
+    Zugang mit dem Namen aus dem Formular. Danach ist die Datei weg.
+    """
+    _herkunft_pruefen(request)
+    if settings.anmeldung_modus != "eigen":
+        raise HTTPException(409, "Diese Installation meldet über Olares an.")
+    try:
+        kern.passwort_pruefen(daten.passwort)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    name = daten.name.strip().lower()
+
+    # Gezählt wird je Adresse, mit der strengen Grenze (zehn): Ein fester
+    # Schlüssel für alle ließe einen Fremden die Einrichtung durch
+    # absichtliche Fehlversuche für jeden sperren. Raten lohnt auch mit
+    # gefälschter Adresse nicht — der Code hat 48 Bit.
+    kennungen = [f"einrichtung:{_adresse(request)}"]
+    async with acquire() as sperre:
+        await sperre.execute("select pg_advisory_lock($1)", _EINRICHTUNG_SPERRE)
+        try:
+            if not await auth_kern.noch_unbewohnt():
+                raise HTTPException(409, "Rocket ist schon eingerichtet. Bitte melden Sie sich an.")
+            try:
+                await kern.bremse_pruefen(sperre, kennungen)
+            except kern.ZuVieleVersuche as exc:
+                raise HTTPException(
+                    429,
+                    "Zu viele Versuche. Bitte warten Sie eine Viertelstunde.",
+                    headers={"Retry-After": str(exc.sekunden)},
+                ) from exc
+
+            vorhanden = await auth_kern.eigentuemerin_ohne_passwort()
+            # Die Datei muss es geben, bevor sie stimmen kann — auch wenn
+            # niemand vorher die Anmeldeseite geöffnet hat.
+            einrichtung.bereitstellen(vorhanden[2] if vorhanden else None)
+            if not einrichtung.stimmt(daten.code):
+                await kern.versuch_merken(sperre, kennungen)
+                raise HTTPException(403, "Der Code stimmt nicht.")
+
+            if vorhanden is not None:
+                user_id, org_id, zugang = vorhanden
+                if name != zugang.lower():
+                    raise HTTPException(
+                        422, "Der Zugang steht in der Datei — bitte genau diesen Namen eintragen."
+                    )
+            else:
+                if not einrichtung.NAME_MUSTER.match(name):
+                    raise HTTPException(
+                        422,
+                        "Der Name darf Kleinbuchstaben, Ziffern, Punkt, Binde- und Unterstrich "
+                        "enthalten (2 bis 63 Zeichen), z. B. vorname-nachname.",
+                    )
+                person = await auth_kern._ensure_user_and_org(name)
+                user_id, org_id, zugang = person.user_id, person.org_id, name
+
+            await sperre.execute(
+                "update public.users set passwort_hash = $1, passwort_am = now() where id = $2",
+                kern.hash_passwort(daten.passwort), user_id,
+            )
+            auth_kern.bewohnt_merken()
+            einrichtung.verbrauchen()
+            await kern.versuche_loeschen(sperre, kennungen)
+            token = await kern.sitzung_anlegen(sperre, user_id, org_id, user_agent or "")
+        finally:
+            await sperre.execute("select pg_advisory_unlock($1)", _EINRICHTUNG_SPERRE)
+
+    await _protokoll(user_id, org_id, "eingerichtet", zugang, {"bestand_vorhanden": vorhanden is not None})
+    _keks_setzen(request, antwort, token)
+    return Lage(angemeldet=True, name=zugang, modus=settings.anmeldung_modus)
 
 
 @router.post("/anmeldung/code", response_model=Lage)
@@ -369,8 +485,8 @@ async def vergessen(
     Anmeldemaske selbst sorgfältig verschweigt.
 
     Geschrieben wird nur für einen Zugang, der schon ein Passwort hat: Wer
-    noch keines gesetzt hat, kommt auf einer frischen Box ohnehin über die
-    Box-Sitzung herein und braucht diesen Weg nicht.
+    noch keines gesetzt hat, richtet Rocket über den Einrichtungscode ein
+    (`app/einrichtung.py`) und braucht diesen Weg nicht.
     """
     _herkunft_pruefen(request)
     kennungen = [f"name:{daten.name.strip().lower()}", f"ip:{_adresse(request)}"]
@@ -398,7 +514,7 @@ async def vergessen(
         )
         zugaenge = [z["olares_username"] for z in zeilen]
         gibt_es = any(z.lower() == daten.name.strip().lower() for z in zugaenge)
-        # Dieselbe Frage, die `auth._noch_unbewohnt()` stellt: Steht
+        # Dieselbe Frage, die `auth.noch_unbewohnt()` stellt: Steht
         # irgendwo ein Passwort? Nur wenn nirgends eines steht, lässt die
         # Anwendung die Olares-Sitzung noch durch.
         passwoerter_ueberhaupt = await conn.fetchval(

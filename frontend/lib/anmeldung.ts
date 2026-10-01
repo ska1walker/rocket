@@ -16,6 +16,10 @@ export type Lage = {
   modus: string;
   /** Passwort stimmt, der Code aus der App steht noch aus. */
   zweiter_faktor?: boolean;
+  /** Noch niemand hat ein Passwort: erst einrichten, mit dem Code aus der Datei. */
+  einrichtung?: boolean;
+  /** Der Klickweg zur Datei in der Dateien-App von Olares. */
+  einrichtung_ordner?: string | null;
 };
 
 export type Einladung = {
@@ -32,6 +36,11 @@ export function anmelden(name: string, passwort: string) {
 /** Der zweite Schritt: Code aus der App oder ein Wiederherstellungscode. */
 export function codeEinloesen(code: string) {
   return api.post<Lage>("/api/anmeldung/code", { code });
+}
+
+/** Der erste Zugang — mit dem Code aus dem Datenordner der Box. */
+export function einrichten(code: string, name: string, passwort: string) {
+  return api.post<Lage>("/api/anmeldung/einrichten", { code, name, passwort });
 }
 
 export function abmelden() {

@@ -1381,25 +1381,43 @@ Der zweite Modus ist die Voraussetzung dafür, den Eingang zu öffnen. Ohne
 ihn genügte ein `curl -H 'X-Bfl-User: kaivostudio'`, um Eigentümer zu
 sein und den ganzen Bestand zu lesen.
 
-### Die Erstinstallation braucht eine Ausnahme
+### Die Erstinstallation: ein Code aus dem Datenordner (seit 26.10.1)
 
 Aus dem Markt installiert steht `ANMELDUNG_MODUS=eigen` von Anfang an. Eine
 frische Datenbank hat aber keinen Nutzer, kein Passwort und keine
-Einladung — und ohne Ausnahme auch keinen Weg, das zu ändern. Genau das ist
-am 8. September einem zweiten Nutzer passiert, der Rocket auf seiner
-eigenen Box installierte: 401 auf alles, Sackgasse, App unbrauchbar.
+Einladung. Am 8. September führte das bei einem zweiten Nutzer zu 401 auf
+alles, eine Sackgasse.
 
-Deshalb gilt seit 0.6.3: **Solange in dieser Datenbank niemand ein Passwort
-hat, zählt der Olares-Kopf weiter.** Mit dem ersten gesetzten Passwort ist
-er endgültig tot, auch für den, der eben noch hereinkam. Die Bedingung ist
-bewusst nicht „gibt es Nutzer?" — der Kopf legt beim ersten Aufruf ja
-selbst einen an, und die Tür fiele zu, bevor jemand ein Passwort setzen
-konnte.
+**Von 0.6.3 bis 26.9.7 lautete die Antwort: Solange niemand ein Passwort
+hat, zählt der Olares-Kopf weiter.** Begründet war das damit, dass eine
+frische Installation hinter `authLevel: internal` stehe. Seit 0.6.9 ist der
+Entrance aber von Anfang an `public` — die Begründung war damit weg, die
+Ausnahme blieb. Bis zum ersten Passwort genügte also
+`curl -H 'X-Bfl-User: kaivostudio'`, und der Name steht in der Adresse der
+Box. Kai fand das am 1.10.2026 über den Hinweis in den Einstellungen.
 
-Das ist vertretbar, weil eine frische Installation hinter
-`authLevel: internal` steht: Es kommt ohnehin nur herein, wer an der Box
-angemeldet ist. Die Einstellungsseite sagt es außerdem deutlich, solange
-kein Passwort gesetzt ist.
+**Seit 26.10.1 gilt der Kopf im Modus `eigen` nie.** An seine Stelle tritt
+dieselbe Hürde wie beim vergessenen Passwort — der Zugang zur Box:
+
+- Solange niemand ein Passwort hat, legt Rocket beim Start (und beim
+  Öffnen der Anmeldeseite) **Data › rocket › rocket-einrichten.txt** an,
+  0600, mit einem Code. Das Pod-Log nennt den Ort.
+- Die Anmeldeseite zeigt dann „Rocket einrichten“: Code, Name, Passwort
+  (`POST /api/anmeldung/einrichten`, `app/einrichtung.py`).
+- **Gibt es schon eine Eigentümerin ohne Passwort** — eine Box, die vor
+  26.10.1 über den Kopf eingerichtet wurde —, nennt die Datei ihren Zugang,
+  und genau sie bekommt das Passwort; der Bestand bleibt. Sonst entsteht
+  der Zugang mit dem eingetragenen Namen samt Organisation, und ein Abzug
+  neben den Daten wird wie bisher zurückgespielt.
+- Der Code gilt, bis eingelöst ist (eine Installation wird oft erst Tage
+  später eingerichtet); ein Neustart behält ihn. Raten bremst dieselbe
+  Bremse wie die Anmeldung. Danach ist die Datei weg, und
+  `POST /api/anmeldung/einrichten` antwortet mit 409.
+
+**Für eine Box, die vor 26.10.1 ohne Passwort lief:** Nach dem Update kommt
+niemand mehr über die Olares-Sitzung herein. Die Anmeldeseite zeigt
+„Rocket einrichten“; der Code liegt in der Dateien-App, der Zugang steht
+in der Datei.
 
 ### Wie ein Zugang entsteht
 
@@ -1626,15 +1644,13 @@ sagen, sie steht öffentlich im Netz. Die Datei darf es, denn sie liegt
 hinter derselben Hürde wie der Code selbst.
 
 Hat auf der Box **noch niemand** ein Passwort gesetzt, sagt die Datei das
-und nennt den anderen Weg: Rocket von der Olares-Oberfläche der Box aus
-öffnen. Solange kein Passwort gesetzt ist, lässt die Anwendung die
-Box-Sitzung durch (`_noch_unbewohnt()`), und unter Einstellungen wird das
-erste gesetzt.
+und verweist auf `rocket-einrichten.txt` daneben: Rocket ist dann noch
+nicht eingerichtet (siehe „Die Erstinstallation“).
 
 **Der dritte Zustand ist der bittere:** Es gibt Zugänge mit Passwort, aber
 keiner gehört noch zu einer Organisation. Dann kommt niemand mehr herein —
 die Anmeldung findet keine Organisation, und die Olares-Sitzung greift
-auch nicht, weil `_noch_unbewohnt()` schon beim ersten Passwort irgendwo
+auch nicht, weil `noch_unbewohnt()` schon beim ersten Passwort irgendwo
 in der Datenbank auf „bewohnt" schaltet. Diese Strenge ist Absicht: Bei
 offenem Eingang ist `X-Bfl-User` von außen fälschbar, eine Box mit Daten
 darf durch verwaiste Rollen nicht wieder übernehmbar werden. Die Datei
@@ -1902,6 +1918,35 @@ npm run e2e                                     # Browser von Playwright
 ROCKET_CHROMIUM=/opt/pw-browsers/chromium npm run e2e   # in einer Claude-Sitzung
 ROCKET_URL=http://localhost:3000 npm run e2e    # anderer Port
 ```
+
+**Übersehen und nachgezogen in 26.10.1** — Kai fand es auf seiner Box:
+
+- Der Hinweis „noch kein Passwort“ (und die beiden anderen Hinweise der
+  Einstellungen) stand ohne Seitenrand direkt in der Seite: bündig an
+  der Navigation, ohne Abstand unter den Reitern. Jetzt in
+  `.seitenhinweise`, im Rand der Blöcke, mit Zeichen.
+- Das Zeichen jedes Leerzustands stand links, der Text mittig darunter
+  — die Grundregeln machen jedes SVG zum Block, und ein Block folgt
+  `text-align` nicht.
+- Auf der Einfuhr klebte die Ablagefläche ohne Abstand an der Auswahl,
+  und der erste Satz saß fast auf der Linie des Seitenkopfs.
+- Die Druckfassung behielt auf dem Handy die A4-Ränder; die Positionen
+  liefen rechts hinaus.
+- Der Hinweistext selbst war zu freundlich: „kommt herein, wer an dieser
+  Box angemeldet ist“. Solange niemand ein Passwort hatte, galt der Kopf
+  `X-Bfl-User` — und den kann bei offenem Entrance jeder mitschicken.
+  Geschlossen mit dem Einrichtungscode (siehe „Die Erstinstallation“).
+
+**Warum die Prüfung es nicht sah:** Der Rundgang prüfte, was sich zählen
+lässt — Fehlerantworten, Überlauf der Seite, den Seitenkopf, axe. Ob ein
+Kasten im Rand steht, ob er an seinem Nachbarn klebt, ob ein Zeichen
+mittig sitzt, prüfte er nicht; die Bilder der GUI-Prüfung waren
+überwiegend hell und mit Beispieldaten, in denen kaum ein Leerzustand
+vorkommt. Seit 26.10.1 prüft `frontend/e2e/lage.ts` jede Seite in hell
+**und** dunkel auf drei Dinge: Text am Rand des Inhalts (außer in
+rollenden Bereichen), Kästen ohne Abstand zum Vorgänger, Zeichen im
+Leerzustand außer Mitte; ein eigener Test führt einen Leerzustand
+herbei. Gegen den alten Stand fällt er an allen vier Stellen oben.
 
 **Offen, weil es das Designsystem betrifft:** Gedämpfter Text
 (`--am-text-gedaempft` = Blau-500) erreicht auf der Grundfläche Blau-25

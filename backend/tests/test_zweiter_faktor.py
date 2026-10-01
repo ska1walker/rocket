@@ -100,7 +100,8 @@ async def test_mit_faktor_reicht_das_passwort_allein_nicht(datenbank, monkeypatc
         name, geheimnis, _, schritt = await _mit_faktor(k, monkeypatch, "Faktor Eins")
         r = await k.post("/api/anmeldung", json={"name": name, "passwort": GUT})
         assert r.status_code == 200
-        assert r.json() == {"angemeldet": False, "name": None, "modus": "eigen", "zweiter_faktor": True}
+        assert {k: r.json()[k] for k in ("angemeldet", "name", "modus", "zweiter_faktor")} == {
+            "angemeldet": False, "name": None, "modus": "eigen", "zweiter_faktor": True}
         assert k.cookies.get("rocket_sitzung") is None
         # Die Vorstufe ist keine Sitzung.
         assert (await k.get("/api/companies")).status_code == 401

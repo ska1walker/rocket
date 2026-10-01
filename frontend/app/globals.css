@@ -1137,6 +1137,11 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
   /* Der Titel eines Leerzustands ist keine Überschrift: Als h4 übersprang
      er auf den meisten Seiten zwei Ebenen. */
+  /* Das Zeichen über dem Satz: Die Grundregeln machen jedes SVG zum Block,
+     und ein Block folgt text-align nicht — bis 26.9.7 stand es links,
+     der Text mittig darunter (Kai, 1.10.2026). */
+  .leerzustand > svg { display: block; margin-inline: auto; }
+
   .leerzustand .leerzustand-titel {
     color: var(--am-text-primaer);
     font-size: 1rem;
@@ -1204,6 +1209,21 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .tabelle th.rechts,
   .tabelle td.rechts { text-align: right; }
   .seitenrand { padding: 0 var(--am-raum-8); }
+  /* Hinweise über dem Inhalt einer Seite (Einstellungen): im selben Rand
+     wie die Blöcke darunter. Standen bis 26.9.7 ohne eigenen Rand direkt
+     in der Seite — bündig an der Navigation, ohne Abstand an den Reitern. */
+  .seitenhinweise {
+    display: grid;
+    gap: var(--am-raum-3);
+    padding: var(--am-raum-6) var(--am-raum-8) 0;
+    max-inline-size: calc(40rem + 2 * var(--am-raum-8));
+  }
+  .seitenhinweise:empty { display: none; }
+  /* Eine Seite in Lesebreite ohne Block-Kachel (Einfuhr). */
+  .seite-lesespalte {
+    padding: var(--am-raum-6) var(--am-raum-8) var(--am-raum-16);
+    max-inline-size: calc(40rem + 2 * var(--am-raum-8));
+  }
 
   /* ── Felder nebeneinander [HB-FELDREIHE] ─────────────────────────────────────────
      Server, Port und Verschlüsselung in einer Zeile — auf dem Handy
@@ -2009,6 +2029,7 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
      geht, ein zweiter Rahmen mit derselben Überschrift wäre nur eine
      Wand mehr. */
   .einfuhr { display: grid; gap: var(--am-raum-6); }
+  .einfuhr-schritt { display: grid; gap: var(--am-raum-4); }
 
   .einfuhr-wahl {
     display: flex;
@@ -2415,6 +2436,16 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     padding: 20mm 18mm;
     font-size: 0.875rem;
     line-height: 1.6;
+  }
+
+  /* Auf dem Handy behielt das Blatt die Ränder des A4-Bogens, und die
+     Positionen liefen rechts hinaus. Nur am Bildschirm: Gedruckt wird
+     weiter mit den Rändern oben (und @media print setzt sie ohnehin). */
+  @media screen and (max-width: 640px) {
+    .dokument {
+      padding: var(--am-raum-6) var(--am-raum-4);
+      overflow-x: auto;
+    }
   }
 
   .dokument-kopf {

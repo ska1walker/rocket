@@ -111,11 +111,11 @@ def anfordern(
         )
     else:
         teil = (
-            "Auf dieser Box hat noch niemand ein Passwort gesetzt.\n\n"
-            "Solange das so ist, brauchen Sie keines: Öffnen Sie Rocket von\n"
-            "der Olares-Oberfläche dieser Box aus, dann sind Sie drin. Setzen\n"
-            "Sie dort unter Einstellungen ein Passwort — erst das schließt\n"
-            "die Tür.\n"
+            "Auf dieser Box hat noch niemand ein Passwort gesetzt — Rocket ist\n"
+            "noch nicht eingerichtet.\n\n"
+            "Den Code dafür finden Sie in derselben Ablage in der Datei\n"
+            "rocket-einrichten.txt. Auf der Anmeldeseite steht „Rocket\n"
+            "einrichten“; dort tragen Sie ihn ein.\n"
         )
 
     fuss = (

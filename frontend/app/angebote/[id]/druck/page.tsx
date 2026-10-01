@@ -66,7 +66,7 @@ export default function DruckSeite({ params }: { params: Promise<{ id: string }>
         </div>
       )}
 
-      <article className="dokument">
+      <article className="dokument" tabIndex={0} aria-label="Angebot als Blatt">
         <header className="dokument-kopf">
           <div className="dokument-marke">
             <span>{a.absender_name ?? "Absender fehlt"}</span>

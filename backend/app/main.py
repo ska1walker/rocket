@@ -392,6 +392,16 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         print(f"Tresor-Nachlauf fehlgeschlagen: {exc}", flush=True)
     await _stammdaten_nachziehen()
+    # Noch nicht eingerichtet? Dann liegt der Code ab jetzt im Datenordner,
+    # und das Log sagt, wo — für den, der zuerst dort nachsieht.
+    try:
+        from app import einrichtung
+        from app.routers.anmeldung import _einrichtung_offen
+
+        if await _einrichtung_offen():
+            print(f"Rocket ist noch nicht eingerichtet. Der Code liegt unter {einrichtung.wo_liegt_die_datei()}", flush=True)
+    except Exception as exc:
+        print(f"Einrichtungsdatei nicht angelegt: {exc}", flush=True)
     schleife = asyncio.create_task(_sicherungsschleife())
     post = asyncio.create_task(_postschleife())
     ausgang = asyncio.create_task(_versandschleife())

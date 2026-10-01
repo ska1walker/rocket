@@ -3,7 +3,7 @@
 > **Produkt:** Rocket — schlankes, KI-gestütztes CRM für den AImighty-Vertrieb
 > **Maintainer:** Kai Böhm (kaivo.studio)
 > **Plattform:** Olares OS (Kubernetes-basiert), wie Insilo
-> **Status:** 26.9.7 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); am selben Tag über den Markt von 26.9.1 auf 26.9.4 aktualisiert
+> **Status:** 26.10.1 (Versionsschema `YY.M.<n>` wie im Markt, bis 0.13.0 `0.x.y`) — Vertrieb, Versand und Service durchgängig; seit 26.9.2 zweiter Faktor und Stufe 1 aus `docs/PLAN-TEAM.md`; seit 26.9.3/26.9.4 Eigenschaften in Gruppen mit Pflichtfeldern; 26.9.5 behebt die Befunde der GUI-Prüfung (`docs/BETRIEB.md` „GUI-Prüfung“), 26.9.6 schließt die Tastaturlücken und prüft die Oberfläche in der CI im Browser, 26.9.7 gibt der Web-App das Rocket-Icon, 26.10.1 behebt, was die Prüfung übersah (Hinweise ohne Rand, Leerzustand, Druckfassung am Handy; `docs/BETRIEB.md` „Übersehen und nachgezogen“) und prüft die Lage jeder Seite hell und dunkel; die Erstinstallation läuft über einen Einrichtungscode statt über den Olares-Kopf. Bis 0.12.1 hieß das Produkt **Beacon**. Rocket läuft seit 30.9.2026 auf Kais Box, aus dem Markt installiert und neu begonnen (ohne Beacon-Daten; Beacon bleibt vorerst daneben installiert); am selben Tag über den Markt von 26.9.1 auf 26.9.4 aktualisiert
 > **Letzte Aktualisierung:** 30. September 2026
 
 ---
@@ -50,7 +50,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Prognose | gewichtet, Trefferquote, Verlustanalyse, nach Produkt |
 | KI | Notiz→Struktur, Tagesbriefing, Fragen an den Bestand, Angebotsvorschlag, Qualifizierung aus dem Verlauf, Anschreiben, Erkenntnisse aus Gesprächsnotizen, Firma/Kontakt aus Beschreibung finden, Assistent (Aufträge in Worten, Handlung nur über Karte), Gesprächsvorbereitung als Podcast (zwei Stimmen, gesprochen auf der Box) |
 | Insilo-Kopplung | auf derselben Box über Insilos gemeinsamen Ordner wie Relay (seit 0.11.0, `app/insilo_ablage.py`), sonst signierter Webhook; Besprechungen als eigener Bereich mit Vorschlag, nie automatisch zugeordnet; Protokoll ohne Wortlaut (`docs/BETRIEB.md` „Insilo anschließen") |
-| Anmeldung | eigene Anmeldung seit 0.6.0 (`ANMELDUNG_MODUS=eigen`, Entrance `public` seit 0.6.9): Einladung, Sitzungen, Geräteübersicht, Bremse nach Fehlversuchen; zweiter Faktor (TOTP, Wiederherstellungscodes, Pflicht für alle als Schalter) seit 26.9.2; Rückweg per Datei unter `/app/data` (setzt auch den Faktor zurück) oder per Mail (Faktor bleibt); Anmeldungen im Audit-Log |
+| Anmeldung | eigene Anmeldung seit 0.6.0 (`ANMELDUNG_MODUS=eigen`, Entrance `public` seit 0.6.9): Einladung, Sitzungen, Geräteübersicht, Bremse nach Fehlversuchen; zweiter Faktor (TOTP, Wiederherstellungscodes, Pflicht für alle als Schalter) seit 26.9.2; Erstinstallation mit Code aus `/app/data` (seit 26.10.1, kein Kopf mehr); Rückweg per Datei unter `/app/data` (setzt auch den Faktor zurück) oder per Mail (Faktor bleibt); Anmeldungen im Audit-Log |
 | Zusammenarbeit | jede Person mit eigenem Zugang; Rollen `owner`/`admin`/`member`/`viewer`, Eigentümerin vergibt `admin` (seit 0.9.2); Besitz, Filter „Nur meine"; den Sitzplatz-Wechsel gibt es seit 26.9.2 nicht mehr — jede Person meldet sich selbst an |
 | Tresor | SMTP/IMAP-Passwörter, API-Schlüssel und Geheimnisse AES-GCM-verschlüsselt, Schlüssel `tresor.key` unter `/app/data` (seit 0.6.6) |
 | Versand | SMTP/IMAP je Organisation, Absenderadresse je Person, Einwilligung am Kontakt, öffentliche Links (Einwilligung, Abmelden, Klick) über eigenen Entrance `rocketlinks`; Listen (statisch/aktiv) und Kampagnen |
@@ -67,7 +67,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | Anreicherung | Firmen und Kontakte aus Website, Suchdienst und LinkedIn-Treffern; jeder Wert mit Quelle, Kontaktdaten nur wörtlich belegt, nie überschreiben; leere Felder von selbst, Rest als Vorschlag |
 | Sicherung | Abzug nach jeder Änderung (Prüfung alle 5 Minuten), spätestens alle sechs Stunden, nach `/app/data/sicherungen/`; Wiederanlauf nach Deinstallation samt Einstellungen; Ausfuhr als Download |
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
-| Tests | 704 Backend, 79 Frontend, 77 im Browser (Playwright, CI-Job „oberfläche“) |
+| Tests | 707 Backend, 79 Frontend, 143 im Browser (Playwright, CI-Job „oberfläche“) |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.9.4 läuft auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`; 26.9.1 installiert am 30.9.2026, am selben Tag auf 26.9.4 aktualisiert — das erste Update über den Markt, mit den Migrationen 0033–0035). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
 | Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.9.7` am 30.9.2026, Chart als Anhang). Katalogeintrag `rocket` **26.9.7 im Markt** (`bayerhazard/aimighty-market` PR #85, 30.9.2026, enthält 26.9.6; vorher 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
@@ -93,7 +93,11 @@ Dieselben Constraints wie bei Insilo. Die wichtigsten für dieses Repo:
    Deployment und der Entrance `rocket` auf `public`. In diesem Modus
    gilt `X-Bfl-User` **nicht** und legt nichts an. Der Markt verlangt
    sonst `authLevel: internal` — `public` ist bei Rocket eine bewusste,
-   von Kai bestätigte Ausnahme (30.9.2026), nicht zurückdrehen. Reihenfolge ist die
+   von Kai bestätigte Ausnahme (30.9.2026), nicht zurückdrehen. Auch vor
+   dem ersten Passwort gilt der Kopf im Modus `eigen` **nicht** (bis 26.9.7
+   tat er es — ein offenes Tor); die Erstinstallation läuft über einen Code
+   in `Data › rocket › rocket-einrichten.txt` (`app/einrichtung.py`, seit
+   26.10.1). Reihenfolge ist die
    Sicherheit: erst `eigen`, dann den Entrance öffnen, nie umgekehrt —
    sonst ist ein gefälschter Kopf der Eigentümer. Im Modus `olares`
    (lokal, Altbestand) gilt weiter: Identität aus `X-Bfl-User`, fehlt er,
@@ -270,7 +274,11 @@ der Lieferung und liest die Token über `var(--am-*)`.
    Escape inklusive); Spalten, die das Handy nicht trägt, kommen aus
    CSS mit Umbruch (`.feldreihe`, `.datensatz-zwei`), nicht inline. Eine
    neue Seite gehört in `frontend/e2e/rundgang.spec.ts`, ein neuer
-   Tastaturweg in `tastatur.spec.ts` — die CI geht sie im Browser durch.
+   Tastaturweg in `tastatur.spec.ts` — die CI geht sie im Browser durch,
+   hell und dunkel. Nichts steht ohne Rand direkt in der Seite (ein
+   Hinweis gehört in `.seitenhinweise`); `e2e/lage.ts` prüft Rand,
+   Abstand und Mitte. Prüfen heißt auch hinsehen: Bilder jeder
+   geänderten Seite in hell und dunkel, mit und ohne Daten.
 
 5. **Bei KI-Funktionen** gelten vier Regeln, jede teuer bezahlt:
 
