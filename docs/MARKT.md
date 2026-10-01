@@ -198,6 +198,8 @@ Vierter Durchlauf: Rocket 26.9.7, PR #85, 30.9.2026 — auf Kais Auftrag vor ein
 
 Fünfter Durchlauf: Rocket 26.10.1, PR #86, 1.10.2026 — Einrichtungscode statt Olares-Kopf bei der Erstinstallation, Layout-Korrekturen. Nach der neuen Regel gebaut: Marcs `main` frisch geholt (2c5b31f), seine Änderungen seit 26.9.7 gelesen (Deploy-Zeitstempel für alle Apps, Kategorien kleingeschrieben, drei Apps entfernt, Relay und Wings nach „Utilities“) und daraufhin `CANONICAL_EPOCH_MS` auf 4374000000000 gehoben. Lokal mit wrangler bewiesen, diesmal ohne Rückfrage von der Standard-Sitzung gemergt, auf `main` byte-gleich geprüft (sha256 `45e77567…2710`, keine alten Schlüssel). Keine Datenbankänderung gegenüber 26.9.7.
 
+Sechster Durchlauf: Rocket 26.10.2, PR #87, 1.10.2026 — Einrichtungscode fehlertolerant (O/I/L, Formprüfung vor dem Senden). Marcs `main` unverändert seit 26.10.1 (c35957f); `CANONICAL_EPOCH_MS` 4374000000000 → 4375000000000. Lokal mit wrangler bewiesen; die von Claude angelegte Sitzung hielt vor dem PR an und wartete auf Kai — Anlass für die Regel „Kai startet die Sitzung“. Auf `main` byte-gleich geprüft (sha256 `f03a5688…a253`, keine alten Schlüssel). Keine Datenbankänderung.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
