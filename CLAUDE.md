@@ -82,7 +82,9 @@ per OAuth-Freigabe des Postfachs, kein SSO), feinere Rechte.
 **Offen:** Stufe 2 (persönliches Postfach) und Stufe 3 (feinere Rechte)
 aus `docs/PLAN-TEAM.md`.
 
-**Mit dem nächsten Release:** Kategorie im Markt „Applications“ statt „AI“
+**Mit dem nächsten Release:** Rocket steht im Markt auch auf Deutsch
+(Beschreibung und „Was ist neu“, `olares/markt/beschreibung.*.md`, Notiz mit
+`## Deutsch`), und die Kategorie ist „Applications“ statt „AI“
 (Kai, 1.10.2026) — in `olares/OlaresManifest.yaml` und der Kopie in der
 Wurzel `categories: [Applications]`; `markt.yml` übernimmt die Kategorien von
 dort in Marcs `_apps.ts`. Nicht ohne Versionssprung mergen: Jede
@@ -339,8 +341,8 @@ der Lieferung und liest die Token über `var(--am-*)`.
    beweist ihn mit wrangler, öffnet den PR und mergt ihn (Kai, 1.10.2026,
    „ganz automatisch“; `docs/MARKT.md`, „Der Weg in den Markt“). Dafür
    gehört in **jeden Release-PR** die Notiz `olares/markt/<version>.md`
-   (`# Titel`, darunter Englisch ab `v<version>: `) — `check-chart.sh`
-   verlangt sie. Claude prüft nach dem Merge den Lauf von `markt` und den
+   (`# Titel`, darunter Englisch ab `v<version>: `, nach `## Deutsch` derselbe
+   Text auf Deutsch) — `check-chart.sh` verlangt sie. Claude prüft nach dem Merge den Lauf von `markt` und den
    Eintrag auf `main` wie jeden anderen Build. Ohne das Geheimnis
    `MARKT_TOKEN` gilt der alte Weg unten. **Marc veröffentlicht dort selbst Apps
    und ändert den Markt** — vor jedem Eintrag `upstream/main` frisch
