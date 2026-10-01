@@ -235,14 +235,20 @@ setzt der Aufrufer daneben (`.marke-produkt`).
 - Entschieden 30.9.2026: Die Marke bleibt, auch wenn der Markt „kein Logo"
   vorgibt.
 
-### HB-DARSTELLUNG — Hell / Dunkel / System ◐
+### HB-DARSTELLUNG — Hell / Dunkel / System, Dichte ◐
 
 `components/darstellung.tsx` → `Darstellungsschalter()`,
 `DARSTELLUNG_SCRIPT`. Drei Knöpfe in einer Gruppe, Wahl im Cookie
 (gerätebezogen, nicht im Konto). Das Skript läuft in `<head>` vor dem
 ersten Anstrich, sonst blitzt Hell auf.
 
-**Übernahme:** Cookie-Name `rocket-darstellung` tauschen.
+Darunter seit 26.10.13 die **Dichte**: `Dichteschalter()`, `DICHTE_SCRIPT`,
+Cookie `rocket-dichte`. Drei Stufen aus `tokens/app.css` — Weit (Vorgabe,
+1,1), Normal (`data-dichte="normal"`, 1,0), Kompakt (`data-dichte="kompakt"`,
+0,9). Nur am Zeiger; am Touchscreen fehlt die Gruppe, und das Skript setzt
+nichts. Geprüft in `e2e/dichte.spec.ts`.
+
+**Übernahme:** Cookie-Namen `rocket-darstellung` und `rocket-dichte` tauschen.
 
 ### HB-NAVIGATION — Seitenspalte ◐
 

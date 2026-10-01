@@ -50,6 +50,9 @@ export const LifeBuoy = symbol("ticket", <><circle cx="12" cy="12" r="10" /><pat
 export const Lightbulb = symbol("erkenntnis", <><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" /></>);
 export const ListChecks = symbol("liste", <><path d="M13 5h8" /><path d="M13 12h8" /><path d="M13 19h8" /><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /></>);
 export const Lokal = symbol("lokal", <><path d="M3.8 10.4 12 3.6l8.2 6.8V19a1.4 1.4 0 0 1-1.4 1.4H5.2A1.4 1.4 0 0 1 3.8 19Z"/><circle cx="12" cy="13.6" r="2.1"/></>);
+export const DichteKompakt = symbol("dichte-kompakt", <><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M21 7.5H3" /><path d="M21 12H3" /><path d="M21 16.5H3" /></>);
+export const DichteNormal = symbol("dichte-normal", <><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M21 9H3" /><path d="M21 15H3" /></>);
+export const DichteWeit = symbol("dichte-weit", <><rect width="18" height="18" x="3" y="3" rx="2" /><path d="M3 12h18" /></>);
 export const Lock = symbol("schloss", <><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>);
 export const LogOut = symbol("abmelden", <><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /></>);
 export const Mail = symbol("post", <><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /><rect x="2" y="4" width="20" height="16" rx="2" /></>);

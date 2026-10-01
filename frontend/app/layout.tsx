@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { DARSTELLUNG_SCRIPT } from "@/components/darstellung";
+import { DARSTELLUNG_SCRIPT, DICHTE_SCRIPT } from "@/components/darstellung";
 import { NAVIGATION_SCRIPT } from "@/components/navigation";
 import { Huelle } from "@/components/huelle";
 import { Abfrageanbieter } from "@/components/abfrageanbieter";
@@ -54,6 +54,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Dasselbe für die eingeklappte Navigation — sonst springt die
             Leiste beim Laden von breit auf schmal. */}
         <script dangerouslySetInnerHTML={{ __html: NAVIGATION_SCRIPT }} />
+        {/* Und für die Dichte (Weit/Normal/Kompakt) — sonst rückt die Seite
+            nach dem Laden zusammen. */}
+        <script dangerouslySetInnerHTML={{ __html: DICHTE_SCRIPT }} />
         {/* Im Tab nur die Rakete (SVG folgt der Tableiste, PNG für Safari),
             auf dem Home-Bildschirm die volle Kachel — aus
             scripts/app-symbole.mjs. */}

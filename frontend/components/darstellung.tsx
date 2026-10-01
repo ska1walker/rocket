@@ -3,7 +3,7 @@
 // Modul HB-DARSTELLUNG — docs/MODULE.md
 
 /**
- * Hell / Dunkel / Wie das System.
+ * Hell / Dunkel / Wie das System — und die Dichte (Weit / Normal / Kompakt).
  *
  * Der Dunkelmodus des AImighty-Systems ist kein Farbfilter, sondern eine
  * eigene Rollenverteilung: im Hellmodus handelt Hanseatenblau und Gold
@@ -16,7 +16,7 @@
  * Benutzerkonto nichts verloren.
  */
 
-import { Monitor, Moon, Sun } from "@/lib/symbole";
+import { DichteKompakt, DichteNormal, DichteWeit, Monitor, Moon, Sun } from "@/lib/symbole";
 import { useEffect, useState } from "react";
 
 export const DARSTELLUNG_COOKIE = "rocket-darstellung";
@@ -101,6 +101,88 @@ export function Darstellungsschalter() {
             setWahl(wert);
             setzeCookie(wert);
             wende(wert);
+          }}
+        >
+          <Zeichen size={16} aria-hidden="true" />
+          <span className="nur-vorleser">{text}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ── Dichte ─────────────────────────────────────────────────────────────
+ * Die drei Stufen aus tokens/app.css im CI: Weit ist die Vorgabe am Zeiger
+ * (--am-skalierung 1,1, kein Attribut), Normal setzt data-dichte="normal"
+ * (1,0), Kompakt data-dichte="kompakt" (0,9). Dichte ändert nur Maße —
+ * Schrift, Farbe und Kontrast bleiben (medien/app.md im CI).
+ *
+ * Am Touchscreen gibt es die Wahl nicht, und das Skript setzt dort nichts:
+ * Die Ziele stehen ohnehin auf 44 px, eine dichtere Stufe nähme nur den
+ * Abstand zwischen ihnen. Wie die Darstellung ein Cookie je Gerät — am
+ * Schreibtisch dicht, am Laptop unterwegs weit. */
+
+export const DICHTE_COOKIE = "rocket-dichte";
+
+export type Dichte = "weit" | "normal" | "kompakt";
+
+/** Läuft vor dem ersten Anstrich (layout.tsx), sonst springt die Seite. */
+export const DICHTE_SCRIPT = `
+(function () {
+  try {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    var m = document.cookie.match(/(?:^|;\\s*)rocket-dichte=([^;]*)/);
+    if (m && (m[1] === "normal" || m[1] === "kompakt"))
+      document.documentElement.setAttribute("data-dichte", m[1]);
+  } catch (e) {}
+})();
+`;
+
+function liesDichte(): Dichte {
+  if (typeof document === "undefined") return "weit";
+  const wert = document.cookie.match(/(?:^|;\s*)rocket-dichte=([^;]*)/)?.[1];
+  return wert === "normal" || wert === "kompakt" ? wert : "weit";
+}
+
+function setzeDichte(wert: Dichte) {
+  const ablauf = new Date();
+  ablauf.setTime(ablauf.getTime() + 365 * 86400 * 1000);
+  document.cookie = `${DICHTE_COOKIE}=${wert}; Path=/; Expires=${ablauf.toUTCString()}; SameSite=Lax`;
+  if (wert === "weit") document.documentElement.removeAttribute("data-dichte");
+  else document.documentElement.setAttribute("data-dichte", wert);
+}
+
+const DICHTEN: { wert: Dichte; text: string; Zeichen: typeof Sun }[] = [
+  { wert: "weit", text: "Weit", Zeichen: DichteWeit },
+  { wert: "normal", text: "Normal", Zeichen: DichteNormal },
+  { wert: "kompakt", text: "Kompakt", Zeichen: DichteKompakt },
+];
+
+export function Dichteschalter() {
+  // null bis nach der Hydration — und am Touchscreen für immer.
+  const [wahl, setWahl] = useState<Dichte | null>(null);
+  const [zeiger, setZeiger] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    setZeiger(true);
+    setWahl(liesDichte());
+  }, []);
+
+  if (!zeiger) return null;
+
+  return (
+    <div className="darstellung-schalter" role="group" aria-label="Dichte">
+      {DICHTEN.map(({ wert, text, Zeichen }) => (
+        <button
+          key={wert}
+          type="button"
+          className={`darstellung-knopf${wahl === wert ? " aktiv" : ""}`}
+          aria-pressed={wahl === wert}
+          title={text}
+          onClick={() => {
+            setWahl(wert);
+            setzeDichte(wert);
           }}
         >
           <Zeichen size={16} aria-hidden="true" />
