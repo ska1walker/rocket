@@ -92,7 +92,8 @@ jobs:
           set +e
           TITEL=$(python3 "$GITHUB_WORKSPACE/scripts/markt-eintrag.py" --markt . \
             --chart "$RUNNER_TEMP/rocket-$V.tgz" --version "$V" \
-            --notizen "$GITHUB_WORKSPACE/olares/markt" --pr-text "$RUNNER_TEMP/pr.md")
+            --notizen "$GITHUB_WORKSPACE/olares/markt" --pr-text "$RUNNER_TEMP/pr.md" \
+            --manifest "$GITHUB_WORKSPACE/olares/OlaresManifest.yaml")
           RC=$?
           set -e
           if [ $RC -eq 3 ]; then

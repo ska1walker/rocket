@@ -8,6 +8,9 @@ Stelle:
   `upgradeDescription` die Notizen jeder Version, die der Markt noch nicht
   kennt (`olares/markt/<version>.md`). Kam ein Eintrag nie an, reist seine
   Notiz mit dem nächsten — Regel 5 in MARKT.md.
+- `functions/_apps.ts`: die Kategorien aus `olares/OlaresManifest.yaml`
+  (`metadata.categories`) — der Markt zeigt die App dort, wo das Chart sie
+  einordnet, und beides kann nicht auseinanderlaufen.
 - `functions/_lib.ts`: der Chart-Schlüssel `rocket-<version>.tgz` mit dem
   frisch kodierten Release-Anhang, alte Rocket-Schlüssel entfernt, und
   `CANONICAL_EPOCH_MS` streng über dem Wert auf main.
@@ -50,6 +53,24 @@ def notiz_lesen(datei: Path) -> tuple[str, str]:
     return titel, text
 
 
+def kategorien_lesen(manifest: Path) -> list[str]:
+    """`metadata.categories` aus dem OlaresManifest, ohne YAML-Bibliothek."""
+    zeilen = manifest.read_text(encoding="utf-8").splitlines()
+    try:
+        i = next(n for n, z in enumerate(zeilen) if z.strip() == "categories:")
+    except StopIteration:
+        raise SystemExit(f"{manifest}: keine categories") from None
+    kategorien = []
+    for z in zeilen[i + 1 :]:
+        s = z.strip()
+        if not s.startswith("- "):
+            break
+        kategorien.append(s[2:].strip().strip("'\""))
+    if not kategorien:
+        raise SystemExit(f"{manifest}: categories ist leer")
+    return kategorien
+
+
 def rocket_block(apps: str) -> tuple[int, int]:
     anfang = apps.index('name: "rocket"')
     ende = apps.index("spec: {", anfang)
@@ -63,6 +84,7 @@ def main() -> None:
     a.add_argument("--version", required=True)
     a.add_argument("--notizen", type=Path, required=True)
     a.add_argument("--pr-text", type=Path)
+    a.add_argument("--manifest", type=Path, help="olares/OlaresManifest.yaml — Kategorien von dort")
     arg = a.parse_args()
 
     v = arg.version
@@ -94,6 +116,16 @@ def main() -> None:
     texte = " ".join(t for _, t in notizen)
 
     block = block.replace(f'version: "{alt}"', f'version: "{v}"', 1)
+    if arg.manifest:
+        kategorien = kategorien_lesen(arg.manifest)
+        block, n = re.subn(
+            r"categories: \[[^\]]*\]",
+            "categories: [" + ", ".join(f'"{k}"' for k in kategorien) + "]",
+            block,
+            count=1,
+        )
+        if n != 1:
+            raise SystemExit("_apps.ts: categories im Rocket-Eintrag nicht gefunden")
     m = re.search(r"upgradeDescription:\s*\n\s*`", block)
     if not m:
         raise SystemExit("_apps.ts: upgradeDescription nicht gefunden")

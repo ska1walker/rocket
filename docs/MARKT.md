@@ -83,8 +83,8 @@ danach prüfte Claude nach. Jetzt läuft nach jedem erfolgreichen `release`
 auf `main` die Action `.github/workflows/markt.yml`:
 
 1. holt den Chart-Anhang des Release und **Marcs `main` frisch**;
-2. baut den Eintrag mit `scripts/markt-eintrag.py`: Version, Notizen vorn in
-   `upgradeDescription`, Chart-Schlüssel frisch kodiert, alte Rocket-Schlüssel
+2. baut den Eintrag mit `scripts/markt-eintrag.py`: Version, Kategorien aus
+   `olares/OlaresManifest.yaml`, Notizen vorn in `upgradeDescription`, Chart-Schlüssel frisch kodiert, alte Rocket-Schlüssel
    weg, `CANONICAL_EPOCH_MS` streng darüber. Kennt der Markt die Version
    schon, endet sie still;
 3. **beweist ihn mit wrangler** (`scripts/markt-beweis.sh`: Hash, Chart

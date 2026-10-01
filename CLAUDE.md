@@ -82,6 +82,12 @@ per OAuth-Freigabe des Postfachs, kein SSO), feinere Rechte.
 **Offen:** Stufe 2 (persönliches Postfach) und Stufe 3 (feinere Rechte)
 aus `docs/PLAN-TEAM.md`.
 
+**Mit dem nächsten Release:** Kategorie im Markt „Applications“ statt „AI“
+(Kai, 1.10.2026) — in `olares/OlaresManifest.yaml` und der Kopie in der
+Wurzel `categories: [Applications]`; `markt.yml` übernimmt die Kategorien von
+dort in Marcs `_apps.ts`. Nicht ohne Versionssprung mergen: Jede
+Chart-Änderung braucht eine neue Version.
+
 ## Plattform-Kontext: Olares OS
 
 Dieselben Constraints wie bei Insilo. Die wichtigsten für dieses Repo:
