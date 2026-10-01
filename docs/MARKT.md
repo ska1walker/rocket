@@ -268,6 +268,8 @@ Neunter Durchlauf: Rocket 26.10.7, PR #90, 1.10.2026 — **der erste ohne Sitzun
 
 Zehnter Durchlauf: Rocket 26.10.8, PR #91, 1.10.2026 — wieder von der Action, zwei Minuten nach dem Release: erstmals mit deutschen Texten (`{ en, de }` für Beschreibung und „Was ist neu“) und der Kategorie „Applications“ aus dem Manifest. Auf `main` byte-gleich geprüft (sha256 `9b6630ed…b307`, Zeitstempel 4384000000000). Keine Datenbankänderung.
 
+Elfter Durchlauf: Rocket 26.10.9, PR #92, 1.10.2026 — von der Action: jedes Symbol aus dem CI-Set (HB-SYMBOL). Marc hatte `main` seit 26.10.8 bewegt (eigene App `aimqwen3asr`) und den Zeitstempel selbst auf 4385000000000 gehoben; die Action rechnete auf frischem `main` 4386000000000. Auf `main` byte-gleich geprüft (sha256 `e05c3747…808a`, keine alten Schlüssel). Keine Datenbankänderung.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
