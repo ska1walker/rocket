@@ -1964,12 +1964,52 @@ Grundfläche Blau-25 nur 4,36:1. Kai entschied am 1.10.2026 für `#567595`
 bewusste Abweichung vom Paket und steht am Token. Auf Blau-50 (4,34:1) und
 Blau-100 (3,96:1) bliebe auch dieser Wert darunter; axe fand über alle
 Seiten aber keinen gedämpften Text auf diesen Flächen. Würde er dort
-nötig, trüge `#4f6c8a` auch auf Blau-100 (4,51:1).
+nötig, trüge `#4f6c8a` auch auf Blau-100 (4,51:1). **Abgelöst in 26.10.5:**
+Fläche 2 ist jede Zeile unter dem Zeiger; seitdem gilt `#4f6c8a` (siehe
+„Token aus dem CI“).
 
 Der einzige übrige Befund war das Schildchen „Wunsch“ auf den
 Erkenntnissen (Gold-800 auf Blau-50, 4,45:1); es nimmt hell Gold-900 wie
 die Stufenpille „Opportunity“. Seitdem läuft der Rundgang **mit** der
 axe-Regel `color-contrast`, hell und dunkel.
+
+## Token aus dem CI (seit 26.10.5)
+
+**Die Werte kommen seit 26.10.5 aus dem CI-Repo.** Der Token-Block oben in
+`frontend/app/globals.css` ([AM-TOKEN]) ist eine unveränderte Kopie von
+`tokens/app.css` in `ska1walker/aimighty-ci`. Dort ist die Quelle für Rocket,
+Insilo und Relay, entschieden von Kai am 1.10.2026 im Abgleich
+(`ABGLEICH.md` im CI-Repo, Paket 1). **Wer einen Wert ändern will, ändert
+ihn dort** und kopiert den Block hierher. Ob beide gleich sind, sagt:
+
+```bash
+python3 ../aimighty-ci/werkzeug/app-abgleich.py frontend/app/globals.css
+```
+
+Was sich mit 26.10.5 geändert hat:
+
+| Was | Vorher | Jetzt | Warum |
+|---|---|---|---|
+| gedämpfter Text, hell | `#567595` | `#4f6c8a` | Auf Fläche 2 (jede Zeile unter dem Zeiger) 4,34:1, im Dialog 3,96:1 — jetzt überall ≥ 4,5:1. Blau 500 bleibt `#587898`: Es trägt Pfeil und Balken in beiden Modi |
+| Text, dunkel | `#ffffff` | `#eef2f6` | Reines Weiß überstrahlt auf Hanseatenblau beim langen Lesen; 16:1 bleibt. Weiß nur noch auf satten Flächen |
+| Gold als Schrift | `#8b6c1f` | `#8c6c1f` | ein Wert mit dem Auftritt |
+| betonter Rand (sekundärer Knopf, offene Auswahl) | Blau 300 / dunkel Blau 600 | Blau 500 / dunkel Blau 400 | 1,86:1 und 2,34:1 — ein Bedienelement braucht 3:1 (WCAG 1.4.11) |
+| Fokusring, dunkel | Gold 900 | Gold 500 | 2,62:1 → 8,06:1 |
+| Schrift auf dem Lösch-Knopf und der roten Zählpille, dunkel | Weiß | `--am-handlung-text` (Blau 900) | 2,45:1 → 7,37:1 |
+| Bewegung | `--am-dauer-kurz/-lang`, Insilo-Reste, feste 100/140 ms mit `ease` | `--am-dauer-schnell/-mittel/-langsam`, `--am-kurve` | eine Leiter, eine Kurve, wie im Auftritt |
+
+**Bewegung reduziert** heißt seitdem überall: Der Zustand stellt sich
+sofort ein (`transition-duration: 0s` unter `prefers-reduced-motion`).
+Die zwei Schleifen — das zwinkernde Schild und der Suchbalken — haben
+weiter ihre eigenen ruhigen Fassungen.
+
+**Warum die Prüfung das nicht fand:** axe misst Schrift gegen ihren Grund,
+und nur, was gerade zu sehen ist — keine Ränder, keinen Fokusring, keine
+Zeile unter dem Zeiger, keinen Knopf, den der Rundgang nicht öffnet.
+Seitdem rechnet `lib/__tests__/kontrast.test.ts` jedes Paar aus den Token,
+hell und dunkel: Text auf jeder Fläche (4,5:1), Schrift auf jedem Knopf
+(4,5:1), Rand und Fokusring (3:1). Gegen den Stand von 26.10.4 fällt er an
+elf Stellen.
 
 ## Untermenü der Einstellungen (seit 26.10.4)
 
