@@ -105,6 +105,10 @@ export function Einfuhrblock({ vorwahl }: { vorwahl?: Objektart }) {
   const bisher = useQuery({
     queryKey: ["einfuhren"],
     queryFn: () => api.get<Einfuhr[]>("/api/einfuhr"),
+    // Den Verlauf sehen seit 26.10.15 nur Verwalter: Er nennt, was
+    // übersprungen wurde, und damit Adressen aus dem ganzen Bestand.
+    enabled: darfVerwalten,
+    retry: false,
   });
 
   function formular(f: File, zuordnung?: (string | null)[]): FormData {
