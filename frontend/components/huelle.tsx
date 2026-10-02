@@ -3,7 +3,7 @@
 // Modul HB-NAVIGATION — docs/MODULE.md
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bookmark,
   Building2,
@@ -30,9 +30,10 @@ import { useNavigationKlapp } from "@/components/navigation";
 import { Kontozeile, Nachweiszeile } from "@/components/konto";
 import { Kopfleiste } from "@/components/kopfleiste";
 import {
-  GRUPPEN,
   NACHRANGIG,
+  gruppenFuer,
   istAktiv,
+  offenFuerEingeschraenkt,
   leisteZiele,
   mobilRest,
   mobilZiele,
@@ -40,6 +41,8 @@ import {
   type NavZiel,
 } from "@/lib/navigation";
 import { useFavoriten } from "@/lib/wer";
+import { useSicht } from "@/lib/sicht";
+import { Laedt, Leer } from "@/components/zustaende";
 
 // Die Hülle hat drei Bereiche: Navigation, Inhalt, Ablage. Die Ablage
 // trägt Kontext zum gewählten Ding und ist nie eine zweite Inhaltsspalte —
@@ -72,10 +75,18 @@ export function Huelle({ children }: { children: React.ReactNode }) {
   const [mobilMehr, setMobilMehr] = useState(false);
   const [feldOffen, setFeldOffen] = useState(false);
   const mehrKnopf = useRef<HTMLButtonElement>(null);
+  const router = useRouter();
+  const { eingeschraenkt } = useSicht();
+  // Start rechnet über den ganzen Bestand; wer eingeschränkt ist, beginnt
+  // bei den Kontakten (seit 26.10.17).
+  const verschlossen = eingeschraenkt && !offenFuerEingeschraenkt(aktuell);
   useEffect(() => {
     setMobilMehr(false);
     setFeldOffen(false);
   }, [aktuell]);
+  useEffect(() => {
+    if (verschlossen && aktuell === "/") router.replace("/kontakte");
+  }, [verschlossen, aktuell, router]);
 
   function feldSchliessen(fokus = true) {
     setFeldOffen(false);
@@ -102,7 +113,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
       <nav className="huelle-nav" aria-label="Hauptnavigation">
         {/* Die Leiste: Favoriten — oder die Vorgabe, solange es keine gibt.
             Alles andere steht hinter „Mehr“, wie bei HubSpot. */}
-        <NavGruppe ziele={leisteZiele(favoriten)} aktuell={aktuell} favoriten={favoriten} umschalten={umschalten} eingeklappt={eingeklappt === true} />
+        <NavGruppe ziele={leisteZiele(favoriten, eingeschraenkt)} aktuell={aktuell} favoriten={favoriten} umschalten={umschalten} eingeklappt={eingeklappt === true} />
         <div className="huelle-nav-gruppe">
           <button
             ref={mehrKnopf}
@@ -119,7 +130,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
           </button>
         </div>
         {feldOffen && (
-          <MehrFeld aktuell={aktuell} favoriten={favoriten} umschalten={umschalten} schliessen={feldSchliessen} knopf={mehrKnopf} />
+          <MehrFeld eingeschraenkt={eingeschraenkt} aktuell={aktuell} favoriten={favoriten} umschalten={umschalten} schliessen={feldSchliessen} knopf={mehrKnopf} />
         )}
 
         <div className="huelle-nav-spacer" />
@@ -128,7 +139,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
 
         {/* Die schmale Leiste unten: Favoriten oder die Vorgabe, dazu „Mehr“. */}
         <div className="huelle-nav-mobil">
-          {mobilZiele(favoriten).map((z) => (
+          {mobilZiele(favoriten, eingeschraenkt).map((z) => (
             <NavLink key={z.pfad} ziel={z} aktuell={aktuell} />
           ))}
           <button
@@ -144,7 +155,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
         </div>
         {mobilMehr && (
           <div className="huelle-nav-mehr" id="huelle-nav-mehr" role="group" aria-label="Weitere Bereiche">
-            {mobilRest(favoriten).map((z) => (
+            {mobilRest(favoriten, eingeschraenkt).map((z) => (
               <NavLink key={z.pfad} ziel={z} aktuell={aktuell} />
             ))}
           </div>
@@ -156,7 +167,20 @@ export function Huelle({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <main className="huelle-inhalt">{children}</main>
+      <main className="huelle-inhalt">
+        {!verschlossen ? (
+          children
+        ) : aktuell === "/" ? (
+          <Laedt />
+        ) : (
+          // Der Server sagte hier ohnehin 403; die Seite sagt es vorher und
+          // in einem Satz, statt in jedem Block einen Fehler zu zeigen.
+          <Leer
+            titel="Dieser Bereich ist nicht freigegeben"
+            text="Sie sehen die Kontakte, Aufgaben, Listen und Kampagnen der Firmen, für die Sie Zugriff haben. Weitere Bereiche gibt Ihnen die Leitung frei."
+          />
+        )}
+      </main>
       <Assistent />
     </div>
   );
@@ -169,12 +193,14 @@ export function Huelle({ children }: { children: React.ReactNode }) {
  * schließen es; der Fokus kehrt zum Knopf zurück.
  */
 function MehrFeld({
+  eingeschraenkt,
   aktuell,
   favoriten,
   umschalten,
   schliessen,
   knopf,
 }: {
+  eingeschraenkt: boolean;
   aktuell: string;
   favoriten: string[];
   umschalten: (pfad: string) => void;
@@ -201,7 +227,8 @@ function MehrFeld({
     };
   }, [schliessen, knopf]);
 
-  const spalten = GRUPPEN.map((g, i) => (i === GRUPPEN.length - 1 ? { ...g, ziele: [...g.ziele, ...NACHRANGIG] } : g));
+  const gruppen = gruppenFuer(eingeschraenkt);
+  const spalten = gruppen.map((g, i) => (i === gruppen.length - 1 ? { ...g, ziele: [...g.ziele, ...NACHRANGIG] } : g));
 
   return (
     <div className="huelle-mehr" id="huelle-mehr" role="dialog" aria-label="Alle Bereiche" ref={wurzel}>

@@ -4572,9 +4572,9 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
    Datum brechen nicht um — eine Plakette mit Zeilenumbruch ist keine
    Plakette mehr, und „08.09.202 / 6" liest niemand als Datum. */
 .mitgliedertabelle th:nth-child(2),
-.mitgliedertabelle td:nth-child(2) { width: 8.5rem; white-space: nowrap; }
+.mitgliedertabelle td:nth-child(2) { width: 10.5rem; white-space: nowrap; }
 .mitgliedertabelle th:nth-child(3),
-.mitgliedertabelle td:nth-child(3) { width: 9rem; white-space: nowrap; }
+.mitgliedertabelle td:nth-child(3) { width: 10rem; white-space: nowrap; }
 /* Zwei Zeichenknöpfe zu je 51 px plus Innenabstand — gemessen, nicht geschätzt. */
 .mitgliedertabelle th:last-child,
 .mitgliedertabelle td:last-child { width: 7.5rem; text-align: right; white-space: nowrap; }
@@ -5324,4 +5324,107 @@ select,
   font-size: 0.8125rem;
   color: var(--am-text-gedaempft);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Sicht nach Zuordnung [RK-SICHT] ──────────────────────────────────────────────── */
+/* Wer was sieht (seit 26.10.17): der Dialog an der Person, die Bereiche,
+   die Sichtbarkeit an der Firma, die Bezugspersonen am Kontakt. Listen
+   statt Tabellen — jede Zeile ist ein Name und höchstens eine Wahl. */
+.mitglied-sicht-text { display: block; }
+
+/* Unter der Rolle, eine Zeile: das Auge sagt „Sicht“, das Wort den Stand.
+   Die Spalten (Zugang 10,5 rem, Rolle 10 rem) sind mit dem Knopf und der
+   Plakette „ohne zweiten Faktor“ gemessen, die vorher schon überstand. */
+.mitglied-sicht {
+  display: flex;
+  margin-top: var(--am-raum-1);
+}
+
+.sicht-zwischentitel {
+  margin: var(--am-raum-4) 0 var(--am-raum-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--am-text-sekundaer);
+}
+
+.sicht-liste {
+  list-style: none;
+  margin: 0 0 var(--am-raum-3);
+  padding: 0;
+}
+
+/* Viele Firmen rollen im Dialog für sich, statt ihn zu sprengen. */
+.sicht-liste-rollt {
+  max-height: 16rem;
+  overflow-y: auto;
+  border: 1px solid var(--am-trennlinie);
+  border-radius: var(--am-radius-mittel);
+  padding: 0 var(--am-raum-3);
+}
+
+.sicht-zeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--am-raum-2);
+  padding: var(--am-raum-2) 0;
+  border-bottom: 1px solid var(--am-trennlinie);
+}
+
+.sicht-zeile:last-child { border-bottom: 0; }
+
+.sicht-zeile label {
+  display: flex;
+  align-items: center;
+  gap: var(--am-raum-2);
+  min-width: 0;
+}
+
+.sicht-zeile select { width: auto; }
+
+.sicht-aktionen {
+  display: flex;
+  gap: var(--am-raum-1);
+}
+
+/* Der Satz, der sagt, was am Ende gilt — wichtiger als jedes Häkchen. */
+.sicht-satz {
+  margin: var(--am-raum-4) 0 0;
+  padding: var(--am-raum-3);
+  border-radius: var(--am-radius-mittel);
+  background: var(--am-flaeche-2);
+  color: var(--am-text-primaer);
+}
+
+.sicht-umbenennen,
+.sicht-anlegen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--am-raum-2);
+  width: 100%;
+}
+
+.sicht-umbenennen input { flex: 1 1 10rem; min-width: 0; }
+.sicht-anlegen .feld { flex: 1 1 12rem; margin-bottom: 0; }
+
+.sicht-bezug {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--am-raum-2);
+}
+
+.sicht-bezug-form {
+  margin-top: var(--am-raum-3);
+  padding-top: var(--am-raum-3);
+  border-top: 1px solid var(--am-trennlinie);
+}
+
+/* Der Satz für Eingeschränkte steht über der Liste — mit Luft zur
+   Ansichtsleiste, die sonst unmittelbar an ihm klebt. */
+.seitenhinweise:not(:empty) + .ansichtsleiste,
+.seitenhinweise:not(:empty) + * > .ansichtsleiste:first-child {
+  margin-top: var(--am-raum-4);
 }

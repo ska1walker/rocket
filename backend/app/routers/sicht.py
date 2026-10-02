@@ -16,7 +16,7 @@ Im Vertrieb heißt das „Außendienst Nord sieht das Gebiet Nord“, im Verein
 """
 
 from typing import Literal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import asyncpg
 from fastapi import APIRouter, Depends, HTTPException
@@ -277,12 +277,81 @@ async def firma_in_bereich(
                              diff={"bereich_id": str(payload.bereich_id) if payload.bereich_id else None})
 
 
+class FirmaSichtPerson(BaseModel):
+    user_id: UUID
+    name: str
+    # Wodurch: `alles` (volle Sicht), `firma` (Zugriff auf diese Firma) oder
+    # `bereich` (über ihren Bereich).
+    ueber: Literal["alles", "firma", "bereich"]
+    stufe: Literal["lesen", "bearbeiten"]
+
+
+class FirmaSicht(BaseModel):
+    bereich_id: UUID | None
+    personen: list[FirmaSichtPerson]
+
+
+@router.get("/api/companies/{company_id}/sicht", response_model=FirmaSicht)
+async def firma_sicht(company_id: UUID, user: CurrentUser = Depends(verwaltet)) -> FirmaSicht:
+    """Wer sieht diese Firma mit ihren Kontakten — für die Leitung.
+
+    Die Namen der Firma sieht jede Person; hier stehen nur die, die auch
+    ihre Kontakte sehen: alle mit voller Sicht, dazu die Eingeschränkten mit
+    Zugriff auf die Firma oder ihren Bereich.
+    """
+    async with acquire_as(user.user_id) as conn:
+        bereich = await conn.fetchrow(
+            "select bereich_id from public.companies where id = $1 and org_id = $2 and deleted_at is null",
+            company_id, user.org_id,
+        )
+        if bereich is None:
+            raise HTTPException(404, "Firma nicht gefunden")
+        zeilen = await conn.fetch(
+            """
+            select u.id as user_id, coalesce(u.display_name, u.olares_username) as name,
+                   'alles' as ueber, case when r.role = 'viewer' then 'lesen' else 'bearbeiten' end as stufe
+              from public.user_org_roles r join public.users u on u.id = r.user_id
+             where r.org_id = $1 and r.sicht = 'alles' and u.deleted_at is null
+            union all
+            select u.id, coalesce(u.display_name, u.olares_username),
+                   case when z.company_id is not null then 'firma' else 'bereich' end, z.stufe
+              from public.zugriffe z
+              join public.user_org_roles r on r.user_id = z.user_id and r.org_id = z.org_id
+              join public.users u on u.id = z.user_id
+             where z.org_id = $1 and r.sicht = 'eingeschraenkt' and u.deleted_at is null
+               and (z.company_id = $2 or (z.bereich_id is not null and z.bereich_id = $3))
+             order by 3, 2
+            """,
+            user.org_id, company_id, bereich["bereich_id"],
+        )
+    return FirmaSicht(
+        bereich_id=bereich["bereich_id"],
+        personen=[FirmaSichtPerson(**dict(z)) for z in zeilen],
+    )
+
+
 # ── Beziehungen zwischen Kontakten ───────────────────────────────────────
 
 
+class NeueBezugsperson(BaseModel):
+    first_name: str | None = Field(default=None, max_length=120)
+    last_name: str = Field(min_length=1, max_length=120)
+    email: str | None = Field(default=None, max_length=200)
+    phone: str | None = Field(default=None, max_length=60)
+
+
 class BeziehungIn(BaseModel):
-    bezug_id: UUID
+    """Eine vorhandene Bezugsperson (`bezug_id`) oder eine neue (`neu`)."""
+
+    bezug_id: UUID | None = None
+    neu: NeueBezugsperson | None = None
     art: str = Field(default="erziehungsberechtigt", min_length=1, max_length=60)
+
+    @model_validator(mode="after")
+    def _eines(self) -> "BeziehungIn":
+        if (self.bezug_id is None) == (self.neu is None):
+            raise ValueError("Genau eines: bezug_id oder neu.")
+        return self
 
 
 class Beziehung(BaseModel):
@@ -324,29 +393,54 @@ async def beziehung_anlegen(
     darf, darf das — die Datenbank prüft es (kontakt_beziehungen_schreiben)."""
     if payload.bezug_id == contact_id:
         raise HTTPException(400, "Ein Kontakt ist nicht seine eigene Bezugsperson.")
-    async with acquire_as(user.user_id) as conn:
-        beide = await conn.fetch(
-            "select id, trim(concat_ws(' ', first_name, last_name)) as name from public.contacts "
-            "where id = any($1::uuid[]) and org_id = $2 and deleted_at is null",
-            [contact_id, payload.bezug_id], user.org_id,
+    art = payload.art.strip()
+    async with acquire_as(user.user_id) as conn, conn.transaction():
+        kind = await conn.fetchval(
+            "select trim(concat_ws(' ', first_name, last_name)) from public.contacts "
+            "where id = $1 and org_id = $2 and deleted_at is null",
+            contact_id, user.org_id,
         )
-        namen = {z["id"]: z["name"] for z in beide}
-        if contact_id not in namen or payload.bezug_id not in namen:
+        if kind is None:
             raise HTTPException(404, "Kontakt nicht gefunden")
-        try:
-            neu = await conn.fetchval(
-                "insert into public.kontakt_beziehungen (org_id, kontakt_id, bezug_id, art) "
-                "values ($1, $2, $3, $4) returning id",
-                user.org_id, contact_id, payload.bezug_id, payload.art.strip(),
+        if payload.neu is not None:
+            # Neu und gleich verknüpft, in einem Zug. Ein Kontakt ohne Firma ist
+            # für eine eingeschränkte Person erst sichtbar, wenn er am Kind
+            # hängt — darum ohne `returning` angelegt, mit selbst gewählter
+            # Kennung (siehe contacts_sicht_anlegen in 0037).
+            bezug_id = uuid4()
+            n = payload.neu
+            name = " ".join(x for x in ((n.first_name or "").strip(), n.last_name.strip()) if x)
+            await conn.execute(
+                "insert into public.contacts (id, org_id, first_name, last_name, email, phone, owner_id, created_by) "
+                "values ($1, $2, $3, $4, $5, $6, $7, $7)",
+                bezug_id, user.org_id, (n.first_name or "").strip() or None, n.last_name.strip(),
+                (n.email or "").strip() or None, (n.phone or "").strip() or None, user.handelnder,
             )
+            await audit.log_fuer(conn, user, action="create", entity="contacts", entity_id=bezug_id,
+                                 diff={"name": name, "bezugsperson_fuer": str(contact_id)})
+        else:
+            bezug_id = payload.bezug_id
+            name = await conn.fetchval(
+                "select trim(concat_ws(' ', first_name, last_name)) from public.contacts "
+                "where id = $1 and org_id = $2 and deleted_at is null",
+                bezug_id, user.org_id,
+            )
+            if name is None:
+                raise HTTPException(404, "Kontakt nicht gefunden")
+        try:
+            async with conn.transaction():
+                neu = await conn.fetchval(
+                    "insert into public.kontakt_beziehungen (org_id, kontakt_id, bezug_id, art) "
+                    "values ($1, $2, $3, $4) returning id",
+                    user.org_id, contact_id, bezug_id, art,
+                )
         except asyncpg.UniqueViolationError as e:
             raise HTTPException(409, "Diese Beziehung gibt es schon.") from e
         except asyncpg.InsufficientPrivilegeError as e:
             raise HTTPException(403, "Diesen Kontakt dürfen Sie nicht bearbeiten.") from e
         await audit.log_fuer(conn, user, action="create", entity="contacts", entity_id=contact_id,
-                             diff={"beziehung": payload.art.strip(), "bezug_id": str(payload.bezug_id)})
-    return Beziehung(id=neu, richtung="bezug", contact_id=payload.bezug_id,
-                     name=namen[payload.bezug_id], art=payload.art.strip())
+                             diff={"beziehung": art, "bezug_id": str(bezug_id)})
+    return Beziehung(id=neu, richtung="bezug", contact_id=bezug_id, name=name, art=art)
 
 
 @router.delete("/api/contacts/{contact_id}/beziehungen/{beziehung_id}", status_code=204)

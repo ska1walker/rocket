@@ -7,12 +7,15 @@ import { Knopfmenue } from "@/components/knopfmenue";
 import { Segmentliste } from "@/components/segmentliste";
 import { FirmaAnlegen } from "@/components/firma-anlegen";
 import { useNeuGewuenscht } from "@/lib/neu";
+import { useSicht } from "@/lib/sicht";
+import { SichtHinweis } from "@/components/sicht-verwalten";
 
 export default function FirmenSeite() {
   const router = useRouter();
   const [offen, setOffen] = useState(false);
   // „Neu" aus der Kopfleiste zeigt hierher und will den Dialog offen sehen.
   const neu = useNeuGewuenscht();
+  const { eingeschraenkt } = useSicht();
   useEffect(() => {
     if (neu) setOffen(true);
   }, [neu]);
@@ -22,17 +25,20 @@ export default function FirmenSeite() {
       <Seitenkopf titel="Firmen">
         {/* Der zweite Weg gehört neben den ersten: Wer auf eine leere
             Liste schaut, sucht den Import nicht in den Einstellungen. */}
-        <Knopfmenue
-          text="Firma anlegen"
-          eintraege={[
-            { text: "Neu anlegen", onWahl: () => setOffen(true) },
-            {
-              text: "Aus CSV importieren",
-              hinweis: "Mehrere auf einmal, aus einer Tabelle",
-              onWahl: () => router.push("/import?entity=companies"),
-            },
-          ]}
-        />
+        {/* Firmen legt an, wer alles sieht (companies_sicht_anlegen in 0037). */}
+        {!eingeschraenkt && (
+          <Knopfmenue
+            text="Firma anlegen"
+            eintraege={[
+              { text: "Neu anlegen", onWahl: () => setOffen(true) },
+              {
+                text: "Aus CSV importieren",
+                hinweis: "Mehrere auf einmal, aus einer Tabelle",
+                onWahl: () => router.push("/import?entity=companies"),
+              },
+            ]}
+          />
+        )}
       </Seitenkopf>
 
       {offen && (
@@ -44,6 +50,10 @@ export default function FirmenSeite() {
           }}
         />
       )}
+
+      <div className="seitenhinweise">
+        <SichtHinweis />
+      </div>
 
       <Segmentliste
         entity="companies"

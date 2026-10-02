@@ -3014,11 +3014,53 @@ Eine neue Route ist von selbst dabei. Bricht der Test nach einer Änderung,
 ist das kein Testproblem: Es ist ein Weg, auf dem eine eingeschränkte
 Person sieht, was sie nicht sehen soll.
 
+### Die Oberfläche (seit 26.10.17)
+
+Schritt 3: Einschränken geht ohne API. Baustein RK-SICHT (`docs/MODULE.md`).
+
+- **Einstellungen › Firma und Team:** an jeder Person unter der Rolle der
+  Knopf „alles“ / „eingeschränkt“. Er öffnet den Sicht-Dialog: Alles, oder
+  nur ausgewählte Bereiche und Firmen, je bearbeiten oder nur lesen.
+  Darunter ein Satz, der sagt, was am Ende gilt (`lib/sicht.ts`,
+  `sichtSatz`). Eigentümerin und Verwalter sehen immer alles; für sie zeigt
+  der Dialog nur das. Die Rolle „Nur lesen“ ist jetzt wählbar.
+- **Bereiche** stehen im selben Bereich darunter: anlegen, umbenennen,
+  löschen mit Rückfrage.
+- **Firmenseite, rechte Spalte, „Sichtbarkeit“** (nur Verwalter): Bereich
+  wählen, und wer die Kontakte sieht — direkt oder über den Bereich, mit
+  Stufe, dazu die Zahl der Personen mit voller Sicht
+  (`GET /api/companies/{id}/sicht`).
+- **Kontaktseite, „Bezugspersonen“:** vorhandene Person verknüpfen oder eine
+  neue anlegen und verknüpfen — in einem Schritt, weil eine neue Person ohne
+  Firma für einen Trainer erst am Kind sichtbar wird (`neu` in
+  `POST /api/contacts/{id}/beziehungen`).
+- **Für Eingeschränkte:** Die Navigation zeigt nur Kontakte, Firmen,
+  Aufgaben, Listen, Kampagnen, Fragen und Einstellungen
+  (`lib/navigation.ts`, `EINGESCHRAENKT_OFFEN` — dasselbe wie die
+  Erlaubnisliste im Backend). Start führt zu den Kontakten, jede andere
+  Seite sagt „Dieser Bereich ist nicht freigegeben“, statt in jedem Block
+  einen Fehler zu zeigen. Über Kontakten und Firmen steht in
+  `.seitenhinweise`, wessen Kontakte die Person sieht. Erstellen bietet nur
+  Kontakt und Aufgabe an; Leads, Anreichern, Podcast, Zusammenfassung,
+  Firmen zuordnen und Senden über Relay fehlen. Die Einstellungen zeigen
+  nur das eigene Konto.
+- **Nebenbei gefunden:** Mitgliedern ohne Verwaltung bot die Tabelle
+  Umbenennen, Einladen und Entfernen an, die der Server abwies — jetzt nur
+  noch Verwaltern. Und im Block „Zweiter Faktor“ stand „Einrichten“ ohne
+  Abstand unter dem Satz; das sah erst der Rundgang als Trainer, die erste
+  geprüfte Person mit Passwort.
+
+`e2e/sicht.spec.ts`: Die Leitung legt per API zwei Firmen und einen Trainer
+für Firma A an; der Trainer löst eine Einladung ein und geht Kontakte,
+Kontakt, Firmen, beide Firmen, Aufgaben, Listen, Kampagnen, Fragen und
+Einstellungen durch — hell und dunkel, Desktop und Handy, mit denselben
+Prüfungen wie der Rundgang (keine Antwort 4xx der API, Lage, axe). Dazu
+der Sicht-Dialog per Tastatur, „Sichtbarkeit“ an der Firma und Eltern am
+Kind.
+
 ### Was noch kommt
 
-Schritt 3: die Oberfläche (Zugriffe beim Einladen anhaken, Bereiche,
-„Wer sieht diese Firma“, Eltern am Kind, Navigation für Eingeschränkte
-ohne die Wege, die ihnen nicht offenstehen, Rundgang als Trainer). Bis
-dahin geht das Einschränken über die API, und eine eingeschränkte Person
-sieht in der Oberfläche Seiten, die ihr dann 403 melden.
+Schritt 4 (vertrauliche Feldgruppen) und Schritt 5 (Modus Vertrieb/Verein:
+Begriffe wie Mannschaft und Person, Vorlagen für Trainer, Jugendleiter …)
+aus `docs/PLAN-TEAM.md`.
 

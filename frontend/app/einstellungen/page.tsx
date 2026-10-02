@@ -31,6 +31,8 @@ import { Absenderkontoblock } from "@/components/absenderkonto";
 import { AnreicherungEinstellungen } from "@/components/anreicherung-einstellungen";
 import { Sprachausgabeblock } from "@/components/podcast";
 import { Unternavigation, type UnternavGruppe } from "@/components/unternavigation";
+import { Bereicheblock } from "@/components/sicht-verwalten";
+import { useSicht } from "@/lib/sicht";
 
 /**
  * Die Einstellungen in sechs Unterpunkten.
@@ -56,6 +58,13 @@ const GRUPPEN: { titel: string; schluessel: Bereich[] }[] = [
   { titel: "Vertrieb", schluessel: ["vertrieb", "eigenschaften", "email"] },
   { titel: "System", schluessel: ["ki", "daten"] },
 ];
+
+// Wer eingeschränkt sieht, verwaltet nichts: Für ihn gibt es nur das
+// eigene Konto (Passwort, zweiter Faktor, Geräte).
+const NAVIGATION_EINGESCHRAENKT: UnternavGruppe[] = [{
+  titel: "Konto",
+  eintraege: [{ ...BEREICHE[0], href: `/einstellungen?bereich=${BEREICHE[0].schluessel}` }],
+}];
 
 const NAVIGATION: UnternavGruppe[] = GRUPPEN.map((g) => ({
   titel: g.titel,
@@ -168,8 +177,9 @@ function Inhalt() {
   const suche = useSearchParams();
   // Ohne gültigen Bereich zeigt der Desktop „Firma und Team“, das Handy die
   // Übersicht (CSS an `data-auswahl`, siehe HB-UNTERNAV).
+  const { eingeschraenkt } = useSicht();
   const gewaehlt = suche.get("bereich") as Bereich | null;
-  const ausgewaehlt = BEREICHE.some((b) => b.schluessel === gewaehlt);
+  const ausgewaehlt = BEREICHE.some((b) => b.schluessel === gewaehlt && (!eingeschraenkt || b.schluessel === "firma"));
   const bereich: Bereich = ausgewaehlt ? gewaehlt! : "firma";
   const bereichName = BEREICHE.find((b) => b.schluessel === bereich)!.text;
 
@@ -187,7 +197,7 @@ function Inhalt() {
       <Seitenkopf titel="Einstellungen" />
 
       <div className="unternav-seite" data-auswahl={ausgewaehlt ? "ja" : "nein"}>
-        <Unternavigation gruppen={NAVIGATION} aktiv={bereich} label="Bereiche der Einstellungen" />
+        <Unternavigation gruppen={eingeschraenkt ? NAVIGATION_EINGESCHRAENKT : NAVIGATION} aktiv={bereich} label="Bereiche der Einstellungen" />
 
         <div className="unternav-inhalt">
           <div className="unternav-zurueck">
@@ -208,8 +218,9 @@ function Inhalt() {
           <div className="datensatz datensatz-lesespalte">
             {bereich === "firma" && (
               <>
-                <Absenderblock />
+                {!eingeschraenkt && <Absenderblock />}
                 <Mitgliederblock />
+                <Bereicheblock />
                 <Passwortblock />
                 <Faktorblock />
                 <Geraeteblock />

@@ -50,6 +50,8 @@ export interface Company {
   contact_count: number;
   open_deal_count: number;
   open_amount_cents: number;
+  /** In welchem Bereich die Firma steht (Sicht nach Zuordnung). */
+  bereich_id?: string | null;
 }
 
 export type Einwilligung = "keine" | "angefragt" | "bestaetigt" | "bestandskunde" | "abgemeldet";
@@ -639,6 +641,8 @@ export interface Wer {
   zweiter_faktor_fehlt: boolean;
   /** `owner` | `admin` | `member` | `viewer`. */
   rolle: string;
+  /** Seit 26.10.17: `alles` oder `eingeschraenkt` (nur Firmen mit Zugriff). */
+  sicht?: "alles" | "eingeschraenkt";
   /** Hat diese Person ein eigenes Passwort? */
   passwort_gesetzt: boolean;
   /** Was diese Person für sich eingestellt hat. */
@@ -1346,4 +1350,42 @@ export interface DbErgebnis {
   zeilen: unknown[][];
   abgeschnitten: boolean;
   dauer_ms: number;
+}
+
+// ── Sicht nach Zuordnung (seit 26.10.15, Oberfläche seit 26.10.17) ───────
+
+export type Zugriffsstufe = "lesen" | "bearbeiten";
+
+export interface Zugriff {
+  company_id?: string | null;
+  bereich_id?: string | null;
+  stufe: Zugriffsstufe;
+  /** Nur in der Antwort: Name der Firma oder des Bereichs. */
+  name?: string | null;
+}
+
+export interface Sicht {
+  sicht: "alles" | "eingeschraenkt";
+  zugriffe: Zugriff[];
+}
+
+export interface Bereich {
+  id: string;
+  name: string;
+  position: number;
+  firmen: number;
+}
+
+export interface FirmaSicht {
+  bereich_id: string | null;
+  personen: { user_id: string; name: string; ueber: "alles" | "firma" | "bereich"; stufe: Zugriffsstufe }[];
+}
+
+export interface Beziehung {
+  id: string;
+  /** `bezug`: die Bezugsperson dieses Kontakts; `fuer`: für wen er Bezugsperson ist. */
+  richtung: "bezug" | "fuer";
+  contact_id: string;
+  name: string;
+  art: string;
 }

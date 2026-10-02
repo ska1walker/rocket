@@ -27,10 +27,15 @@ import { Marke } from "@/components/marke";
 import { Klappschalter } from "@/components/navigation";
 import { Suchfeld } from "@/components/suche";
 import { useMenue } from "@/components/knopfmenue";
+import { useSicht } from "@/lib/sicht";
 
 function NeuMenue() {
   const { offen, setOffen, wurzel, knopf, feld } = useMenue();
   const id = useId();
+  // Eingeschränkt: Kontakte und Aufgaben — Firmen, Leads und Tickets legt
+  // an, wer alles sieht (seit 26.10.17).
+  const { eingeschraenkt } = useSicht();
+  const ziele = eingeschraenkt ? NEU_ZIELE.filter((z) => z.pfad === "/kontakte" || z.pfad === "/aufgaben") : NEU_ZIELE;
 
   return (
     <div className="knopfmenue" ref={wurzel}>
@@ -57,7 +62,7 @@ function NeuMenue() {
 
       {offen && (
         <div className="knopfmenue-feld" id={id} role="menu" ref={feld}>
-          {NEU_ZIELE.map((z) => (
+          {ziele.map((z) => (
             <Link
               key={z.pfad}
               role="menuitem"
