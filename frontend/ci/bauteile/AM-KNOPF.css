@@ -87,6 +87,24 @@
     color: var(--am-text-primaer);
   }
 
+  /* Gefahr: nur für das, was etwas wegnimmt, und immer mit Objekt im Wort
+     („Aufnahme löschen“, nicht „Löschen“). Nie still, nie zweimal auf einer
+     Ansicht (kern/schaltflaechen.md, ABGLEICH R1). Schrift wie auf der
+     Handlung: hell Weiß (5,92:1), dunkel Blau 900 (7,37:1) — Weiß auf dem
+     hellen Rot des Dunkelmodus kam auf 2,45:1 (ABGLEICH T9). Beim
+     Überfahren heller wie jede Handlung, nicht dunkler. Bis ci-26.10.3
+     stand die Regel nur in Rocket (RK-SEGMENTLISTE); seit Insilo gehört sie
+     allen (ABGLEICH IN-R1). */
+  .btn-gefahr {
+    background: var(--am-fehler);
+    color: var(--am-handlung-text);
+    border-color: var(--am-fehler);
+  }
+  .btn-gefahr:hover {
+    background: var(--am-fehler-hover);
+    border-color: var(--am-fehler-hover);
+  }
+
   .btn-gesperrt,
   .btn:disabled {
     background: var(--am-flaeche-2);
