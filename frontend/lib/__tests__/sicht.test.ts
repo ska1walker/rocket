@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { aufzaehlung, sichtSatz } from "@/lib/sicht";
+import { begriffe } from "@/lib/begriffe";
 
 describe("Sicht in Klartext", () => {
   it("zählt auf wie ein Mensch", () => {
@@ -32,5 +33,13 @@ describe("Sicht in Klartext", () => {
   it("nennt vertrauliche Felder, wenn danach gefragt ist", () => {
     expect(sichtSatz("Kim", "alles", [], true)).toBe("Kim sieht alle Firmen und Kontakte. Vertrauliche Felder auch.");
     expect(sichtSatz("Kim", "alles", [], false)).toBe("Kim sieht alle Firmen und Kontakte. Vertrauliche Felder nicht.");
+  });
+
+  it("spricht im Verein von Mannschaften und Personen", () => {
+    const v = begriffe("verein");
+    expect(sichtSatz("Max", "alles", [], undefined, v)).toBe("Max sieht alle Mannschaften und Personen.");
+    expect(sichtSatz("Max", "eingeschraenkt", [{ name: "1. Herren", bereich: false, stufe: "bearbeiten" }], false, v)).toBe(
+      "Max sieht die Personen von 1. Herren und kann sie bearbeiten. Vertrauliche Felder nicht.",
+    );
   });
 });

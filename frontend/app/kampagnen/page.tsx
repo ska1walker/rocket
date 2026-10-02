@@ -10,10 +10,12 @@ import { api } from "@/lib/api";
 import { datum, KAMPAGNE_STATUS_ART, KAMPAGNE_STATUS_TEXT } from "@/lib/format";
 import type { Kampagne, Liste } from "@/lib/typen";
 import { Seitenkopf } from "@/components/seitenkopf";
+import { useBegriffe } from "@/lib/modus";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
 import { Dialog } from "@/components/dialog";
 
 function KampagneAnlegen({ vorgewaehlt, beiSchliessen, beiErfolg }: { vorgewaehlt: string | null; beiSchliessen: () => void; beiErfolg: (id: string) => void }) {
+  const b = useBegriffe();
   const [name, setName] = useState("");
   const [listeId, setListeId] = useState(vorgewaehlt ?? "");
   const listen = useQuery({ queryKey: ["listen"], queryFn: () => api.get<Liste[]>("/api/listen") });
@@ -22,7 +24,7 @@ function KampagneAnlegen({ vorgewaehlt, beiSchliessen, beiErfolg }: { vorgewaehl
     onSuccess: (k) => beiErfolg(k.id),
   });
   return (
-    <Dialog titel="Kampagne anlegen" breite="schmal" beiSchliessen={beiSchliessen} beiSenden={() => anlegen.mutate()}>
+    <Dialog titel={b.kampagneAnlegen} breite="schmal" beiSchliessen={beiSchliessen} beiSenden={() => anlegen.mutate()}>
           <div className="dialog-koerper">
           <div className="feld">
             <label htmlFor="ka-name">Name</label>
@@ -54,11 +56,12 @@ function Inhalt() {
   const suche = useSearchParams();
   const [offen, setOffen] = useState(!!suche.get("liste"));
   const kampagnen = useQuery({ queryKey: ["kampagnen"], queryFn: () => api.get<Kampagne[]>("/api/kampagnen") });
+  const b = useBegriffe();
 
   return (
     <>
-      <Seitenkopf titel="Kampagnen" zahl={kampagnen.data ? `${kampagnen.data.length}` : undefined}>
-        <button type="button" className="btn btn-primaer" onClick={() => setOffen(true)}>Kampagne anlegen</button>
+      <Seitenkopf titel={b.kampagnen} zahl={kampagnen.data ? `${kampagnen.data.length}` : undefined}>
+        <button type="button" className="btn btn-primaer" onClick={() => setOffen(true)}>{b.kampagneAnlegen}</button>
       </Seitenkopf>
 
       {offen && (
@@ -73,14 +76,14 @@ function Inhalt() {
         {kampagnen.isPending && <Laedt />}
         {kampagnen.isError && <Fehler text={(kampagnen.error as Error).message} />}
         {kampagnen.data && kampagnen.data.length === 0 && (
-          <Leer titel="Noch keine Kampagne" text="Eine Kampagne ist Betreff, Text und eine Liste. Geschrieben wird nur, wer eingewilligt hat." />
+          <Leer titel={b.keineKampagne} text={`Eine ${b.kampagne} ist Betreff, Text und eine Liste. Geschrieben wird nur, wer eingewilligt hat.`} />
         )}
         {kampagnen.data && kampagnen.data.length > 0 && (
           <div className="rollbar" tabIndex={0}>
             <table className="tabelle" style={{ minInlineSize: "48rem" }}>
               <thead>
                 <tr>
-                  <th>Kampagne</th>
+                  <th>{b.kampagne}</th>
                   <th>Liste</th>
                   <th>Status</th>
                   <th className="rechts">Gesendet</th>

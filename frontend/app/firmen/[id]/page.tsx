@@ -26,6 +26,7 @@ import { Fehler, Laedt } from "@/components/zustaende";
 import { Dokumente } from "@/components/dokumente";
 import { FirmaSichtblock } from "@/components/sicht-verwalten";
 import { useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
 
 export default function FirmaSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -36,7 +37,11 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
   // Leads, Anreichern, Podcast und AI-Zusammenfassung rechnen über den
   // ganzen Bestand — wer eingeschränkt sieht, bekommt sie nicht angeboten.
   const { alles } = useSicht();
-  const pipelines = useQuery({ queryKey: ["pipelines"], queryFn: () => api.get<Pipeline[]>("/api/pipelines"), enabled: alles });
+  // Im Verein (seit 26.10.19) keine Leads, keine Anreicherung aus dem Netz
+  // und keine Gesprächsvorbereitung — das ist Vertrieb.
+  const b = useBegriffe();
+  const vertrieb = alles && b.modus === "vertrieb";
+  const pipelines = useQuery({ queryKey: ["pipelines"], queryFn: () => api.get<Pipeline[]>("/api/pipelines"), enabled: vertrieb });
   const standard = pipelines.data?.find((p) => p.is_default) ?? pipelines.data?.[0];
 
   const firma = useQuery({
@@ -52,7 +57,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
   const deals = useQuery({
     queryKey: ["firma-deals", id],
     queryFn: () => api.get<Deal[]>(`/api/deals${suchparameter({ company_id: id })}`),
-    enabled: alles,
+    enabled: vertrieb,
   });
 
   if (firma.isPending) return <Laedt />;
@@ -62,7 +67,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
 
   return (
     <>
-      <Seitenkopf titel={f.name} pfad={{ text: "← Firmen", href: "/firmen" }}>
+      <Seitenkopf titel={f.name} pfad={{ text: `← ${b.firmen}`, href: "/firmen" }}>
         {alles && (
           <KiKnopf
             pfad={`/api/ki/companies/${id}/zusammenfassung`}
@@ -91,13 +96,13 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
         <div>
           <Feldgruppen
             entity="companies"
-            titel="Über diese Firma"
+            titel={b.ueberFirma}
             pfad={`/api/companies/${id}`}
             abfrageSchluessel={["firma", id]}
             zurueckNach="/firmen"
-            loeschknopf="Firma löschen"
-            loeschtext="Die Firma wird aus allen Listen genommen. Kontakte und Leads bleiben bestehen und lassen sich 30 Tage wiederherstellen."
-            kopfrechts={<Stufenpille stufe={f.lifecycle_stage} />}
+            loeschknopf={b.firmaLoeschen}
+            loeschtext={`Die ${b.firma} wird aus allen Listen genommen. ${b.kontakte}${vertrieb ? " und Leads" : ""} bleiben bestehen und lassen sich 30 Tage wiederherstellen.`}
+            kopfrechts={b.modus === "vertrieb" ? <Stufenpille stufe={f.lifecycle_stage} /> : undefined}
             werte={f as unknown as Record<string, unknown>}
             sonder={{
               domain: {
@@ -109,7 +114,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
             }}
           />
 
-          {alles && <Anreicherungsblock entity="companies" id={id} werte={f as unknown as Record<string, unknown>} abfrageSchluessel={["firma", id]} />}
+          {vertrieb && <Anreicherungsblock entity="companies" id={id} werte={f as unknown as Record<string, unknown>} abfrageSchluessel={["firma", id]} />}
 
           {f.ai_summary && (
             <section className="block">
@@ -124,7 +129,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
             </section>
           )}
 
-          {alles && <Podcastblock entity="companies" entityId={id} />}
+          {vertrieb && <Podcastblock entity="companies" entityId={id} />}
         </div>
 
         {/* Mitte: was passiert ist */}
@@ -135,7 +140,7 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
 
         {/* Rechts: was daranhängt */}
         <div>
-          {alles && <section className="block">
+          {vertrieb && <section className="block">
             <div className="block-kopf">
               <h2>Leads</h2>
               <button type="button" className="btn btn-still btn-klein" onClick={() => setDealOffen(true)} disabled={!standard}>Anlegen</button>
@@ -165,9 +170,9 @@ export default function FirmaSeite({ params }: { params: Promise<{ id: string }>
 
           <section className="block">
             <div className="block-kopf">
-              <h2>Kontakte</h2>
+              <h2>{b.kontakte}</h2>
               <div className="block-kopf-aktionen">
-                {alles && (
+                {vertrieb && (
                   <button type="button" className="btn btn-still btn-klein" onClick={() => setSuchenOffen((o) => !o)} aria-expanded={suchenOffen} title="Ansprechpartner aus Website und Suchtreffern finden">
                     <UserSearch size={16} aria-hidden="true" />
                     Finden

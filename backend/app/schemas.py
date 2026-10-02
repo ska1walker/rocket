@@ -397,6 +397,8 @@ class OrgSettingsIn(Absender):
     podcast_automatisch: bool | None = None
     default_currency: str | None = None
     locale: str | None = None
+    # Vertrieb oder Verein (seit 26.10.19): nur Begriffe und Navigation.
+    modus: Literal["vertrieb", "verein"] | None = None
 
 
 class OrgSettings(Absender):
@@ -469,6 +471,9 @@ class OrgSettings(Absender):
     podcast_automatisch: bool = False
     default_currency: str = "EUR"
     locale: str = "de"
+    # Vertrieb oder Verein (seit 26.10.19): ändert Begriffe und Navigation,
+    # keine Daten und keine Rechte.
+    modus: str = "vertrieb"
 
 
 # ── Produkte ────────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { sichtSatz, useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
 import { useWer } from "@/lib/wer";
 import type { Bereich, Company, FirmaSicht, Mitglied, Sicht, Zugriff, Zugriffsstufe } from "@/lib/typen";
 import { Dialog, Rueckfrage } from "@/components/dialog";
@@ -41,10 +42,20 @@ function wahlAus(zugriffe: Zugriff[]): Wahl {
 }
 
 /** Sicht und Zugriffe einer Person setzen — alles auf einmal, wie die API. */
-export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; beiSchliessen: () => void }) {
+export function SichtDialog({
+  mitglied,
+  beiSchliessen,
+  stufe = "bearbeiten",
+}: {
+  mitglied: Mitglied;
+  beiSchliessen: () => void;
+  /** Mit welcher Stufe eine neu angehakte Firma beginnt (aus der Vorlage). */
+  stufe?: Zugriffsstufe;
+}) {
   const client = useQueryClient();
   const name = mitglied.display_name ?? mitglied.olares_username;
   const verwaltet = mitglied.role === "owner" || mitglied.role === "admin";
+  const w = useBegriffe();
   const bereiche = useBereiche();
   const firmen = useFirmenAuswahl();
   const stand = useQuery({
@@ -107,6 +118,7 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
           .filter(([k]) => namen.has(k))
           .map(([k, stufe]) => ({ ...namen.get(k)!, stufe })),
         aktuell.geheim,
+        w,
       )
     : "";
 
@@ -132,8 +144,8 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
                 value={aktuell.sicht}
                 onChange={(e) => setEntwurf({ ...aktuell, sicht: e.target.value as Sicht["sicht"] })}
               >
-                <option value="alles">Alles — alle Firmen und Kontakte</option>
-                <option value="eingeschraenkt">Nur die Kontakte ausgewählter Firmen und Bereiche</option>
+                <option value="alles">Alles — alle {w.firmen} und {w.kontakte}</option>
+                <option value="eingeschraenkt">Nur die {w.kontakte} ausgewählter {w.firmen} und Bereiche</option>
               </select>
             </div>
 
@@ -149,7 +161,7 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
                   />
                   <span>
                     Sieht vertrauliche Felder
-                    <span className="text-leise-klein"> · etwa Bank und Beitrag, nur an Kontakten, die {name} ohnehin sieht</span>
+                    <span className="text-leise-klein"> · etwa Bank und Beitrag, nur an {w.kontakteDativ}, die {name} ohnehin sieht</span>
                   </span>
                 </label>
               </li>
@@ -159,7 +171,7 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
               <>
                 <h3 className="sicht-zwischentitel">Bereiche</h3>
                 {bereiche.data?.length === 0 && (
-                  <p className="text-leise-klein">Noch keine Bereiche. Sie entstehen unter Firma und Team › Bereiche.</p>
+                  <p className="text-leise-klein">Noch keine Bereiche. Sie entstehen unter {w.firmaUndTeam} › Bereiche.</p>
                 )}
                 <ul className="sicht-liste sicht-liste-rollt">
                   {bereiche.data?.map((b) => (
@@ -167,21 +179,22 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
                       key={b.id}
                       schluessel={`b:${b.id}`}
                       text={b.name}
-                      zusatz={`${b.firmen} ${b.firmen === 1 ? "Firma" : "Firmen"}, auch künftige`}
+                      zusatz={`${b.firmen} ${b.firmen === 1 ? w.firma : w.firmen}, auch künftige`}
                       wahl={aktuell.wahl}
                       setze={setze}
+                      vorgabe={stufe}
                     />
                   ))}
                 </ul>
 
-                <h3 className="sicht-zwischentitel">Einzelne Firmen</h3>
+                <h3 className="sicht-zwischentitel">Einzelne {w.firmen}</h3>
                 <div className="feld">
-                  <label htmlFor="sicht-filter">Firmen filtern</label>
+                  <label htmlFor="sicht-filter">{w.firmen} filtern</label>
                   <input id="sicht-filter" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Name" />
                 </div>
                 <ul className="sicht-liste sicht-liste-rollt">
                   {gefiltert.map((f) => (
-                    <Zeile key={f.id} schluessel={`f:${f.id}`} text={f.name} wahl={aktuell.wahl} setze={setze} />
+                    <Zeile key={f.id} schluessel={`f:${f.id}`} text={f.name} wahl={aktuell.wahl} setze={setze} vorgabe={stufe} />
                   ))}
                 </ul>
               </>
@@ -212,18 +225,20 @@ function Zeile({
   zusatz,
   wahl,
   setze,
+  vorgabe,
 }: {
   schluessel: string;
   text: string;
   zusatz?: string;
   wahl: Wahl;
   setze: (schluessel: string, stufe: Zugriffsstufe | null) => void;
+  vorgabe: Zugriffsstufe;
 }) {
   const stufe = wahl.get(schluessel);
   return (
     <li className="sicht-zeile">
       <label>
-        <input type="checkbox" checked={!!stufe} onChange={(e) => setze(schluessel, e.target.checked ? "bearbeiten" : null)} />
+        <input type="checkbox" checked={!!stufe} onChange={(e) => setze(schluessel, e.target.checked ? vorgabe : null)} />
         <span>
           {text}
           {zusatz && <span className="text-leise-klein"> · {zusatz}</span>}
@@ -242,6 +257,7 @@ function Zeile({
 /** Bereiche: Gruppen von Firmen. Nur für die, die verwalten. */
 export function Bereicheblock() {
   const { verwaltet } = useSicht();
+  const w = useBegriffe();
   const client = useQueryClient();
   const bereiche = useBereiche();
   const [name, setName] = useState("");
@@ -275,8 +291,8 @@ export function Bereicheblock() {
       </div>
       <div className="block-inhalt">
         <Erklaerung
-          kurz="Gruppen von Firmen — etwa ein Gebiet oder eine Altersklasse. Wer Zugriff auf einen Bereich hat, sieht die Kontakte jeder Firma darin."
-          lang={<>Ein Bereich schließt auch Firmen ein, die später hineinkommen. In welchem Bereich eine Firma steht, wählen Sie auf ihrer Seite unter „Sichtbarkeit“. Wer welche Bereiche sieht, steht bei den Personen oben unter „Sicht“.</>}
+          kurz={`Gruppen von ${w.firmen} — etwa ein Gebiet oder eine Altersklasse. Wer Zugriff auf einen Bereich hat, sieht die ${w.kontakte} jeder ${w.firma} darin.`}
+          lang={<>Ein Bereich schließt auch {w.firmen} ein, die später hineinkommen. In welchem Bereich eine {w.firma} steht, wählen Sie auf ihrer Seite unter „Sichtbarkeit“. Wer welche Bereiche sieht, steht bei den Personen oben unter „Sicht“.</>}
         />
         {bereiche.isPending && <Laedt />}
         {bereiche.data?.length === 0 && <p className="text-leise">Noch kein Bereich.</p>}
@@ -294,7 +310,7 @@ export function Bereicheblock() {
                   <>
                     <span>
                       {b.name}
-                      <span className="text-leise-klein"> · {b.firmen} {b.firmen === 1 ? "Firma" : "Firmen"}</span>
+                      <span className="text-leise-klein"> · {b.firmen} {b.firmen === 1 ? w.firma : w.firmen}</span>
                     </span>
                     <span className="sicht-aktionen">
                       <button type="button" className="btn btn-still btn-klein" aria-label={`${b.name} umbenennen`} title={`${b.name} umbenennen`} onClick={() => { setBearbeitet(b.id); setEntwurf(b.name); }}>
@@ -327,7 +343,7 @@ export function Bereicheblock() {
         <Rueckfrage
           titel={<>„{loeschen.name}“ löschen</>}
           label="Bereich löschen"
-          text="Die Firmen bleiben und stehen danach in keinem Bereich. Wer nur über diesen Bereich Zugriff hatte, sieht ihre Kontakte nicht mehr."
+          text={`Die ${w.firmen} bleiben und stehen danach in keinem Bereich. Wer nur über diesen Bereich Zugriff hatte, sieht ihre ${w.kontakte} nicht mehr.`}
           beiSchliessen={() => setLoeschen(null)}
           vorsicht
           knopf={
@@ -346,6 +362,7 @@ export function Bereicheblock() {
 /** An der Firma: in welchem Bereich sie steht, und wer ihre Kontakte sieht. */
 export function FirmaSichtblock({ firmaId }: { firmaId: string }) {
   const { verwaltet } = useSicht();
+  const w = useBegriffe();
   const client = useQueryClient();
   const bereiche = useBereiche();
   const sicht = useQuery({
@@ -387,13 +404,13 @@ export function FirmaSichtblock({ firmaId }: { firmaId: string }) {
           </select>
           {bereiche.data?.length === 0 && (
             <p className="feld-hinweis">
-              Bereiche legen Sie unter <Link href="/einstellungen?bereich=firma">Einstellungen › Firma und Team</Link> an.
+              Bereiche legen Sie unter <Link href="/einstellungen?bereich=firma">Einstellungen › {w.firmaUndTeam}</Link> an.
             </p>
           )}
         </div>
         {bereichSetzen.isError && <Fehler text={(bereichSetzen.error as Error).message} />}
 
-        <p className="sicht-zwischentitel">Wer die Kontakte sieht</p>
+        <p className="sicht-zwischentitel">Wer die {w.kontakte} sieht</p>
         {sicht.isPending && <Laedt />}
         <ul className="sicht-liste">
           {eingeschraenkte.map((p) => (
@@ -422,6 +439,7 @@ export function FirmaSichtblock({ firmaId }: { firmaId: string }) {
  */
 export function SichtHinweis() {
   const { eingeschraenkt } = useSicht();
+  const w = useBegriffe();
   const { wer } = useWer();
   const eigene = useQuery({
     queryKey: ["sicht", wer.data?.user_id],
@@ -435,8 +453,8 @@ export function SichtHinweis() {
       <Eye size={16} aria-hidden="true" />
       <span>
         {namen.length === 0
-          ? "Sie sehen keine Kontakte — Ihnen ist noch keine Firma freigegeben. Fragen Sie die Leitung."
-          : `Sie sehen die Kontakte von ${namen.length === 1 ? namen[0] : `${namen.slice(0, -1).join(", ")} und ${namen[namen.length - 1]}`}.`}
+          ? `Sie sehen keine ${w.kontakte} — Ihnen ist noch keine ${w.firma} freigegeben. Fragen Sie die Leitung.`
+          : `Sie sehen die ${w.kontakte} von ${namen.length === 1 ? namen[0] : `${namen.slice(0, -1).join(", ")} und ${namen[namen.length - 1]}`}.`}
       </span>
     </div>
   );

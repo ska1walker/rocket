@@ -8,6 +8,7 @@ import { Segmentliste } from "@/components/segmentliste";
 import { KontaktAnlegen } from "@/components/kontakt-anlegen";
 import { useNeuGewuenscht } from "@/lib/neu";
 import { useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
 import { SichtHinweis } from "@/components/sicht-verwalten";
 
 export default function KontakteSeite() {
@@ -16,21 +17,22 @@ export default function KontakteSeite() {
   // „Neu" aus der Kopfleiste zeigt hierher und will den Dialog offen sehen.
   const neu = useNeuGewuenscht();
   const { eingeschraenkt } = useSicht();
+  const b = useBegriffe();
   useEffect(() => {
     if (neu) setOffen(true);
   }, [neu]);
 
   return (
     <>
-      <Seitenkopf titel="Kontakte">
+      <Seitenkopf titel={b.kontakte}>
         {/* Der zweite Weg gehört neben den ersten: Wer auf eine leere
             Liste schaut, sucht den Import nicht in den Einstellungen. */}
         {/* Eingeschränkt: anlegen ja, Import nein — er läuft über den ganzen Bestand. */}
         {eingeschraenkt ? (
-          <button type="button" className="btn btn-primaer" onClick={() => setOffen(true)}>Kontakt anlegen</button>
+          <button type="button" className="btn btn-primaer" onClick={() => setOffen(true)}>{b.kontaktAnlegen}</button>
         ) : (
           <Knopfmenue
-            text="Kontakt anlegen"
+            text={b.kontaktAnlegen}
             eintraege={[
               { text: "Neu anlegen", onWahl: () => setOffen(true) },
               {
@@ -60,8 +62,8 @@ export default function KontakteSeite() {
       <Segmentliste
         entity="contacts"
         basisPfad="/kontakte"
-        suchePlatzhalter="Name, E-Mail oder Firma"
-        leerTitel="Kein Kontakt gefunden"
+        suchePlatzhalter={`Name, E-Mail oder ${b.firma}`}
+        leerTitel={b.keinKontaktGefunden}
         leerText="Entweder ist der Filter zu eng, oder hier ist noch niemand angelegt."
         stapelfelder={[
           { schluessel: "lifecycle_stage", text: "Stufe" },

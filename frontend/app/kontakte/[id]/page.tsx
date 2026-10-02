@@ -19,6 +19,7 @@ import { KontaktListen } from "@/components/kontakt-listen";
 import { Dokumente } from "@/components/dokumente";
 import { Bezugspersonen } from "@/components/kontakt-beziehungen";
 import { useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
 
 /** Entwurf für eine Ansprache. Er wird hingelegt, nie versendet. */
 function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
@@ -130,6 +131,10 @@ function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
 export default function KontaktSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { alles } = useSicht();
+  // Im Verein (seit 26.10.19) keine Anreicherung aus dem Netz und keine
+  // Lebenszyklus-Stufe — eine Person im Verein ist kein Lead.
+  const b = useBegriffe();
+  const vertrieb = b.modus === "vertrieb";
 
   const kontakt = useQuery({
     queryKey: ["kontakt", id],
@@ -146,20 +151,20 @@ export default function KontaktSeite({ params }: { params: Promise<{ id: string 
       <Seitenkopf
         titel={personName(k.first_name, k.last_name)}
         zahl={[k.job_title, k.company_name].filter(Boolean).join(" · ") || undefined}
-        pfad={{ text: "← Kontakte", href: "/kontakte" }}
+        pfad={{ text: `← ${b.kontakte}`, href: "/kontakte" }}
       />
 
       <div className="datensatz">
         <div>
           <Feldgruppen
             entity="contacts"
-            titel="Über diesen Kontakt"
+            titel={b.ueberKontakt}
             pfad={`/api/contacts/${id}`}
             abfrageSchluessel={["kontakt", id]}
             zurueckNach="/kontakte"
-            loeschknopf="Kontakt löschen"
-            loeschtext="Der Kontakt wird aus allen Listen genommen. Verlauf und Zuordnungen bleiben 30 Tage wiederherstellbar."
-            kopfrechts={<Stufenpille stufe={k.lifecycle_stage} />}
+            loeschknopf={b.kontaktLoeschen}
+            loeschtext={`${vertrieb ? "Der Kontakt" : "Die Person"} wird aus allen Listen genommen. Verlauf und Zuordnungen bleiben 30 Tage wiederherstellbar.`}
+            kopfrechts={vertrieb ? <Stufenpille stufe={k.lifecycle_stage} /> : undefined}
             werte={k as unknown as Record<string, unknown>}
             sonder={{
               company_name: {
@@ -173,7 +178,7 @@ export default function KontaktSeite({ params }: { params: Promise<{ id: string 
             }}
           />
 
-          {alles && <Anreicherungsblock entity="contacts" id={id} werte={k as unknown as Record<string, unknown>} abfrageSchluessel={["kontakt", id]} />}
+          {alles && vertrieb && <Anreicherungsblock entity="contacts" id={id} werte={k as unknown as Record<string, unknown>} abfrageSchluessel={["kontakt", id]} />}
 
           <KontaktFirmen kontaktId={id} />
 

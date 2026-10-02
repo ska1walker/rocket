@@ -284,6 +284,8 @@ export interface OrgSettings extends Absender {
   podcast_automatisch: boolean;
   default_currency: string;
   locale: string;
+  /** Seit 26.10.19: Vertrieb oder Verein — nur Begriffe und Navigation. */
+  modus?: "vertrieb" | "verein";
 }
 
 /** Ein Lauf der Anreicherung — was gelesen, vorgeschlagen, geschrieben wurde. */
@@ -647,6 +649,8 @@ export interface Wer {
   sicht?: "alles" | "eingeschraenkt";
   /** Seit 26.10.18: darf vertrauliche Felder sehen und ändern. */
   vertraulich?: boolean;
+  /** Seit 26.10.19: Vertrieb oder Verein — nur Begriffe und Navigation. */
+  modus?: "vertrieb" | "verein";
   /** Hat diese Person ein eigenes Passwort? */
   passwort_gesetzt: boolean;
   /** Was diese Person für sich eingestellt hat. */

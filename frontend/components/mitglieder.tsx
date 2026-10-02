@@ -12,6 +12,8 @@ import type { Mitglied, Wer } from "@/lib/typen";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { Erklaerung } from "@/components/erklaerung";
 import { SichtDialog } from "@/components/sicht-verwalten";
+import { useBegriffe } from "@/lib/modus";
+import { OHNE_VORLAGE, vorlagen, type Vorlage } from "@/lib/vorlagen";
 
 export function Mitgliederblock() {
   const client = useQueryClient();
@@ -19,8 +21,14 @@ export function Mitgliederblock() {
   // Welche Zeile gerade umbenannt wird, und der Entwurf des Namens.
   const [bearbeitet, setBearbeitet] = useState<string | null>(null);
   const [entwurf, setEntwurf] = useState("");
-  // Wessen Sicht gerade im Dialog steht.
+  // Wessen Sicht gerade im Dialog steht — und mit welcher Stufe neu
+  // angehakte Firmen beginnen (aus der Vorlage).
   const [sichtFuer, setSichtFuer] = useState<Mitglied | null>(null);
+  const [sichtStufe, setSichtStufe] = useState<Vorlage["stufe"]>("bearbeiten");
+  // Vorlage beim Hinzufügen (seit 26.10.19): setzt Rolle, Sicht und den
+  // Haken für vertrauliche Felder auf einmal.
+  const [vorlage, setVorlage] = useState("");
+  const w = useBegriffe();
 
   const mitglieder = useQuery({
     queryKey: ["mitglieder"],
@@ -32,11 +40,31 @@ export function Mitgliederblock() {
     queryFn: () => api.get<Wer>("/api/mitglieder/wer"),
   });
 
+  // `admin` vergibt nur die Eigentümerin — Vorlagen mit Verwaltung bietet
+  // die Liste deshalb nur ihr an.
+  const angeboten = vorlagen(w.modus).filter((v) => v.rolle !== "admin" || wer.data?.rolle === "owner");
+  const gewaehlt = angeboten.find((v) => v.schluessel === vorlage) ?? OHNE_VORLAGE;
+
   const anlegen = useMutation({
-    mutationFn: () => api.post<Mitglied>("/api/mitglieder", { display_name: name }),
-    onSuccess: () => {
+    mutationFn: async () => {
+      const v = gewaehlt;
+      const neu = await api.post<Mitglied>("/api/mitglieder", { display_name: name });
+      if (v.rolle !== "member") await api.patch(`/api/mitglieder/${neu.id}/rolle`, { role: v.rolle });
+      if (v.sicht !== "alles" || v.vertraulich) {
+        await api.put(`/api/mitglieder/${neu.id}/sicht`, { sicht: v.sicht, zugriffe: [], vertraulich_sehen: v.vertraulich });
+      }
+      return { neu, v };
+    },
+    onSuccess: ({ neu, v }) => {
       setName("");
+      setVorlage("");
       client.invalidateQueries({ queryKey: ["mitglieder"] });
+      // Eingeschränkt ohne Zugriff sähe die Person nichts: gleich weiter
+      // zur Auswahl von Firmen und Bereichen.
+      if (v.sicht === "eingeschraenkt") {
+        setSichtStufe(v.stufe);
+        setSichtFuer({ ...neu, role: v.rolle, sicht: "eingeschraenkt" });
+      }
     },
   });
 
@@ -274,7 +302,13 @@ export function Mitgliederblock() {
           </tbody>
         </table>
 
-        {sichtFuer && <SichtDialog mitglied={sichtFuer} beiSchliessen={() => setSichtFuer(null)} />}
+        {sichtFuer && (
+          <SichtDialog
+            mitglied={sichtFuer}
+            stufe={sichtStufe}
+            beiSchliessen={() => { setSichtFuer(null); setSichtStufe("bearbeiten"); }}
+          />
+        )}
 
         {link && (
           <div className="einladung-ausgabe">
@@ -337,32 +371,43 @@ export function Mitgliederblock() {
         {umbenennen.isError && <Fehler text={(umbenennen.error as Error).message} />}
 
         {darfVerwalten && <form
-          style={{ display: "flex", gap: "var(--am-raum-2)", alignItems: "flex-end" }}
           onSubmit={(e) => {
             e.preventDefault();
             if (name.trim().length >= 2) anlegen.mutate();
           }}
         >
-          <div className="feld" style={{ flex: 1, marginBottom: 0 }}>
-            <label htmlFor="mitgliedname">Person hinzufügen</label>
-            <input
-              id="mitgliedname"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Marc Bayer"
-            />
-            <p className="feld-hinweis">
-              Aus dem Namen wird der Anmeldename. Danach erzeugen Sie mit dem Schlüssel einen
-              Einladungslink; damit setzt die Person ihr Passwort.
-            </p>
+          <div className="feldreihe">
+            <div className="feld">
+              <label htmlFor="mitgliedname">Person hinzufügen</label>
+              <input
+                id="mitgliedname"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Marc Bayer"
+              />
+              <p className="feld-hinweis">
+                Aus dem Namen wird der Anmeldename. Danach erzeugen Sie mit dem Schlüssel einen
+                Einladungslink; damit setzt die Person ihr Passwort.
+              </p>
+            </div>
+            <div className="feld">
+              <label htmlFor="mitgliedvorlage">Vorlage</label>
+              <select id="mitgliedvorlage" value={vorlage} onChange={(e) => setVorlage(e.target.value)}>
+                <option value="">{OHNE_VORLAGE.text}</option>
+                {angeboten.map((v) => <option key={v.schluessel} value={v.schluessel}>{v.text}</option>)}
+              </select>
+              <p className="feld-hinweis">{gewaehlt.hinweis}.</p>
+            </div>
           </div>
-          <button
-            type="submit"
-            className="btn btn-primaer"
-            disabled={name.trim().length < 2 || anlegen.isPending}
-          >
-            {anlegen.isPending ? "Legt an …" : "Hinzufügen"}
-          </button>
+          <div className="btn-reihe">
+            <button
+              type="submit"
+              className="btn btn-primaer"
+              disabled={name.trim().length < 2 || anlegen.isPending}
+            >
+              {anlegen.isPending ? "Legt an …" : "Hinzufügen"}
+            </button>
+          </div>
         </form>}
         {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
 
