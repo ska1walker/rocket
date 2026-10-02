@@ -64,6 +64,7 @@ GESPERRT: dict[str, str] = {
     "passwort_links": "Codes zum Zurücksetzen des Passworts — wer sie hat, übernimmt das Konto",
     "oeffentliche_links": "Schlüssel der Links in Mails — wer sie hat, kann im Namen eines Empfängers abmelden",
     "vertrauliche_werte": "vertrauliche Felder (Bank, Beitrag …) — sie stehen am Datensatz, für wen sie freigegeben sind",
+    "mailkonten": "persönliche Postfächer mit Passwort — jede Person sieht nur ihres, unter Einstellungen › Mein Postfach",
     "api_schluessel": "API-Schlüssel (nur als Hash) — wer die Liste sieht, sieht, welche Programme zugreifen",
 }
 

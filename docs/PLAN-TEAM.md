@@ -1,6 +1,8 @@
 # Plan: Rocket für Vertriebsteams
 
-> **Stand:** 30. September 2026 · **Status:** Stufe 1 umgesetzt (26.9.2), Stufen 2 und 3 geplant
+> **Stand:** 2. Oktober 2026 · **Status:** Stufe 1 umgesetzt (26.9.2), Stufe 3 umgesetzt (26.10.15–26.10.19), Stufe 2a umgesetzt (26.10.20)
+> **Geändert von Kai am 2.10.2026:** Microsoft 365 per OAuth-Freigabe
+> wird **nicht** gebaut. Ein Microsoft-Postfach bekommt den Grund gesagt.
 > **Entschieden von Kai am 29.9.2026:**
 > - Anmeldung an Rocket **nur mit Rocket-Passwort und zweitem Faktor** —
 >   keine Anmeldung über Microsoft oder Google (kein SSO).
@@ -62,7 +64,14 @@ nutzbar. Das ist die Anmeldung an Rocket, und sie bleibt es.
 Tests: Anmeldung ohne Code scheitert, falscher Code bremst, ein
 Wiederherstellungscode gilt genau einmal, Pflicht greift.
 
-## Stufe 2 — Das persönliche Postfach
+## Stufe 2 — Das persönliche Postfach (2a ✅ umgesetzt in 26.10.20)
+
+Umgesetzt ist Verbinden und Einlesen (`docs/BETRIEB.md`, „Mein Postfach“).
+Abweichend vom Plan unten: kein Microsoft (Kai, 2.10.2026), IONOS mit
+SMTP 465 SSL statt 587 (beides geht), die Mails als Aktivität `email`
+statt in `mails`, und `mailkonten` gehört nur seiner Person — Verwalter
+sehen es nicht. Senden über das eigene Postfach kommt als 2b, privat
+markieren als 2c.
 
 Der größte Nutzen. Baut auf `app/postfach.py` auf (liest schon heute als
 zweiter Klient, fasst keine Markierung an, merkt sich die UID).
@@ -195,15 +204,16 @@ Fünf Schritte, je ein Release:
 | Stufe | Inhalt | Umfang |
 |---|---|---|
 | 1 | zweiter Faktor, Reset per Mail, Geräte abmelden, Protokoll, Sitzplatz weg | klein |
-| 2a | Postfach verbinden mit Voreinstellungen und (App-)Passwort, Einlesen nur Kontakte, Senden aus eigenem Konto | mittel |
-| 2b | privat markieren, Sichtbarkeit in der Zeilensicherheit | klein |
-| 2c | Microsoft 365 per OAuth-Freigabe (XOAUTH2), Token-Erneuerung | mittel |
+| 2a ✅ | Postfach verbinden mit Voreinstellungen und (App-)Passwort, Einlesen nur Kontakte (26.10.20) | mittel |
+| 2b | Senden aus eigenem Konto, `APPEND` nach Gesendet, Vorschlag „Kontakt anlegen?“ | mittel |
+| 2c | privat markieren, Sichtbarkeit in der Zeilensicherheit | klein |
+| — | ~~Microsoft 365 per OAuth-Freigabe~~ — bewusst nicht (Kai, 2.10.2026) | — |
 | 3 | Rechte nach Besitzer/Team | nach Bedarf |
 
 2a zuerst: Google mit App-Passwort und jeder gewöhnliche Mailserver
 beweisen Abholer, Zuordnung und Sichtbarkeit, ohne auf eine
-App-Registrierung bei Microsoft zu warten. 2c, sobald der erste Kunde mit
-Microsoft 365 kommt.
+App-Registrierung bei Microsoft zu warten. Microsoft 365 kommt nicht
+(Kai, 2.10.2026).
 
 ## Bewusst nicht
 

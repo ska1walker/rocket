@@ -40,6 +40,7 @@ const SEITEN: [string, string][] = [
   ["Datenbank", "/datenbank"],
   ["Einstellungen Übersicht", "/einstellungen"],
   ["Einstellungen Firma", "/einstellungen?bereich=firma"],
+  ["Einstellungen Mein Postfach", "/einstellungen?bereich=postfach"],
   ["Einstellungen Vertrieb", "/einstellungen?bereich=vertrieb"],
   ["Einstellungen Eigenschaften", "/einstellungen?bereich=eigenschaften"],
   ["Einstellungen E-Mail", "/einstellungen?bereich=email"],

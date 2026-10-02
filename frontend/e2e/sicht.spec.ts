@@ -105,6 +105,7 @@ for (const thema of ["hell", "dunkel"] as const) {
       "/fragen",
       "/einstellungen",
       "/einstellungen?bereich=firma",
+      "/einstellungen?bereich=postfach",
     ]) {
       await pruefen(page, pfad);
     }

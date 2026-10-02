@@ -113,6 +113,7 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | RK-EINSTELLUNGEN | Die Blöcke der Einstellungen | `mitglieder.tsx`, `versand.tsx` u. a. | ○ |
 | RK-SICHT | Sicht nach Zuordnung: Sicht-Dialog, Bereiche, Sichtbarkeit an der Firma, Bezugspersonen | `sicht-verwalten.tsx`, `kontakt-beziehungen.tsx`, `lib/sicht.ts` | ○ |
 | RK-MODUS | Modus Vertrieb/Verein: Umschalten, Begriffe, Vorlagen, Vereinsfelder | `modus.tsx`, `lib/begriffe.ts`, `lib/modus.ts`, `lib/vorlagen.ts` | ○ (◐ lib) |
+| RK-POSTFACH | Mein Postfach: eigenes Postfach verbinden, testen, lesen, trennen | `mein-postfach.tsx` | ○ |
 
 ---
 
@@ -915,6 +916,24 @@ keine Rechte (`0040_modus.sql`, `org_settings.modus`).
 
 CSS: `.modus-vorschlag`. Die Wortliste und die Vorlagen sind reine
 Funktionen mit Tests — für jede App übertragbar, die zwei Sprachen braucht.
+
+### RK-POSTFACH — Mein Postfach ○
+
+Seit 26.10.20, Stufe 2 aus `docs/PLAN-TEAM.md`. Einstellungen › Konto ›
+„Mein Postfach“, auch für Eingeschränkte. Jede Person verbindet ihr eigenes
+Postfach über IMAP/SMTP; Rocket legt nur Mails mit Kontakten in den Verlauf
+(`app/mailkonten.py`, `0041_mailkonten.sql`).
+
+- Anbieter wählen (Google, IONOS, Strato, one.com aus `app/mailanbieter.py`)
+  füllt die Server; „Anderer Anbieter“ lässt sie leer. Microsoft 365 wird
+  erklärt, nicht versucht.
+- Knöpfe: Verbinden/Speichern, Verbindung testen (je Weg eine Zeile in
+  `.postfach-pruefung`), Jetzt lesen (Bilanz als Satz), Trennen über eine
+  `Rueckfrage`.
+- Der Stand oben rechts als Pille (verbunden / Fehler / nicht verbunden);
+  ein Fehler steht als `.hinweis` mit Zeichen und Satz.
+
+CSS: `.postfach-pruefung`.
 
 ### RK-SICHT — Sicht nach Zuordnung ○
 
