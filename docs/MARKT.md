@@ -280,6 +280,8 @@ Fünfzehnter Durchlauf: Rocket 26.10.13, PR #96, 1.10.2026 — von der Action, z
 
 Sechzehnter Durchlauf: Rocket 26.10.14, PR #97, 2.10.2026 — von der Action: API-Schlüssel, mit denen Programme von außen die Eigenschaften pflegen. Marc hatte `main` seit 26.10.13 bewegt (eigene App `aimqwen38llama`, Zeitstempel weiter gehoben); die Action rechnete auf frischem `main` 4404000000000. Auf `main` byte-gleich geprüft (sha256 `8221fd45…bb2b`, keine alten Schlüssel). Neue Tabelle `api_schluessel` (Migration 0036), vorhandene Daten unverändert.
 
+Siebzehnter Durchlauf: Rocket 26.10.15, PR #98, 2.10.2026 — von der Action: Sicht nach Zuordnung, das Fundament von Stufe 3 (eingeschränkte Sicht, Zugriff auf Firmen und Bereiche, `viewer` liest nur). `main` hatte sich seit 26.10.14 nicht bewegt; Zeitstempel 4405000000000. Auf `main` byte-gleich geprüft (sha256 `1ba53c86…9e05`, keine alten Schlüssel). Migration 0037 mit vier neuen Tabellen und einer Spalte; vorhandene Daten unverändert, alle behalten volle Sicht.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
