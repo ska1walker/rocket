@@ -288,6 +288,8 @@ Neunzehnter Durchlauf: Rocket 26.10.17, PR #100, 2.10.2026 — von der Action: d
 
 Zwanzigster Durchlauf: Rocket 26.10.18, PR #102, 2.10.2026 — von der Action: vertrauliche Feldgruppen (Werte in eigener Tabelle, Haken „Sieht vertrauliche Felder“). Dazwischen hat Insilo 0.1.103 eingetragen (PR #101, `_apps.ts`); die Action baute auf diesem Stand. Zeitstempel 4409000000000. Auf `main` byte-gleich geprüft (sha256 `9a462def…b46b`, keine alten Schlüssel). Migration 0039 mit neuer Tabelle `vertrauliche_werte`.
 
+Einundzwanzigster Durchlauf: Rocket 26.10.19, PR #103, 2.10.2026 — von der Action: Modus Vertrieb/Verein, CI-Stand `ci-26.10.11` (Erstellen als Plus, Klappschalter über der Spalte). `main` unverändert seit 26.10.18; Zeitstempel 4410000000000. Auf `main` byte-gleich geprüft (sha256 `545a48f4…6e29`, keine alten Schlüssel). Migration 0040 nur mit einer Spalte.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
