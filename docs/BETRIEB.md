@@ -2966,13 +2966,59 @@ kommt mit dem nächsten Schritt; bis dahin geht es über die API.
   Bereich, Co-Trainer mit `lesen`, Vorstand als `viewer`, Abzug; dazu ruft
   ein Rauchtest jede GET-Route als Trainer auf und verlangt: kein 500.
 
+### Dicht für den Alltag (seit 26.10.16)
+
+Schritt 2 aus dem Plan. Bis 26.10.15 hieß es hier: niemanden einschränken,
+dem man den Bestand nicht zeigen dürfte. Das gilt nicht mehr.
+
+- **Zweite Tür: Erlaubnisliste der Wege.** `auth.EINGESCHRAENKT_ERLAUBT`
+  nennt, was eine eingeschränkte Person aufrufen darf: Anmeldung, eigene
+  Einstellungen, Firmen und Kontakte (ohne Anreichern), Aktivitäten,
+  Aufgaben, Dokumente, Ansichten, Listen, Kampagnen, Vorlagen, Suche,
+  Ausfuhr, Eigenschaften und Bereiche (lesen), Fragen, Assistent,
+  Anschreiben. Alles andere ist 403 — auch jeder neue Weg, bis er dort
+  steht. Die Zeilensicherheit bleibt die erste Tür.
+- **Listen und Kampagnen** sieht sie nur, wenn sie sie selbst angelegt hat
+  (0038). Die Empfänger einer Kampagne stehen beim Start fest, gelesen
+  unter der Sicht der startenden Person — die Versandschleife, die später
+  als Eigentümerin läuft, verschickt nur, was dort schon stand.
+- **Die AI-Zusammenfassung einer Firma** fasst auch Kontakte zusammen, die
+  sie nicht sieht; sie bekommt sie nicht (`companies._firma`, in Fragen
+  ebenso). `auswertungen` (welche Notizen die Erkenntnisse schon gelesen
+  haben) nur mit voller Sicht.
+- **Dubletten:** „Ein Kontakt mit dieser E-Mail-Adresse ist schon
+  angelegt“ verriete einen verborgenen Kontakt. Eingeschränkte bekommen
+  einen Satz ohne Inhalt (`main.doppelter_eintrag`).
+- **Rolle und Sicht** kommen einmal mit der Anmeldung der Anfrage
+  (`CurrentUser.rolle`, `.sicht`), statt je Prüfung abgefragt zu werden.
+
+### Der Leck-Test
+
+`tests/test_leck.py` ist der Beweis für „wasserdicht“: Mannschaft B trägt
+in jeder verknüpften Tabelle die Markierung `LECKB` — Kontakt (Name, Mail,
+Telefon, Notiz, eigenes Feld), Kind und Elternteil, Kontakt ohne
+Mannschaft, Aktivität am Kontakt und an der Firma, Aufgabe, Dokument,
+Ticket, Lead, Angebot, Liste, Kampagne, Mail, AI-Zusammenfassung. Dann
+ruft der Trainer von A **jede GET-Route** aus dem Schema auf, mit den
+Kennungen von B im Pfad und als Abfrage (`company_id`, `contact_id`,
+`deal_id`, `ticket_id`, `q=LECKB`), dazu Fragen an den Bestand. Keine
+Antwort darf die Markierung enthalten, und als Trainer zeigt keine Tabelle
+aus `FREI` eine markierte Zeile.
+
+Der Test läuft zweimal: mit Erlaubnisliste und ohne. Der zweite Lauf
+beweist, dass die Datenbank allein dicht ist. Gegenprobe beim Bau: Eine
+vorübergehend geöffnete Regel an `activities` und eine nicht ausgeblendete
+Zusammenfassung machten beide Läufe rot.
+
+Eine neue Route ist von selbst dabei. Bricht der Test nach einer Änderung,
+ist das kein Testproblem: Es ist ein Weg, auf dem eine eingeschränkte
+Person sieht, was sie nicht sehen soll.
+
 ### Was noch kommt
 
-Schritt 2 aus dem Plan macht es dicht für den Alltag: eine Erlaubnisliste
-der Pfade für Eingeschränkte, gespeicherte AI-Zusammenfassungen an Firmen
-nicht mehr ausliefern, neutrale Meldung bei Dubletten, Empfänger einer Mail
-beim Start festschreiben, und ein Leck-Test, der jede Route mit fremden
-Kennungen aufruft. Bis dahin: **niemanden einschränken, dem man den
-Bestand nicht zeigen dürfte** — die Regeln stehen, aber noch nicht jede
-Nebentür ist geprüft.
+Schritt 3: die Oberfläche (Zugriffe beim Einladen anhaken, Bereiche,
+„Wer sieht diese Firma“, Eltern am Kind, Navigation für Eingeschränkte
+ohne die Wege, die ihnen nicht offenstehen, Rundgang als Trainer). Bis
+dahin geht das Einschränken über die API, und eine eingeschränkte Person
+sieht in der Oberfläche Seiten, die ihr dann 403 melden.
 

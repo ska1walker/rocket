@@ -177,7 +177,7 @@ Fünf Schritte, je ein Release:
    Bereich (lesen/bearbeiten), Beziehungen zwischen Kontakten, Regeln in
    der Datenbank, `viewer` liest nur, Lücken bei Sicherung und
    Import-Verlauf zu. `docs/BETRIEB.md`, „Sicht nach Zuordnung“.
-2. **Dicht für den Alltag:** Erlaubnisliste der Pfade für Eingeschränkte,
+2. ✅ **Dicht für den Alltag (26.10.16):** Erlaubnisliste der Pfade für Eingeschränkte,
    gespeicherte AI-Ergebnisse heraus, neutrale Dubletten-Meldung, Empfänger
    beim Start festschreiben, Leck-Test über jede Route.
 3. **Oberfläche:** Vorlagen beim Einladen, Zugriffe anhaken, Bereiche,

@@ -493,6 +493,12 @@ async def doppelter_eintrag(request: Request, exc: asyncpg.exceptions.UniqueViol
     grund = UNIQUE_TEXTE.get(
         exc.constraint_name or "", "Dieser Eintrag existiert bereits."
     )
+    # Mit eingeschränkter Sicht verriete „Ein Kontakt mit dieser E-Mail ist
+    # schon angelegt“, dass es einen Kontakt gibt, den die Person nicht
+    # sieht — und mit etwas Raten, wen. Sie bekommt einen Satz ohne Inhalt
+    # (seit 26.10.16, auth._eingeschraenkt_pruefen setzt die Sicht).
+    if getattr(request.state, "sicht", "alles") != "alles":
+        grund = "Das lässt sich so nicht anlegen. Bitte wenden Sie sich an die Leitung."
     return JSONResponse(status_code=409, content={"detail": grund})
 
 
