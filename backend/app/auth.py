@@ -511,6 +511,34 @@ OHNE_FAKTOR_ERLAUBT = (
 )
 
 
+# Was eine Person mit der Rolle `viewer` schreibend aufrufen darf: sich
+# anmelden und abmelden, die eigenen Einstellungen und Ansichten, und was
+# nur liest, obwohl es ein POST ist (eine Frage an den Bestand, ein Auftrag
+# an den Assistenten — der schlägt nur vor, ausgeführt wird über die
+# schreibenden Wege, und die bleiben zu).
+NUR_LESEND_ERLAUBT = (
+    "/api/anmeldung",
+    "/api/abmeldung",
+    "/api/mitglieder/wer",
+    "/api/ansichten",
+    "/api/fragen",
+    "/api/assistent",
+    "/api/briefing/text",
+    "/api/fehler",
+)
+
+LESEND = frozenset({"GET", "HEAD", "OPTIONS"})
+
+
+async def rolle_von(user: CurrentUser) -> str | None:
+    """Die Rolle der angemeldeten Person in der Organisation ihrer Sitzung."""
+    async with acquire() as conn:
+        return await conn.fetchval(
+            "select role::text from public.user_org_roles where user_id = $1 and org_id = $2",
+            user.handelnder, user.org_id,
+        )
+
+
 async def get_current_user(
     request: Request,
     x_bfl_user: str | None = Header(None, alias="X-Bfl-User"),
@@ -563,6 +591,7 @@ async def get_current_user(
                     status_code=403,
                     detail=f"Dieser API-Schlüssel gilt nicht für {request.url.path}.",
                 )
+            await _nur_lesend_pruefen(request, angemeldet)
             return angemeldet
 
     if angemeldet is None and settings.anmeldung_modus != "eigen":
@@ -583,7 +612,25 @@ async def get_current_user(
             headers={"X-Rocket-Zweiter-Faktor": "einrichten"},
         )
 
+    await _nur_lesend_pruefen(request, angemeldet)
     return angemeldet
+
+
+async def _nur_lesend_pruefen(request: Request, user: CurrentUser) -> None:
+    """`viewer` liest nur (seit 26.10.15).
+
+    Bis dahin hatte die Rolle keine Wirkung: Ein `viewer` konnte alles, was
+    ein `member` kann. Geprüft wird an dieser einen Stelle vor jedem
+    Router, nicht an jedem Endpunkt — ein neuer schreibender Weg ist damit
+    von selbst zu. Nur lesende Aufrufe kosten keine Abfrage.
+    """
+    if request.method in LESEND or request.url.path.startswith(NUR_LESEND_ERLAUBT):
+        return
+    if await rolle_von(user) == "viewer":
+        raise HTTPException(
+            status_code=403,
+            detail="Sie haben Lesezugriff. Für Änderungen fragen Sie die Eigentümerin oder einen Verwalter.",
+        )
 
 
 # Rollen, die verwalten dürfen. `member` und `viewer` arbeiten im Bestand,
@@ -599,10 +646,17 @@ async def verwaltet(user: CurrentUser = Depends(get_current_user)) -> CurrentUse
     Organisation ihrer Sitzung.
     """
     async with acquire() as conn:
-        rolle = await conn.fetchval(
-            "select role::text from public.user_org_roles where user_id = $1 and org_id = $2",
+        stand = await conn.fetchrow(
+            "select role::text as rolle, sicht from public.user_org_roles where user_id = $1 and org_id = $2",
             user.handelnder, user.org_id,
         )
-    if rolle not in VERWALTET:
+    if stand is None or stand["rolle"] not in VERWALTET:
         raise HTTPException(403, "Dafür fehlt Ihnen die Berechtigung. Fragen Sie den Eigentümer.")
+    # Verwalten heißt: über den ganzen Bestand. Wer nur einen Ausschnitt
+    # sieht, zöge eine halbe Sicherung oder vergäbe Zugriffe auf Firmen, die
+    # er selbst nicht kennt. Die API lässt das nicht entstehen (sicht.py),
+    # hier steht es noch einmal, falls es doch einmal so in der Datenbank
+    # steht.
+    if stand["sicht"] != "alles":
+        raise HTTPException(403, "Verwalten kann nur, wer den ganzen Bestand sieht.")
     return user

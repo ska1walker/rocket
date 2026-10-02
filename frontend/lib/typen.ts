@@ -620,6 +620,8 @@ export interface Mitglied {
   olares_username: string;
   zugang: "olares" | "sitzplatz";
   role: string;
+  /** Seit 26.10.15: alles oder nur, worauf die Person Zugriff hat. */
+  sicht?: "alles" | "eingeschraenkt";
   created_at: string;
   last_seen_at: string | null;
   /** Hat diese Person ein eigenes Passwort? Nur ob, nie was. */

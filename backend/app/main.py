@@ -57,6 +57,7 @@ from app.routers import podcast as podcast_router
 from app.routers import qualifizierung as qualifizierung_router
 from app.routers import settings as settings_router
 from app.routers import sicherung as sicherung_router
+from app.routers import sicht as sicht_router
 from app.routers import suche as suche_router
 
 
@@ -451,6 +452,7 @@ app.include_router(eingang.quellen_router)
 app.include_router(mitglieder.router)
 app.include_router(eigenschaften.router)
 app.include_router(api_schluessel_router.router)
+app.include_router(sicht_router.router)
 app.include_router(pipelines.router)
 app.include_router(post.router)
 app.include_router(sicherung_router.router)
@@ -492,6 +494,22 @@ async def doppelter_eintrag(request: Request, exc: asyncpg.exceptions.UniqueViol
         exc.constraint_name or "", "Dieser Eintrag existiert bereits."
     )
     return JSONResponse(status_code=409, content={"detail": grund})
+
+
+@app.exception_handler(asyncpg.exceptions.InsufficientPrivilegeError)
+async def kein_zugriff(request: Request, exc: asyncpg.exceptions.InsufficientPrivilegeError):
+    """Die Zeilensicherheit hat eine Änderung abgewiesen (seit 26.10.15).
+
+    Das passiert, wenn eine eingeschränkte Person etwas schreibt, das
+    außerhalb ihres Zugriffs liegt — etwa einen Kontakt löscht oder in eine
+    fremde Firma stellt. Ohne diesen Weg käme ein 500 an. Die Meldung nennt
+    nichts aus der Zeile; was die Person nicht sieht, soll sie auch hier
+    nicht erfahren.
+    """
+    return JSONResponse(
+        status_code=403,
+        content={"detail": "Dafür fehlt Ihnen der Zugriff. Fragen Sie die Leitung."},
+    )
 
 
 @app.get("/health", tags=["system"])

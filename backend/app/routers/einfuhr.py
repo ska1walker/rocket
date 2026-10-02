@@ -281,7 +281,7 @@ async def anwenden(
 
 
 @router.get("", response_model=list[Einfuhrzeile])
-async def liste(user: CurrentUser = Depends(get_current_user)) -> list[Einfuhrzeile]:
+async def liste(user: CurrentUser = Depends(verwaltet)) -> list[Einfuhrzeile]:
     async with acquire_as(user.user_id) as conn:
         zeilen = await conn.fetch(
             """
@@ -298,7 +298,7 @@ async def liste(user: CurrentUser = Depends(get_current_user)) -> list[Einfuhrze
 
 
 @router.get("/{einfuhr_id}", response_model=Ergebnis)
-async def eine(einfuhr_id: UUID, user: CurrentUser = Depends(get_current_user)) -> Ergebnis:
+async def eine(einfuhr_id: UUID, user: CurrentUser = Depends(verwaltet)) -> Ergebnis:
     async with acquire_as(user.user_id) as conn:
         z = await conn.fetchrow(
             "select id, entity, angelegt, firmen_angelegt, uebersprungen, gruende, details "

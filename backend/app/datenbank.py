@@ -42,13 +42,14 @@ from pglast.visitors import Visitor
 # sichtbar.
 FREI = frozenset({
     "activities", "anreicherungen", "ansichten", "audit_log", "aussagen",
-    "auswertungen", "besprechung_kontakte", "besprechungen", "companies",
+    "auswertungen", "bereiche", "besprechung_kontakte", "besprechungen", "companies",
     "contact_companies", "contacts", "deal_contacts", "deals", "dokumente",
-    "einfuhren", "eingang", "kampagnen", "listen", "listen_mitglieder",
+    "einfuhren", "eingang", "kampagnen", "kontakt_beziehungen", "kontakt_mannschaften",
+    "listen", "listen_mitglieder",
     "loss_reasons", "mails", "orgs", "pipeline_stages", "pipelines",
     "podcasts", "products", "property_definitions", "property_groups", "quote_items", "quotes",
     "tasks", "themenlaeufe", "ticket_kategorien", "ticket_pipelines",
-    "ticket_stages", "tickets", "user_org_roles", "vorlagen",
+    "ticket_stages", "tickets", "user_org_roles", "vorlagen", "zugriffe",
 })
 
 # Was hier nicht hingehört, mit dem Grund — die Oberfläche nennt ihn.
