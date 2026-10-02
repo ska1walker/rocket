@@ -5457,6 +5457,23 @@ select,
   border-top: 1px solid var(--am-trennlinie);
 }
 
+/* ── Mein Postfach [RK-POSTFACH] ──────────────────────────────────────────────────── */
+/* Das Ergebnis von „Verbindung testen“: je Weg eine Zeile, Zeichen und Satz —
+   die Farbe allein sagt nichts. */
+.postfach-pruefung {
+  display: flex;
+  flex-direction: column;
+  gap: var(--am-raum-2);
+  margin: var(--am-raum-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.postfach-pruefung li {
+  display: flex;
+  align-items: center;
+  gap: var(--am-raum-2);
+}
+
 /* ── Sicht nach Zuordnung [RK-SICHT] ──────────────────────────────────────────────── */
 /* Wer was sieht (seit 26.10.17): der Dialog an der Person, die Bereiche,
    die Sichtbarkeit an der Firma, die Bezugspersonen am Kontakt. Listen

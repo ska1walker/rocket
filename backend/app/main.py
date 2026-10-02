@@ -53,6 +53,7 @@ from app.routers import einfuhr as einfuhr_router
 from app.routers import erkenntnisse as erkenntnisse_router
 from app.routers import fehler as fehler_router
 from app.routers import finden as finden_router
+from app.routers import mailkonto as mailkonto_router
 from app.routers import podcast as podcast_router
 from app.routers import qualifizierung as qualifizierung_router
 from app.routers import settings as settings_router
@@ -277,6 +278,49 @@ async def _postschleife() -> None:
                 print(f"Postfach-Abruf fehlgeschlagen: {exc}", flush=True)
 
 
+async def _mailkontenschleife() -> None:
+    """Liest die persönlichen Postfächer (seit 26.10.20).
+
+    Ein Postfach gehört seiner Person; selbst die Eigentümerin sieht die
+    Zeile nicht (0041). Darum fragt die Schleife je Person in deren eigenem
+    Kontext, ob ihr Postfach dran ist — `user_org_roles` steht nicht unter
+    FORCE und nennt alle. Ein Postfach, das nicht antwortet, schreibt seinen
+    Fehler in die eigene Zeile und hält niemanden sonst auf.
+    """
+    from app import mailkonten
+
+    while True:
+        await asyncio.sleep(60)
+        try:
+            async with acquire() as conn:
+                personen = await conn.fetch(
+                    "select r.user_id, r.org_id from public.user_org_roles r "
+                    "join public.users u on u.id = r.user_id and u.deleted_at is null "
+                    "where r.role <> 'viewer'"
+                )
+        except Exception as exc:
+            print(f"Postfach-Schleife (Personen): {exc}", flush=True)
+            continue
+        for p in personen:
+            try:
+                async with acquire_as(p["user_id"]) as conn:
+                    konto = await conn.fetchrow(
+                        "select * from public.mailkonten where org_id = $1 and aktiv "
+                        "and (zuletzt is null or zuletzt < now() - make_interval(mins => $2))",
+                        p["org_id"], mailkonten.TAKT_MINUTEN,
+                    )
+                if konto is None:
+                    continue
+                try:
+                    async with acquire_as(p["user_id"]) as conn:
+                        await mailkonten.einlesen(conn, konto)
+                except Exception as exc:
+                    async with acquire_as(p["user_id"]) as conn:
+                        await mailkonten.fehler_merken(conn, konto["id"], exc)
+            except Exception as exc:
+                print(f"Postfach einer Person: {exc}", flush=True)
+
+
 async def _versandschleife() -> None:
     """Schickt, was im Buch wartet — alle 30 Sekunden ein Blick.
 
@@ -406,12 +450,13 @@ async def lifespan(app: FastAPI):
         print(f"Einrichtungsdatei nicht angelegt: {exc}", flush=True)
     schleife = asyncio.create_task(_sicherungsschleife())
     post = asyncio.create_task(_postschleife())
+    mailkonten_lauf = asyncio.create_task(_mailkontenschleife())
     ausgang = asyncio.create_task(_versandschleife())
     podcasts = asyncio.create_task(_podcastschleife())
     sitzungen = asyncio.create_task(_sitzungsschleife())
     insilo = asyncio.create_task(_insiloschleife())
     yield
-    for aufgabe in (schleife, post, ausgang, podcasts, sitzungen, insilo):
+    for aufgabe in (schleife, post, mailkonten_lauf, ausgang, podcasts, sitzungen, insilo):
         aufgabe.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await aufgabe
@@ -435,6 +480,7 @@ app = FastAPI(
 )
 
 app.include_router(companies.router)
+app.include_router(mailkonto_router.router)
 app.include_router(angebote.router)
 app.include_router(qualifizierung_router.router)
 app.include_router(contacts.router)

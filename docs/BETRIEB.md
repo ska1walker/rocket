@@ -601,6 +601,9 @@ eigener Adresse, käme die Antwort dort an, wo niemand sie einliest — der
 Faden im CRM bliebe stumm. Deshalb trägt jede Mail `Reply-To` auf das
 Postfach der Organisation, **sofern eines eingerichtet ist**. Ist keines
 da, sagt die Einstellungsseite genau das, statt etwas zu versprechen.
+Seit 26.10.20 gibt es den zweiten Weg: Wer sein eigenes Postfach unter
+„Mein Postfach“ verbindet, bekommt Antworten von Kontakten auch von dort
+in den Verlauf (Abschnitt „Mein Postfach“).
 
 Tests: `backend/tests/test_versand.py` — Hausadresse ohne Eintrag, nur das
 `From` wechselt, fremde Domain abgewiesen, eigene Zugangsdaten führen
@@ -3176,6 +3179,82 @@ schaltet.
 
 ### Was noch kommt
 
-Stufe 3 ist mit Schritt 5 vollständig. Offen in `docs/PLAN-TEAM.md` bleibt
-Stufe 2 (persönliches Postfach).
+Stufe 3 ist mit Schritt 5 vollständig. Stufe 2 (persönliches Postfach)
+hat mit 26.10.20 begonnen, siehe „Mein Postfach“.
 
+## Mein Postfach (seit 26.10.20)
+
+Stufe 2a aus `docs/PLAN-TEAM.md`: Jede Person verbindet **ihr eigenes**
+Postfach, Rocket liest Posteingang und Gesendet und legt nur ab, was
+einen Kontakt betrifft. Einstellungen › Konto › „Mein Postfach“, auch für
+Eingeschränkte; wer nur liest (`viewer`), verbindet keines.
+
+### Was Rocket liest — und was nicht
+
+- **Alle zwei Minuten** (Schleife in `main.py`, `mailkonten.TAKT_MINUTEN`),
+  dazu „Jetzt lesen“. Beim ersten Lauf die letzten 14 Tage, höchstens 200
+  Mails je Lauf und Ordner; danach nur, was über der gemerkten UID liegt.
+  Wechselt die UIDVALIDITY oder ändern sich Adresse, Benutzer oder Server,
+  beginnt das Lesen neu.
+- **Erst die Kopfzeilen.** Von jeder Mail holt Rocket nur Absender,
+  Empfänger, Betreff, `Message-ID` und Größe (`BODY.PEEK`, Ordner
+  `readonly`). Ganz geladen wird nur, was zu einem Kontakt passt. Private
+  Post verlässt das Postfach also nicht einmal als Text, und nichts wird
+  als gelesen markiert, verschoben oder gelöscht.
+- **Zugeordnet** über die E-Mail-Adresse, unter der Sicht der Person:
+  Ein Trainer bekommt nur Post seiner Spieler, die Mail eines fremden
+  Spielers ist für ihn private Post. Automaten (`Auto-Submitted`,
+  Abwesenheitsnotizen, Listen) bleiben draußen.
+- **Abgelegt** als Aktivität `email` am Kontakt (und am Geschäft, wenn es
+  genau ein offenes gibt), mit Richtung, Empfängern, Anhangsnamen und
+  `quelle: postfach`. Über 5 MB nur die Kopfzeilen (`ohne_inhalt`).
+- **Einmal, nicht zweimal:** Schreibt ein Kunde an zwei Personen, die beide
+  ihr Postfach verbunden haben, steht die Mail einmal im Verlauf — die
+  `Message-ID` ist eindeutig je Organisation.
+
+### Wem das Postfach gehört
+
+`mailkonten` (0041) trägt neben der Org-Regel eine RESTRICTIVE-Regel
+`user_id = current_user_id()`: Auch Eigentümerin und Verwalter sehen das
+Postfach einer anderen Person nicht, nicht in der Oberfläche, nicht in der
+API, nicht im Datenbank-Blick (dort ohnehin `GESPERRT`). Das Passwort liegt
+im Tresor. **Nicht im Abzug** (`AUSGENOMMEN`): Die Sicherung läuft als
+Eigentümerin und sieht fremde Postfächer nicht — nach einem Wiederanlauf
+verbindet jede Person ihr Postfach neu. Was schon im Verlauf steht, ist im
+Abzug.
+
+### Anbieter
+
+Voreinstellungen in `app/mailanbieter.py`, geprüft am 2.10.2026:
+
+| Anbieter | IMAP | SMTP | Anmeldung |
+|---|---|---|---|
+| Google / Gmail | `imap.gmail.com:993` SSL | `smtp.gmail.com:465` SSL | App-Passwort (Bestätigung in zwei Schritten an) |
+| IONOS | `imap.ionos.de:993` SSL | `smtp.ionos.de:465` SSL (587 STARTTLS geht auch) | Passwort des Postfachs |
+| Strato | `imap.strato.de:993` SSL | `smtp.strato.de:465` SSL | Passwort des Postfachs |
+| one.com | `imap.one.com:993` SSL | `send.one.com:465` SSL | Passwort des Postfachs |
+| Anderer Anbieter | frei | frei | Passwort |
+
+**Microsoft 365 und Outlook.com bewusst nicht** (Kai, 2.10.2026): Exchange
+Online nimmt für IMAP kein Passwort mehr an, nur OAuth. Wer
+`outlook.office365.com` o. ä. einträgt, bekommt den Grund gesagt (422),
+statt an einer Anmeldung zu scheitern, die nie gelingen kann.
+
+Die Box braucht Zugang nach außen zu den Mailservern (993, 465/587).
+„Verbindung testen“ meldet sich an IMAP und SMTP an, liest und sendet
+nichts, und nennt den Ordner „Gesendet“, den Rocket gefunden hat
+(SPECIAL-USE `\Sent`, sonst die üblichen Namen).
+
+### Was noch fehlt
+
+- **2b:** Senden über das eigene Postfach (heute geht Versand weiter über
+  das Konto der Organisation oder die eigenen SMTP-Daten aus „Ihre
+  Absenderadresse“), Ablage in „Gesendet“ per `APPEND`, Vorschlag
+  „Kontakt anlegen?“ für Unbekannte von einer bekannten Firmendomain.
+- **2c:** eine Mail oder Adresse als privat markieren.
+
+Tests: `backend/tests/test_mailkonten.py` (nur Kontakte, Privates nicht
+einmal ganz geladen, Passwort verschlüsselt, nur Neues im zweiten Lauf,
+dieselbe Mail bei zweien ein Eintrag, jedes Postfach nur seiner Person,
+`viewer` 403, Microsoft erklärt, Trainer nur seine Spieler, Verbindung
+testen); im Browser `e2e/mein-postfach.spec.ts` und der Rundgang.

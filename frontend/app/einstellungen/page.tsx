@@ -3,7 +3,7 @@
 // Modul HB-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ChevronLeft, Cpu, Database, Info, Mail, SlidersHorizontal, TrendingUp, Users } from "@/lib/symbole";
+import { AlertTriangle, ChevronLeft, Cpu, Database, Inbox, Info, Mail, SlidersHorizontal, TrendingUp, Users } from "@/lib/symbole";
 import { lage } from "@/lib/anmeldung";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -28,6 +28,7 @@ import { Katalogblock, Verlustgruendeblock } from "@/components/katalog";
 import { Postausgangblock } from "@/components/postausgang";
 import { Marketingversandblock, Versandblock } from "@/components/versand";
 import { Absenderkontoblock } from "@/components/absenderkonto";
+import { MeinPostfachblock } from "@/components/mein-postfach";
 import { AnreicherungEinstellungen } from "@/components/anreicherung-einstellungen";
 import { Sprachausgabeblock } from "@/components/podcast";
 import { Unternavigation, type UnternavGruppe } from "@/components/unternavigation";
@@ -38,7 +39,7 @@ import type { Begriffe } from "@/lib/begriffe";
 import { Modusblock } from "@/components/modus";
 
 /**
- * Die Einstellungen in sechs Unterpunkten.
+ * Die Einstellungen in sieben Unterpunkten.
  *
  * Eine Seite mit vierzehn Blöcken untereinander liest niemand. Jeder
  * Unterpunkt trägt, was zusammengehört; jeder Block sagt in einem Satz,
@@ -46,6 +47,7 @@ import { Modusblock } from "@/components/modus";
  */
 const BEREICHE = [
   { schluessel: "firma", text: "Firma und Team", beschreibung: "Firmendaten, Team, Passwort, zweiter Faktor, Geräte", symbol: Users },
+  { schluessel: "postfach", text: "Mein Postfach", beschreibung: "Ihr eigenes Postfach: Mails mit Kontakten im Verlauf", symbol: Inbox },
   { schluessel: "vertrieb", text: "Vertrieb", beschreibung: "Pipelines und Stufen, Produktkatalog, Verlustgründe", symbol: TrendingUp },
   { schluessel: "eigenschaften", text: "Eigenschaften", beschreibung: "Felder und Gruppen für Firmen, Kontakte und Leads", symbol: SlidersHorizontal },
   { schluessel: "email", text: "E-Mail", beschreibung: "Konto, Absenderadresse, Marketing, Postfach, Relay", symbol: Mail },
@@ -57,7 +59,7 @@ type Bereich = (typeof BEREICHE)[number]["schluessel"];
 
 /** Drei Gruppen wie in HubSpots Einstellungen: wer, womit verkauft wird, worauf es läuft. */
 const GRUPPEN: { titel: string; schluessel: Bereich[] }[] = [
-  { titel: "Konto", schluessel: ["firma"] },
+  { titel: "Konto", schluessel: ["firma", "postfach"] },
   { titel: "Vertrieb", schluessel: ["vertrieb", "eigenschaften", "email"] },
   { titel: "System", schluessel: ["ki", "daten"] },
 ];
@@ -85,8 +87,8 @@ function navigation(w: Begriffe, eingeschraenkt: boolean): UnternavGruppe[] {
     return b ? [{ ...b, href: `/einstellungen?bereich=${b.schluessel}` }] : [];
   };
   // Wer eingeschränkt sieht, verwaltet nichts: Für ihn gibt es nur das
-  // eigene Konto (Passwort, zweiter Faktor, Geräte).
-  if (eingeschraenkt) return [{ titel: "Konto", eintraege: eintrag("firma") }];
+  // eigene Konto (Passwort, zweiter Faktor, Geräte) und das eigene Postfach.
+  if (eingeschraenkt) return [{ titel: "Konto", eintraege: [...eintrag("firma"), ...eintrag("postfach")] }];
   return GRUPPEN.map((g) => ({
     titel: g.titel === "Vertrieb" && w.modus === "verein" ? "Verein" : g.titel,
     eintraege: g.schluessel.flatMap(eintrag),
@@ -200,7 +202,7 @@ function Inhalt() {
   const w = useBegriffe();
   const moeglich = bereicheFuer(w);
   const gewaehlt = suche.get("bereich") as Bereich | null;
-  const ausgewaehlt = moeglich.some((b) => b.schluessel === gewaehlt && (!eingeschraenkt || b.schluessel === "firma"));
+  const ausgewaehlt = moeglich.some((b) => b.schluessel === gewaehlt && (!eingeschraenkt || b.schluessel === "firma" || b.schluessel === "postfach"));
   const bereich: Bereich = ausgewaehlt ? gewaehlt! : "firma";
   const bereichName = moeglich.find((b) => b.schluessel === bereich)!.text;
 
@@ -249,6 +251,7 @@ function Inhalt() {
                 <Geraeteblock />
               </>
             )}
+            {bereich === "postfach" && <MeinPostfachblock />}
             {bereich === "vertrieb" && (
               <>
                 <Pipelinesblock />

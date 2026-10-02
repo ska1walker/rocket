@@ -119,6 +119,11 @@ AUSGENOMMEN = {
     # erzeugt man neue — ein alter, irgendwo hinterlegter Schlüssel soll
     # nicht stillschweigend wieder Zugang haben.
     "api_schluessel",
+    # Persönliche Postfächer gehören der Person, nicht dem Bestand: Der
+    # Abzug läuft als Eigentümerin und sieht sie gar nicht (0041,
+    # `mailkonten_eigen`). Nach einem Wiederanlauf verbindet jede Person ihr
+    # Postfach neu; was schon im Verlauf steht, ist im Abzug.
+    "mailkonten",
     # Abgeleitet: Die Trigger an `contacts` und `contact_companies` bauen sie
     # beim Zurückspielen von selbst wieder auf.
     "kontakt_mannschaften",

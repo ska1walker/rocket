@@ -152,10 +152,10 @@ export function Absenderkontoblock() {
                 </>
               ) : (
                 <>
-                  Rocket liest noch kein Postfach ein. Antworten auf Ihre Mails kommen
-                  deshalb in <strong>Ihrem eigenen</strong> Postfach an und tauchen im
-                  Bestand nicht auf. Das Postfach richtet der Eigentümer weiter oben
-                  unter „Posteingang“ ein.
+                  Rocket liest kein Postfach der Organisation ein. Antworten auf Ihre Mails
+                  kommen deshalb in <strong>Ihrem eigenen</strong> Postfach an. Verbinden Sie
+                  es unter „Mein Postfach“, dann stehen Antworten von Kontakten trotzdem im
+                  Verlauf.
                 </>
               )}
             </span>

@@ -576,6 +576,9 @@ EINGESCHRAENKT_ERLAUBT: tuple[tuple[re.Pattern[str], frozenset[str] | None], ...
         # Ob ein Sprachmodell und ein Postweg eingerichtet sind — nur ja/nein,
         # die Oberfläche sagt damit vorher, was nicht geht.
         (r"^/api/(ki|post)/status$", {"GET"}),
+        # Das eigene Postfach (seit 26.10.20): Es gehört der Person, nicht
+        # dem Bestand, und ordnet nur Kontakten zu, die sie ohnehin sieht.
+        (r"^/api/mailkonto(/.*)?$", None),
     )
 )
 
