@@ -62,6 +62,7 @@ GESPERRT: dict[str, str] = {
     "zweitfaktor_codes": "Wiederherstellungscodes für den zweiten Faktor",
     "passwort_links": "Codes zum Zurücksetzen des Passworts — wer sie hat, übernimmt das Konto",
     "oeffentliche_links": "Schlüssel der Links in Mails — wer sie hat, kann im Namen eines Empfängers abmelden",
+    "api_schluessel": "API-Schlüssel (nur als Hash) — wer die Liste sieht, sieht, welche Programme zugreifen",
 }
 
 # Funktionen, die nichts tun außer rechnen. Was fehlt, fehlt mit Absicht,

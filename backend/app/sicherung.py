@@ -106,6 +106,10 @@ AUSGENOMMEN = {
     # Rücksetz-Links leben eine halbe Stunde; einen zurückzuspielen hieße,
     # einen verbrauchten Weg ins Konto wieder zu öffnen.
     "zweitfaktor_codes", "passwort_links",
+    # API-Schlüssel gelten für diese Installation. Nach einem Wiederanlauf
+    # erzeugt man neue — ein alter, irgendwo hinterlegter Schlüssel soll
+    # nicht stillschweigend wieder Zugang haben.
+    "api_schluessel",
 }
 
 # Tabellen ohne eigene org_id — sie hängen an einer Elterntabelle.

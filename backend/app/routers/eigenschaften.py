@@ -85,6 +85,11 @@ class DefinitionPatch(BaseModel):
     im_anlegen: bool | None = None
     # Pflichtfeld (Stufe C): beim Anlegen gefüllt, beim Ändern nicht geleert.
     required: bool | None = None
+    # In eine andere Gruppe desselben Objekts (seit 26.10.14). Das Feld
+    # kommt ans Ende der Zielgruppe, außer `position` steht mit dabei. Für
+    # ein Programm, das ein Feld verschieben will, ohne die ganze
+    # Anordnung zu kennen (`PUT /reihenfolge` verlangt sie vollständig).
+    group_id: UUID | None = None
 
 
 class Definition(BaseModel):
@@ -205,6 +210,8 @@ async def aendern(
     zuweisungen: list[str] = []
     args: list[Any] = []
     for name, wert in felder.items():
+        if name == "group_id":
+            continue  # geprüft unten, mit Verbindung
         if name == "options":
             neue = _optionen_aus(wert)
             felder[name] = [o.model_dump() for o in neue]
@@ -213,7 +220,6 @@ async def aendern(
         else:
             args.append(wert)
             zuweisungen.append(f"{name} = ${len(args)}")
-    args.append(definition_id)
 
     async with acquire_as(user.user_id) as conn:
         zeile_alt = await conn.fetchrow(
@@ -244,6 +250,27 @@ async def aendern(
             )
         if "options" in felder:
             await _optionen_pruefen(conn, definition_id, [Option(**o) for o in felder["options"]])
+        if "group_id" in felder:
+            ziel = felder["group_id"]
+            if ziel is None:
+                raise HTTPException(400, "Ein Feld gehört immer in eine Gruppe.")
+            gruppe = await conn.fetchrow(
+                "select entity from public.property_groups where id = $1 and org_id = $2",
+                ziel, user.org_id,
+            )
+            if gruppe is None or gruppe["entity"] != zeile_alt["entity"]:
+                raise HTTPException(409, "Diese Gruppe gibt es für dieses Objekt nicht.")
+            args.append(ziel)
+            zuweisungen.append(f"group_id = ${len(args)}")
+            if "position" not in felder:
+                ende = await conn.fetchval(
+                    "select coalesce(max(position), 0) + 10 from public.property_definitions "
+                    "where group_id = $1 and id <> $2",
+                    ziel, definition_id,
+                )
+                args.append(ende)
+                zuweisungen.append(f"position = ${len(args)}")
+        args.append(definition_id)
         zeile = await conn.fetchrow(
             f"update public.property_definitions set {', '.join(zuweisungen)} "
             f"where id = ${len(args)} returning *",

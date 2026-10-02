@@ -44,6 +44,7 @@ from app.routers import (
     tickets,
 )
 from app.routers import anmeldung as anmeldung_router
+from app.routers import api_schluessel as api_schluessel_router
 from app.routers import assistent as assistent_router
 from app.routers import ausfuhr as ausfuhr_router
 from app.routers import datenbank as datenbank_router
@@ -449,6 +450,7 @@ app.include_router(eingang.router)
 app.include_router(eingang.quellen_router)
 app.include_router(mitglieder.router)
 app.include_router(eigenschaften.router)
+app.include_router(api_schluessel_router.router)
 app.include_router(pipelines.router)
 app.include_router(post.router)
 app.include_router(sicherung_router.router)

@@ -5055,6 +5055,30 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .eig-pflege { padding-left: var(--am-raum-3); }
 }
 
+/* ── API-Schlüssel [RK-EINSTELLUNGEN] ─────────────────────────────────────────────── */
+/* Der frische Schlüssel steht einmal im Hinweis: lang, ohne Leerzeichen —
+   er bricht deshalb überall um, statt die Spalte zu sprengen. */
+.api-schluessel-neu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--am-raum-2);
+  min-width: 0;
+}
+
+.api-schluessel-neu code {
+  word-break: break-all;
+}
+
+/* Herkunft unter dem Namen statt einer eigenen Spalte — sonst trägt die
+   Lesespalte die Tabelle nicht. Der Beispielaufruf bricht überall um. */
+.api-schluessel-herkunft {
+  display: block;
+}
+
+.api-schluessel-aufruf code {
+  word-break: break-all;
+}
+
 /* ── Geräte [RK-EINSTELLUNGEN] ────────────────────────────────────────────────────── */
 /* Wo bin ich überall angemeldet. Eine Liste, keine Kartensammlung — die
    Zeilen unterscheiden sich nur durch Gerät und Zeit. */
