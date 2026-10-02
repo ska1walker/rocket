@@ -112,6 +112,7 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | RK-WISSEN | Fragen, Erkenntnisse, Eingang, Besprechungen | `app/fragen` u. a. | ○ |
 | RK-EINSTELLUNGEN | Die Blöcke der Einstellungen | `mitglieder.tsx`, `versand.tsx` u. a. | ○ |
 | RK-SICHT | Sicht nach Zuordnung: Sicht-Dialog, Bereiche, Sichtbarkeit an der Firma, Bezugspersonen | `sicht-verwalten.tsx`, `kontakt-beziehungen.tsx`, `lib/sicht.ts` | ○ |
+| RK-MODUS | Modus Vertrieb/Verein: Umschalten, Begriffe, Vorlagen, Vereinsfelder | `modus.tsx`, `lib/begriffe.ts`, `lib/modus.ts`, `lib/vorlagen.ts` | ○ (◐ lib) |
 
 ---
 
@@ -888,6 +889,32 @@ Geräte (`geraete.tsx`), Zweiter Faktor (HB-FAKTOR), Sicherung
 Programme (`quellen.tsx`), Katalog und Verlustgründe (`katalog.tsx`),
 Pipelines (`pipelines-verwalten.tsx`), Eigenschaften (RK-EIGENSCHAFTEN).
 Versand, Postfach und Programme sind inhaltlich Relay-nah.
+
+### RK-MODUS — Modus Vertrieb/Verein ○ (◐ lib)
+
+Seit 26.10.19, Schritt 5 aus `docs/PLAN-TEAM.md`. Rocket ist ein CRM; der
+Modus „Verein“ ändert nur, wie es spricht und was es anbietet — keine Daten,
+keine Rechte (`0040_modus.sql`, `org_settings.modus`).
+
+- `lib/begriffe.ts`: die eine Wortliste. Ganze Wendungen statt Wörter, weil
+  „der Kontakt“ zu „die Person“ wird. Jede Seite holt ihre Wörter über
+  `useBegriffe()` (`lib/modus.ts`, aus `/wer`, damit auch Eingeschränkte
+  sie kennen); keine Seite schreibt „Firma“ selbst, wo im Verein
+  „Mannschaft“ stünde.
+- `lib/navigation.ts` nimmt die Begriffe mit: Im Verein fehlen Start,
+  Leads, Angebote und Prognose (`NUR_VERTRIEB`), Gruppen und Ziele heißen
+  anders. Start leitet zu den Personen.
+- `Modusblock` (Einstellungen › Verein und Team, nur Verwalter):
+  Umschalten, und im Verein „Vereinsfelder anlegen“ — „Spielerdaten“ und
+  die vertrauliche Gruppe „Beitrag und Bank“, nur was fehlt.
+- `lib/vorlagen.ts`: Vorlagen beim Hinzufügen einer Person (Spartenleitung,
+  Vorstand, Kassierer, Jugendleiter, Trainer, Co-Trainer; im Vertrieb
+  Leitung, Innendienst, Außendienst, Nur lesen). Eine Vorlage setzt Rolle,
+  Sicht und den Haken für Vertrauliches; wer eingeschränkt sieht, bekommt
+  gleich den Sicht-Dialog.
+
+CSS: `.modus-vorschlag`. Die Wortliste und die Vorlagen sind reine
+Funktionen mit Tests — für jede App übertragbar, die zwei Sprachen braucht.
 
 ### RK-SICHT — Sicht nach Zuordnung ○
 

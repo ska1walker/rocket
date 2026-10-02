@@ -8,6 +8,7 @@ import { Segmentliste } from "@/components/segmentliste";
 import { FirmaAnlegen } from "@/components/firma-anlegen";
 import { useNeuGewuenscht } from "@/lib/neu";
 import { useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
 import { SichtHinweis } from "@/components/sicht-verwalten";
 
 export default function FirmenSeite() {
@@ -16,19 +17,20 @@ export default function FirmenSeite() {
   // „Neu" aus der Kopfleiste zeigt hierher und will den Dialog offen sehen.
   const neu = useNeuGewuenscht();
   const { eingeschraenkt } = useSicht();
+  const b = useBegriffe();
   useEffect(() => {
     if (neu) setOffen(true);
   }, [neu]);
 
   return (
     <>
-      <Seitenkopf titel="Firmen">
+      <Seitenkopf titel={b.firmen}>
         {/* Der zweite Weg gehört neben den ersten: Wer auf eine leere
             Liste schaut, sucht den Import nicht in den Einstellungen. */}
         {/* Firmen legt an, wer alles sieht (companies_sicht_anlegen in 0037). */}
         {!eingeschraenkt && (
           <Knopfmenue
-            text="Firma anlegen"
+            text={b.firmaAnlegen}
             eintraege={[
               { text: "Neu anlegen", onWahl: () => setOffen(true) },
               {
@@ -59,7 +61,7 @@ export default function FirmenSeite() {
         entity="companies"
         basisPfad="/firmen"
         suchePlatzhalter="Name, Domain oder Ort"
-        leerTitel="Keine Firma gefunden"
+        leerTitel={b.keineFirmaGefunden}
         leerText="Entweder ist der Filter zu eng, oder hier ist noch nichts angelegt."
         stapelfelder={[
           { schluessel: "lifecycle_stage", text: "Stufe" },

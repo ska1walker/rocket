@@ -28,6 +28,8 @@ import { Klappschalter } from "@/components/navigation";
 import { Suchfeld } from "@/components/suche";
 import { useMenue } from "@/components/knopfmenue";
 import { useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
+import { NUR_VERTRIEB } from "@/lib/begriffe";
 
 function NeuMenue() {
   const { offen, setOffen, wurzel, knopf, feld } = useMenue();
@@ -35,15 +37,20 @@ function NeuMenue() {
   // Eingeschränkt: Kontakte und Aufgaben — Firmen, Leads und Tickets legt
   // an, wer alles sieht (seit 26.10.17).
   const { eingeschraenkt } = useSicht();
-  const ziele = eingeschraenkt ? NEU_ZIELE.filter((z) => z.pfad === "/kontakte" || z.pfad === "/aufgaben") : NEU_ZIELE;
+  // Im Verein gibt es keine Leads (seit 26.10.19); Firma und Kontakt
+  // heißen dort Mannschaft und Person.
+  const b = useBegriffe();
+  const ziele = NEU_ZIELE
+    .filter((z) => !eingeschraenkt || z.pfad === "/kontakte" || z.pfad === "/aufgaben")
+    .filter((z) => b.modus !== "verein" || !NUR_VERTRIEB.includes(z.pfad))
+    .map((z) => ({ ...z, text: z.pfad === "/kontakte" ? b.kontakt : z.pfad === "/firmen" ? b.firma : z.text }));
 
   return (
     <div className="knopfmenue" ref={wurzel}>
       <button
         type="button"
-        className="btn btn-primaer kopf-neu"
+        className="btn btn-sekundaer kopf-neu"
         ref={knopf}
-        // Auf schmalen Schirmen weicht das Wort — der Name bleibt.
         aria-label="Erstellen"
         title="Erstellen"
         aria-haspopup="menu"
@@ -51,12 +58,11 @@ function NeuMenue() {
         aria-controls={id}
         onClick={() => setOffen((o) => !o)}
       >
-        {/* Kein Plus davor: Ein Knopf, der „Erstellen" sagt und ein
-            Menü öffnet, trägt bei HubSpot die Beschriftung und den Pfeil
-            und sonst nichts. Auf dem Handy weicht das Wort und das
-            Zeichen bleibt — dort ist es der einzige Weg, es zu erkennen. */}
-        <Plus size={16} aria-hidden="true" className="kopf-neu-zeichen" />
-        <span className="kopf-neu-text">Erstellen</span>
+        {/* Nur Plus und Pfeil, als Zweitknopf (Kai, 2.10.2026, ABGLEICH G2):
+            Die Hauptaktion einer Seite steht in ihrem Kopf — „Firma
+            anlegen“. Ein zweiter gefüllter Knopf hier oben machte auf jeder
+            Listenseite zwei Hauptaktionen daraus. Name und Tooltip bleiben. */}
+        <Plus size={20} aria-hidden="true" />
         <ChevronDown size={16} aria-hidden="true" />
       </button>
 

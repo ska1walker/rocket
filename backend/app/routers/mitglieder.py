@@ -83,6 +83,10 @@ class Wer(BaseModel):
     # Darf sie vertrauliche Felder sehen (seit 26.10.18)? Die Oberfläche
     # blendet sonst deren Gruppen, Spalten und Filter aus.
     vertraulich: bool = False
+    # Vertrieb oder Verein (seit 26.10.19). Steht hier und nicht nur unter
+    # /api/settings: Jede Person braucht die Begriffe, auch eine
+    # eingeschränkte, der die Einstellungen der Organisation verschlossen sind.
+    modus: str = "vertrieb"
     # Hat diese Person schon ein eigenes Passwort? Solange niemand eines
     # hat, lässt der Olares-Kopf den ersten noch herein (siehe auth.py) —
     # und das soll die Oberfläche sagen, nicht verschweigen.
@@ -172,6 +176,7 @@ def _wer(
     rolle: str = "member",
     passwort_gesetzt: bool = False,
     vertraulich: bool = False,
+    modus: str = "vertrieb",
 ) -> Wer:
     return Wer(
         user_id=user.user_id,
@@ -184,6 +189,7 @@ def _wer(
         sicht=user.sicht,
         passwort_gesetzt=passwort_gesetzt,
         vertraulich=vertraulich,
+        modus=modus,
     )
 
 
@@ -192,6 +198,12 @@ async def _rolle(conn, user: CurrentUser) -> str:
         "select role::text from public.user_org_roles where user_id = $1 and org_id = $2",
         user.user_id, user.org_id,
     ) or "member"
+
+
+async def _modus(conn, user: CurrentUser) -> str:
+    return await conn.fetchval(
+        "select modus from public.org_settings where org_id = $1", user.org_id
+    ) or "vertrieb"
 
 
 async def _hat_passwort(conn, user: CurrentUser) -> bool:
@@ -207,7 +219,8 @@ async def wer(user: CurrentUser = Depends(get_current_user)) -> Wer:
         rolle = await _rolle(conn, user)
         hat = await _hat_passwort(conn, user)
         geheim = await vertraulich_.darf(conn)
-    return _wer(user, einst, rolle, hat, geheim)
+        modus = await _modus(conn, user)
+    return _wer(user, einst, rolle, hat, geheim, modus)
 
 
 @router.patch("/wer/einstellungen", response_model=Wer)
@@ -239,8 +252,9 @@ async def einstellungen_aendern(
         rolle = await _rolle(conn, user)
         hat = await _hat_passwort(conn, user)
         geheim = await vertraulich_.darf(conn)
+        modus = await _modus(conn, user)
     daten = json.loads(roh) if isinstance(roh, str | bytes) else roh
-    return _wer(user, daten if isinstance(daten, dict) else {}, rolle, hat, geheim)
+    return _wer(user, daten if isinstance(daten, dict) else {}, rolle, hat, geheim, modus)
 
 
 @router.get("", response_model=list[Mitglied])

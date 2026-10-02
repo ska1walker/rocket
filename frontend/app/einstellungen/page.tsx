@@ -33,6 +33,9 @@ import { Sprachausgabeblock } from "@/components/podcast";
 import { Unternavigation, type UnternavGruppe } from "@/components/unternavigation";
 import { Bereicheblock } from "@/components/sicht-verwalten";
 import { useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
+import type { Begriffe } from "@/lib/begriffe";
+import { Modusblock } from "@/components/modus";
 
 /**
  * Die Einstellungen in sechs Unterpunkten.
@@ -59,20 +62,36 @@ const GRUPPEN: { titel: string; schluessel: Bereich[] }[] = [
   { titel: "System", schluessel: ["ki", "daten"] },
 ];
 
-// Wer eingeschränkt sieht, verwaltet nichts: Für ihn gibt es nur das
-// eigene Konto (Passwort, zweiter Faktor, Geräte).
-const NAVIGATION_EINGESCHRAENKT: UnternavGruppe[] = [{
-  titel: "Konto",
-  eintraege: [{ ...BEREICHE[0], href: `/einstellungen?bereich=${BEREICHE[0].schluessel}` }],
-}];
+/** Was ein Bereich nach Modus heißt und ob es ihn gibt (seit 26.10.19):
+ *  Im Verein fehlt „Vertrieb“ (Pipelines, Katalog, Verlustgründe). */
+function bereicheFuer(w: Begriffe) {
+  return BEREICHE
+    .filter((b) => w.modus !== "verein" || b.schluessel !== "vertrieb")
+    .map((b) => {
+      if (b.schluessel === "firma") {
+        return { ...b, text: w.firmaUndTeam, beschreibung: w.modus === "verein" ? "Modus, Team, Bereiche, Passwort, zweiter Faktor, Geräte" : b.beschreibung };
+      }
+      if (b.schluessel === "eigenschaften") {
+        return { ...b, beschreibung: `Felder und Gruppen für ${w.firmen}, ${w.kontakte}${w.modus === "verein" ? "" : " und Leads"}` };
+      }
+      return b;
+    });
+}
 
-const NAVIGATION: UnternavGruppe[] = GRUPPEN.map((g) => ({
-  titel: g.titel,
-  eintraege: g.schluessel.map((k) => {
-    const b = BEREICHE.find((x) => x.schluessel === k)!;
-    return { ...b, href: `/einstellungen?bereich=${b.schluessel}` };
-  }),
-}));
+function navigation(w: Begriffe, eingeschraenkt: boolean): UnternavGruppe[] {
+  const bereiche = bereicheFuer(w);
+  const eintrag = (k: Bereich) => {
+    const b = bereiche.find((x) => x.schluessel === k);
+    return b ? [{ ...b, href: `/einstellungen?bereich=${b.schluessel}` }] : [];
+  };
+  // Wer eingeschränkt sieht, verwaltet nichts: Für ihn gibt es nur das
+  // eigene Konto (Passwort, zweiter Faktor, Geräte).
+  if (eingeschraenkt) return [{ titel: "Konto", eintraege: eintrag("firma") }];
+  return GRUPPEN.map((g) => ({
+    titel: g.titel === "Vertrieb" && w.modus === "verein" ? "Verein" : g.titel,
+    eintraege: g.schluessel.flatMap(eintrag),
+  }));
+}
 
 /** Der KI-Assistent: Adresse, Modell, Schlüssel. */
 function KIBlock({ e }: { e: OrgSettings }) {
@@ -178,10 +197,12 @@ function Inhalt() {
   // Ohne gültigen Bereich zeigt der Desktop „Firma und Team“, das Handy die
   // Übersicht (CSS an `data-auswahl`, siehe HB-UNTERNAV).
   const { eingeschraenkt } = useSicht();
+  const w = useBegriffe();
+  const moeglich = bereicheFuer(w);
   const gewaehlt = suche.get("bereich") as Bereich | null;
-  const ausgewaehlt = BEREICHE.some((b) => b.schluessel === gewaehlt && (!eingeschraenkt || b.schluessel === "firma"));
+  const ausgewaehlt = moeglich.some((b) => b.schluessel === gewaehlt && (!eingeschraenkt || b.schluessel === "firma"));
   const bereich: Bereich = ausgewaehlt ? gewaehlt! : "firma";
-  const bereichName = BEREICHE.find((b) => b.schluessel === bereich)!.text;
+  const bereichName = moeglich.find((b) => b.schluessel === bereich)!.text;
 
   const abfrage = useQuery({
     queryKey: ["einstellungen"],
@@ -197,7 +218,7 @@ function Inhalt() {
       <Seitenkopf titel="Einstellungen" />
 
       <div className="unternav-seite" data-auswahl={ausgewaehlt ? "ja" : "nein"}>
-        <Unternavigation gruppen={eingeschraenkt ? NAVIGATION_EINGESCHRAENKT : NAVIGATION} aktiv={bereich} label="Bereiche der Einstellungen" />
+        <Unternavigation gruppen={navigation(w, eingeschraenkt)} aktiv={bereich} label="Bereiche der Einstellungen" />
 
         <div className="unternav-inhalt">
           <div className="unternav-zurueck">
@@ -218,7 +239,9 @@ function Inhalt() {
           <div className="datensatz datensatz-lesespalte">
             {bereich === "firma" && (
               <>
-                {!eingeschraenkt && <Absenderblock />}
+                {!eingeschraenkt && <Modusblock e={e} />}
+                {/* Firmendaten für Angebote — die gibt es im Verein nicht. */}
+                {!eingeschraenkt && w.modus === "vertrieb" && <Absenderblock />}
                 <Mitgliederblock />
                 <Bereicheblock />
                 <Passwortblock />

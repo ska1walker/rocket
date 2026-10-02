@@ -2148,6 +2148,17 @@ Die erste so: Das Suchfeld der Kopfleiste beginnt seit `ci-26.10.2` auf der
 Linie der Seitentitel statt an der Spaltenkante (AM-HUELLE, Kai 1.10.2026).
 Bei eingeklappter Navigation bleibt es an der Kante, wie vorher.
 
+Mit `ci-26.10.10` (26.10.19, aus ska1walker/rocket#49) kamen Insilos Beiträge
+dazu: Gefahrknopf in AM-KNOPF, Auswahlknopf in AM-HAKEN, Zustände des
+Nachweises, Erfolgshinweis, Zustandspille; die Tab-Titel-Wache beobachtet
+seitdem das ganze Dokument, weil Next 15.5 `<title>` in den `<body>`
+streamt. Mit `ci-26.10.11` (ska1walker/aimighty-ci#15, Kai 2.10.2026):
+**Erstellen** in der Kopfleiste ist ein Zweitknopf mit Plus und Pfeil — vorher
+standen auf jeder Listenseite zwei gefüllte Hauptaktionen (oben „Erstellen“,
+im Seitenkopf „Firma anlegen“; G2: eine je Ansicht). Und der **Klappschalter**
+steht über der Navigationsspalte, bündig mit ihren Einträgen, sein Zeichen
+über den Lesezeichen — vorher rechts neben der Spaltenkante.
+
 `RK-` Abschnitte bleiben Rockets eigene Sache und werden nicht geprüft.
 
 ## Ein Icon-Set für alle Apps (seit 26.10.9)
@@ -3122,8 +3133,49 @@ Markierung — die Gegenprobe (`sieht_vertrauliches()` immer wahr) machte
 ihn in beiden Läufen rot. Im Browser: `e2e/sicht.spec.ts` (Trainer sieht
 die Gruppe nicht, Leitung sieht sie mit Schild, Schalter gedrückt).
 
+### Modus Vertrieb/Verein (seit 26.10.19)
+
+Schritt 5, der letzte der Stufe 3. Rocket ist ein CRM und bleibt eines; der
+Modus „Verein“ (Einstellungen › Verein und Team › Modus, nur Verwalter) ändert
+**nur Darstellung**: Begriffe, Navigation, Vorlagen. Keine Daten, keine
+Tabellen, keine Rechte — die Regeln aus 0037 bis 0039 gelten in beiden Modi
+gleich. Wer zurückschaltet, findet Leads, Angebote und Prognose, wie sie waren.
+
+- **Speicher:** `org_settings.modus` (`vertrieb` | `verein`, Migration 0040).
+  Jede Person bekommt ihn über `/api/mitglieder/wer` — auch eine
+  eingeschränkte, der `/api/settings` verschlossen ist.
+- **Begriffe:** `lib/begriffe.ts` ist die eine Wortliste: Firma → Mannschaft,
+  Kontakt → Person, Kampagne → Rundmail, „Firma und Team“ → „Verein und
+  Team“. Ganze Wendungen statt Wörter, weil „der Kontakt“ zu „die Person“
+  wird. Eine Seite schreibt nie selbst „Firma“, wo im Verein „Mannschaft“
+  stünde; sie holt `useBegriffe()`.
+- **Navigation:** Im Verein fehlen Start, Leads, Angebote und Prognose; „/“
+  führt zu den Personen. Erstellen bietet keinen Lead an. An Mannschaft und
+  Person fehlen Leads, Anreicherung aus dem Netz, Gesprächsvorbereitung und
+  die Lebenszyklus-Stufe; in den Einstellungen der Bereich „Vertrieb“ und die
+  Firmendaten für Angebote.
+- **Vorlagen** beim Hinzufügen einer Person (`lib/vorlagen.ts`): im Verein
+  Spartenleitung, Vorstand, Kassierer/Geschäftsstelle, Jugendleiter,
+  Trainer, Co-Trainer/Betreuer; im Vertrieb Vertriebsleitung, Innendienst,
+  Außendienst, Nur lesen. Eine Vorlage setzt Rolle, Sicht und den Haken für
+  vertrauliche Felder — nichts, was es nicht schon gab. Wer eingeschränkt
+  sieht, bekommt gleich den Sicht-Dialog (Co-Trainer mit „nur lesen“ als
+  Vorgabe). Vorlagen mit Verwaltung bietet die Liste nur der Eigentümerin an,
+  weil nur sie `admin` vergibt.
+- **Vereinsfelder:** Im Verein legt ein Knopf unter dem Modus die Gruppen
+  „Spielerdaten“ (Position, Rückennummer, Passnummer) und „Beitrag und Bank“
+  (vertraulich: Mitgliedsnummer, Beitrag, IBAN, Kontoinhaber) an — nur, was
+  fehlt.
+
+Tests: `tests/test_modus.py` (Umschalten ändert keine Daten, `null` und
+Unbekanntes nichts, Eingeschränkte lesen den Modus, schalten nicht),
+`lib/__tests__/navigation.test.ts` und `vorlagen.test.ts`, `sicht.test.ts`;
+im Browser `e2e/modus.spec.ts` (Rundgang im Verein hell und dunkel,
+Vereinsfelder, Trainer mit Vorlage), das zum Schluss zurück auf Vertrieb
+schaltet.
+
 ### Was noch kommt
 
-Schritt 5 (Modus Vertrieb/Verein: Begriffe wie Mannschaft und Person,
-Vorlagen für Trainer, Jugendleiter, Kassierer …) aus `docs/PLAN-TEAM.md`.
+Stufe 3 ist mit Schritt 5 vollständig. Offen in `docs/PLAN-TEAM.md` bleibt
+Stufe 2 (persönliches Postfach).
 

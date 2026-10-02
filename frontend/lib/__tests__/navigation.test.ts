@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { begriffe } from "@/lib/begriffe";
 import {
   ALLE_ZIELE,
   EINGESCHRAENKT_OFFEN,
   LEISTE_EINGESCHRAENKT,
+  LEISTE_VEREIN,
   gruppenFuer,
   offenFuerEingeschraenkt,
   GRUPPEN,
@@ -100,3 +102,28 @@ describe("eingeschränkte Sicht", () => {
   });
 });
 
+describe("Modus Verein", () => {
+  const verein = begriffe("verein");
+
+  it("nennt Firmen Mannschaften und lässt den Vertrieb weg", () => {
+    const leiste = leisteZiele([], false, verein);
+    expect(leiste.map((z) => z.pfad)).toEqual(LEISTE_VEREIN);
+    expect(leiste.find((z) => z.pfad === "/firmen")?.text).toBe("Mannschaften");
+    expect(leiste.find((z) => z.pfad === "/kontakte")?.text).toBe("Personen");
+    expect(leiste.find((z) => z.pfad === "/kampagnen")?.text).toBe("Rundmails");
+    const alle = [...gruppenFuer(false, verein).flatMap((g) => g.ziele), ...mobilZiele([], false, verein), ...mobilRest([], false, verein)];
+    for (const pfad of ["/", "/deals", "/angebote", "/prognose"]) {
+      expect(alle.map((z) => z.pfad)).not.toContain(pfad);
+    }
+    expect(gruppenFuer(false, verein).map((g) => g.titel)).toEqual(["Alltag", "Verein", "Post", "Wissen"]);
+  });
+
+  it("lässt gemerkte Leads weg, statt sie zu zeigen", () => {
+    expect(leisteZiele(["/deals", "/firmen"], false, verein).map((z) => z.pfad)).toEqual(["/firmen"]);
+  });
+
+  it("verbindet sich mit eingeschränkter Sicht", () => {
+    for (const z of mobilRest([], true, verein)) expect(EINGESCHRAENKT_OFFEN).toContain(z.pfad);
+    expect(leisteZiele([], true, verein).find((z) => z.pfad === "/firmen")?.text).toBe("Mannschaften");
+  });
+});

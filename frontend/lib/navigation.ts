@@ -9,6 +9,8 @@
  * hängen in der Hülle an den Schlüsseln; hier steht nur, was wohin gehört.
  */
 
+import { begriffe, navText, NUR_VERTRIEB, type Begriffe } from "@/lib/begriffe";
+
 export type NavZeichen =
   | "start" | "leads" | "angebote" | "prognose" | "aufgaben"
   | "firmen" | "kontakte" | "listen"
@@ -94,13 +96,34 @@ export function offenFuerEingeschraenkt(aktuell: string): boolean {
   return EINGESCHRAENKT_OFFEN.some((pfad) => aktuell === pfad || aktuell.startsWith(`${pfad}/`));
 }
 
-function nurOffene(ziele: NavZiel[], eingeschraenkt: boolean): NavZiel[] {
-  return eingeschraenkt ? ziele.filter((z) => EINGESCHRAENKT_OFFEN.includes(z.pfad)) : ziele;
+const VERTRIEB = begriffe("vertrieb");
+
+/** Die Leiste im Verein, solange niemand etwas gemerkt hat (seit 26.10.19). */
+export const LEISTE_VEREIN = ["/kontakte", "/firmen", "/aufgaben", "/kampagnen", "/listen"];
+export const MOBIL_VEREIN = ["/kontakte", "/firmen", "/aufgaben", "/kampagnen"];
+
+/**
+ * Was offen ist — nach Sicht und Modus — und wie es heißt. Der Modus
+ * „Verein“ blendet Start, Leads, Angebote und Prognose aus und nennt Firmen
+ * Mannschaften (`lib/begriffe.ts`); Rechte ändert er nicht.
+ */
+function nurOffene(ziele: NavZiel[], eingeschraenkt: boolean, b: Begriffe = VERTRIEB): NavZiel[] {
+  return ziele
+    .filter((z) => !eingeschraenkt || EINGESCHRAENKT_OFFEN.includes(z.pfad))
+    .filter((z) => b.modus !== "verein" || !NUR_VERTRIEB.includes(z.pfad))
+    .map((z) => ({ ...z, text: navText(z.pfad, z.text, b) }));
 }
 
-/** Die Gruppen von „Mehr“ — für Eingeschränkte ohne Verschlossenes und ohne leere Gruppe. */
-export function gruppenFuer(eingeschraenkt = false): NavGruppe[] {
-  return GRUPPEN.map((g) => ({ ...g, ziele: nurOffene(g.ziele, eingeschraenkt) })).filter((g) => g.ziele.length > 0);
+/** Gruppentitel nach Modus: Im Verein bleibt von „Verkauf“ nur der Alltag. */
+function gruppenTitel(titel: string, b: Begriffe): string {
+  if (b.modus !== "verein") return titel;
+  return ({ Verkauf: "Alltag", Bestand: "Verein" } as Record<string, string>)[titel] ?? titel;
+}
+
+/** Die Gruppen von „Mehr“ — ohne Verschlossenes und ohne leere Gruppe. */
+export function gruppenFuer(eingeschraenkt = false, b: Begriffe = VERTRIEB): NavGruppe[] {
+  return GRUPPEN.map((g) => ({ titel: gruppenTitel(g.titel, b), ziele: nurOffene(g.ziele, eingeschraenkt, b) }))
+    .filter((g) => g.ziele.length > 0);
 }
 
 export function istAktiv(pfad: string, aktuell: string): boolean {
@@ -120,15 +143,20 @@ export function favoritenZiele(favoriten: string[]): NavZiel[] {
   return ergebnis;
 }
 
+function vorgabeLeiste(eingeschraenkt: boolean, b: Begriffe): string[] {
+  if (eingeschraenkt) return LEISTE_EINGESCHRAENKT;
+  return b.modus === "verein" ? LEISTE_VEREIN : LEISTE_STANDARD;
+}
+
 /**
  * Die Leiste links: die Favoriten — oder, solange es keine gibt, die
  * Vorgabe. Das erste Lesezeichen ersetzt die Vorgabe ganz: Wer wählt, will
  * seine Auswahl sehen, nicht seine Auswahl plus unsere.
  */
-export function leisteZiele(favoriten: string[], eingeschraenkt = false): NavZiel[] {
-  const meine = nurOffene(favoritenZiele(favoriten), eingeschraenkt);
+export function leisteZiele(favoriten: string[], eingeschraenkt = false, b: Begriffe = VERTRIEB): NavZiel[] {
+  const meine = nurOffene(favoritenZiele(favoriten), eingeschraenkt, b);
   if (meine.length > 0) return meine;
-  return favoritenZiele(eingeschraenkt ? LEISTE_EINGESCHRAENKT : LEISTE_STANDARD);
+  return nurOffene(favoritenZiele(vorgabeLeiste(eingeschraenkt, b)), eingeschraenkt, b);
 }
 
 export function favoritUmschalten(favoriten: string[], pfad: string): string[] {
@@ -136,17 +164,18 @@ export function favoritUmschalten(favoriten: string[], pfad: string): string[] {
 }
 
 /** Die Leiste unten: erst die Favoriten, aufgefüllt aus der Vorgabe bis vier. */
-export function mobilZiele(favoriten: string[], eingeschraenkt = false): NavZiel[] {
-  const ziele = nurOffene(favoritenZiele(favoriten), eingeschraenkt).slice(0, MOBIL_MAX);
-  for (const z of favoritenZiele(eingeschraenkt ? LEISTE_EINGESCHRAENKT : MOBIL_STANDARD)) {
+export function mobilZiele(favoriten: string[], eingeschraenkt = false, b: Begriffe = VERTRIEB): NavZiel[] {
+  const ziele = nurOffene(favoritenZiele(favoriten), eingeschraenkt, b).slice(0, MOBIL_MAX);
+  const vorgabe = eingeschraenkt ? LEISTE_EINGESCHRAENKT : b.modus === "verein" ? MOBIL_VEREIN : MOBIL_STANDARD;
+  for (const z of nurOffene(favoritenZiele(vorgabe), eingeschraenkt, b)) {
     if (ziele.length >= MOBIL_MAX) break;
-    if (!ziele.includes(z)) ziele.push(z);
+    if (!ziele.some((y) => y.pfad === z.pfad)) ziele.push(z);
   }
   return ziele;
 }
 
 /** Alles, was nicht auf der Leiste ist — für „Mehr“, inklusive Einstellungen. */
-export function mobilRest(favoriten: string[], eingeschraenkt = false): NavZiel[] {
-  const gezeigt = new Set(mobilZiele(favoriten, eingeschraenkt).map((z) => z.pfad));
-  return nurOffene([...ALLE_ZIELE, ...NACHRANGIG], eingeschraenkt).filter((z) => !gezeigt.has(z.pfad));
+export function mobilRest(favoriten: string[], eingeschraenkt = false, b: Begriffe = VERTRIEB): NavZiel[] {
+  const gezeigt = new Set(mobilZiele(favoriten, eingeschraenkt, b).map((z) => z.pfad));
+  return nurOffene([...ALLE_ZIELE, ...NACHRANGIG], eingeschraenkt, b).filter((z) => !gezeigt.has(z.pfad));
 }

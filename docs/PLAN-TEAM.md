@@ -186,7 +186,9 @@ Fünf Schritte, je ein Release:
    Schalter „sieht vertrauliche Felder“; Filter, Spalten, Ausfuhr und
    Protokoll kennen sie nur für Berechtigte, Umzug beim Umschalten.
    `docs/BETRIEB.md`, „Vertrauliche Feldgruppen“.
-5. **Modus Vertrieb/Verein:** nur Begriffe und Navigation, keine Rechte.
+5. ✅ **Modus Vertrieb/Verein (26.10.19):** nur Begriffe, Navigation und
+   Vorlagen, keine Rechte; Vereinsfelder auf Knopfdruck.
+   `docs/BETRIEB.md`, „Modus Vertrieb/Verein“.
 
 ## Reihenfolge und grober Umfang
 

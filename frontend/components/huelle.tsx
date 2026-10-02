@@ -42,6 +42,7 @@ import {
 } from "@/lib/navigation";
 import { useFavoriten } from "@/lib/wer";
 import { useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
 import { Laedt, Leer } from "@/components/zustaende";
 
 // Die Hülle hat drei Bereiche: Navigation, Inhalt, Ablage. Die Ablage
@@ -77,16 +78,19 @@ export function Huelle({ children }: { children: React.ReactNode }) {
   const mehrKnopf = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const { eingeschraenkt } = useSicht();
+  const b = useBegriffe();
   // Start rechnet über den ganzen Bestand; wer eingeschränkt ist, beginnt
-  // bei den Kontakten (seit 26.10.17).
+  // bei den Kontakten (seit 26.10.17). Im Verein ebenso: Start zeigt die
+  // Pipeline, und die gibt es dort nicht (seit 26.10.19).
   const verschlossen = eingeschraenkt && !offenFuerEingeschraenkt(aktuell);
+  const ohneStart = aktuell === "/" && (verschlossen || b.modus === "verein");
   useEffect(() => {
     setMobilMehr(false);
     setFeldOffen(false);
   }, [aktuell]);
   useEffect(() => {
-    if (verschlossen && aktuell === "/") router.replace("/kontakte");
-  }, [verschlossen, aktuell, router]);
+    if (ohneStart) router.replace("/kontakte");
+  }, [ohneStart, router]);
 
   function feldSchliessen(fokus = true) {
     setFeldOffen(false);
@@ -113,7 +117,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
       <nav className="huelle-nav" aria-label="Hauptnavigation">
         {/* Die Leiste: Favoriten — oder die Vorgabe, solange es keine gibt.
             Alles andere steht hinter „Mehr“, wie bei HubSpot. */}
-        <NavGruppe ziele={leisteZiele(favoriten, eingeschraenkt)} aktuell={aktuell} favoriten={favoriten} umschalten={umschalten} eingeklappt={eingeklappt === true} />
+        <NavGruppe ziele={leisteZiele(favoriten, eingeschraenkt, b)} aktuell={aktuell} favoriten={favoriten} umschalten={umschalten} eingeklappt={eingeklappt === true} />
         <div className="huelle-nav-gruppe">
           <button
             ref={mehrKnopf}
@@ -139,7 +143,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
 
         {/* Die schmale Leiste unten: Favoriten oder die Vorgabe, dazu „Mehr“. */}
         <div className="huelle-nav-mobil">
-          {mobilZiele(favoriten, eingeschraenkt).map((z) => (
+          {mobilZiele(favoriten, eingeschraenkt, b).map((z) => (
             <NavLink key={z.pfad} ziel={z} aktuell={aktuell} />
           ))}
           <button
@@ -155,7 +159,7 @@ export function Huelle({ children }: { children: React.ReactNode }) {
         </div>
         {mobilMehr && (
           <div className="huelle-nav-mehr" id="huelle-nav-mehr" role="group" aria-label="Weitere Bereiche">
-            {mobilRest(favoriten, eingeschraenkt).map((z) => (
+            {mobilRest(favoriten, eingeschraenkt, b).map((z) => (
               <NavLink key={z.pfad} ziel={z} aktuell={aktuell} />
             ))}
           </div>
@@ -168,16 +172,16 @@ export function Huelle({ children }: { children: React.ReactNode }) {
       </nav>
 
       <main className="huelle-inhalt">
-        {!verschlossen ? (
-          children
-        ) : aktuell === "/" ? (
+        {ohneStart ? (
           <Laedt />
+        ) : !verschlossen ? (
+          children
         ) : (
           // Der Server sagte hier ohnehin 403; die Seite sagt es vorher und
           // in einem Satz, statt in jedem Block einen Fehler zu zeigen.
           <Leer
             titel="Dieser Bereich ist nicht freigegeben"
-            text="Sie sehen die Kontakte, Aufgaben, Listen und Kampagnen der Firmen, für die Sie Zugriff haben. Weitere Bereiche gibt Ihnen die Leitung frei."
+            text={`Sie sehen die ${b.kontakte}, Aufgaben, Listen und ${b.kampagnen} der ${b.firmenDativ}, für die Sie Zugriff haben. Weitere Bereiche gibt Ihnen die Leitung frei.`}
           />
         )}
       </main>
@@ -227,7 +231,7 @@ function MehrFeld({
     };
   }, [schliessen, knopf]);
 
-  const gruppen = gruppenFuer(eingeschraenkt);
+  const gruppen = gruppenFuer(eingeschraenkt, useBegriffe());
   const spalten = gruppen.map((g, i) => (i === gruppen.length - 1 ? { ...g, ziele: [...g.ziele, ...NACHRANGIG] } : g));
 
   return (

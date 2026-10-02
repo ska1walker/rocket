@@ -137,6 +137,7 @@ async def get_settings(user: CurrentUser = Depends(get_current_user)) -> OrgSett
         podcast_automatisch=bool(row and row["podcast_automatisch"]),
         default_currency=(row["default_currency"] if row else "EUR"),
         locale=(row["locale"] if row else "de"),
+        modus=(row["modus"] if row else "vertrieb"),
     )
 
 
@@ -173,6 +174,9 @@ async def update_settings(
             # bei jedem Speichern leer zurück und wäre nach dem ersten
             # Feldwechsel weg. Wer ihn entfernen will, sendet null.
             if name in GEHEIM and wert == "":
+                continue
+            # Der Modus hat immer einen Wert; `null` hieße nichts.
+            if name == "modus" and wert is None:
                 continue
             # Geheimnisse gehen verschlüsselt in die Datenbank (app/tresor.py).
             # Der Schlüssel liegt als Datei neben den Daten, nicht in der

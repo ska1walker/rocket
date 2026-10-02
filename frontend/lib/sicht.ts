@@ -1,6 +1,7 @@
 "use client";
 
 import { useWer } from "@/lib/wer";
+import { begriffe, type Begriffe } from "@/lib/begriffe";
 
 /**
  * Was die angemeldete Person sehen und tun darf — für die Oberfläche.
@@ -43,8 +44,9 @@ export function sichtSatz(
   sicht: "alles" | "eingeschraenkt",
   zugriffe: { name: string; bereich: boolean; stufe: "lesen" | "bearbeiten" }[],
   vertraulich?: boolean,
+  w: Begriffe = begriffe("vertrieb"),
 ): string {
-  const satz = sichtSatzOhne(name, sicht, zugriffe);
+  const satz = sichtSatzOhne(name, sicht, zugriffe, w);
   if (vertraulich === undefined) return satz;
   return `${satz} Vertrauliche Felder ${vertraulich ? "auch" : "nicht"}.`;
 }
@@ -53,13 +55,14 @@ function sichtSatzOhne(
   name: string,
   sicht: "alles" | "eingeschraenkt",
   zugriffe: { name: string; bereich: boolean; stufe: "lesen" | "bearbeiten" }[],
+  w: Begriffe,
 ): string {
-  if (sicht === "alles") return `${name} sieht alle Firmen und Kontakte.`;
-  if (zugriffe.length === 0) return `${name} sieht keine Kontakte, nur die Namen der Firmen.`;
+  if (sicht === "alles") return `${name} sieht alle ${w.firmen} und ${w.kontakte}.`;
+  if (zugriffe.length === 0) return `${name} sieht keine ${w.kontakte}, nur die Namen der ${w.firmen}.`;
   const titel = (z: { name: string; bereich: boolean }) => (z.bereich ? `Bereich ${z.name}` : z.name);
   const alle = zugriffe.map(titel);
   const nurLesen = zugriffe.filter((z) => z.stufe === "lesen").map(titel);
-  const satz = `${name} sieht die Kontakte von ${aufzaehlung(alle)}`;
+  const satz = `${name} sieht die ${w.kontakte} von ${aufzaehlung(alle)}`;
   if (nurLesen.length === 0) return `${satz} und kann sie bearbeiten.`;
   if (nurLesen.length === alle.length) return `${satz}, nur lesend.`;
   return `${satz}; nur lesend bei ${aufzaehlung(nurLesen)}.`;
