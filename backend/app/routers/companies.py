@@ -33,6 +33,21 @@ where c.deleted_at is null
 """
 
 
+def _firma(zeile, user: CurrentUser) -> Company:
+    """Eine Firma für die Antwort.
+
+    Die AI-Zusammenfassung fasst den ganzen Verlauf einer Firma zusammen,
+    auch an Kontakten, die eine eingeschränkte Person nicht sieht — im
+    Verein die Spieler einer fremden Mannschaft. Sie bekommt sie deshalb
+    nicht (seit 26.10.16); Namen und Felder der Firma bleiben sichtbar.
+    """
+    werte = dict(zeile)
+    if user.sicht != "alles":
+        werte["ai_summary"] = None
+        werte["ai_summary_at"] = None
+    return Company(**werte)
+
+
 async def _custom_pruefen(conn, entity: str, werte: dict | None) -> str:
     """Prüft eigene Eigenschaften gegen ihre Definition, gibt JSON zurück."""
     import json
@@ -140,7 +155,7 @@ async def list_companies(
 
     async with acquire_as(user.user_id) as conn:
         rows = await conn.fetch(sql, *args)
-    return [Company(**dict(r)) for r in rows]
+    return [_firma(r, user) for r in rows]
 
 
 @router.get("/anzahl")
@@ -234,7 +249,7 @@ async def get_company(
         row = await conn.fetchrow(LIST_SQL + " and c.id = $1", company_id)
     if row is None:
         raise HTTPException(404, "Firma nicht gefunden")
-    return Company(**dict(row))
+    return _firma(row, user)
 
 
 @router.post("", response_model=Company, status_code=201)
@@ -251,7 +266,7 @@ async def create_company(
     # Was über die Firma öffentlich zu finden ist, wird jetzt gesucht —
     # ohne dass jemand darauf wartet.
     anreicherung.im_hintergrund(user, "companies", new_id)
-    return Company(**dict(full))
+    return _firma(full, user)
 
 
 @router.patch("/{company_id}", response_model=Company)
@@ -293,7 +308,7 @@ async def update_company(
             diff=payload.model_dump(mode="json", exclude_unset=True),
         )
         row = await conn.fetchrow(LIST_SQL + " and c.id = $1", company_id)
-    return Company(**dict(row))
+    return _firma(row, user)
 
 
 @router.delete("/{company_id}", status_code=204)
