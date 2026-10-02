@@ -4782,6 +4782,17 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 
 .eig-gruppe-knoepfe { margin-left: auto; display: flex; gap: var(--am-raum-1); }
 
+/* Vertrauliche Gruppe (seit 26.10.18): Schild und Wort am Namen; der
+   Schalter ist gedrückt, solange sie es ist. */
+.eig-vertraulich {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--am-raum-1);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--am-text-gedaempft);
+}
+
 .eig-umbenennen { display: flex; gap: var(--am-raum-2); align-items: center; flex: 1; }
 .eig-umbenennen .input { max-width: 18rem; }
 
@@ -4951,6 +4962,15 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 .fg-pfeil { flex: none; color: var(--am-text-gedaempft); transition: transform var(--am-dauer-schnell) var(--am-kurve); }
 .fg-gruppe-kopf[aria-expanded="false"] .fg-pfeil { transform: rotate(-90deg); }
 .fg-stand { margin-left: auto; font-size: 0.6875rem; font-weight: 500; color: var(--am-text-gedaempft); }
+/* Vertrauliche Gruppe (seit 26.10.18): Schild und Wort, nie Farbe allein. */
+.fg-vertraulich {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--am-raum-1);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--am-text-gedaempft);
+}
 .fg-archiv { cursor: default; color: var(--am-text-sekundaer); }
 .fg-archiv:hover { background: transparent; }
 
@@ -5027,6 +5047,9 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
 }
 
 .fg-abschnitt legend {
+  display: flex;
+  align-items: center;
+  gap: var(--am-raum-2);
   font-size: 0.8125rem;
   font-weight: 600;
   padding: 0 0 var(--am-raum-2);
@@ -5339,6 +5362,9 @@ select,
   display: flex;
   margin-top: var(--am-raum-1);
 }
+
+/* Der Schild hinter dem Stand: sieht auch vertrauliche Felder (26.10.18). */
+.mitglied-sicht-schloss { display: inline-flex; }
 
 .sicht-zwischentitel {
   margin: var(--am-raum-4) 0 var(--am-raum-2);

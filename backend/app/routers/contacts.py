@@ -8,7 +8,7 @@ import orjson
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from app import anreicherung, audit, eigenschaften, segmente, versand
+from app import anreicherung, audit, eigenschaften, segmente, versand, vertraulich
 from app.auth import CurrentUser, get_current_user
 from app.db import acquire_as
 from app.patching import build_update
@@ -17,15 +17,20 @@ from app.schemas import Contact, ContactIn, ContactPatch
 router = APIRouter(prefix="/api/contacts", tags=["contacts"])
 
 LIST_SQL = """
-select k.*, f.name as company_name
+select k.*, f.name as company_name,
+       {vertraulich}
 from public.contacts k
 left join public.companies f on f.id = k.company_id
 where k.deleted_at is null
-"""
+""".format(vertraulich=vertraulich.spalte("contacts", "k"))
 
 
-async def _custom_pruefen(conn, entity: str, werte: dict | None) -> str:
-    """Prüft eigene Eigenschaften gegen ihre Definition, gibt JSON zurück."""
+async def _custom_pruefen(conn, entity: str, werte: dict | None) -> tuple[str, dict]:
+    """Prüft eigene Eigenschaften gegen ihre Definition.
+
+    Gibt das JSON für `custom` zurück und getrennt davon die vertraulichen
+    Werte, die nach `vertrauliche_werte` gehören (seit 26.10.18).
+    """
     import json
 
     from app import eigenschaften
@@ -34,7 +39,8 @@ async def _custom_pruefen(conn, entity: str, werte: dict | None) -> str:
         geprueft = await eigenschaften.pruefen_voll(conn, entity, werte or {})
     except eigenschaften.Ungueltig as exc:
         raise HTTPException(400, str(exc)) from exc
-    return json.dumps(geprueft)
+    offen, geheim = await vertraulich.aufteilen(conn, entity, geprueft)
+    return json.dumps(offen), geheim
 
 
 def _bedingungen(sql: str, args: list[Any], q: str | None, company_id: UUID | None, filter: str | None) -> str:
@@ -79,7 +85,9 @@ def abfrage_sql(
         raise HTTPException(400, str(exc)) from exc
 
 
-async def einfuegen(conn, user: CurrentUser, payload: ContactIn, custom_json: str) -> UUID:
+async def einfuegen(
+    conn, user: CurrentUser, payload: ContactIn, custom_json: str, geheim: dict | None = None
+) -> UUID:
     """Legt einen Kontakt an und protokolliert es. Ohne Anreicherung.
 
     Der Endpunkt stößt danach die Anreicherung an, die Einfuhr nicht:
@@ -115,9 +123,10 @@ async def einfuegen(conn, user: CurrentUser, payload: ContactIn, custom_json: st
         user.user_id,
         custom_json,
     )
+    await vertraulich.schreiben(conn, user.org_id, "contacts", new_id, geheim or {})
     await audit.log_fuer(
         conn, user, action="create", entity="contacts", entity_id=new_id,
-        diff=payload.model_dump(mode="json"),
+        diff=vertraulich.fuer_protokoll(payload.model_dump(mode="json"), geheim or {}),
     )
     return new_id
 
@@ -256,9 +265,8 @@ async def create_contact(
 ) -> Contact:
     async with acquire_as(user.user_id) as conn:
         await eigenschaften.pflicht_oder_422(conn, "contacts", payload.model_dump(), neu=True)
-        new_id = await einfuegen(
-            conn, user, payload, await _custom_pruefen(conn, "contacts", payload.custom)
-        )
+        custom_json, geheim = await _custom_pruefen(conn, "contacts", payload.custom)
+        new_id = await einfuegen(conn, user, payload, custom_json, geheim)
         row = await conn.fetchrow(LIST_SQL + " and k.id = $1", new_id)
     anreicherung.im_hintergrund(user, "contacts", new_id)
     return Contact(**dict(row))
@@ -274,12 +282,13 @@ async def update_contact(
         await eigenschaften.pflicht_oder_422(
             conn, "contacts", payload.model_dump(exclude_unset=True), neu=False
         )
+    geheim: dict = {}
     if "custom" in payload.model_fields_set:
         async with acquire_as(user.user_id) as conn:
             import json
 
-            geprueft = json.loads(await _custom_pruefen(conn, "contacts", payload.custom))
-        payload = payload.model_copy(update={"custom": geprueft})
+            offen_json, geheim = await _custom_pruefen(conn, "contacts", payload.custom)
+        payload = payload.model_copy(update={"custom": json.loads(offen_json)})
     try:
         zuweisungen, args = build_update(payload)
     except ValueError as exc:
@@ -294,13 +303,14 @@ async def update_contact(
         )
         if updated is None:
             raise HTTPException(404, "Kontakt nicht gefunden")
+        await vertraulich.schreiben(conn, user.org_id, "contacts", updated, geheim)
         await audit.log_fuer(
             conn,
             user,
             action="update",
             entity="contacts",
             entity_id=contact_id,
-            diff=payload.model_dump(mode="json", exclude_unset=True),
+            diff=vertraulich.fuer_protokoll(payload.model_dump(mode="json", exclude_unset=True), geheim),
         )
         row = await conn.fetchrow(LIST_SQL + " and k.id = $1", contact_id)
     return Contact(**dict(row))

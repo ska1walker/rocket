@@ -20,6 +20,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app import anmeldung, audit, versand
+from app import vertraulich as vertraulich_
 from app.auth import CurrentUser, get_current_user, verwaltet
 from app.config import settings
 from app.db import acquire_as
@@ -52,6 +53,9 @@ class Mitglied(BaseModel):
     role: str
     # 'alles' oder 'eingeschraenkt' (seit 26.10.15, siehe routers/sicht.py).
     sicht: str = "alles"
+    # Sieht vertrauliche Felder (seit 26.10.18). Eigentümerin und Verwalter
+    # immer, egal was hier steht.
+    vertraulich_sehen: bool = False
     created_at: datetime
     last_seen_at: datetime | None = None
     # Nur ob, nie was. Die Oberfläche braucht es, um zu warnen, dass eine
@@ -76,6 +80,9 @@ class Wer(BaseModel):
     # 'alles' oder 'eingeschraenkt' (seit 26.10.17): Die Oberfläche blendet
     # damit Wege aus, die einer eingeschränkten Person nicht offenstehen.
     sicht: str = "alles"
+    # Darf sie vertrauliche Felder sehen (seit 26.10.18)? Die Oberfläche
+    # blendet sonst deren Gruppen, Spalten und Filter aus.
+    vertraulich: bool = False
     # Hat diese Person schon ein eigenes Passwort? Solange niemand eines
     # hat, lässt der Olares-Kopf den ersten noch herein (siehe auth.py) —
     # und das soll die Oberfläche sagen, nicht verschweigen.
@@ -164,6 +171,7 @@ def _wer(
     einstellungen: dict[str, Any],
     rolle: str = "member",
     passwort_gesetzt: bool = False,
+    vertraulich: bool = False,
 ) -> Wer:
     return Wer(
         user_id=user.user_id,
@@ -175,6 +183,7 @@ def _wer(
         rolle=rolle,
         sicht=user.sicht,
         passwort_gesetzt=passwort_gesetzt,
+        vertraulich=vertraulich,
     )
 
 
@@ -197,7 +206,8 @@ async def wer(user: CurrentUser = Depends(get_current_user)) -> Wer:
         einst = await _einstellungen(conn, user.user_id)
         rolle = await _rolle(conn, user)
         hat = await _hat_passwort(conn, user)
-    return _wer(user, einst, rolle, hat)
+        geheim = await vertraulich_.darf(conn)
+    return _wer(user, einst, rolle, hat, geheim)
 
 
 @router.patch("/wer/einstellungen", response_model=Wer)
@@ -228,8 +238,9 @@ async def einstellungen_aendern(
     async with acquire_as(user.user_id) as conn:
         rolle = await _rolle(conn, user)
         hat = await _hat_passwort(conn, user)
+        geheim = await vertraulich_.darf(conn)
     daten = json.loads(roh) if isinstance(roh, str | bytes) else roh
-    return _wer(user, daten if isinstance(daten, dict) else {}, rolle, hat)
+    return _wer(user, daten if isinstance(daten, dict) else {}, rolle, hat, geheim)
 
 
 @router.get("", response_model=list[Mitglied])
@@ -238,7 +249,7 @@ async def liste(user: CurrentUser = Depends(get_current_user)) -> list[Mitglied]
         zeilen = await conn.fetch(
             """
             select u.id, u.display_name, u.email, u.olares_username, u.zugang,
-                   r.role::text as role, r.sicht, u.created_at, u.last_seen_at,
+                   r.role::text as role, r.sicht, r.vertraulich_sehen, u.created_at, u.last_seen_at,
                    u.passwort_hash is not null as passwort_gesetzt,
                    u.totp_seit is not null as zweiter_faktor
             from public.users u
@@ -354,7 +365,7 @@ async def umbenennen(
               from public.user_org_roles r
              where u.id = $4 and r.user_id = u.id and r.org_id = $5 and u.deleted_at is null
             returning u.id, u.display_name, u.email, u.olares_username, u.zugang,
-                      r.role::text as role, r.sicht, u.created_at, u.last_seen_at
+                      r.role::text as role, r.sicht, r.vertraulich_sehen, u.created_at, u.last_seen_at
             """,
             felder.get("display_name"),
             felder.get("email"),
@@ -465,7 +476,7 @@ async def rolle_setzen(
              where r.user_id = $2 and r.org_id = $3 and u.id = r.user_id
                and u.deleted_at is null and r.role <> 'owner'
             returning u.id, u.display_name, u.email, u.olares_username, u.zugang,
-                      r.role::text as role, r.sicht, u.created_at, u.last_seen_at
+                      r.role::text as role, r.sicht, r.vertraulich_sehen, u.created_at, u.last_seen_at
             """,
             payload.role,
             mitglied_id,

@@ -3,7 +3,7 @@
 // Modul RK-FELDGRUPPEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertCircle, Check, ChevronDown, Eye, EyeOff, Pencil, Trash2, X } from "@/lib/symbole";
+import { AlertCircle, Check, ChevronDown, Eye, EyeOff, Pencil, ShieldCheck, Trash2, X } from "@/lib/symbole";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api, suchparameter } from "@/lib/api";
@@ -19,6 +19,8 @@ import {
   waehlbar,
   wertVon,
 } from "@/lib/feldwerte";
+import { fuerSicht } from "@/lib/anordnung";
+import { useSicht } from "@/lib/sicht";
 import type { Anordnung, Feldeintrag, Mitglied, PropertyEntity, Wer } from "@/lib/typen";
 import { useWer } from "@/lib/wer";
 import { Mehrfachauswahl } from "@/components/mehrfachauswahl";
@@ -77,6 +79,7 @@ export function Feldgruppen({
   const client = useQueryClient();
   const router = useRouter();
   const { wer } = useWer();
+  const sicht = useSicht();
   const [alle, setAlle] = useState(false);
   const [einzeln, setEinzeln] = useState<string | null>(null);
   const [loeschen, setLoeschen] = useState(false);
@@ -138,7 +141,7 @@ export function Feldgruppen({
 
   if (anordnung.isPending) return <Laedt />;
   if (anordnung.isError) return <Fehler text={(anordnung.error as Error).message} />;
-  const a = anordnung.data!;
+  const a = fuerSicht(anordnung.data!, sicht.vertraulich);
 
   // Ein gerechnetes Feld, das dieser Datensatz gar nicht mitliefert (etwa
   // „Offene Deals" auf der Firmenseite), ist nicht leer, sondern hier nicht
@@ -207,6 +210,7 @@ export function Feldgruppen({
                   >
                     <ChevronDown size={16} aria-hidden="true" className="fg-pfeil" />
                     <span>{g.label}</span>
+                    {g.vertraulich && <Vertraulich />}
                     {!offen && <span className="fg-stand">{gefuellt} gefüllt</span>}
                   </button>
                   {offen && (
@@ -266,6 +270,17 @@ export function Feldgruppen({
 }
 
 /** Eine Zeile — ansehen, und mit dem Stift genau dieses Feld ändern. */
+/** Kennzeichen einer vertraulichen Gruppe — Schild und Wort. Nicht das
+ *  Schloss: Das heißt in den Einstellungen „festes Feld“. */
+function Vertraulich() {
+  return (
+    <span className="fg-vertraulich" title="Nur für Personen, die vertrauliche Felder sehen">
+      <ShieldCheck size={16} aria-hidden="true" />
+      vertraulich
+    </span>
+  );
+}
+
 function Feldzeile({
   feld,
   wert,
@@ -510,7 +525,7 @@ function Formular({
         if (hier.length === 0) return null;
         return (
           <fieldset className="fg-abschnitt" key={g.id}>
-            <legend>{g.label}</legend>
+            <legend>{g.label}{g.vertraulich && <Vertraulich />}</legend>
             {hier.map((f) => (
               <div className="feld" key={f.id}>
                 <label htmlFor={`fga-${f.key}`}>

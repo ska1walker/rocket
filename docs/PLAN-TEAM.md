@@ -182,8 +182,10 @@ Fünf Schritte, je ein Release:
    beim Start festschreiben, Leck-Test über jede Route.
 3. ✅ **Oberfläche (26.10.17):** Vorlagen beim Einladen, Zugriffe anhaken, Bereiche,
    „Wer sieht diese Firma“, Eltern am Kind, Rundgang als Trainer.
-4. **Vertrauliche Feldgruppen:** Werte in eigener Tabelle, nur mit
-   Schalter „sieht vertrauliche Felder“.
+4. ✅ **Vertrauliche Feldgruppen (26.10.18):** Werte in eigener Tabelle, nur mit
+   Schalter „sieht vertrauliche Felder“; Filter, Spalten, Ausfuhr und
+   Protokoll kennen sie nur für Berechtigte, Umzug beim Umschalten.
+   `docs/BETRIEB.md`, „Vertrauliche Feldgruppen“.
 5. **Modus Vertrieb/Verein:** nur Begriffe und Navigation, keine Rechte.
 
 ## Reihenfolge und grober Umfang

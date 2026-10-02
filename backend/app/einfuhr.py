@@ -31,7 +31,7 @@ from uuid import UUID
 import asyncpg
 import orjson
 
-from app import audit, csvform, eigenschaften, segmente
+from app import audit, csvform, eigenschaften, segmente, vertraulich
 from app.auth import CurrentUser
 from app.csvform import Unlesbar
 from app.schemas import CompanyIn, ContactIn
@@ -504,16 +504,18 @@ async def anwenden(
             continue
         werte = dict(zeile.werte)
         werte.setdefault("source", HERKUNFT)
-        custom_json = orjson.dumps(zeile.custom).decode()
+        # Vertrauliche Felder gehen in ihre eigene Ablage (seit 26.10.18).
+        offen, geheim = await vertraulich.aufteilen(conn, entity, zeile.custom)
+        custom_json = orjson.dumps(offen).decode()
 
         if entity == "contacts":
             werte["company_id"] = zeile.firma_id or firmen_ids.get(zeile.neue_firma or "")
             neue_id = await kontakt_router.einfuegen(
-                conn, user, ContactIn(**werte), custom_json
+                conn, user, ContactIn(**werte), custom_json, geheim
             )
         else:
             neue_id = await firmen_router.einfuegen(
-                conn, user, CompanyIn(**werte), custom_json
+                conn, user, CompanyIn(**werte), custom_json, geheim
             )
         angelegt += 1
         await audit.log_fuer(

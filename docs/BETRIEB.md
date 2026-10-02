@@ -3058,9 +3058,72 @@ Prüfungen wie der Rundgang (keine Antwort 4xx der API, Lage, axe). Dazu
 der Sicht-Dialog per Tastatur, „Sichtbarkeit“ an der Firma und Eltern am
 Kind.
 
+### Vertrauliche Feldgruppen (seit 26.10.18)
+
+Schritt 4. Manche Felder soll nicht jede Person sehen, die den Datensatz
+sieht — im Verein Bankverbindung, Beitrag, Mitgliedsnummer; im Vertrieb etwa
+Konditionen. Eine **Eigenschaftsgruppe** lässt sich deshalb vertraulich
+schalten (Einstellungen › Eigenschaften, Schild am Gruppenkopf). Nur eigene
+Eigenschaften: Feste Felder stehen in ihrer Spalte und lassen sich nicht
+getrennt ablegen — eine Gruppe mit festen Feldern bietet den Schalter nicht
+an, und ein festes Feld lässt sich nicht hineinziehen (409).
+
+**Wer sieht:** Eigentümerin und Verwalter immer, alle anderen nur mit dem
+Haken „Sieht vertrauliche Felder“ im Sicht-Dialog (im Verein: Kassierer,
+Geschäftsstelle) — und auch dann nur an Datensätzen, die sie ohnehin
+sehen. Der Haken gilt unabhängig von `alles`/`eingeschraenkt`: Ein
+Jugendleiter mit Haken sieht die Beiträge seiner Jugend, nicht die der
+Herren.
+
+**Wie es dicht ist:** Die Werte stehen nicht in `custom`, sondern in
+`vertrauliche_werte` (Migration 0039, RLS unter FORCE). Deren Regeln
+verlangen `sieht_vertrauliches()` **und** einen sichtbaren Datensatz,
+schreibend einen bearbeitbaren. Die Abfragen holen die Werte als
+Unterabfrage dazu (`app/vertraulich.py`, Spalte `custom_vertraulich`, im
+Schema mit `custom` zusammengeführt); wer sie nicht sehen darf, bekommt dort
+nichts. Damit gilt derselbe Schutz an jeder Stelle:
+
+- **Datensatz und Liste:** Der Wert fehlt; die Oberfläche blendet die
+  Gruppe ganz aus (`fuerSicht` in `lib/anordnung.ts`), auch im
+  Anlegen-Dialog — ein leeres Feld, dessen Speichern der Server abweist,
+  wäre eine Falle.
+- **Filter und Sortierung:** `segmente.CUSTOM_SPALTE` enthält die
+  Unterabfrage. Ein Filter „IBAN beginnt mit DE12“ findet für Unberechtigte
+  nichts; die Spaltenwahl und der Filterbau kennen das Feld für sie gar
+  nicht (`felder_fuer`).
+- **Ausfuhr:** Dieselbe Abfrage; eine ausdrücklich verlangte Spalte gibt
+  400.
+- **Suche, Fragen an den Bestand, AI:** lesen nur `custom` — vertrauliche
+  Werte erreichen nie ein Sprachmodell, auch nicht für Berechtigte.
+- **Schreiben:** Wer nicht sehen darf, darf auch nicht setzen oder leeren
+  (403 mit dem Feldnamen). Ein vertrauliches Pflichtfeld ist für ihn kein
+  Pflichtfeld — sonst könnte ein Trainer keinen Spieler anlegen, weil die
+  Bankverbindung fehlt.
+- **Protokoll:** nennt „(vertraulich)“ statt des Werts.
+- **Datenbank-Blick:** `vertrauliche_werte` steht in `GESPERRT`.
+
+**Umzug:** Wird eine Gruppe vertraulich, wandern die vorhandenen Werte ihrer
+Felder aus `custom` in die eigene Ablage; fällt der Schalter, zurück. Ebenso,
+wenn ein Feld in eine andere Gruppe gezogen oder eine Gruppe mit Ziel
+gelöscht wird (`vertraulich.abgleichen`, in derselben Transaktion wie die
+Änderung an der Gruppe).
+
+**Abzug:** trägt `vertrauliche_werte` und den Haken je Person; die Gruppe
+trägt ihren Schalter ohnehin. Wie immer gilt: Abzug und `tresor.key` gehören
+zusammen — die vertraulichen Werte stehen im Abzug im Klartext, so wie die
+übrigen Felder auch. Wer den Ordner `sicherungen/` hat, hat sie.
+
+Tests: `tests/test_vertraulich.py` (Kassierer sieht, Mitglied und Trainer
+nicht — in Antwort, Liste, Filter, Spalten, Ausfuhr, Datenbank; Pflichtfeld;
+Jugendleiter mit Haken nur an den eigenen; Umzug in beide Richtungen;
+feste Felder; Abzug). Der Leck-Test legt an den **eigenen** Spieler und die
+eigene Mannschaft des Trainers je einen vertraulichen Wert mit der
+Markierung — die Gegenprobe (`sieht_vertrauliches()` immer wahr) machte
+ihn in beiden Läufen rot. Im Browser: `e2e/sicht.spec.ts` (Trainer sieht
+die Gruppe nicht, Leitung sieht sie mit Schild, Schalter gedrückt).
+
 ### Was noch kommt
 
-Schritt 4 (vertrauliche Feldgruppen) und Schritt 5 (Modus Vertrieb/Verein:
-Begriffe wie Mannschaft und Person, Vorlagen für Trainer, Jugendleiter …)
-aus `docs/PLAN-TEAM.md`.
+Schritt 5 (Modus Vertrieb/Verein: Begriffe wie Mannschaft und Person,
+Vorlagen für Trainer, Jugendleiter, Kassierer …) aus `docs/PLAN-TEAM.md`.
 
