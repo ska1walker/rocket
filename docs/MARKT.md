@@ -278,6 +278,8 @@ Vierzehnter Durchlauf: Rocket 26.10.12, PR #95, 1.10.2026 — von der Action: Re
 
 Fünfzehnter Durchlauf: Rocket 26.10.13, PR #96, 1.10.2026 — von der Action, zwei Minuten nach dem Release: Dichteschalter (Weit/Normal/Kompakt). Marc hatte `main` seit 26.10.12 bewegt (eigene App `aimllmgemma4vllm`, Zeitstempel als globale Höchstmarke auf 4400000000000); die Action rechnete auf frischem `main` 4401000000000. Auf `main` byte-gleich geprüft (sha256 `5d2b6b5d…3455`, keine alten Schlüssel). Keine Datenbankänderung. Kai hat seine Box am selben Abend von 26.10.7 direkt auf 26.10.13 aktualisiert; läuft.
 
+Sechzehnter Durchlauf: Rocket 26.10.14, PR #97, 2.10.2026 — von der Action: API-Schlüssel, mit denen Programme von außen die Eigenschaften pflegen. Marc hatte `main` seit 26.10.13 bewegt (eigene App `aimqwen38llama`, Zeitstempel weiter gehoben); die Action rechnete auf frischem `main` 4404000000000. Auf `main` byte-gleich geprüft (sha256 `8221fd45…bb2b`, keine alten Schlüssel). Neue Tabelle `api_schluessel` (Migration 0036), vorhandene Daten unverändert.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
