@@ -411,6 +411,24 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     color: var(--am-text-primaer);
   }
 
+  /* Gefahr: nur für das, was etwas wegnimmt, und immer mit Objekt im Wort
+     („Aufnahme löschen“, nicht „Löschen“). Nie still, nie zweimal auf einer
+     Ansicht (kern/schaltflaechen.md, ABGLEICH R1). Schrift wie auf der
+     Handlung: hell Weiß (5,92:1), dunkel Blau 900 (7,37:1) — Weiß auf dem
+     hellen Rot des Dunkelmodus kam auf 2,45:1 (ABGLEICH T9). Beim
+     Überfahren heller wie jede Handlung, nicht dunkler. Bis ci-26.10.3
+     stand die Regel nur in Rocket (RK-SEGMENTLISTE); seit Insilo gehört sie
+     allen (ABGLEICH IN-R1). */
+  .btn-gefahr {
+    background: var(--am-fehler);
+    color: var(--am-handlung-text);
+    border-color: var(--am-fehler);
+  }
+  .btn-gefahr:hover {
+    background: var(--am-fehler-hover);
+    border-color: var(--am-fehler-hover);
+  }
+
   .btn-gesperrt,
   .btn:disabled {
     background: var(--am-flaeche-2);
@@ -540,6 +558,42 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   input[type="checkbox"]:disabled { opacity: 0.5; cursor: not-allowed; }
   html.dunkel input[type="checkbox"]:hover { border-color: var(--am-gold-500); }
   html.dunkel input[type="checkbox"]:checked { border-color: var(--am-gold-500); background: var(--am-gold-500); color: var(--am-blau-900); }
+
+  /* Der Auswahlknopf (eins aus mehreren): derselbe Rahmen, rund; gewählt
+     ein Punkt in Hanseatenblau, im Dunkeln Gold. Seit Insilo (IN-G8). */
+  input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+    border: var(--am-rand-betont) solid var(--am-rand);
+    border-radius: var(--am-radius-voll);
+    background: var(--am-seite);
+    cursor: pointer;
+    display: inline-grid;
+    place-content: center;
+    vertical-align: -0.2em;
+    transition: border-color var(--am-dauer-schnell) var(--am-kurve);
+  }
+  input[type="radio"]::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--am-radius-voll);
+    transform: scale(0);
+    transition: transform var(--am-dauer-schnell) var(--am-kurve);
+    background: var(--am-handlung-ruhend);
+  }
+  input[type="radio"]:hover,
+  input[type="radio"]:checked { border-color: var(--am-handlung-ruhend); }
+  input[type="radio"]:checked::before { transform: scale(1); }
+  input[type="radio"]:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
+  input[type="radio"]:disabled { opacity: 0.5; cursor: not-allowed; }
+  html.dunkel input[type="radio"]:hover,
+  html.dunkel input[type="radio"]:checked { border-color: var(--am-gold-500); }
+  html.dunkel input[type="radio"]::before { background: var(--am-gold-500); }
 
   .schalter-zeile {
     display: flex;
@@ -1135,6 +1189,14 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     .nachweis:hover { color: var(--am-text-primaer); background: var(--am-flaeche-2); }
     .nachweis:focus-visible { outline: 2px solid var(--am-fokus-ring); outline-offset: 2px; }
     .nachweis[data-extern="true"] svg { color: var(--am-gold-beschriftung); }
+    /* Der dritte Zustand, aus Insilo (ABGLEICH IN-B4): Ein Ziel draußen
+       bekommt ganze Transkripte oder den Ton (Sprachmodell, Spracherkennung).
+       Das muss auffallen — in der Zustandsfarbe, mit Zeichen und Wort. */
+    .nachweis[data-zustand="achtung"],
+    .nachweis[data-zustand="achtung"] svg { color: var(--am-achtung); }
+    /* Zweite Zeile, wo gemessen wird: der Host oder die übertragene Menge. */
+    .nachweis-text { display: flex; flex-direction: column; min-width: 0; }
+    .nachweis-unter { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .huelle-inhalt {
       grid-row: 2;
@@ -1619,6 +1681,33 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     color: var(--am-hinweis);
     border-color: var(--am-hinweis-rand);
     background: var(--am-hinweis-flaeche);
+  }
+
+  /* Zustand einer Verarbeitung statt Stufe eines Datensatzes — seit Insilo
+     (ABGLEICH IN-B5): wartet (ohne Zustand, neutral), läuft, erledigt,
+     gescheitert. „Läuft“ trägt Gold wie die Aufnahme, auf der Fläche erst
+     mit Gold-900 lesbar; der Punkt steht still — Bewegung ist der
+     Aufnahme vorbehalten (medien/app.md, Insilo). Immer mit Wort. */
+  .stufe[data-zustand="laeuft"] {
+    color: var(--am-gold-900);
+    border-color: var(--am-gold-300);
+    background: var(--am-gold-200);
+  }
+  .stufe[data-zustand="laeuft"]::before { background: var(--am-gold-500); }
+  .dunkel .stufe[data-zustand="laeuft"] {
+    color: var(--am-gold-beschriftung);
+    border-color: var(--am-gold-600);
+    background: transparent;
+  }
+  .stufe[data-zustand="erfolg"] {
+    color: var(--am-erfolg);
+    border-color: var(--am-erfolg-rand);
+    background: var(--am-erfolg-flaeche);
+  }
+  .stufe[data-zustand="fehler"] {
+    color: var(--am-fehler);
+    border-color: var(--am-fehler-rand);
+    background: var(--am-fehler-flaeche);
   }
 
   /* ── Datensatzseite — drei Bereiche [HB-BLOCK] ───────────────────────────────
@@ -2739,6 +2828,15 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
     background: var(--am-fehler-flaeche);
     color: var(--am-fehler);
   }
+
+  /* Ein gemessener guter Zustand, etwa „alles bleibt auf der Box“ in
+     Insilos Datenschutz-Nachweis (ABGLEICH IN-B4). Mit Zeichen und Satz wie
+     jeder Zustand; nie als Auszeichnung. */
+  .hinweis[data-art="erfolg"] {
+    border-color: var(--am-erfolg-rand);
+    background: var(--am-erfolg-flaeche);
+    color: var(--am-erfolg);
+  }
 }
 
 /* ── Eingabefeld, aus dem Paket übernommen [AM-FELD] ──────────────────────────── */
@@ -2980,18 +3078,6 @@ html[data-dichte="kompakt"] { --am-skalierung: 0.9; }
   .stapel-luecke { flex: 1; }
 
   .stapel-frage { color: var(--am-fehler); font-weight: 600; }
-
-  /* Schrift auf der Fehlerfläche wie auf der Handlung: hell Weiß (5,92:1),
-     dunkel Blau 900 (7,37:1). Weiß auf dem hellen Rot des Dunkelmodus kam
-     auf 2,45:1 (ABGLEICH T9). */
-  .btn-gefahr {
-    background: var(--am-fehler);
-    color: var(--am-handlung-text);
-    border-color: var(--am-fehler);
-  }
-
-  /* Beim Überfahren heller wie jede Handlung, nicht dunkler (ABGLEICH R1). */
-  .btn-gefahr:hover { background: var(--am-fehler-hover); border-color: var(--am-fehler-hover); }
 
   /* Die Auswahlspalte ist schmal und klickt nicht die Zeile mit. */
   .tabelle th.wahlspalte,
