@@ -715,6 +715,9 @@ und API-Pfade als Parameter herausgelöst werden.
   Person.
 - Zwei Wege zu ändern: der Stift am Feld oder „Alles bearbeiten".
 - Ein leeres Pflichtfeld zeigt Zeichen und das Wort „fehlt".
+- Eine vertrauliche Gruppe trägt Schild und Wort „vertraulich“ (seit
+  26.10.18); wer sie nicht sehen darf, bekommt sie gar nicht
+  (`fuerSicht`) — auch nicht im Anlegen-Dialog.
 
 `lib/feldwerte.ts` (anzeigen, in Eingabe verwandeln und zurück, Euro ↔
 Cent, sichere URLs) und `lib/anordnung.ts` (Ziehen, Tastaturschritte,
@@ -731,6 +734,9 @@ Gruppen verschieben) sind reine Funktionen ohne React — mit Tests, gut
   mit ↑/↓; die Ablage zeigt eine Linie, nicht nur eine Farbe.
 - Feste Felder lassen sich verschieben und umbenennen, aber nicht löschen.
 - Auswahlwerte werden archiviert statt gelöscht.
+- Der Schild am Gruppenkopf schaltet die Gruppe vertraulich (seit
+  26.10.18, `aria-pressed`); am Namen steht dann Schild und Wort. Nicht das
+  Schloss: Das heißt hier „festes Feld“.
 
 ### RK-STAMMDATEN — Stammdaten ohne Gruppen ◐
 
@@ -890,6 +896,8 @@ wird in der Datenbank (0037, 0038), nicht hier.
 
 - `SichtDialog` (Team › „sieht alles“ / „sieht eingeschränkt“): Alles oder
   nur ausgewählte Bereiche und Firmen, je `bearbeiten` oder `nur lesen`,
+  dazu der Haken „Sieht vertrauliche Felder“ (seit 26.10.18; in der Tabelle
+  danach ein Schild hinter dem Stand),
   darunter der Satz aus `lib/sicht.ts` (`sichtSatz`), der sagt, was am Ende
   gilt. Für Eigentümerin und Verwalter nur ein Hinweis: Sie sehen immer
   alles.

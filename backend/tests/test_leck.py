@@ -51,6 +51,14 @@ async def _aufbau(k, kuerzel: str) -> dict:
     await _ok(await k.post(f"/api/contacts/{kind['id']}/beziehungen", json={"bezug_id": elter["id"]}))
     passiv = await _ok(await k.post("/api/contacts", json={"first_name": "LECKB-Passiv", "last_name": kuerzel}))
 
+    # Vertrauliche Felder (seit 26.10.18): Auch am **eigenen** Spieler und an
+    # der eigenen Mannschaft sieht der Trainer sie nicht — ohne den Schalter.
+    for entity, ziel in (("contacts", eigen["id"]), ("companies", a["id"])):
+        gruppe = await _ok(await k.post("/api/eigenschaften/gruppen", json={"entity": entity, "label": f"Bank {kuerzel}"}))
+        await _ok(await k.patch(f"/api/eigenschaften/gruppen/{gruppe['id']}", json={"vertraulich": True}))
+        feld = await _ok(await k.post("/api/eigenschaften", json={"entity": entity, "label": f"IBAN {kuerzel}", "group_id": gruppe["id"]}))
+        await _ok(await k.patch(f"/api/{entity}/{ziel}", json={"custom": {feld["key"]: "LECKB-IBAN"}}))
+
     aktivitaet = await _ok(await k.post("/api/activities", json={"kind": "note", "body": "LECKB-Aktivität", "contact_id": fremd["id"]}))
     await _ok(await k.post("/api/activities", json={"kind": "note", "body": "LECKB-an-der-Firma", "company_id": b["id"]}))
     aufgabe = await _ok(await k.post("/api/tasks", json={"title": "LECKB-Aufgabe", "contact_id": fremd["id"]}))
@@ -156,6 +164,10 @@ async def test_nichts_von_der_fremden_mannschaft_kommt_heraus(datenbank, monkeyp
         for tabelle in sorted(datenbankblick.FREI - {"companies", "orgs"}):
             treffer = await conn.fetchval(f"select count(*) from public.{tabelle} t where t::text ilike '%leckb%'")
             assert treffer == 0, f"{tabelle}: {treffer} Zeilen mit der Markierung"
+        # `companies` ist oben ausgenommen, vertrauliche Werte stehen dort
+        # aber gar nicht; und ihre eigene Tabelle zeigt ihm nichts.
+        assert await conn.fetchval("select count(*) from public.companies t where t::text ilike '%leckb-iban%'") == 0
+        assert await conn.fetchval("select count(*) from public.vertrauliche_werte") == 0
 
 
 async def test_eingeschraenkt_kommt_nur_durch_die_erlaubten_tueren(datenbank):

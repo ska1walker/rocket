@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api, suchparameter } from "@/lib/api";
 import { ausEingabe, type Auswahl, Eingabefehler, istLeer, patchFuer } from "@/lib/feldwerte";
+import { fuerSicht } from "@/lib/anordnung";
+import { useSicht } from "@/lib/sicht";
 import type { Anordnung, Mitglied, PropertyEntity } from "@/lib/typen";
 import { Eingabe } from "@/components/feldgruppen";
 
@@ -27,7 +29,8 @@ export function useAnlegefelder(entity: PropertyEntity, vorhanden: string[]) {
     queryFn: () => api.get<Anordnung>(`/api/eigenschaften/anordnung${suchparameter({ entity })}`),
     staleTime: 60_000,
   });
-  const felder = (anordnung.data?.gruppen ?? [])
+  const { vertraulich } = useSicht();
+  const felder = (anordnung.data ? fuerSicht(anordnung.data, vertraulich).gruppen : [])
     .flatMap((g) => g.felder)
     // Pflichtfelder erscheinen immer — wie in HubSpot, wo sie sich im
     // Anlegen-Formular gar nicht abwählen lassen.

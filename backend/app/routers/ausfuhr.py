@@ -16,11 +16,10 @@ festgehalten, mit Zeilenzahl, Filter und Spalten.
 from datetime import date
 from typing import Any
 
-import orjson
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
-from app import audit, csvform, segmente
+from app import audit, csvform, segmente, vertraulich
 from app.auth import CurrentUser, get_current_user
 from app.db import acquire_as
 from app.routers import companies as firmen_router
@@ -91,7 +90,8 @@ async def ausfuhr(
             }
             gezaehlt = 0
             async for satz in conn.cursor(sql, *args):
-                eigen = orjson.loads(satz["custom"]) if satz.get("custom") else {}
+                # Vertrauliche Werte nur, wenn die Abfrage sie liefern durfte.
+                eigen = vertraulich.zusammen(satz.get("custom"), satz.get("custom_vertraulich"))
                 gezaehlt += 1
                 yield [
                     csvform.zelle_text(

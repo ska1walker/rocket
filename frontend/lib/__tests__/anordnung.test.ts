@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ablageOrt, alsReihenfolge, finde, gruppieren, gruppeSchieben, passt, schritt, verschiebe } from "@/lib/anordnung";
+import { ablageOrt, alsReihenfolge, finde, fuerSicht, gruppieren, gruppeSchieben, passt, schritt, verschiebe } from "@/lib/anordnung";
 import type { Anordnung, Feldeintrag } from "@/lib/typen";
 
 function feld(id: string): Feldeintrag {
@@ -86,5 +86,17 @@ describe("Anordnung", () => {
     expect(passt("ci", "Ort", "city")).toBe(true);
     expect(passt("or", "Ort", "city")).toBe(true);
     expect(passt("plz", "Ort", "city")).toBe(false);
+  });
+
+  it("blendet vertrauliche Gruppen aus, wer sie nicht sehen darf", () => {
+    const geheim: Anordnung = {
+      ...A,
+      gruppen: A.gruppen.map((g) => (g.id === "g3" ? { ...g, vertraulich: true } : g)),
+      archiviert: [{ ...feld("x"), is_active: false, vertraulich: true }, { ...feld("y"), is_active: false }],
+    };
+    expect(fuerSicht(geheim, true)).toBe(geheim);
+    const ohne = fuerSicht(geheim, false);
+    expect(ohne.gruppen.map((g) => g.id)).toEqual(["g1", "g2"]);
+    expect(ohne.archiviert.map((f) => f.id)).toEqual(["y"]);
   });
 });

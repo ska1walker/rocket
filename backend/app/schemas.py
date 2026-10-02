@@ -9,7 +9,7 @@ from datetime import date, datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 
 def _json_dict(wert: Any) -> dict[str, Any]:
@@ -32,6 +32,19 @@ class MitEigenschaften(BaseModel):
     @classmethod
     def _custom_lesen(cls, wert: Any) -> dict[str, Any]:
         return _json_dict(wert)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _vertrauliches_dazu(cls, daten: Any) -> Any:
+        """Die Abfragen holen vertrauliche Werte als `custom_vertraulich`
+        dazu (`app/vertraulich.py`); wer sie nicht sehen darf, bekommt dort
+        nichts. Für die Antwort stehen beide in `custom`."""
+        if isinstance(daten, dict) and "custom_vertraulich" in daten:
+            daten = dict(daten)
+            geheim = _json_dict(daten.pop("custom_vertraulich"))
+            if geheim:
+                daten["custom"] = {**_json_dict(daten.get("custom")), **geheim}
+        return daten
 
 LifecycleStage = Literal["lead", "qualified", "opportunity", "customer", "partner", "disqualified"]
 DealProduct = Literal["assistent", "analyst", "experte", "service", "sonstiges"]

@@ -53,9 +53,13 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
   });
 
   // Der Entwurf beginnt, sobald der Stand da ist — vorher steht „Lädt“.
-  const [entwurf, setEntwurf] = useState<{ sicht: Sicht["sicht"]; wahl: Wahl } | null>(null);
+  const [entwurf, setEntwurf] = useState<{ sicht: Sicht["sicht"]; wahl: Wahl; geheim: boolean } | null>(null);
   const [filter, setFilter] = useState("");
-  const aktuell = entwurf ?? (stand.data ? { sicht: stand.data.sicht, wahl: wahlAus(stand.data.zugriffe) } : null);
+  const aktuell =
+    entwurf ??
+    (stand.data
+      ? { sicht: stand.data.sicht, wahl: wahlAus(stand.data.zugriffe), geheim: !!stand.data.vertraulich_sehen }
+      : null);
 
   const speichern = useMutation({
     mutationFn: () => {
@@ -67,7 +71,11 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
               const [art, id] = schluessel.split(":");
               return art === "f" ? { company_id: id, stufe } : { bereich_id: id, stufe };
             });
-      return api.put<Sicht>(`/api/mitglieder/${mitglied.id}/sicht`, { sicht: z.sicht, zugriffe });
+      return api.put<Sicht>(`/api/mitglieder/${mitglied.id}/sicht`, {
+        sicht: z.sicht,
+        zugriffe,
+        vertraulich_sehen: z.geheim,
+      });
     },
     onSuccess: () => {
       client.invalidateQueries({ queryKey: ["mitglieder"] });
@@ -81,7 +89,7 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
     const neu = new Map(aktuell!.wahl);
     if (stufe) neu.set(schluessel, stufe);
     else neu.delete(schluessel);
-    setEntwurf({ sicht: aktuell!.sicht, wahl: neu });
+    setEntwurf({ ...aktuell!, wahl: neu });
   }
 
   const namen = useMemo(() => {
@@ -98,6 +106,7 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
         [...aktuell.wahl]
           .filter(([k]) => namen.has(k))
           .map(([k, stufe]) => ({ ...namen.get(k)!, stufe })),
+        aktuell.geheim,
       )
     : "";
 
@@ -127,6 +136,24 @@ export function SichtDialog({ mitglied, beiSchliessen }: { mitglied: Mitglied; b
                 <option value="eingeschraenkt">Nur die Kontakte ausgewählter Firmen und Bereiche</option>
               </select>
             </div>
+
+            {/* Seit 26.10.18: vertrauliche Feldgruppen (im Verein Bank und
+                Beitrag) — unabhängig davon, wie viel die Person sonst sieht. */}
+            <ul className="sicht-liste">
+              <li className="sicht-zeile">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={aktuell.geheim}
+                    onChange={(e) => setEntwurf({ ...aktuell, geheim: e.target.checked })}
+                  />
+                  <span>
+                    Sieht vertrauliche Felder
+                    <span className="text-leise-klein"> · etwa Bank und Beitrag, nur an Kontakten, die {name} ohnehin sieht</span>
+                  </span>
+                </label>
+              </li>
+            </ul>
 
             {aktuell.sicht === "eingeschraenkt" && (
               <>

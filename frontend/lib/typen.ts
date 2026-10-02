@@ -624,6 +624,8 @@ export interface Mitglied {
   role: string;
   /** Seit 26.10.15: alles oder nur, worauf die Person Zugriff hat. */
   sicht?: "alles" | "eingeschraenkt";
+  /** Seit 26.10.18: sieht vertrauliche Felder (Eigentümerin und Verwalter immer). */
+  vertraulich_sehen?: boolean;
   created_at: string;
   last_seen_at: string | null;
   /** Hat diese Person ein eigenes Passwort? Nur ob, nie was. */
@@ -643,6 +645,8 @@ export interface Wer {
   rolle: string;
   /** Seit 26.10.17: `alles` oder `eingeschraenkt` (nur Firmen mit Zugriff). */
   sicht?: "alles" | "eingeschraenkt";
+  /** Seit 26.10.18: darf vertrauliche Felder sehen und ändern. */
+  vertraulich?: boolean;
   /** Hat diese Person ein eigenes Passwort? */
   passwort_gesetzt: boolean;
   /** Was diese Person für sich eingestellt hat. */
@@ -693,6 +697,8 @@ export interface Feldeintrag {
   required: boolean;
   im_anlegen: boolean;
   is_active: boolean;
+  /** Steht in einer vertraulichen Gruppe (seit 26.10.18). */
+  vertraulich?: boolean;
   /** Datensätze mit Wert — nur auf Wunsch geladen, `null` bei Gerechnetem. */
   anzahl: number | null;
 }
@@ -704,6 +710,8 @@ export interface Eigenschaftsgruppe {
   position: number;
   /** Vorgabegruppe: umbenennbar, nicht löschbar. */
   is_system: boolean;
+  /** Vertraulich (seit 26.10.18): Werte nur für Berechtigte, getrennt abgelegt. */
+  vertraulich?: boolean;
   felder: Feldeintrag[];
 }
 
@@ -1367,6 +1375,8 @@ export interface Zugriff {
 export interface Sicht {
   sicht: "alles" | "eingeschraenkt";
   zugriffe: Zugriff[];
+  /** Seit 26.10.18: sieht vertrauliche Felder. Fehlt er beim Setzen, bleibt er. */
+  vertraulich_sehen?: boolean | null;
 }
 
 export interface Bereich {

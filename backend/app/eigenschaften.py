@@ -461,10 +461,19 @@ async def pflicht_pruefen(
     jede Messeliste an einem Feld, das auf ihr nicht steht.
     """
     zeilen = await conn.fetch(
-        "select key, label, is_system from public.property_definitions "
-        "where entity = $1 and required and is_active",
+        "select d.key, d.label, d.is_system, coalesce(g.vertraulich, false) as vertraulich "
+        "from public.property_definitions d "
+        "left join public.property_groups g on g.id = d.group_id "
+        "where d.entity = $1 and d.required and d.is_active",
         entity,
     )
+    # Ein vertrauliches Pflichtfeld kann nur füllen, wer es sehen darf. Für
+    # alle anderen ist es kein Pflichtfeld — sonst könnte ein Trainer keinen
+    # Spieler anlegen, weil die Bankverbindung fehlt (seit 26.10.18).
+    if any(z["vertraulich"] for z in zeilen) and not await conn.fetchval(
+        "select public.sieht_vertrauliches()"
+    ):
+        zeilen = [z for z in zeilen if not z["vertraulich"]]
     custom = daten.get("custom") or {}
     fehlend: list[str] = []
     for z in zeilen:
