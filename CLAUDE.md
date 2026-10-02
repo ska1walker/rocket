@@ -69,7 +69,7 @@ Begründung jedes Teils steht in `docs/BETRIEB.md`.
 | CSV | Einfuhr für Kontakte und Firmen (alles oder nichts, nie überschreiben), Ausfuhr der aktuellen Liste |
 | Tests | 745 Backend, 112 Frontend, 171 im Browser (Playwright, CI-Job „oberfläche“) |
 | Olares-Chart | lintet (`helm` und `olares-cli chart lint`), rendert; **Rocket 26.10.13 läuft auf Kais Box** (aus dem Aimighty-Katalog, `market.AImighty`; 26.9.1 installiert am 30.9.2026, am selben Tag auf 26.9.4 aktualisiert — das erste Update über den Markt, mit den Migrationen 0033–0035; am 1.10.2026 auf 26.10.2, eingerichtet über den Einrichtungscode für den vorhandenen Zugang `kaivostudio`, Bestand erhalten; am selben Tag auf 26.10.3, 26.10.5, 26.10.7 und 26.10.13 — von 26.10.7 direkt, läuft (Kai)). Die Umbenennung von Beacon war eine Neuinstallation; Kai hat bewusst leer begonnen, ohne Abzug — der Weg mit Abzug steht in `docs/BETRIEB.md`, „Seit 0.13.0: Rocket, vorher Beacon" |
-| Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.10.19` am 2.10.2026, Chart als Anhang). Katalogeintrag `rocket` **26.10.19 im Markt** (`bayerhazard/aimighty-market` PR #103, 2.10.2026, von der Action; vorher 26.10.18 mit PR #102; vorher 26.10.17 mit PR #100; vorher 26.10.16 mit PR #99; vorher 26.10.15 mit PR #98; vorher 26.10.14 mit PR #97; vorher 26.10.13 mit PR #96; vorher 26.10.12 mit PR #95; vorher 26.10.11 mit PR #94; vorher 26.10.10 mit PR #93; vorher 26.10.9 mit PR #92; vorher 26.10.8 mit PR #91, deutsch und unter „Applications“; vorher 26.10.7 mit PR #90, enthält 26.10.6 — der erste Eintrag durch die Action `markt.yml`; vorher 26.10.5 mit PR #89, enthält 26.10.4; vorher 26.10.3 mit PR #88, 26.10.2 mit PR #87, 26.10.1 mit PR #86, 26.9.7 mit PR #85, enthält 26.9.6; 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
+| Veröffentlichung | Repo `github.com/ska1walker/rocket` (öffentlich), Abbilder `ghcr.io/ska1walker/rocket-{frontend,backend}`; Tag und Release entstehen beim Merge nach `main` automatisch (zuletzt `v26.10.20` am 2.10.2026, Chart als Anhang). Katalogeintrag `rocket` **26.10.20 im Markt** (`bayerhazard/aimighty-market` PR #105, 2.10.2026, von der Action; vorher 26.10.19 mit PR #103; vorher 26.10.18 mit PR #102; vorher 26.10.17 mit PR #100; vorher 26.10.16 mit PR #99; vorher 26.10.15 mit PR #98; vorher 26.10.14 mit PR #97; vorher 26.10.13 mit PR #96; vorher 26.10.12 mit PR #95; vorher 26.10.11 mit PR #94; vorher 26.10.10 mit PR #93; vorher 26.10.9 mit PR #92; vorher 26.10.8 mit PR #91, deutsch und unter „Applications“; vorher 26.10.7 mit PR #90, enthält 26.10.6 — der erste Eintrag durch die Action `markt.yml`; vorher 26.10.5 mit PR #89, enthält 26.10.4; vorher 26.10.3 mit PR #88, 26.10.2 mit PR #87, 26.10.1 mit PR #86, 26.9.7 mit PR #85, enthält 26.9.6; 26.9.5 mit PR #84, 26.9.4 mit PR #83, 26.9.1 mit PR #81); Weg dorthin in `docs/MARKT.md`; Icon nach Marcs Idee 6 (`docs/icon/`) |
 
 **Nicht gebaut, bewusst:** Mehrsprachigkeit (internes Werkzeug),
 Sequenzen (Kampagnen ja, automatische Folgen nein), Kalender-Anbindung,
@@ -197,7 +197,10 @@ als Kopie unter `frontend/ci/` (mit `stand.json`), geholt mit
 zur Bauzeit. Der Token-Block oben in `globals.css` ist `ci/tokens/app.css`,
 jeder `AM-`/`HB-` Abschnitt ist `ci/bauteile/<KENNUNG>.css`;
 `lib/__tests__/ci-stand.test.ts` wacht. **Ändern nur im CI**, dann neu
-holen; eine Abweichung von CI-Regeln geht nur über einen Eintrag in
+holen — seit `ci-26.10.12` holt die Action `stand` im CI jeden neuen Stand
+selbst als PR „CI-Stand ci-…“ in Rocket und Insilo (`werkzeug/apps.json`
+dort, braucht `APPS_TOKEN`); so einen PR prüft Claude wie jeden anderen und
+mergt ihn bei grün; eine Abweichung von CI-Regeln geht nur über einen Eintrag in
 `ABGLEICH.md` im CI-Repo, nie still (`docs/BETRIEB.md` „Stand aus dem CI“). Die Bauteile darunter
 stammen aus dem AImighty-Paket über Insilo; darunter steht ein eigener
 Abschnitt mit den CRM-Bauteilen.

@@ -7,8 +7,11 @@
 // genau die Dateien des Tags, nicht was im Klon gerade ausgecheckt ist. Das
 // Paket (welche Dateien) steht im CI selbst, in werkzeug/stand.py. Geholt
 // wird beim Entwickeln, nie beim Bauen; die CI prüft ohne Netz gegen die
-// Kopie (lib/__tests__/ci-stand.test.ts). Danach entsteht lib/symbole.tsx
-// neu aus den Zeichen.
+// Kopie (lib/__tests__/ci-stand.test.ts). Danach setzt werkzeug/bauteile.py
+// --einsetzen Token und Bausteine des Stands in app/globals.css ein, und
+// lib/symbole.tsx entsteht neu aus den Zeichen. Dasselbe tut die Action
+// `stand` im CI nach jedem neuen Stand und öffnet hier einen PR
+// („CI-Stand ci-…“, STAND.md dort, „Nachziehen“).
 //
 // Was sich in Rocket ändern soll, ändert sich zuerst im CI (STAND.md dort).
 
@@ -64,5 +67,13 @@ writeFileSync(
   JSON.stringify({ stand, commit, quelle: "ska1walker/aimighty-ci", dateien: pruefsummen }, null, 2) + "\n",
 );
 console.log(`${stand} (${commit.slice(0, 7)}): ${dateien.length} Dateien nach ci/`);
+
+// Token und Bausteine an ihre Stelle in globals.css; was sich nicht
+// eindeutig einsetzen lässt, meldet das Werkzeug — die CI zeigt es dann rot.
+try {
+  execFileSync("python3", [join(ZIEL, "werkzeug", "bauteile.py"), join(frontend, "app", "globals.css"), "--einsetzen", "--ohne-md"], { stdio: "inherit" });
+} catch {
+  console.error("Nicht alles ließ sich einsetzen — siehe oben.");
+}
 
 execFileSync("node", [join(hier, "symbole-erzeugen.mjs")], { stdio: "inherit" });

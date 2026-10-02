@@ -290,6 +290,8 @@ Zwanzigster Durchlauf: Rocket 26.10.18, PR #102, 2.10.2026 — von der Action: v
 
 Einundzwanzigster Durchlauf: Rocket 26.10.19, PR #103, 2.10.2026 — von der Action: Modus Vertrieb/Verein, CI-Stand `ci-26.10.11` (Erstellen als Plus, Klappschalter über der Spalte). `main` unverändert seit 26.10.18; Zeitstempel 4410000000000. Auf `main` byte-gleich geprüft (sha256 `545a48f4…6e29`, keine alten Schlüssel). Migration 0040 nur mit einer Spalte.
 
+Zweiundzwanzigster Durchlauf: Rocket 26.10.20, PR #105, 2.10.2026 — von der Action: Mein Postfach (Stufe 2a, ohne Microsoft). Seit 26.10.19 hat Marc Insilo 0.1.104 eingetragen (#104); Rocket baute auf diesem `main`. Zeitstempel 4412000000000. Auf `main` byte-gleich geprüft (sha256 `b9b5c646…ed3c`, keine alten Schlüssel). Migration 0041 legt eine Tabelle an.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
