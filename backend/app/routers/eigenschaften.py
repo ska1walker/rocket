@@ -8,7 +8,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from app import audit, eigenschaften
+from app import audit, eigenschaften, vertraulich
 from app.auth import CurrentUser, get_current_user, verwaltet
 from app.db import acquire_as
 
@@ -107,6 +107,19 @@ class Definition(BaseModel):
     required: bool = False
     im_anlegen: bool = False
     created_at: datetime
+    # Steht das Feld in einer vertraulichen Gruppe? (seit 26.10.18)
+    vertraulich: bool = False
+
+
+async def _definition(conn, definition_id: UUID) -> Definition:
+    """Eine Definition samt dem, was ihre Gruppe über sie sagt."""
+    zeile = await conn.fetchrow(
+        "select d.*, coalesce(g.vertraulich, false) as vertraulich "
+        "from public.property_definitions d "
+        "left join public.property_groups g on g.id = d.group_id where d.id = $1",
+        definition_id,
+    )
+    return _aus_zeile(zeile)
 
 
 def _aus_zeile(z: Any) -> Definition:
@@ -138,14 +151,18 @@ async def liste(
     # Nur eigene Eigenschaften: Die festen Felder liefert `/anordnung`.
     # Wer diese Liste liest (Datensatzseite, Einfuhr), erwartet genau das,
     # was in `custom` steht.
-    sql = "select * from public.property_definitions where not is_system"
+    sql = (
+        "select d.*, coalesce(g.vertraulich, false) as vertraulich "
+        "from public.property_definitions d "
+        "left join public.property_groups g on g.id = d.group_id where not d.is_system"
+    )
     args: list[Any] = []
     if entity:
         args.append(entity)
-        sql += f" and entity = ${len(args)}"
+        sql += f" and d.entity = ${len(args)}"
     if not auch_inaktive:
-        sql += " and is_active"
-    sql += " order by entity, position, label"
+        sql += " and d.is_active"
+    sql += " order by d.entity, d.position, d.label"
     async with acquire_as(user.user_id) as conn:
         zeilen = await conn.fetch(sql, *args)
     return [_aus_zeile(z) for z in zeilen]
@@ -190,7 +207,7 @@ async def anlegen(
             conn, user, action="create", entity="property_definitions", entity_id=zeile["id"],
             diff={"entity": payload.entity, "key": key, "kind": payload.kind},
         )
-    return _aus_zeile(zeile)
+        return await _definition(conn, zeile["id"])
 
 
 @router.patch("/{definition_id}", response_model=Definition)
@@ -255,11 +272,13 @@ async def aendern(
             if ziel is None:
                 raise HTTPException(400, "Ein Feld gehört immer in eine Gruppe.")
             gruppe = await conn.fetchrow(
-                "select entity from public.property_groups where id = $1 and org_id = $2",
+                "select entity, vertraulich from public.property_groups where id = $1 and org_id = $2",
                 ziel, user.org_id,
             )
             if gruppe is None or gruppe["entity"] != zeile_alt["entity"]:
                 raise HTTPException(409, "Diese Gruppe gibt es für dieses Objekt nicht.")
+            if system and gruppe["vertraulich"]:
+                raise HTTPException(409, FEST_NICHT_VERTRAULICH)
             args.append(ziel)
             zuweisungen.append(f"group_id = ${len(args)}")
             if "position" not in felder:
@@ -278,11 +297,13 @@ async def aendern(
         )
         if zeile is None:
             raise HTTPException(404, "Eigenschaft nicht gefunden")
+        if "group_id" in felder:
+            await vertraulich.abgleichen(conn, zeile_alt["entity"])
         await audit.log_fuer(
             conn, user, action="update", entity="property_definitions",
             entity_id=definition_id, diff=felder,
         )
-    return _aus_zeile(zeile)
+        return await _definition(conn, definition_id)
 
 
 async def _optionen_pruefen(conn, definition_id: UUID, neu: list[Option]) -> None:
@@ -324,8 +345,9 @@ async def _optionen_pruefen(conn, definition_id: UUID, neu: list[Option]) -> Non
         # Ein einzelner Wert steht als jsonb-Text im Feld, eine
         # Mehrfachauswahl als Liste. `@>` trifft beide Formen.
         anzahl = await conn.fetchval(
-            f"select count(*) from public.{tabelle} "
-            f"where deleted_at is null and (custom -> $1) @> to_jsonb($2::text)",
+            f"select count(*) from public.{tabelle} t "
+            f"where deleted_at is null and ({vertraulich.custom_voll(tabelle, 't')} -> $1) "
+            f"@> to_jsonb($2::text)",
             d["key"], option["wert"],
         )
         if anzahl:
@@ -394,6 +416,7 @@ class Feld(BaseModel):
     required: bool = False
     im_anlegen: bool = False
     is_active: bool = True
+    vertraulich: bool = False
     # Datensätze mit Wert — nur auf Wunsch (`mit_anzahl`), und `None` bei
     # Gerechnetem, das keine Spalte hat.
     anzahl: int | None = None
@@ -405,6 +428,9 @@ class Gruppe(BaseModel):
     label: str
     position: int
     is_system: bool
+    # Werte der Felder liegen getrennt und sind nur für Berechtigte
+    # sichtbar (seit 26.10.18, `app/vertraulich.py`).
+    vertraulich: bool = False
     felder: list[Feld]
 
 
@@ -429,7 +455,8 @@ async def _anzahlen(conn, entity: str) -> dict[str, int]:
     ergebnis: dict[str, int] = {
         z["key"]: z["n"] for z in await conn.fetch(
             f"select e.key, count(*)::int as n from public.{tabelle} t, "
-            f"jsonb_each(t.custom) e where t.deleted_at is null and e.value <> 'null'::jsonb "
+            f"jsonb_each({vertraulich.custom_voll(tabelle, 't')}) e "
+            f"where t.deleted_at is null and e.value <> 'null'::jsonb "
             f"group by e.key"
         )
     }
@@ -451,7 +478,7 @@ async def _anzahlen(conn, entity: str) -> dict[str, int]:
     return ergebnis
 
 
-def _feld(z: Any, entity: str, anzahl: dict[str, int] | None) -> Feld:
+def _feld(z: Any, entity: str, anzahl: dict[str, int] | None, geheim: bool = False) -> Feld:
     sf = eigenschaften.systemfeld(entity, z["key"]) if z["is_system"] else None
     if sf is not None:
         art, bearbeitbar = sf.art, sf.bearbeitbar
@@ -463,6 +490,7 @@ def _feld(z: Any, entity: str, anzahl: dict[str, int] | None) -> Feld:
         id=z["id"], key=z["key"], label=z["label"], description=z["description"],
         is_system=z["is_system"], art=art, bearbeitbar=bearbeitbar, options=optionen,
         required=z["required"], im_anlegen=z["im_anlegen"], is_active=z["is_active"],
+        vertraulich=geheim,
         anzahl=None if anzahl is None else anzahl.get(z["key"], 0 if not z["is_system"] else None),
     )
 
@@ -478,6 +506,7 @@ async def _anordnung(conn, org_id: UUID, entity: str, mit_anzahl: bool) -> Anord
         "order by position, label", org_id, entity,
     )
     anzahl = await _anzahlen(conn, entity) if mit_anzahl else None
+    geheim = {g["id"] for g in gruppen if g["vertraulich"]}
     # Ein festes Feld, das der Katalog nicht mehr kennt (in einer neueren
     # Version entfallen), bleibt stehen, wird aber nicht gezeigt.
     sichtbar = [
@@ -489,13 +518,14 @@ async def _anordnung(conn, org_id: UUID, entity: str, mit_anzahl: bool) -> Anord
         gruppen=[
             Gruppe(
                 id=g["id"], key=g["key"], label=g["label"], position=g["position"],
-                is_system=g["is_system"],
-                felder=[_feld(d, entity, anzahl) for d in sichtbar
+                is_system=g["is_system"], vertraulich=g["vertraulich"],
+                felder=[_feld(d, entity, anzahl, g["vertraulich"]) for d in sichtbar
                         if d["group_id"] == g["id"] and d["is_active"]],
             )
             for g in gruppen
         ],
-        archiviert=[_feld(d, entity, anzahl) for d in sichtbar if not d["is_active"]],
+        archiviert=[_feld(d, entity, anzahl, d["group_id"] in geheim) for d in sichtbar
+                    if not d["is_active"]],
     )
 
 
@@ -516,7 +546,16 @@ class GruppeIn(BaseModel):
 
 
 class GruppePatch(BaseModel):
-    label: str = Field(min_length=1, max_length=80)
+    label: str | None = Field(default=None, min_length=1, max_length=80)
+    vertraulich: bool | None = None
+
+
+FEST_NICHT_VERTRAULICH = (
+    "Feste Felder stehen in ihrer eigenen Spalte und lassen sich nicht vertraulich "
+    "ablegen. In eine vertrauliche Gruppe gehören nur eigene Eigenschaften."
+)
+
+_GRUPPE_FELDER = ("id", "key", "label", "position", "is_system", "vertraulich")
 
 
 @router.post("/gruppen", response_model=Gruppe, status_code=201)
@@ -540,26 +579,45 @@ async def gruppe_anlegen(payload: GruppeIn, user: CurrentUser = Depends(verwalte
             conn, user, action="create", entity="property_groups", entity_id=zeile["id"],
             diff={"entity": payload.entity, "label": payload.label.strip()},
         )
-    return Gruppe(**{k: zeile[k] for k in ("id", "key", "label", "position", "is_system")}, felder=[])
+    return Gruppe(**{k: zeile[k] for k in _GRUPPE_FELDER}, felder=[])
 
 
 @router.patch("/gruppen/{gruppe_id}", response_model=Gruppe)
 async def gruppe_umbenennen(
     gruppe_id: UUID, payload: GruppePatch, user: CurrentUser = Depends(verwaltet)
 ) -> Gruppe:
-    """Nur die Beschriftung — auch bei Vorgabegruppen. Der Schlüssel bleibt."""
+    """Beschriftung (auch bei Vorgabegruppen, der Schlüssel bleibt) und der
+    Schalter „vertraulich“.
+
+    Wird eine Gruppe vertraulich, wandern die vorhandenen Werte ihrer Felder
+    aus `custom` in die eigene Ablage — und zurück, wenn der Schalter fällt.
+    Alles in einer Transaktion: Ein halber Umzug ließe Werte offen stehen.
+    """
+    if payload.label is None and payload.vertraulich is None:
+        raise HTTPException(400, "Keine Änderung übergeben")
     async with acquire_as(user.user_id) as conn:
-        zeile = await conn.fetchrow(
-            "update public.property_groups set label = $2 where id = $1 returning *",
-            gruppe_id, payload.label.strip(),
+        alt = await conn.fetchrow(
+            "select entity, vertraulich from public.property_groups where id = $1", gruppe_id
         )
-        if zeile is None:
+        if alt is None:
             raise HTTPException(404, "Gruppe nicht gefunden")
+        if payload.vertraulich and await conn.fetchval(
+            "select exists (select 1 from public.property_definitions "
+            "where group_id = $1 and is_system)", gruppe_id,
+        ):
+            raise HTTPException(409, FEST_NICHT_VERTRAULICH)
+        zeile = await conn.fetchrow(
+            "update public.property_groups set label = coalesce($2, label), "
+            "vertraulich = coalesce($3, vertraulich) where id = $1 returning *",
+            gruppe_id, payload.label.strip() if payload.label else None, payload.vertraulich,
+        )
+        if payload.vertraulich is not None and payload.vertraulich != alt["vertraulich"]:
+            await vertraulich.abgleichen(conn, alt["entity"])
         await audit.log_fuer(
             conn, user, action="update", entity="property_groups", entity_id=gruppe_id,
-            diff={"label": payload.label.strip()},
+            diff=payload.model_dump(exclude_none=True),
         )
-    return Gruppe(**{k: zeile[k] for k in ("id", "key", "label", "position", "is_system")}, felder=[])
+    return Gruppe(**{k: zeile[k] for k in _GRUPPE_FELDER}, felder=[])
 
 
 @router.delete("/gruppen/{gruppe_id}", status_code=204)
@@ -607,6 +665,7 @@ async def gruppe_loeschen(
                 gruppe_id, ziel,
             )
         await conn.execute("delete from public.property_groups where id = $1", gruppe_id)
+        await vertraulich.abgleichen(conn, g["entity"])
         await audit.log_fuer(
             conn, user, action="delete", entity="property_groups", entity_id=gruppe_id,
             diff={"ziel": str(ziel) if ziel else None},
@@ -660,6 +719,20 @@ async def reihenfolge(payload: Reihenfolge, user: CurrentUser = Depends(verwalte
                 "Die Anordnung ist nicht mehr aktuell — inzwischen hat sich etwas geändert. "
                 "Bitte laden Sie die Seite neu.",
             )
+        geheim = {
+            z["id"] for z in await conn.fetch(
+                "select id from public.property_groups where org_id = $1 and entity = $2 and vertraulich",
+                user.org_id, payload.entity,
+            )
+        }
+        fest = {
+            z["id"] for z in await conn.fetch(
+                "select id from public.property_definitions where org_id = $1 and entity = $2 and is_system",
+                user.org_id, payload.entity,
+            )
+        }
+        if any(g.id in geheim and set(g.felder) & fest for g in payload.gruppen):
+            raise HTTPException(409, FEST_NICHT_VERTRAULICH)
         for gpos, g in enumerate(payload.gruppen):
             await conn.execute(
                 "update public.property_groups set position = $2 where id = $1",
@@ -675,4 +748,5 @@ async def reihenfolge(payload: Reihenfolge, user: CurrentUser = Depends(verwalte
             conn, user, action="update", entity="property_groups", entity_id=None,
             diff={"reihenfolge": payload.entity},
         )
+        await vertraulich.abgleichen(conn, payload.entity)
         return await _anordnung(conn, user.org_id, payload.entity, False)

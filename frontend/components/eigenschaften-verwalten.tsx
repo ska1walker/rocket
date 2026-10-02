@@ -4,7 +4,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Archive, ArchiveRestore, ArrowDown, ArrowUp, GripVertical, Lock, Pencil, Plus, Trash2, X,
+  Archive, ArchiveRestore, ArrowDown, ArrowUp, GripVertical, Lock, Pencil, Plus, ShieldCheck, Trash2, X,
 } from "@/lib/symbole";
 import { useEffect, useState } from "react";
 import { api, suchparameter } from "@/lib/api";
@@ -307,6 +307,14 @@ function Gruppenblock({
       geaendert();
     },
   });
+  // Vertraulich nur ohne feste Felder: Die stehen in ihrer Spalte und
+  // ließen sich nicht getrennt ablegen — der Server sagt sonst 409.
+  const mitFesten = gruppe.felder.some((f) => f.is_system);
+  const geheim = !!gruppe.vertraulich;
+  const schalten = useMutation({
+    mutationFn: () => api.patch(`/api/eigenschaften/gruppen/${gruppe.id}`, { vertraulich: !geheim }),
+    onSuccess: geaendert,
+  });
   const weg = useMutation({
     mutationFn: () =>
       api.del(
@@ -322,6 +330,12 @@ function Gruppenblock({
           <h3>
             {gruppe.label}
             <span className="eig-anzahl">{gruppe.felder.length}</span>
+            {geheim && (
+              <span className="eig-vertraulich">
+                <ShieldCheck size={16} aria-hidden="true" />
+                vertraulich
+              </span>
+            )}
           </h3>
         ) : (
           <form
@@ -356,6 +370,23 @@ function Gruppenblock({
           <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} umbenennen`} title={`Gruppe ${gruppe.label} umbenennen`} onClick={() => setName(gruppe.label)}>
             <Pencil size={16} aria-hidden="true" />
           </button>
+          {!mitFesten && (
+            <button
+              type="button"
+              className="btn btn-still btn-klein btn-symbol"
+              aria-pressed={geheim}
+              aria-label={`Gruppe ${gruppe.label} vertraulich`}
+              title={
+                geheim
+                  ? "Vertraulich: Werte sehen nur Eigentümerin, Verwalter und Personen mit „sieht vertrauliche Felder“. Klicken macht sie wieder für alle sichtbar."
+                  : "Vertraulich machen: Die Werte sehen danach nur Eigentümerin, Verwalter und Personen mit „sieht vertrauliche Felder“."
+              }
+              disabled={schalten.isPending}
+              onClick={() => schalten.mutate()}
+            >
+              <ShieldCheck size={16} aria-hidden="true" />
+            </button>
+          )}
           {!gruppe.is_system && (
             <button type="button" className="btn btn-still btn-klein btn-symbol" aria-label={`Gruppe ${gruppe.label} löschen`} onClick={() => setLoeschen((l) => !l)}>
               <Trash2 size={16} aria-hidden="true" />
@@ -388,6 +419,7 @@ function Gruppenblock({
         </div>
       )}
       {umbenennen.isError && <Fehler text={(umbenennen.error as Error).message} />}
+      {schalten.isError && <Fehler text={(schalten.error as Error).message} />}
       {weg.isError && <Fehler text={(weg.error as Error).message} />}
       {children}
     </div>

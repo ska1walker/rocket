@@ -3,7 +3,7 @@
 // Modul RK-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, Eye, KeyRound, Pencil, UserMinus } from "@/lib/symbole";
+import { Copy, Eye, KeyRound, Pencil, ShieldCheck, UserMinus } from "@/lib/symbole";
 import { useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { lage, passwortAendern } from "@/lib/anmeldung";
@@ -230,6 +230,12 @@ export function Mitgliederblock() {
                     >
                       <Eye size={16} aria-hidden="true" />
                       {m.sicht === "eingeschraenkt" ? "eingeschränkt" : "alles"}
+                      {/* Seit 26.10.18: sieht auch vertrauliche Felder. */}
+                      {m.vertraulich_sehen && m.role !== "owner" && m.role !== "admin" && (
+                        <span className="mitglied-sicht-schloss" title="sieht vertrauliche Felder">
+                          <ShieldCheck size={16} aria-hidden="true" />
+                        </span>
+                      )}
                     </button>
                   ) : (
                     m.sicht === "eingeschraenkt" && <span className="mitglied-zuletzt mitglied-sicht-text">sieht eingeschränkt</span>

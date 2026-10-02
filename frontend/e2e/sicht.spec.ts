@@ -8,7 +8,8 @@
 // nichts breiter als der Bildschirm, Lage, axe.
 //
 // Dazu die Leitung: Sicht-Dialog per Tastatur, Bereich an der Firma, Eltern
-// am Kind anlegen.
+// am Kind anlegen, vertrauliche Felder (seit 26.10.18): Die Leitung sieht die
+// IBAN am Spieler, der Trainer nicht — nicht einmal die Gruppe.
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type APIRequestContext, type Browser, type Page } from "@playwright/test";
@@ -17,7 +18,9 @@ import { lagePruefen } from "./lage";
 const BASIS = process.env.ROCKET_URL ?? "http://localhost:3011";
 const PASSWORT = "rundgang-trainer-passwort";
 
-type Aufbau = { a: string; b: string; eigen: string; fremd: string; trainer: string; trainerName: string };
+type Aufbau = { a: string; b: string; eigen: string; fremd: string; trainer: string; trainerName: string; bank: string };
+
+const IBAN = "DE00VERTRAULICH";
 
 async function json<T>(antwort: Awaited<ReturnType<APIRequestContext["get"]>>): Promise<T> {
   expect(antwort.ok(), `${antwort.url()}: ${antwort.status()} ${await antwort.text()}`).toBe(true);
@@ -32,12 +35,18 @@ async function aufbauen(leitung: APIRequestContext): Promise<Aufbau> {
   await leitung.put(`/api/companies/${a.id}/bereich`, { data: { bereich_id: bereich.id } });
   const eigen = await json<{ id: string }>(await leitung.post("/api/contacts", { data: { first_name: "Eigener", last_name: `Spieler ${z}`, company_id: a.id } }));
   const fremd = await json<{ id: string }>(await leitung.post("/api/contacts", { data: { first_name: "Fremder", last_name: `Spieler ${z}`, company_id: b.id } }));
+  // Vertrauliche Gruppe mit einem Wert am eigenen Spieler des Trainers.
+  const bank = `Bank ${z}`;
+  const gruppe = await json<{ id: string }>(await leitung.post("/api/eigenschaften/gruppen", { data: { entity: "contacts", label: bank } }));
+  await json(await leitung.patch(`/api/eigenschaften/gruppen/${gruppe.id}`, { data: { vertraulich: true } }));
+  const feld = await json<{ key: string }>(await leitung.post("/api/eigenschaften", { data: { entity: "contacts", label: `IBAN ${z}`, group_id: gruppe.id } }));
+  await json(await leitung.patch(`/api/contacts/${eigen.id}`, { data: { custom: { [feld.key]: IBAN } } }));
   const trainerName = `Trainer ${z}`;
   const trainer = await json<{ id: string }>(await leitung.post("/api/mitglieder", { data: { display_name: trainerName } }));
   await json(await leitung.put(`/api/mitglieder/${trainer.id}/sicht`, {
     data: { sicht: "eingeschraenkt", zugriffe: [{ company_id: a.id, stufe: "bearbeiten" }] },
   }));
-  return { a: a.id, b: b.id, eigen: eigen.id, fremd: fremd.id, trainer: trainer.id, trainerName };
+  return { a: a.id, b: b.id, eigen: eigen.id, fremd: fremd.id, trainer: trainer.id, trainerName, bank };
 }
 
 /** Ein Browserkontext, in dem der Trainer angemeldet ist — über eine frische
@@ -106,6 +115,12 @@ for (const thema of ["hell", "dunkel"] as const) {
     await expect(page.getByText(`Eigener`, { exact: false }).first()).toBeVisible();
     await expect(page.getByText(`Fremder`, { exact: true })).toHaveCount(0);
 
+    // Am eigenen Spieler: keine vertrauliche Gruppe, kein Wert.
+    await page.goto(`/kontakte/${aufbau.eigen}`, { waitUntil: "networkidle" });
+    await expect(page.getByRole("heading", { name: "Bezugspersonen" })).toBeVisible();
+    await expect(page.getByText(aufbau.bank)).toHaveCount(0);
+    await expect(page.getByText(IBAN)).toHaveCount(0);
+
     // Start führt zu den Kontakten; Leads gibt es für ihn nicht.
     await page.goto("/", { waitUntil: "networkidle" });
     await expect(page).toHaveURL(/\/kontakte$/);
@@ -151,4 +166,23 @@ test("Eltern am Kind anlegen", async ({ page, isMobile }) => {
   await expect(block.getByRole("link", { name: "Erika Rundgang" })).toBeVisible();
   await expect(block).toContainText("Erziehungsberechtigt");
   expect(await page.evaluate(lagePruefen)).toEqual([]);
+});
+
+test("Leitung: vertrauliche Gruppe sichtbar und schaltbar", async ({ page, isMobile }) => {
+  test.skip(isMobile, "einmal am Desktop genügt");
+  await page.goto(`/kontakte/${aufbau.eigen}`, { waitUntil: "networkidle" });
+  const gruppe = page.locator(".fg-gruppe", { hasText: aufbau.bank });
+  await expect(gruppe.locator(".fg-vertraulich")).toContainText("vertraulich");
+  await expect(page.getByText(IBAN)).toBeVisible();
+  expect(await page.evaluate(lagePruefen)).toEqual([]);
+
+  // In den Einstellungen: Schloss am Namen, Schalter gedrückt.
+  await page.goto("/einstellungen?bereich=eigenschaften", { waitUntil: "networkidle" });
+  await page.getByRole("tab", { name: "Kontakte" }).click();
+  const schalter = page.getByRole("button", { name: `Gruppe ${aufbau.bank} vertraulich` });
+  await expect(schalter).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".eig-gruppe", { hasText: aufbau.bank }).locator(".eig-vertraulich")).toBeVisible();
+  expect(await page.evaluate(lagePruefen)).toEqual([]);
+  const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
+  expect(axe.violations.filter((v) => v.impact === "critical" || v.impact === "serious").map((v) => v.id)).toEqual([]);
 });

@@ -7,7 +7,7 @@ import orjson
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
-from app import anreicherung, audit, eigenschaften, segmente
+from app import anreicherung, audit, eigenschaften, segmente, vertraulich
 from app.auth import CurrentUser, get_current_user
 from app.db import acquire_as
 from app.patching import build_update
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/companies", tags=["companies"])
 # GROUP BY: die Liste bleibt sonst bei jedem zusätzlichen Feld eine neue
 # Gruppierungsdiskussion.
 LIST_SQL = """
-select c.*,
+select c.*, {vertraulich},
        (select count(*) from public.contacts k
          where k.company_id = c.id and k.deleted_at is null) as contact_count,
        (select count(*) from public.deals d
@@ -30,7 +30,7 @@ select c.*,
          where d.company_id = c.id and d.deleted_at is null and s.kind = 'open') as open_amount_cents
 from public.companies c
 where c.deleted_at is null
-"""
+""".format(vertraulich=vertraulich.spalte("companies", "c"))
 
 
 def _firma(zeile, user: CurrentUser) -> Company:
@@ -48,8 +48,12 @@ def _firma(zeile, user: CurrentUser) -> Company:
     return Company(**werte)
 
 
-async def _custom_pruefen(conn, entity: str, werte: dict | None) -> str:
-    """Prüft eigene Eigenschaften gegen ihre Definition, gibt JSON zurück."""
+async def _custom_pruefen(conn, entity: str, werte: dict | None) -> tuple[str, dict]:
+    """Prüft eigene Eigenschaften gegen ihre Definition.
+
+    Gibt das JSON für `custom` zurück und getrennt davon die vertraulichen
+    Werte, die nach `vertrauliche_werte` gehören (seit 26.10.18).
+    """
     import json
 
     from app import eigenschaften
@@ -58,7 +62,8 @@ async def _custom_pruefen(conn, entity: str, werte: dict | None) -> str:
         geprueft = await eigenschaften.pruefen_voll(conn, entity, werte or {})
     except eigenschaften.Ungueltig as exc:
         raise HTTPException(400, str(exc)) from exc
-    return json.dumps(geprueft)
+    offen, geheim = await vertraulich.aufteilen(conn, entity, geprueft)
+    return json.dumps(offen), geheim
 
 
 def _bedingungen(sql: str, args: list[Any], q: str | None, stage: str | None, filter: str | None) -> str:
@@ -95,7 +100,9 @@ def abfrage_sql(
         raise HTTPException(400, str(exc)) from exc
 
 
-async def einfuegen(conn, user: CurrentUser, payload: CompanyIn, custom_json: str) -> UUID:
+async def einfuegen(
+    conn, user: CurrentUser, payload: CompanyIn, custom_json: str, geheim: dict | None = None
+) -> UUID:
     """Legt eine Firma an und protokolliert es. Ohne Anreicherung.
 
     Der Endpunkt stößt danach die Anreicherung an, die Einfuhr nicht —
@@ -130,9 +137,10 @@ async def einfuegen(conn, user: CurrentUser, payload: CompanyIn, custom_json: st
         payload.postal_code,
         payload.linkedin_url,
     )
+    await vertraulich.schreiben(conn, user.org_id, "companies", new_id, geheim or {})
     await audit.log_fuer(
         conn, user, action="create", entity="companies", entity_id=new_id,
-        diff=payload.model_dump(mode="json"),
+        diff=vertraulich.fuer_protokoll(payload.model_dump(mode="json"), geheim or {}),
     )
     return new_id
 
@@ -259,9 +267,8 @@ async def create_company(
 ) -> Company:
     async with acquire_as(user.user_id) as conn:
         await eigenschaften.pflicht_oder_422(conn, "companies", payload.model_dump(), neu=True)
-        new_id = await einfuegen(
-            conn, user, payload, await _custom_pruefen(conn, "companies", payload.custom)
-        )
+        custom_json, geheim = await _custom_pruefen(conn, "companies", payload.custom)
+        new_id = await einfuegen(conn, user, payload, custom_json, geheim)
         full = await conn.fetchrow(LIST_SQL + " and c.id = $1", new_id)
     # Was über die Firma öffentlich zu finden ist, wird jetzt gesucht —
     # ohne dass jemand darauf wartet.
@@ -279,12 +286,13 @@ async def update_company(
         await eigenschaften.pflicht_oder_422(
             conn, "companies", payload.model_dump(exclude_unset=True), neu=False
         )
+    geheim: dict = {}
     if "custom" in payload.model_fields_set:
         async with acquire_as(user.user_id) as conn:
             import json
 
-            geprueft = json.loads(await _custom_pruefen(conn, "companies", payload.custom))
-        payload = payload.model_copy(update={"custom": geprueft})
+            offen_json, geheim = await _custom_pruefen(conn, "companies", payload.custom)
+        payload = payload.model_copy(update={"custom": json.loads(offen_json)})
     try:
         zuweisungen, args = build_update(payload)
     except ValueError as exc:
@@ -299,13 +307,14 @@ async def update_company(
         )
         if updated is None:
             raise HTTPException(404, "Firma nicht gefunden")
+        await vertraulich.schreiben(conn, user.org_id, "companies", updated, geheim)
         await audit.log_fuer(
             conn,
             user,
             action="update",
             entity="companies",
             entity_id=company_id,
-            diff=payload.model_dump(mode="json", exclude_unset=True),
+            diff=vertraulich.fuer_protokoll(payload.model_dump(mode="json", exclude_unset=True), geheim),
         )
         row = await conn.fetchrow(LIST_SQL + " and c.id = $1", company_id)
     return _firma(row, user)

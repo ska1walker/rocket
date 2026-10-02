@@ -47,7 +47,7 @@ def test_eigene_eigenschaft_geht_als_parameter():
     )
     assert "drop" not in sql
     assert args[0] == "kammer'; drop --"
-    assert "custom ->> $1" in sql
+    assert ") ->> $1" in sql
 
 
 def test_sortierung_nur_aus_der_liste():

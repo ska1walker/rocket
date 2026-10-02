@@ -23,6 +23,8 @@ export function useSicht() {
     verwaltet: !!w && !eingeschraenkt && (w.rolle === "owner" || w.rolle === "admin"),
     /** Rolle `viewer`: liest nur. */
     liest: w?.rolle === "viewer",
+    /** Sieht vertrauliche Feldgruppen (seit 26.10.18). */
+    vertraulich: !!w?.vertraulich,
   };
 }
 
@@ -37,6 +39,17 @@ export function aufzaehlung(namen: string[]): string {
  * damit niemand aus Häkchen ablesen muss, was am Ende gilt.
  */
 export function sichtSatz(
+  name: string,
+  sicht: "alles" | "eingeschraenkt",
+  zugriffe: { name: string; bereich: boolean; stufe: "lesen" | "bearbeiten" }[],
+  vertraulich?: boolean,
+): string {
+  const satz = sichtSatzOhne(name, sicht, zugriffe);
+  if (vertraulich === undefined) return satz;
+  return `${satz} Vertrauliche Felder ${vertraulich ? "auch" : "nicht"}.`;
+}
+
+function sichtSatzOhne(
   name: string,
   sicht: "alles" | "eingeschraenkt",
   zugriffe: { name: string; bereich: boolean; stufe: "lesen" | "bearbeiten" }[],

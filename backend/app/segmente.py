@@ -27,6 +27,8 @@ from typing import Any, Literal
 
 import asyncpg
 
+from app import vertraulich
+
 Art = Literal["text", "auswahl", "mehrfachauswahl", "zahl", "datum", "jaNein", "person"]
 
 # Welche Operatoren zu welcher Art von Feld passen. Die Oberfläche liest
@@ -225,7 +227,14 @@ FELDER: dict[str, list[Feld]] = {
 }
 
 # Die Spalte, in der die selbst angelegten Eigenschaften liegen.
-CUSTOM_SPALTE = {"companies": "c.custom", "contacts": "k.custom", "tickets": "t.custom"}
+# Seit 26.10.18 samt der vertraulichen Werte: Wer sie sehen darf, filtert
+# und sortiert auch danach; wer nicht, findet über sie nichts — die
+# Unterabfrage liefert ihm nichts (`app/vertraulich.py`).
+CUSTOM_SPALTE = {
+    "companies": vertraulich.custom_voll("companies", "c"),
+    "contacts": vertraulich.custom_voll("contacts", "k"),
+    "tickets": "t.custom",
+}
 
 # Welche Spalten der Tabelle die Oberfläche zeigt, wenn niemand etwas
 # ausgewählt hat. Dieselben wie bisher — eine neue Funktion soll die
@@ -303,7 +312,15 @@ async def felder_fuer(conn: asyncpg.Connection, entity: str) -> list[dict[str, A
     for eintrag in liste:
         eintrag["betrag"] = eintrag["schluessel"] == "open_amount_cents"
 
+    # Vertrauliche Felder kennt nur, wer sie sehen darf: Für alle anderen
+    # gibt es sie weder als Spalte noch im Filter noch in der Ausfuhr.
+    verborgen: set[str] = set()
+    if not await vertraulich.darf(conn):
+        verborgen = set(await vertraulich.felder(conn, entity))
+
     for d in await eigenschaften.definitionen(conn, entity):
+        if d["key"] in verborgen:
+            continue
         art = art_aus_eigenschaft.get(d["kind"], "text")
         liste.append(
             {

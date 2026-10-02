@@ -64,6 +64,9 @@ TABELLEN: list[str] = [
     "auswertungen",
     "themenlaeufe",
     "tasks",
+    # Vertrauliche Felder (seit 26.10.18) — ohne sie wären Bankverbindung und
+    # Beitrag nach einer Neuinstallation fort.
+    "vertrauliche_werte",
     # Die Zeile trägt den Pfad, unter dem die Datei liegt — samt der
     # alten Org-Kennung. Sie wird beim Zurückspielen **nicht**
     # umgeschrieben: `/app/data` überlebt eine Neuinstallation, der
@@ -222,7 +225,7 @@ async def abzug_erstellen(conn: asyncpg.Connection, org_id: UUID) -> dict[str, A
                u.passwort_hash, u.passwort_am, u.totp_geheimnis, u.totp_seit,
                u.absender_email, u.absender_name, u.smtp_host, u.smtp_port,
                u.smtp_benutzer, u.smtp_passwort, u.smtp_sicherheit,
-               r.role, r.sicht
+               r.role, r.sicht, r.vertraulich_sehen
         from public.users u
         join public.user_org_roles r on r.user_id = u.id
         where r.org_id = $1
@@ -414,14 +417,17 @@ async def _nutzerzuordnung(
             # Die Sicht kommt mit: Ein eingeschränkter Trainer, der nach
             # einer Neuinstallation plötzlich alles sähe, wäre ein Leck.
             # Ältere Abzüge kennen sie nicht — dann gilt die Vorgabe.
+            # Ebenso der Schalter für vertrauliche Felder (seit 26.10.18).
             await conn.execute(
-                "insert into public.user_org_roles (user_id, org_id, role, sicht) "
-                "values ($1, $2, coalesce($3::public.user_role, 'member'), coalesce($4, 'alles')) "
+                "insert into public.user_org_roles (user_id, org_id, role, sicht, vertraulich_sehen) "
+                "values ($1, $2, coalesce($3::public.user_role, 'member'), coalesce($4, 'alles'), "
+                "coalesce($5, false)) "
                 "on conflict (user_id, org_id) do nothing",
                 heutige,
                 ziel_org,
                 eintrag.get("role"),
                 eintrag.get("sicht"),
+                eintrag.get("vertraulich_sehen"),
             )
 
         zuordnung[eintrag["id"]] = heutige or ersatz

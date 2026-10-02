@@ -14,7 +14,7 @@ import orjson
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from app import audit, eigenschaften
+from app import audit, eigenschaften, vertraulich
 from app.auth import CurrentUser, get_current_user
 from app.db import acquire_as
 from app.patching import build_update
@@ -32,7 +32,7 @@ from app.schemas import (
 router = APIRouter(prefix="/api", tags=["deals"])
 
 DEAL_SQL = """
-select d.*, f.name as company_name, s.name as stage_name,
+select d.*, f.name as company_name, s.name as stage_name, {vertraulich},
        s.kind as stage_kind, s.probability,
        (select count(*) from public.deal_contacts v
          join public.contacts k on k.id = v.contact_id and k.deleted_at is null
@@ -41,7 +41,7 @@ from public.deals d
 left join public.companies f on f.id = d.company_id
 join public.pipeline_stages s on s.id = d.stage_id
 where d.deleted_at is null
-"""
+""".format(vertraulich=vertraulich.spalte("deals", "d"))
 
 
 async def _standard_pipeline(conn, org_id: UUID) -> UUID:
@@ -61,17 +61,20 @@ async def _standard_pipeline(conn, org_id: UUID) -> UUID:
 
 # ── Pipelines ───────────────────────────────────────────────────────────
 
-async def _custom_pruefen(conn, entity: str, werte: dict | None) -> str:
-    """Prüft eigene Eigenschaften gegen ihre Definition, gibt JSON zurück."""
-    import json
+async def _custom_pruefen(conn, entity: str, werte: dict | None) -> tuple[str, dict]:
+    """Prüft eigene Eigenschaften gegen ihre Definition.
 
-    from app import eigenschaften
+    Gibt das JSON für `custom` zurück und getrennt davon die vertraulichen
+    Werte, die nach `vertrauliche_werte` gehören (seit 26.10.18).
+    """
+    import json
 
     try:
         geprueft = await eigenschaften.pruefen_voll(conn, entity, werte or {})
     except eigenschaften.Ungueltig as exc:
         raise HTTPException(400, str(exc)) from exc
-    return json.dumps(geprueft)
+    offen, geheim = await vertraulich.aufteilen(conn, entity, geprueft)
+    return json.dumps(offen), geheim
 
 
 @router.get("/pipelines", response_model=list[Pipeline])
@@ -220,6 +223,7 @@ async def create_deal(payload: DealIn, user: CurrentUser = Depends(get_current_u
                 "order by position limit 1",
                 pid,
             )
+        custom_json, geheim = await _custom_pruefen(conn, "deals", payload.custom)
         new_id = await conn.fetchval(
             """
             insert into public.deals
@@ -241,15 +245,16 @@ async def create_deal(payload: DealIn, user: CurrentUser = Depends(get_current_u
             payload.next_step,
             payload.owner_id or user.user_id,
             user.user_id,
-            await _custom_pruefen(conn, 'deals', payload.custom),
+            custom_json,
         )
+        await vertraulich.schreiben(conn, user.org_id, "deals", new_id, geheim)
         await audit.log_fuer(
             conn,
             user,
             action="create",
             entity="deals",
             entity_id=new_id,
-            diff=payload.model_dump(mode="json"),
+            diff=vertraulich.fuer_protokoll(payload.model_dump(mode="json"), geheim),
         )
         row = await conn.fetchrow(DEAL_SQL + " and d.id = $1", new_id)
     return Deal(**{**dict(row), "probability": float(row["probability"])})
@@ -270,12 +275,13 @@ async def update_deal(
         await eigenschaften.pflicht_oder_422(
             conn, "deals", payload.model_dump(exclude_unset=True), neu=False
         )
+    geheim: dict = {}
     if "custom" in payload.model_fields_set:
         async with acquire_as(user.user_id) as conn:
             import json
 
-            geprueft = json.loads(await _custom_pruefen(conn, "deals", payload.custom))
-        payload = payload.model_copy(update={"custom": geprueft})
+            offen_json, geheim = await _custom_pruefen(conn, "deals", payload.custom)
+        payload = payload.model_copy(update={"custom": json.loads(offen_json)})
     try:
         zuweisungen, args = build_update(payload)
     except ValueError as exc:
@@ -290,13 +296,14 @@ async def update_deal(
         )
         if updated is None:
             raise HTTPException(404, "Deal nicht gefunden")
+        await vertraulich.schreiben(conn, user.org_id, "deals", updated, geheim)
         await audit.log_fuer(
             conn,
             user,
             action="update",
             entity="deals",
             entity_id=deal_id,
-            diff=payload.model_dump(mode="json", exclude_unset=True),
+            diff=vertraulich.fuer_protokoll(payload.model_dump(mode="json", exclude_unset=True), geheim),
         )
         row = await conn.fetchrow(DEAL_SQL + " and d.id = $1", deal_id)
     return Deal(**{**dict(row), "probability": float(row["probability"])})

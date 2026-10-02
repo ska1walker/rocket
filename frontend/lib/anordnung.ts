@@ -119,3 +119,18 @@ export function gruppieren<T extends { gruppe?: string | null }>(felder: T[]): {
   }
   return ergebnis;
 }
+
+/**
+ * Die Anordnung, wie diese Person sie sehen darf (seit 26.10.18): Ohne
+ * Recht auf vertrauliche Felder fallen deren Gruppen weg. Die Werte kämen
+ * ohnehin nicht an — aber leere Felder, deren Speichern der Server abweist,
+ * wären eine Falle.
+ */
+export function fuerSicht(a: Anordnung, vertraulich: boolean): Anordnung {
+  if (vertraulich) return a;
+  return {
+    ...a,
+    gruppen: a.gruppen.filter((g) => !g.vertraulich),
+    archiviert: a.archiviert.filter((f) => !f.vertraulich),
+  };
+}

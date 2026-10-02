@@ -49,14 +49,18 @@ class Zugriff(BaseModel):
 class Sicht(BaseModel):
     sicht: Literal["alles", "eingeschraenkt"]
     zugriffe: list[Zugriff] = Field(default_factory=list, max_length=500)
+    # Sieht vertrauliche Felder (seit 26.10.18). Fehlt er beim Setzen, bleibt
+    # er, wie er war. Eigentümerin und Verwalter sehen sie immer.
+    vertraulich_sehen: bool | None = None
 
 
 async def _sicht_lesen(conn: asyncpg.Connection, user_id: UUID, org_id: UUID) -> Sicht:
-    sicht = await conn.fetchval(
-        "select sicht from public.user_org_roles where user_id = $1 and org_id = $2",
+    rolle = await conn.fetchrow(
+        "select sicht, vertraulich_sehen, role::text as role from public.user_org_roles "
+        "where user_id = $1 and org_id = $2",
         user_id, org_id,
     )
-    if sicht is None:
+    if rolle is None:
         raise HTTPException(404, "Nicht in dieser Organisation")
     zeilen = await conn.fetch(
         """
@@ -69,7 +73,11 @@ async def _sicht_lesen(conn: asyncpg.Connection, user_id: UUID, org_id: UUID) ->
         """,
         user_id, org_id,
     )
-    return Sicht(sicht=sicht, zugriffe=[Zugriff(**dict(z)) for z in zeilen])
+    return Sicht(
+        sicht=rolle["sicht"],
+        zugriffe=[Zugriff(**dict(z)) for z in zeilen],
+        vertraulich_sehen=rolle["vertraulich_sehen"] or rolle["role"] in ("owner", "admin"),
+    )
 
 
 @router.get("/api/mitglieder/{mitglied_id}/sicht", response_model=Sicht)
@@ -128,8 +136,9 @@ async def sicht_setzen(
                 raise HTTPException(409, "Einen der Bereiche gibt es in dieser Organisation nicht.")
 
         await conn.execute(
-            "update public.user_org_roles set sicht = $1 where user_id = $2 and org_id = $3",
-            payload.sicht, mitglied_id, user.org_id,
+            "update public.user_org_roles set sicht = $1, "
+            "vertraulich_sehen = coalesce($4, vertraulich_sehen) where user_id = $2 and org_id = $3",
+            payload.sicht, mitglied_id, user.org_id, payload.vertraulich_sehen,
         )
         await conn.execute(
             "delete from public.zugriffe where user_id = $1 and org_id = $2", mitglied_id, user.org_id
@@ -144,6 +153,7 @@ async def sicht_setzen(
             conn, user, action="update", entity="users", entity_id=mitglied_id,
             diff={
                 "sicht": payload.sicht,
+                "vertraulich_sehen": payload.vertraulich_sehen,
                 "zugriffe": [
                     {k: str(v) for k, v in z.model_dump(exclude={"name"}, exclude_none=True).items()}
                     for z in payload.zugriffe

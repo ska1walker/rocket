@@ -28,4 +28,9 @@ describe("Sicht in Klartext", () => {
       ]),
     ).toBe("Eva sieht die Kontakte von 1. Herren und 2. Herren; nur lesend bei 2. Herren.");
   });
+
+  it("nennt vertrauliche Felder, wenn danach gefragt ist", () => {
+    expect(sichtSatz("Kim", "alles", [], true)).toBe("Kim sieht alle Firmen und Kontakte. Vertrauliche Felder auch.");
+    expect(sichtSatz("Kim", "alles", [], false)).toBe("Kim sieht alle Firmen und Kontakte. Vertrauliche Felder nicht.");
+  });
 });
