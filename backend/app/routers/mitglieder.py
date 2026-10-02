@@ -73,6 +73,9 @@ class Wer(BaseModel):
     # `owner` | `admin` | `member` | `viewer`. Die Oberfläche sagt damit
     # vorher, was nicht geht, statt es den Server abweisen zu lassen.
     rolle: str = "member"
+    # 'alles' oder 'eingeschraenkt' (seit 26.10.17): Die Oberfläche blendet
+    # damit Wege aus, die einer eingeschränkten Person nicht offenstehen.
+    sicht: str = "alles"
     # Hat diese Person schon ein eigenes Passwort? Solange niemand eines
     # hat, lässt der Olares-Kopf den ersten noch herein (siehe auth.py) —
     # und das soll die Oberfläche sagen, nicht verschweigen.
@@ -170,6 +173,7 @@ def _wer(
         zweiter_faktor_fehlt=user.zweiter_faktor_fehlt,
         einstellungen=einstellungen,
         rolle=rolle,
+        sicht=user.sicht,
         passwort_gesetzt=passwort_gesetzt,
     )
 

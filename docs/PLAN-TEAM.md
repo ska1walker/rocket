@@ -180,7 +180,7 @@ Fünf Schritte, je ein Release:
 2. ✅ **Dicht für den Alltag (26.10.16):** Erlaubnisliste der Pfade für Eingeschränkte,
    gespeicherte AI-Ergebnisse heraus, neutrale Dubletten-Meldung, Empfänger
    beim Start festschreiben, Leck-Test über jede Route.
-3. **Oberfläche:** Vorlagen beim Einladen, Zugriffe anhaken, Bereiche,
+3. ✅ **Oberfläche (26.10.17):** Vorlagen beim Einladen, Zugriffe anhaken, Bereiche,
    „Wer sieht diese Firma“, Eltern am Kind, Rundgang als Trainer.
 4. **Vertrauliche Feldgruppen:** Werte in eigener Tabelle, nur mit
    Schalter „sieht vertrauliche Felder“.

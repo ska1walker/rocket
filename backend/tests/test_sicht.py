@@ -229,3 +229,49 @@ async def test_keine_lesende_route_bricht_fuer_eingeschraenkte(datenbank):
                 if r.status_code >= 500:
                     kaputt.append((pfad, r.status_code, r.text[:200]))
     assert kaputt == []
+
+
+async def test_wer_sieht_diese_firma(datenbank):
+    async with klient_fuer("si-firma") as k:
+        v = await _verein(k, "w")
+        trainer = await _person(k, "Trainer W")
+        leiter = await _person(k, "Jugendleiter W")
+        await _sicht(k, trainer, "eingeschraenkt", [{"company_id": v.m["H1"], "stufe": "bearbeiten"}])
+        await _sicht(k, leiter, "eingeschraenkt", [{"bereich_id": v.herren, "stufe": "lesen"}])
+        h1 = (await k.get(f"/api/companies/{v.m['H1']}/sicht")).json()
+        h2 = (await k.get(f"/api/companies/{v.m['H2']}/sicht")).json()
+        wer = (await k.get("/api/mitglieder/wer")).json()
+        assert wer["sicht"] == "alles"
+        async with als_person(k, trainer) as t:
+            assert (await t.get("/api/mitglieder/wer")).json()["sicht"] == "eingeschraenkt"
+            assert (await t.get(f"/api/companies/{v.m['H1']}/sicht")).status_code == 403
+    assert h1["bereich_id"] == v.herren
+    assert {(p["name"], p["ueber"], p["stufe"]) for p in h1["personen"] if p["ueber"] != "alles"} == {
+        ("Trainer W", "firma", "bearbeiten"), ("Jugendleiter W", "bereich", "lesen"),
+    }
+    assert any(p["ueber"] == "alles" for p in h1["personen"])
+    assert [p["name"] for p in h2["personen"] if p["ueber"] != "alles"] == ["Jugendleiter W"]
+
+
+async def test_trainer_legt_eltern_neu_am_kind_an(datenbank):
+    async with klient_fuer("si-eltern") as k:
+        v = await _verein(k, "x")
+        trainer = await _person(k, "Trainer X")
+        await _sicht(k, trainer, "eingeschraenkt", [{"company_id": v.m["J1"], "stufe": "bearbeiten"}])
+        async with als_person(k, trainer) as t:
+            r = await t.post(f"/api/contacts/{v.s.kind}/beziehungen",
+                             json={"neu": {"first_name": "Mama", "last_name": "Neu-x", "phone": "0170"}})
+            assert r.status_code == 201, r.text
+            mama = r.json()
+            assert mama["name"] == "Mama Neu-x"
+            # Sie ist jetzt für ihn sichtbar — als Bezugsperson des Kindes.
+            assert (await t.get(f"/api/contacts/{mama['contact_id']}")).status_code == 200
+            # An ein fremdes Kind hängt er niemanden.
+            r = await t.post(f"/api/contacts/{v.s.eins}/beziehungen", json={"neu": {"last_name": "Fremd-x"}})
+            assert r.status_code == 404, r.text
+            # Eine Person, die er nicht sieht, kann er auch nicht verknüpfen.
+            r = await t.post(f"/api/contacts/{v.s.kind}/beziehungen", json={"bezug_id": v.s.passiv})
+            assert r.status_code == 404, r.text
+        # Die Leitung sieht die neue Mutter am Kind.
+        namen = [b["name"] for b in (await k.get(f"/api/contacts/{v.s.kind}/beziehungen")).json()]
+    assert "Mama Neu-x" in namen

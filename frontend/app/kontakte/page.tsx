@@ -7,12 +7,15 @@ import { Knopfmenue } from "@/components/knopfmenue";
 import { Segmentliste } from "@/components/segmentliste";
 import { KontaktAnlegen } from "@/components/kontakt-anlegen";
 import { useNeuGewuenscht } from "@/lib/neu";
+import { useSicht } from "@/lib/sicht";
+import { SichtHinweis } from "@/components/sicht-verwalten";
 
 export default function KontakteSeite() {
   const router = useRouter();
   const [offen, setOffen] = useState(false);
   // „Neu" aus der Kopfleiste zeigt hierher und will den Dialog offen sehen.
   const neu = useNeuGewuenscht();
+  const { eingeschraenkt } = useSicht();
   useEffect(() => {
     if (neu) setOffen(true);
   }, [neu]);
@@ -22,17 +25,22 @@ export default function KontakteSeite() {
       <Seitenkopf titel="Kontakte">
         {/* Der zweite Weg gehört neben den ersten: Wer auf eine leere
             Liste schaut, sucht den Import nicht in den Einstellungen. */}
-        <Knopfmenue
-          text="Kontakt anlegen"
-          eintraege={[
-            { text: "Neu anlegen", onWahl: () => setOffen(true) },
-            {
-              text: "Aus CSV importieren",
-              hinweis: "Mehrere auf einmal, aus einer Tabelle",
-              onWahl: () => router.push("/import?entity=contacts"),
-            },
-          ]}
-        />
+        {/* Eingeschränkt: anlegen ja, Import nein — er läuft über den ganzen Bestand. */}
+        {eingeschraenkt ? (
+          <button type="button" className="btn btn-primaer" onClick={() => setOffen(true)}>Kontakt anlegen</button>
+        ) : (
+          <Knopfmenue
+            text="Kontakt anlegen"
+            eintraege={[
+              { text: "Neu anlegen", onWahl: () => setOffen(true) },
+              {
+                text: "Aus CSV importieren",
+                hinweis: "Mehrere auf einmal, aus einer Tabelle",
+                onWahl: () => router.push("/import?entity=contacts"),
+              },
+            ]}
+          />
+        )}
       </Seitenkopf>
 
       {offen && (
@@ -44,6 +52,10 @@ export default function KontakteSeite() {
           }}
         />
       )}
+
+      <div className="seitenhinweise">
+        <SichtHinweis />
+      </div>
 
       <Segmentliste
         entity="contacts"

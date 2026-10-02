@@ -8,12 +8,17 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { Company, Firmenverknuepfung } from "@/lib/typen";
 import { Fehler } from "@/components/zustaende";
+import { useSicht } from "@/lib/sicht";
 
 /** Die Firmen eines Kontakts — eine Hauptfirma, beliebig viele weitere. */
 export function KontaktFirmen({ kontaktId }: { kontaktId: string }) {
   const client = useQueryClient();
   const [wahl, setWahl] = useState("");
   const [rolle, setRolle] = useState("");
+  // Firmen zuordnen und lösen ändert, wer den Kontakt sieht — das bleibt
+  // denen, die alles sehen (0037, contact_companies_sicht_*).
+  const { alles, liest } = useSicht();
+  const darf = alles && !liest;
 
   const firmen = useQuery({
     queryKey: ["kontakt-firmen", kontaktId],
@@ -22,6 +27,7 @@ export function KontaktFirmen({ kontaktId }: { kontaktId: string }) {
   const alle = useQuery({
     queryKey: ["firmen-auswahl"],
     queryFn: () => api.get<Company[]>("/api/companies?limit=200"),
+    enabled: darf,
   });
 
   const neu = () => { client.invalidateQueries({ queryKey: ["kontakt-firmen", kontaktId] }); client.invalidateQueries({ queryKey: ["kontakt", kontaktId] }); };
@@ -49,23 +55,23 @@ export function KontaktFirmen({ kontaktId }: { kontaktId: string }) {
               <dt>{f.ist_haupt ? "Hauptfirma" : f.role || "weitere Firma"}</dt>
               <dd style={{ display: "flex", gap: "var(--am-raum-2)", alignItems: "baseline", flexWrap: "wrap" }}>
                 <Link href={`/firmen/${f.company_id}`} style={{ textDecoration: "underline", textUnderlineOffset: "2px" }}>{f.company_name}</Link>
-                {!f.ist_haupt && (
+                {darf && !f.ist_haupt && (
                   <button type="button" className="btn btn-still btn-klein" onClick={() => haupt.mutate(f.company_id)}>zur Hauptfirma</button>
                 )}
-                <button type="button" className="btn btn-still btn-klein" onClick={() => loesen.mutate(f.company_id)}>lösen</button>
+                {darf && <button type="button" className="btn btn-still btn-klein" onClick={() => loesen.mutate(f.company_id)}>lösen</button>}
               </dd>
             </div>
           ))}
         </dl>
         {fehler && <Fehler text={(fehler.error as Error).message} />}
-        <form style={{ display: "flex", gap: "var(--am-raum-2)", marginTop: "var(--am-raum-3)", flexWrap: "wrap" }} onSubmit={(e) => { e.preventDefault(); if (wahl) verknuepfen.mutate(); }}>
+        {darf && <form style={{ display: "flex", gap: "var(--am-raum-2)", marginTop: "var(--am-raum-3)", flexWrap: "wrap" }} onSubmit={(e) => { e.preventDefault(); if (wahl) verknuepfen.mutate(); }}>
           <select className="input" style={{ flex: "1 1 160px" }} value={wahl} onChange={(e) => setWahl(e.target.value)} aria-label="Firma verknüpfen">
             <option value="">— Firma wählen —</option>
             {alle.data?.filter((c) => !vergeben.has(c.id)).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           <input className="input" style={{ flex: "1 1 120px" }} value={rolle} onChange={(e) => setRolle(e.target.value)} placeholder="Rolle dort" aria-label="Rolle" />
           <button type="submit" className="btn btn-sekundaer btn-klein" disabled={!wahl || verknuepfen.isPending}>Verknüpfen</button>
-        </form>
+        </form>}
       </div>
     </section>
   );

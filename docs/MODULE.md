@@ -111,6 +111,7 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | RK-VERSAND | Listen, Kampagnen, Einwilligung | `app/listen`, `app/kampagnen`, `einwilligung.tsx` | ○ |
 | RK-WISSEN | Fragen, Erkenntnisse, Eingang, Besprechungen | `app/fragen` u. a. | ○ |
 | RK-EINSTELLUNGEN | Die Blöcke der Einstellungen | `mitglieder.tsx`, `versand.tsx` u. a. | ○ |
+| RK-SICHT | Sicht nach Zuordnung: Sicht-Dialog, Bereiche, Sichtbarkeit an der Firma, Bezugspersonen | `sicht-verwalten.tsx`, `kontakt-beziehungen.tsx`, `lib/sicht.ts` | ○ |
 
 ---
 
@@ -881,6 +882,31 @@ Geräte (`geraete.tsx`), Zweiter Faktor (HB-FAKTOR), Sicherung
 Programme (`quellen.tsx`), Katalog und Verlustgründe (`katalog.tsx`),
 Pipelines (`pipelines-verwalten.tsx`), Eigenschaften (RK-EIGENSCHAFTEN).
 Versand, Postfach und Programme sind inhaltlich Relay-nah.
+
+### RK-SICHT — Sicht nach Zuordnung ○
+
+Seit 26.10.17 die Oberfläche zu Stufe 3 aus `docs/PLAN-TEAM.md`; gerechnet
+wird in der Datenbank (0037, 0038), nicht hier.
+
+- `SichtDialog` (Team › „sieht alles“ / „sieht eingeschränkt“): Alles oder
+  nur ausgewählte Bereiche und Firmen, je `bearbeiten` oder `nur lesen`,
+  darunter der Satz aus `lib/sicht.ts` (`sichtSatz`), der sagt, was am Ende
+  gilt. Für Eigentümerin und Verwalter nur ein Hinweis: Sie sehen immer
+  alles.
+- `Bereicheblock` (Firma und Team): Gruppen von Firmen anlegen, umbenennen,
+  löschen (`Rueckfrage`).
+- `FirmaSichtblock` (rechte Spalte der Firma, nur Verwalter): Bereich wählen
+  und lesen, wer die Kontakte sieht.
+- `Bezugspersonen` (Kontaktseite): vorhandene verknüpfen oder neu anlegen
+  und verknüpfen in einem Schritt.
+- `SichtHinweis` (in `.seitenhinweise` über Firmen und Kontakte): was eine
+  eingeschränkte Person sieht, in einem Satz.
+- `useSicht()` sagt jeder Seite, was sie anbietet; die Navigation filtert
+  über `lib/navigation.ts` (`EINGESCHRAENKT_OFFEN`, dasselbe wie
+  `auth.EINGESCHRAENKT_ERLAUBT` im Backend, in Seiten gedacht).
+
+CSS: `.sicht-*`, `.mitglied-sicht`. Für den Verein heißen die Wörter
+später anders (Schritt 5, Modus); die Mechanik bleibt.
 
 ---
 

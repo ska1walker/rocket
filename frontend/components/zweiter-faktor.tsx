@@ -292,9 +292,14 @@ export function Faktorblock() {
               Noch nicht eingerichtet.
               {s.pflicht && <strong> Ihre Organisation verlangt ihn.</strong>}
             </p>
-            <button type="button" className="btn btn-primaer" onClick={() => setModus("einrichten")}>
-              Einrichten
-            </button>
+            {/* In der Knopfzeile wie im eingeschalteten Zustand — der Knopf
+                stand sonst ohne Abstand unter dem Satz (Rundgang als
+                Trainer, 26.10.17: die erste geprüfte Person mit Passwort). */}
+            <div className="faktor-zeile">
+              <button type="button" className="btn btn-primaer" onClick={() => setModus("einrichten")}>
+                Einrichten
+              </button>
+            </div>
           </>
         )}
 

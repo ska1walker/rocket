@@ -573,6 +573,9 @@ EINGESCHRAENKT_ERLAUBT: tuple[tuple[re.Pattern[str], frozenset[str] | None], ...
         # AI über das Sichtbare: Fragen, Assistent, Anschreiben.
         (r"^/api/(fragen|assistent)$", None),
         (r"^/api/ki/entwurf$", None),
+        # Ob ein Sprachmodell und ein Postweg eingerichtet sind — nur ja/nein,
+        # die Oberfläche sagt damit vorher, was nicht geht.
+        (r"^/api/(ki|post)/status$", {"GET"}),
     )
 )
 
