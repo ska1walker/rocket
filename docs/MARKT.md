@@ -284,6 +284,8 @@ Siebzehnter Durchlauf: Rocket 26.10.15, PR #98, 2.10.2026 — von der Action: Si
 
 Achtzehnter Durchlauf: Rocket 26.10.16, PR #99, 2.10.2026 — von der Action: Sicht nach Zuordnung dicht gemacht (Erlaubnisliste der Wege, Listen und Kampagnen nur eigene, Leck-Test). `main` unverändert seit 26.10.15; Zeitstempel 4406000000000. Auf `main` byte-gleich geprüft (sha256 `41398194…332d`, keine alten Schlüssel). Migration 0038 nur mit Regeln, keine neuen Tabellen.
 
+Neunzehnter Durchlauf: Rocket 26.10.17, PR #100, 2.10.2026 — von der Action: die Oberfläche zur Sicht nach Zuordnung (Sicht-Dialog, Bereiche, Sichtbarkeit an der Firma, Bezugspersonen). `main` unverändert seit 26.10.16; Zeitstempel 4407000000000. Auf `main` byte-gleich geprüft (sha256 `12be3f32…c77e`, keine alten Schlüssel). Keine Migration.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
