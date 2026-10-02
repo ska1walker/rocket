@@ -2137,7 +2137,18 @@ davon selbst, sondern holt einen Stand.
 - **Holen** beim Entwickeln, aus einem Klon des CI-Repos:
   `node scripts/ci-holen.mjs --von ../../aimighty-ci --stand ci-26.10.2`
   (aus `frontend/`). Das Skript liest die Dateien des Tags mit `git show`,
-  nicht den ausgecheckten Stand, und erzeugt danach `lib/symbole.tsx` neu.
+  nicht den ausgecheckten Stand, setzt seit `ci-26.10.12` Token und
+  Bausteine selbst in `globals.css` ein (`bauteile.py --einsetzen`) und
+  erzeugt danach `lib/symbole.tsx` neu.
+- **Nachziehen von selbst** (seit `ci-26.10.12`, Kai 2.10.2026): Setzt die
+  Action `stand` im CI einen neuen Stand, öffnet sie in Rocket und Insilo
+  (`werkzeug/apps.json` dort) einen PR „CI-Stand ci-…“ auf dem Zweig
+  `ci-stand/ci-…`, mit genau diesem Holen und Einsetzen. Rockets CI prüft
+  ihn wie jeden PR; grün heißt mergen, er geht mit dem nächsten Release
+  hinaus — rot heißt, eine Komponente muss zum Baustein passen, im selben
+  PR. So bleibt keine App unbemerkt auf einem alten Stand (Insilo stand
+  einen hinter Rocket, als es das noch nicht gab). Braucht im CI-Repo das
+  Geheimnis `APPS_TOKEN`; ohne es meldet die Action nur.
 - **Was wacht** (`lib/__tests__/ci-stand.test.ts`, läuft mit vitest):
   Die Kopie passt zu ihren Prüfsummen; der Token-Block in `globals.css` ist
   `ci/tokens/app.css`; jeder `AM-`/`HB-` Abschnitt in `globals.css` ist
