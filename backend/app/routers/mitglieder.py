@@ -38,10 +38,9 @@ class MitgliedPatch(BaseModel):
 
 
 class RollePatch(BaseModel):
-    # `viewer` steht im Datenbank-Typ, bewirkt aber nichts: Für die Rechte
-    # ist es dasselbe wie `member` (auth.VERWALTET). Es hier anzubieten
-    # hieße, eine Abstufung zu versprechen, die es nicht gibt.
-    role: Literal["admin", "member"]
+    # `viewer` liest nur — seit 26.10.15 wirklich (auth._nur_lesend_pruefen);
+    # vorher war es dasselbe wie `member` und wurde deshalb nicht angeboten.
+    role: Literal["admin", "member", "viewer"]
 
 
 class Mitglied(BaseModel):
@@ -51,6 +50,8 @@ class Mitglied(BaseModel):
     olares_username: str
     zugang: str
     role: str
+    # 'alles' oder 'eingeschraenkt' (seit 26.10.15, siehe routers/sicht.py).
+    sicht: str = "alles"
     created_at: datetime
     last_seen_at: datetime | None = None
     # Nur ob, nie was. Die Oberfläche braucht es, um zu warnen, dass eine
@@ -72,6 +73,9 @@ class Wer(BaseModel):
     # `owner` | `admin` | `member` | `viewer`. Die Oberfläche sagt damit
     # vorher, was nicht geht, statt es den Server abweisen zu lassen.
     rolle: str = "member"
+    # 'alles' oder 'eingeschraenkt' (seit 26.10.17): Die Oberfläche blendet
+    # damit Wege aus, die einer eingeschränkten Person nicht offenstehen.
+    sicht: str = "alles"
     # Hat diese Person schon ein eigenes Passwort? Solange niemand eines
     # hat, lässt der Olares-Kopf den ersten noch herein (siehe auth.py) —
     # und das soll die Oberfläche sagen, nicht verschweigen.
@@ -169,6 +173,7 @@ def _wer(
         zweiter_faktor_fehlt=user.zweiter_faktor_fehlt,
         einstellungen=einstellungen,
         rolle=rolle,
+        sicht=user.sicht,
         passwort_gesetzt=passwort_gesetzt,
     )
 
@@ -233,7 +238,7 @@ async def liste(user: CurrentUser = Depends(get_current_user)) -> list[Mitglied]
         zeilen = await conn.fetch(
             """
             select u.id, u.display_name, u.email, u.olares_username, u.zugang,
-                   r.role::text as role, u.created_at, u.last_seen_at,
+                   r.role::text as role, r.sicht, u.created_at, u.last_seen_at,
                    u.passwort_hash is not null as passwort_gesetzt,
                    u.totp_seit is not null as zweiter_faktor
             from public.users u
@@ -349,7 +354,7 @@ async def umbenennen(
               from public.user_org_roles r
              where u.id = $4 and r.user_id = u.id and r.org_id = $5 and u.deleted_at is null
             returning u.id, u.display_name, u.email, u.olares_username, u.zugang,
-                      r.role::text as role, u.created_at, u.last_seen_at
+                      r.role::text as role, r.sicht, u.created_at, u.last_seen_at
             """,
             felder.get("display_name"),
             felder.get("email"),
@@ -452,12 +457,15 @@ async def rolle_setzen(
         zeile = await conn.fetchrow(
             """
             update public.user_org_roles r
-               set role = $1::public.user_role
+               set role = $1::public.user_role,
+                   -- Wer verwaltet, sieht alles: Sicherung, Einstellungen und
+                   -- Zugriffe über einen Ausschnitt zu verwalten ginge schief.
+                   sicht = case when $1 = 'admin' then 'alles' else r.sicht end
               from public.users u
              where r.user_id = $2 and r.org_id = $3 and u.id = r.user_id
                and u.deleted_at is null and r.role <> 'owner'
             returning u.id, u.display_name, u.email, u.olares_username, u.zugang,
-                      r.role::text as role, u.created_at, u.last_seen_at
+                      r.role::text as role, r.sicht, u.created_at, u.last_seen_at
             """,
             payload.role,
             mitglied_id,

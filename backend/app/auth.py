@@ -5,6 +5,7 @@ ein Request hier ankommt. Was bleibt, ist die Zuordnung des Olares-Namens
 auf unsere interne Kennung.
 """
 
+import re
 from uuid import UUID
 
 import asyncpg
@@ -105,6 +106,11 @@ class CurrentUser(BaseModel):
     # Die Organisation verlangt einen zweiten Faktor, und diese Person hat
     # noch keinen. Dann ist nur die Einrichtung erlaubt (siehe unten).
     zweiter_faktor_fehlt: bool = False
+    # Rolle und Sicht in der Organisation der Sitzung, gelesen beim
+    # Anmelden der Anfrage (seit 26.10.15/16). `verwaltet` liest die Rolle
+    # trotzdem frisch — dort entscheidet sie über die größte Sprengkraft.
+    rolle: str | None = None
+    sicht: str = "alles"
 
     @property
     def handelnder(self) -> UUID:
@@ -358,11 +364,18 @@ async def _ensure_user_and_org(olares_username: str) -> CurrentUser:
             )
             await _einrichten(conn, org["id"], user_id)
 
+    async with acquire() as conn:
+        stand = await conn.fetchrow(
+            "select role::text as rolle, sicht from public.user_org_roles where user_id = $1 and org_id = $2",
+            user_id, org["id"],
+        )
     return CurrentUser(
         olares_username=olares_username,
         user_id=user_id,
         org_id=org["id"],
         display_name=row["display_name"],
+        rolle=stand["rolle"] if stand else None,
+        sicht=stand["sicht"] if stand else "alles",
     )
 
 
@@ -386,11 +399,11 @@ async def _aus_schluessel(token: str) -> tuple[CurrentUser, tuple[str, ...]] | N
     if person is None:
         return None
     async with acquire_as(schluessel.user_id) as conn:
-        mitglied = await conn.fetchval(
-            "select true from public.user_org_roles where user_id = $1 and org_id = $2",
+        mitglied = await conn.fetchrow(
+            "select role::text as rolle, sicht from public.user_org_roles where user_id = $1 and org_id = $2",
             schluessel.user_id, schluessel.org_id,
         )
-    if not mitglied:
+    if mitglied is None:
         return None
     return (
         CurrentUser(
@@ -399,6 +412,8 @@ async def _aus_schluessel(token: str) -> tuple[CurrentUser, tuple[str, ...]] | N
             org_id=schluessel.org_id,
             display_name=person["display_name"],
             login_username=f"api:{schluessel.name}",
+            rolle=mitglied["rolle"],
+            sicht=mitglied["sicht"],
         ),
         schluessel.bereiche,
     )
@@ -422,7 +437,8 @@ async def _aus_sitzung(keks: str) -> CurrentUser | None:
         # entfernt wurde, sähe unter der Zeilensicherheit ohnehin nichts
         # mehr — aber er soll auch nicht mehr als angemeldet gelten.
         stand = await conn.fetchrow(
-            "select coalesce(s.zweiter_faktor_pflicht, false) as pflicht "
+            "select coalesce(s.zweiter_faktor_pflicht, false) as pflicht, "
+            "       r.role::text as rolle, r.sicht "
             "from public.user_org_roles r "
             "left join public.org_settings s on s.org_id = r.org_id "
             "where r.user_id = $1 and r.org_id = $2",
@@ -442,6 +458,8 @@ async def _aus_sitzung(keks: str) -> CurrentUser | None:
         display_name=person["display_name"],
         login_username=person["olares_username"],
         zweiter_faktor_fehlt=faktor_fehlt,
+        rolle=stand["rolle"],
+        sicht=stand["sicht"],
     )
 
 
@@ -511,6 +529,64 @@ OHNE_FAKTOR_ERLAUBT = (
 )
 
 
+# Was eine Person mit der Rolle `viewer` schreibend aufrufen darf: sich
+# anmelden und abmelden, die eigenen Einstellungen und Ansichten, und was
+# nur liest, obwohl es ein POST ist (eine Frage an den Bestand, ein Auftrag
+# an den Assistenten — der schlägt nur vor, ausgeführt wird über die
+# schreibenden Wege, und die bleiben zu).
+NUR_LESEND_ERLAUBT = (
+    "/api/anmeldung",
+    "/api/abmeldung",
+    "/api/mitglieder/wer",
+    "/api/ansichten",
+    "/api/fragen",
+    "/api/assistent",
+    "/api/briefing/text",
+    "/api/fehler",
+)
+
+LESEND = frozenset({"GET", "HEAD", "OPTIONS"})
+
+# Was eine Person mit eingeschränkter Sicht aufrufen darf (seit 26.10.16).
+# Die Zeilensicherheit schützt die Daten schon allein; diese Liste ist die
+# zweite Tür davor: Ein neuer Weg ist für Eingeschränkte zu, bis er hier
+# steht — und wer ihn einträgt, denkt dabei an sie. Je Eintrag: Pfad als
+# Muster, dazu die Methoden (`None` = alle).
+EINGESCHRAENKT_ERLAUBT: tuple[tuple[re.Pattern[str], frozenset[str] | None], ...] = tuple(
+    (re.compile(muster), frozenset(methoden) if methoden else None)
+    for muster, methoden in (
+        # Anmelden, Abmelden, wer man ist, eigene Einstellungen und Sicht.
+        (r"^/api/(anmeldung|abmeldung|einladung)(/|$)", None),
+        (r"^/api/mitglieder(/wer(/.*)?)?$", None),
+        (r"^/api/mitglieder/[^/]+/sicht$", {"GET"}),
+        (r"^/api/fehler$", None),
+        (r"^/api/settings$", {"GET"}),
+        # Der Bestand — was davon sichtbar ist, entscheidet die Datenbank.
+        # Anreichern nicht: Es schreibt einen Lauf, den nur sieht, wer alles
+        # sieht, und fragt Dienste außerhalb an.
+        (r"^/api/companies(/(?!.*/anreichern$)(?!.*/bereich$).*)?$", None),
+        (r"^/api/contacts(/(?!.*/anreichern$).*)?$", None),
+        (r"^/api/(activities|tasks|dokumente|ansichten|listen|kampagnen|vorlagen)(/.*)?$", None),
+        (r"^/api/suche$", {"GET"}),
+        (r"^/api/ausfuhr(/.*)?$", {"GET"}),
+        (r"^/api/(eigenschaften|bereiche)(/.*)?$", {"GET"}),
+        # AI über das Sichtbare: Fragen, Assistent, Anschreiben.
+        (r"^/api/(fragen|assistent)$", None),
+        (r"^/api/ki/entwurf$", None),
+        # Ob ein Sprachmodell und ein Postweg eingerichtet sind — nur ja/nein,
+        # die Oberfläche sagt damit vorher, was nicht geht.
+        (r"^/api/(ki|post)/status$", {"GET"}),
+    )
+)
+
+
+def eingeschraenkt_erlaubt(methode: str, pfad: str) -> bool:
+    for muster, methoden in EINGESCHRAENKT_ERLAUBT:
+        if muster.match(pfad) and (methoden is None or methode in methoden):
+            return True
+    return False
+
+
 async def get_current_user(
     request: Request,
     x_bfl_user: str | None = Header(None, alias="X-Bfl-User"),
@@ -563,6 +639,8 @@ async def get_current_user(
                     status_code=403,
                     detail=f"Dieser API-Schlüssel gilt nicht für {request.url.path}.",
                 )
+            await _nur_lesend_pruefen(request, angemeldet)
+            _eingeschraenkt_pruefen(request, angemeldet)
             return angemeldet
 
     if angemeldet is None and settings.anmeldung_modus != "eigen":
@@ -583,7 +661,45 @@ async def get_current_user(
             headers={"X-Rocket-Zweiter-Faktor": "einrichten"},
         )
 
+    await _nur_lesend_pruefen(request, angemeldet)
+    _eingeschraenkt_pruefen(request, angemeldet)
     return angemeldet
+
+
+def _eingeschraenkt_pruefen(request: Request, user: CurrentUser) -> None:
+    """Eingeschränkte Sicht: nur die Wege aus `EINGESCHRAENKT_ERLAUBT`.
+
+    Die Meldung sagt, warum, nicht was dahinter liegt. Die Sicht steht auch
+    am Request — der Fehlerweg für Dubletten (main.doppelter_eintrag) nennt
+    Eingeschränkten keinen Grund, der etwas über Verborgenes verriete.
+    """
+    request.state.sicht = user.sicht
+    if user.sicht != "eingeschraenkt":
+        return
+    if request.method in ("HEAD", "OPTIONS"):
+        return
+    if not eingeschraenkt_erlaubt(request.method, request.url.path):
+        raise HTTPException(
+            status_code=403,
+            detail="Mit eingeschränkter Sicht steht Ihnen das nicht offen. Fragen Sie die Leitung.",
+        )
+
+
+async def _nur_lesend_pruefen(request: Request, user: CurrentUser) -> None:
+    """`viewer` liest nur (seit 26.10.15).
+
+    Bis dahin hatte die Rolle keine Wirkung: Ein `viewer` konnte alles, was
+    ein `member` kann. Geprüft wird an dieser einen Stelle vor jedem
+    Router, nicht an jedem Endpunkt — ein neuer schreibender Weg ist damit
+    von selbst zu. Nur lesende Aufrufe kosten keine Abfrage.
+    """
+    if request.method in LESEND or request.url.path.startswith(NUR_LESEND_ERLAUBT):
+        return
+    if user.rolle == "viewer":
+        raise HTTPException(
+            status_code=403,
+            detail="Sie haben Lesezugriff. Für Änderungen fragen Sie die Eigentümerin oder einen Verwalter.",
+        )
 
 
 # Rollen, die verwalten dürfen. `member` und `viewer` arbeiten im Bestand,
@@ -599,10 +715,17 @@ async def verwaltet(user: CurrentUser = Depends(get_current_user)) -> CurrentUse
     Organisation ihrer Sitzung.
     """
     async with acquire() as conn:
-        rolle = await conn.fetchval(
-            "select role::text from public.user_org_roles where user_id = $1 and org_id = $2",
+        stand = await conn.fetchrow(
+            "select role::text as rolle, sicht from public.user_org_roles where user_id = $1 and org_id = $2",
             user.handelnder, user.org_id,
         )
-    if rolle not in VERWALTET:
+    if stand is None or stand["rolle"] not in VERWALTET:
         raise HTTPException(403, "Dafür fehlt Ihnen die Berechtigung. Fragen Sie den Eigentümer.")
+    # Verwalten heißt: über den ganzen Bestand. Wer nur einen Ausschnitt
+    # sieht, zöge eine halbe Sicherung oder vergäbe Zugriffe auf Firmen, die
+    # er selbst nicht kennt. Die API lässt das nicht entstehen (sicht.py),
+    # hier steht es noch einmal, falls es doch einmal so in der Datenbank
+    # steht.
+    if stand["sicht"] != "alles":
+        raise HTTPException(403, "Verwalten kann nur, wer den ganzen Bestand sieht.")
     return user

@@ -332,8 +332,9 @@ async def test_ein_mitglied_darf_nicht_einfuehren(datenbank):
             )
         antwort = await _vorschau(gast, "Vorname;E-Mail\nA;a@x.de\n")
         assert antwort.status_code == 403
-        # Lesen darf es weiter — die Ausfuhr zeigt nur, was die Liste zeigt.
-        assert (await gast.get("/api/einfuhr")).status_code == 200
+        # Auch der Verlauf nicht (seit 26.10.15): Er nennt, was übersprungen
+        # wurde, und damit Adressen aus dem ganzen Bestand.
+        assert (await gast.get("/api/einfuhr")).status_code == 403
 
 
 async def test_eine_fremde_organisation_sieht_den_import_nicht(datenbank):

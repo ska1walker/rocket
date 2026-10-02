@@ -3,7 +3,7 @@
 // Modul RK-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Copy, KeyRound, Pencil, UserMinus } from "@/lib/symbole";
+import { Copy, Eye, KeyRound, Pencil, UserMinus } from "@/lib/symbole";
 import { useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { lage, passwortAendern } from "@/lib/anmeldung";
@@ -11,6 +11,7 @@ import { datum } from "@/lib/format";
 import type { Mitglied, Wer } from "@/lib/typen";
 import { Fehler, Laedt } from "@/components/zustaende";
 import { Erklaerung } from "@/components/erklaerung";
+import { SichtDialog } from "@/components/sicht-verwalten";
 
 export function Mitgliederblock() {
   const client = useQueryClient();
@@ -18,6 +19,8 @@ export function Mitgliederblock() {
   // Welche Zeile gerade umbenannt wird, und der Entwurf des Namens.
   const [bearbeitet, setBearbeitet] = useState<string | null>(null);
   const [entwurf, setEntwurf] = useState("");
+  // Wessen Sicht gerade im Dialog steht.
+  const [sichtFuer, setSichtFuer] = useState<Mitglied | null>(null);
 
   const mitglieder = useQuery({
     queryKey: ["mitglieder"],
@@ -51,7 +54,7 @@ export function Mitgliederblock() {
   // einer fremden Box: „gib mir dein Passwort" — jede angelegte Person
   // war fest `member` und sah die Einstellungen nicht.
   const rolleSetzen = useMutation({
-    mutationFn: ({ id, role }: { id: string; role: "admin" | "member" }) =>
+    mutationFn: ({ id, role }: { id: string; role: "admin" | "member" | "viewer" }) =>
       api.patch<Mitglied>(`/api/mitglieder/${id}/rolle`, { role }),
     onSuccess: () => client.invalidateQueries({ queryKey: ["mitglieder"] }),
   });
@@ -94,6 +97,11 @@ export function Mitgliederblock() {
   // Einstellungen schützen; dürfte er auch Rollen setzen, könnte er die
   // Eigentümerin herabstufen und sich die Organisation aneignen.
   const darfRollen = wer.data?.rolle === "owner";
+  // Sicht vergibt, wer verwaltet und selbst alles sieht (auth.verwaltet).
+  const darfSicht = (wer.data?.rolle === "owner" || wer.data?.rolle === "admin") && wer.data?.sicht !== "eingeschraenkt";
+  // Umbenennen, Einladen, Entfernen und Hinzufügen sind Sache der Verwaltung
+  // (auth.verwaltet) — anderen bietet die Tabelle sie nicht erst an.
+  const darfVerwalten = darfSicht;
 
   if (mitglieder.isPending) return <Laedt />;
 
@@ -108,10 +116,10 @@ export function Mitgliederblock() {
         )}
       </div>
       <div className="block-inhalt">
-        <Erklaerung kurz="Wer mit Ihnen in Rocket arbeitet. Alle sehen und ändern alles." lang={<>Jede Person meldet sich mit
+        <Erklaerung kurz="Wer mit Ihnen in Rocket arbeitet — und was jede Person sieht." lang={<>Jede Person meldet sich mit
           eigenem Namen und Passwort an — dazu gibt es den Einladungslink. Was sie anlegt,
-          gehört ihr; das Protokoll nennt sie. Einen Wechsel auf den Platz einer anderen Person
-          gibt es nicht mehr.</>} />
+          gehört ihr; das Protokoll nennt sie. Unter „Sicht“ legen Sie fest, ob jemand alles
+          sieht oder nur die Kontakte bestimmter Firmen und Bereiche. „Nur lesen“ ändert nichts.</>} />
 
         <table className="tabelle mitgliedertabelle" style={{ marginBottom: "var(--am-raum-4)" }}>
           <thead>
@@ -152,7 +160,7 @@ export function Mitgliederblock() {
                     <span className="mitglied-name">
                       <span className="mitglied-name-zeile">
                         {m.display_name ?? m.olares_username}
-                      <button
+                      {darfVerwalten && <button
                         type="button"
                         className="btn btn-still btn-klein"
                         aria-label={`${m.display_name ?? m.olares_username} umbenennen`}
@@ -163,7 +171,7 @@ export function Mitgliederblock() {
                         }}
                       >
                         <Pencil size={16} aria-hidden="true" />
-                      </button>
+                      </button>}
                       </span>
                       {/* Die Kennung ist der Name, mit dem sich diese Person
                           anmeldet — sie gehört unter den Anzeigenamen, nicht
@@ -196,20 +204,35 @@ export function Mitgliederblock() {
                     <select
                       className="mitglied-rolle"
                       aria-label={`Rolle von ${m.display_name ?? m.olares_username}`}
-                      value={m.role === "admin" ? "admin" : "member"}
+                      value={m.role === "admin" || m.role === "viewer" ? m.role : "member"}
                       disabled={rolleSetzen.isPending}
                       onChange={(e) =>
                         rolleSetzen.mutate({
                           id: m.id,
-                          role: e.target.value as "admin" | "member",
+                          role: e.target.value as "admin" | "member" | "viewer",
                         })
                       }
                     >
                       <option value="member">Mitglied</option>
+                      <option value="viewer">Nur lesen</option>
                       <option value="admin">Verwalter</option>
                     </select>
                   ) : (
                     <span className="mitglied-rolle-fest">{ROLLENTEXT[m.role] ?? m.role}</span>
+                  )}
+                  {/* Die Sicht gehört zur Rolle: beides sagt, was die Person darf. */}
+                  {darfSicht ? (
+                    <button
+                      type="button"
+                      className="btn btn-still btn-klein mitglied-sicht"
+                      onClick={() => setSichtFuer(m)}
+                      aria-label={`Sicht von ${m.display_name ?? m.olares_username} festlegen`}
+                    >
+                      <Eye size={16} aria-hidden="true" />
+                      {m.sicht === "eingeschraenkt" ? "eingeschränkt" : "alles"}
+                    </button>
+                  ) : (
+                    m.sicht === "eingeschraenkt" && <span className="mitglied-zuletzt mitglied-sicht-text">sieht eingeschränkt</span>
                   )}
                 </td>
                 <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
@@ -218,7 +241,7 @@ export function Mitgliederblock() {
                       Tabelle 744 px breit, ihr Rahmen 638 — der Schlüssel der
                       ersten Zeile stand bei 697 und war damit unsichtbar,
                       ausgerechnet für die Person, die ihn zuerst braucht. */}
-                  <button
+                  {darfVerwalten && <button
                     type="button"
                     className="btn btn-still btn-klein"
                     title="Einladungslink erzeugen — damit setzt diese Person ihr Passwort"
@@ -227,8 +250,8 @@ export function Mitgliederblock() {
                     disabled={einladen.isPending}
                   >
                     <KeyRound size={16} aria-hidden="true" />
-                  </button>
-                  {m.zugang === "sitzplatz" && m.id !== wer.data?.user_id && (
+                  </button>}
+                  {darfVerwalten && m.zugang === "sitzplatz" && m.id !== wer.data?.user_id && (
                     <button
                       type="button"
                       className="btn btn-still btn-klein"
@@ -244,6 +267,8 @@ export function Mitgliederblock() {
             ))}
           </tbody>
         </table>
+
+        {sichtFuer && <SichtDialog mitglied={sichtFuer} beiSchliessen={() => setSichtFuer(null)} />}
 
         {link && (
           <div className="einladung-ausgabe">
@@ -305,7 +330,7 @@ export function Mitgliederblock() {
         {einladen.isError && <Fehler text={(einladen.error as Error).message} />}
         {umbenennen.isError && <Fehler text={(umbenennen.error as Error).message} />}
 
-        <form
+        {darfVerwalten && <form
           style={{ display: "flex", gap: "var(--am-raum-2)", alignItems: "flex-end" }}
           onSubmit={(e) => {
             e.preventDefault();
@@ -332,13 +357,13 @@ export function Mitgliederblock() {
           >
             {anlegen.isPending ? "Legt an …" : "Hinzufügen"}
           </button>
-        </form>
+        </form>}
         {anlegen.isError && <Fehler text={(anlegen.error as Error).message} />}
 
         <p style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)", marginTop: "var(--am-raum-3)" }}>
-          Beide sehen und ändern alles. Besitz ist Arbeitsteilung, keine Schranke. Der Name
-          lässt sich für jede Person ändern, auch für den Olares-Zugang selbst — die Kennung
-          bleibt.
+          Wer nicht eingeschränkt ist, sieht alles; Besitz ist Arbeitsteilung, keine Schranke.
+          Der Name lässt sich für jede Person ändern, auch für den Olares-Zugang selbst — die
+          Kennung bleibt.
         </p>
       </div>
     </section>
@@ -414,12 +439,10 @@ export function Passwortblock() {
   );
 }
 
-/** Was eine Rolle im Satz heißt. „viewer" steht im Datenbank-Typ, bewirkt
- *  aber nichts — es wird deshalb nirgends angeboten, nur benannt, falls
- *  es aus einer alten Zeile kommt. */
+/** Was eine Rolle im Satz heißt. „viewer“ liest seit 26.10.15 nur. */
 const ROLLENTEXT: Record<string, string> = {
   owner: "Eigentümerin",
   admin: "Verwalter",
   member: "Mitglied",
-  viewer: "Mitglied",
+  viewer: "Nur lesen",
 };

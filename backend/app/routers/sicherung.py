@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app import sicherung
-from app.auth import CurrentUser, get_current_user, verwaltet
+from app.auth import CurrentUser, verwaltet
 from app.db import acquire_as
 
 router = APIRouter(prefix="/api/sicherung", tags=["sicherung"])
@@ -34,12 +34,12 @@ class Wiederherstellung(BaseModel):
 
 
 @router.get("/staende", response_model=list[Stand])
-async def liste(user: CurrentUser = Depends(get_current_user)) -> list[Stand]:
+async def liste(user: CurrentUser = Depends(verwaltet)) -> list[Stand]:
     return [Stand(**s) for s in sicherung.staende()]
 
 
 @router.post("", response_model=Bilanz, status_code=201)
-async def jetzt_sichern(user: CurrentUser = Depends(get_current_user)) -> Bilanz:
+async def jetzt_sichern(user: CurrentUser = Depends(verwaltet)) -> Bilanz:
     """Schreibt einen Abzug neben die Daten — dorthin, wo er eine
     Deinstallation überlebt."""
     async with acquire_as(user.user_id) as conn:
@@ -53,7 +53,7 @@ async def jetzt_sichern(user: CurrentUser = Depends(get_current_user)) -> Bilanz
 
 
 @router.get("/ausfuhr")
-async def ausfuhr(user: CurrentUser = Depends(get_current_user)) -> JSONResponse:
+async def ausfuhr(user: CurrentUser = Depends(verwaltet)) -> JSONResponse:
     """Derselbe Abzug, aber zum Herunterladen statt zum Ablegen.
 
     Der Schlüssel zum Sprachmodell fliegt hier heraus: Diese Datei geht

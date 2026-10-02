@@ -76,6 +76,33 @@ export const LEISTE_STANDARD = ["/", "/deals", "/aufgaben", "/firmen", "/kontakt
 export const MOBIL_STANDARD = ["/", "/deals", "/firmen", "/kontakte"];
 export const MOBIL_MAX = 4;
 
+/**
+ * Was eine Person mit eingeschränkter Sicht erreicht (seit 26.10.17).
+ *
+ * Dasselbe wie `auth.EINGESCHRAENKT_ERLAUBT` im Backend, nur in Seiten
+ * gedacht: Der Server sagt bei allem anderen 403, die Navigation zeigt es
+ * gar nicht erst. Start, Leads, Prognose, Eingang und die übrigen rechnen
+ * über den ganzen Bestand — sie stehen hier nicht.
+ */
+export const EINGESCHRAENKT_OFFEN = ["/kontakte", "/firmen", "/aufgaben", "/listen", "/kampagnen", "/fragen", "/einstellungen"];
+
+/** Die Leiste einer eingeschränkten Person, solange sie nichts gemerkt hat. */
+export const LEISTE_EINGESCHRAENKT = ["/kontakte", "/firmen", "/aufgaben", "/listen"];
+
+/** Steht diese Seite einer eingeschränkten Person offen? Unterseiten zählen mit. */
+export function offenFuerEingeschraenkt(aktuell: string): boolean {
+  return EINGESCHRAENKT_OFFEN.some((pfad) => aktuell === pfad || aktuell.startsWith(`${pfad}/`));
+}
+
+function nurOffene(ziele: NavZiel[], eingeschraenkt: boolean): NavZiel[] {
+  return eingeschraenkt ? ziele.filter((z) => EINGESCHRAENKT_OFFEN.includes(z.pfad)) : ziele;
+}
+
+/** Die Gruppen von „Mehr“ — für Eingeschränkte ohne Verschlossenes und ohne leere Gruppe. */
+export function gruppenFuer(eingeschraenkt = false): NavGruppe[] {
+  return GRUPPEN.map((g) => ({ ...g, ziele: nurOffene(g.ziele, eingeschraenkt) })).filter((g) => g.ziele.length > 0);
+}
+
 export function istAktiv(pfad: string, aktuell: string): boolean {
   if (pfad === "/") return aktuell === "/";
   return aktuell === pfad || aktuell.startsWith(`${pfad}/`);
@@ -98,9 +125,10 @@ export function favoritenZiele(favoriten: string[]): NavZiel[] {
  * Vorgabe. Das erste Lesezeichen ersetzt die Vorgabe ganz: Wer wählt, will
  * seine Auswahl sehen, nicht seine Auswahl plus unsere.
  */
-export function leisteZiele(favoriten: string[]): NavZiel[] {
-  const meine = favoritenZiele(favoriten);
-  return meine.length > 0 ? meine : favoritenZiele(LEISTE_STANDARD);
+export function leisteZiele(favoriten: string[], eingeschraenkt = false): NavZiel[] {
+  const meine = nurOffene(favoritenZiele(favoriten), eingeschraenkt);
+  if (meine.length > 0) return meine;
+  return favoritenZiele(eingeschraenkt ? LEISTE_EINGESCHRAENKT : LEISTE_STANDARD);
 }
 
 export function favoritUmschalten(favoriten: string[], pfad: string): string[] {
@@ -108,9 +136,9 @@ export function favoritUmschalten(favoriten: string[], pfad: string): string[] {
 }
 
 /** Die Leiste unten: erst die Favoriten, aufgefüllt aus der Vorgabe bis vier. */
-export function mobilZiele(favoriten: string[]): NavZiel[] {
-  const ziele = favoritenZiele(favoriten).slice(0, MOBIL_MAX);
-  for (const z of favoritenZiele(MOBIL_STANDARD)) {
+export function mobilZiele(favoriten: string[], eingeschraenkt = false): NavZiel[] {
+  const ziele = nurOffene(favoritenZiele(favoriten), eingeschraenkt).slice(0, MOBIL_MAX);
+  for (const z of favoritenZiele(eingeschraenkt ? LEISTE_EINGESCHRAENKT : MOBIL_STANDARD)) {
     if (ziele.length >= MOBIL_MAX) break;
     if (!ziele.includes(z)) ziele.push(z);
   }
@@ -118,7 +146,7 @@ export function mobilZiele(favoriten: string[]): NavZiel[] {
 }
 
 /** Alles, was nicht auf der Leiste ist — für „Mehr“, inklusive Einstellungen. */
-export function mobilRest(favoriten: string[]): NavZiel[] {
-  const gezeigt = new Set(mobilZiele(favoriten).map((z) => z.pfad));
-  return [...ALLE_ZIELE, ...NACHRANGIG].filter((z) => !gezeigt.has(z.pfad));
+export function mobilRest(favoriten: string[], eingeschraenkt = false): NavZiel[] {
+  const gezeigt = new Set(mobilZiele(favoriten, eingeschraenkt).map((z) => z.pfad));
+  return nurOffene([...ALLE_ZIELE, ...NACHRANGIG], eingeschraenkt).filter((z) => !gezeigt.has(z.pfad));
 }

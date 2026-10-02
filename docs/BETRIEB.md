@@ -2535,10 +2535,9 @@ Schalter in der Zeile. Vier Riegel:
 
 Geprüft wird die Rolle der **angemeldeten** Person (`handelnder`).
 
-`viewer` steht im Datenbank-Typ, bewirkt aber nichts: Für die Rechte ist
-es dasselbe wie `member` (`auth.VERWALTET`). Es wird deshalb nirgends
-angeboten — eine Abstufung zu versprechen, die es nicht gibt, wäre
-schlimmer als sie wegzulassen.
+`viewer` stand bis 26.10.14 im Datenbank-Typ, bewirkte aber nichts und
+wurde deshalb nicht angeboten. **Seit 26.10.15 liest `viewer` nur** und die
+Eigentümerin kann die Rolle vergeben — siehe „Sicht nach Zuordnung“.
 
 In 0.9.2 stand der Schalter unter der Zugangsplakette in derselben
 Zelle. Das war falsch, aus zwei Gründen: Eine runde Plakette und ein
@@ -2858,4 +2857,210 @@ Kai, 1.10.2026: „bau den Schalter kompakt“):
 - `e2e/dichte.spec.ts`: Kompakt macht Zeilen niedriger, Schrift bleibt, die
   Wahl hält über ein Neuladen, „Weit“ nimmt das Attribut wieder ab; am Handy
   bleibt es trotz Cookie aus.
+
+## Sicht nach Zuordnung (seit 26.10.15)
+
+Bis 26.10.14 sah jede Person einer Organisation alles; die
+Zeilensicherheit prüfte nur die Organisation. Seit 26.10.15 kann eine
+Person **eingeschränkt** sein. Gebraucht hat es Kai für den Verein
+(Spartenleitung sieht alles, der Trainer seine Mannschaft), gebaut ist es
+als CRM-Funktion, wie HubSpot sie als *Teams* und Salesforce als
+*Territories* kennt: „Außendienst Nord sieht das Gebiet Nord.“ Plan und
+Begründung: `docs/PLAN-TEAM.md`, Stufe 3.
+
+**Vorgabe: alles.** Jede Mitgliedschaft hat `sicht = 'alles'`; für sie
+greift keine der neuen Regeln. Eine Installation, die nichts einschränkt,
+merkt nichts — belegt durch die unveränderte Suite.
+
+### Das Modell
+
+| Baustein | Wo | Bedeutung |
+|---|---|---|
+| Sicht | `user_org_roles.sicht` | `alles` oder `eingeschraenkt` |
+| Bereich | `bereiche`, `companies.bereich_id` | Gruppe von Firmen (Gebiet; im Verein „Jugend“) |
+| Zugriff | `zugriffe` | Person → Firma **oder** Bereich, `lesen` oder `bearbeiten` |
+| Beziehung | `kontakt_beziehungen` | Kontakt → Bezugsperson (im Verein: Kind → Elternteil) |
+| abgeleitet | `kontakt_mannschaften` | jede Firma eines Kontakts (Haupt- und weitere), per Trigger gepflegt |
+
+Eine eingeschränkte Person sieht:
+
+- **Firmen:** die Namen aller Firmen (im Verein: welche Mannschaften es
+  gibt). Ändern nur mit Zugriff `bearbeiten`.
+- **Kontakte:** deren Haupt- oder weitere Firma im Zugriff liegt, und die
+  Bezugspersonen dieser Kontakte. Kontakte ohne Firma sieht sie nicht.
+- **Was daran hängt** (Aktivitäten, Aufgaben, Dokumente, Tickets, Mails,
+  Leads, Angebote, Listenmitgliedschaften): wenn der verknüpfte Datensatz
+  sichtbar ist. Bei Firmen zählt der Zugriff, nicht der Name.
+- **Nichts** von Eingang, Aussagen und Themen, Podcasts, Besprechungen,
+  Anreicherungen, Einfuhren und Protokoll — das ist über den ganzen
+  Bestand gerechnet oder gesammelt.
+
+Ein Bereich schließt jede Firma ein, die darin steht — auch eine, die
+erst später hineinkommt. Wird eine Firma herausgenommen, verschwinden ihre
+Kontakte für alle, die nur über den Bereich sahen.
+
+### Wer was darf
+
+- **Löschen, Firma wechseln, Bereich wechseln** nur, wer alles sieht. Weil
+  Rocket weich löscht (`deleted_at`), ist Löschen ein UPDATE; eine Regel
+  sieht aber nur die neue Zeile. Deshalb prüft ein Trigger *vor* dem
+  Schreiben (`sicht_aenderung_pruefen`). Ohne ihn konnte ein Trainer einen
+  Spieler in eine fremde Mannschaft schieben: Beim Prüfen stand der noch in
+  seiner, die abgeleitete Zuordnung zieht erst danach nach. Gefunden hat
+  das `test_trainer_legt_an_aber_loescht_und_verschiebt_nicht`.
+- **Weitere Firmen eines Kontakts** setzen nur, wer alles sieht.
+- **Anlegen** in einer Firma mit `bearbeiten`; ohne Firma auch (für
+  Bezugspersonen, die gleich danach an einen Kontakt gehängt werden).
+- **Verwalten** (`auth.verwaltet`) nur mit Rolle `owner`/`admin` **und**
+  Sicht `alles`. Eigentümerin und Verwalter lassen sich nicht einschränken;
+  wer Verwalter wird, sieht ab da alles. Eine halbe Sicherung oder Zugriffe
+  auf Firmen, die man selbst nicht kennt, gingen schief.
+- Weist die Zeilensicherheit eine Änderung ab, antwortet Rocket mit 403
+  „Dafür fehlt Ihnen der Zugriff“ — ohne etwas aus der Zeile zu nennen
+  (`main.kein_zugriff`).
+
+### `viewer` liest nur
+
+Seit 26.10.15 prüft `auth._nur_lesend_pruefen` vor jedem Router: Mit der
+Rolle `viewer` ist jeder schreibende Aufruf 403, außer Anmeldung, eigene
+Einstellungen und Ansichten, Fragen, Assistent und Briefing
+(`NUR_LESEND_ERLAUBT`). Ein neuer schreibender Weg ist damit von selbst zu.
+
+### Lücken, die dabei zugingen
+
+Sicherung anlegen, herunterladen und die Liste der Stände sowie der
+Import-Verlauf waren für jedes Mitglied offen. Seit 26.10.15 nur noch
+`verwaltet`. Der Abzug trägt `sicht`, `bereiche`, `zugriffe` und
+`kontakt_beziehungen`; `kontakt_mannschaften` nicht — die Trigger bauen sie
+beim Zurückspielen von selbst wieder auf.
+
+### Die API
+
+| Weg | Wer |
+|---|---|
+| `GET /api/mitglieder/{id}/sicht` | die Person selbst, sonst Verwalter |
+| `PUT /api/mitglieder/{id}/sicht` `{sicht, zugriffe:[{company_id\|bereich_id, stufe}]}` | Verwalter; ersetzt alles auf einmal |
+| `GET/POST /api/bereiche`, `PATCH/DELETE /api/bereiche/{id}` | lesen alle, ändern Verwalter |
+| `PUT /api/companies/{id}/bereich` `{bereich_id}` | Verwalter |
+| `GET/POST /api/contacts/{id}/beziehungen`, `DELETE …/{beziehung_id}` | wer den Kontakt sieht bzw. bearbeiten darf |
+
+Die Oberfläche dafür (Zugriffe beim Einladen, Bereiche, Eltern am Kind)
+kommt mit dem nächsten Schritt; bis dahin geht es über die API.
+
+### Wie die Regeln gebaut sind
+
+- Die neuen Regeln sind `AS RESTRICTIVE`: Sie kommen per UND zu den
+  bestehenden Regeln nach Organisation, die unverändert bleiben.
+- Gerechnet wird in drei SQL-Funktionen: `sicht_alles()`,
+  `zugriff_firmen(stufe)`, `sichtbare_kontakte(stufe)`. In den Regeln stehen
+  sie als `(select f())::uuid[]` — so rechnet Postgres sie einmal je
+  Anweisung. Ohne den Cast wäre `= any((select …))` ein Vergleich mit einer
+  Unterabfrage, und uuid gegen uuid[] gibt es nicht.
+- Eine Regel auf `contacts` darf `contacts` nicht lesen (Endlosschleife).
+  Deshalb die abgeleitete Tabelle `kontakt_mannschaften`, gepflegt von
+  Triggern an `contacts` und `contact_companies`.
+- **Neue Tabelle mit Bezug auf Kontakt, Firma, Lead oder Ticket:** braucht
+  eine eigene RESTRICTIVE-Regel nach demselben Muster, sonst sieht eine
+  eingeschränkte Person dort alles.
+- `test_sicht.py` spielt es am Verein durch: Trainer, Jugendleiter mit
+  Bereich, Co-Trainer mit `lesen`, Vorstand als `viewer`, Abzug; dazu ruft
+  ein Rauchtest jede GET-Route als Trainer auf und verlangt: kein 500.
+
+### Dicht für den Alltag (seit 26.10.16)
+
+Schritt 2 aus dem Plan. Bis 26.10.15 hieß es hier: niemanden einschränken,
+dem man den Bestand nicht zeigen dürfte. Das gilt nicht mehr.
+
+- **Zweite Tür: Erlaubnisliste der Wege.** `auth.EINGESCHRAENKT_ERLAUBT`
+  nennt, was eine eingeschränkte Person aufrufen darf: Anmeldung, eigene
+  Einstellungen, Firmen und Kontakte (ohne Anreichern), Aktivitäten,
+  Aufgaben, Dokumente, Ansichten, Listen, Kampagnen, Vorlagen, Suche,
+  Ausfuhr, Eigenschaften und Bereiche (lesen), Fragen, Assistent,
+  Anschreiben. Alles andere ist 403 — auch jeder neue Weg, bis er dort
+  steht. Die Zeilensicherheit bleibt die erste Tür.
+- **Listen und Kampagnen** sieht sie nur, wenn sie sie selbst angelegt hat
+  (0038). Die Empfänger einer Kampagne stehen beim Start fest, gelesen
+  unter der Sicht der startenden Person — die Versandschleife, die später
+  als Eigentümerin läuft, verschickt nur, was dort schon stand.
+- **Die AI-Zusammenfassung einer Firma** fasst auch Kontakte zusammen, die
+  sie nicht sieht; sie bekommt sie nicht (`companies._firma`, in Fragen
+  ebenso). `auswertungen` (welche Notizen die Erkenntnisse schon gelesen
+  haben) nur mit voller Sicht.
+- **Dubletten:** „Ein Kontakt mit dieser E-Mail-Adresse ist schon
+  angelegt“ verriete einen verborgenen Kontakt. Eingeschränkte bekommen
+  einen Satz ohne Inhalt (`main.doppelter_eintrag`).
+- **Rolle und Sicht** kommen einmal mit der Anmeldung der Anfrage
+  (`CurrentUser.rolle`, `.sicht`), statt je Prüfung abgefragt zu werden.
+
+### Der Leck-Test
+
+`tests/test_leck.py` ist der Beweis für „wasserdicht“: Mannschaft B trägt
+in jeder verknüpften Tabelle die Markierung `LECKB` — Kontakt (Name, Mail,
+Telefon, Notiz, eigenes Feld), Kind und Elternteil, Kontakt ohne
+Mannschaft, Aktivität am Kontakt und an der Firma, Aufgabe, Dokument,
+Ticket, Lead, Angebot, Liste, Kampagne, Mail, AI-Zusammenfassung. Dann
+ruft der Trainer von A **jede GET-Route** aus dem Schema auf, mit den
+Kennungen von B im Pfad und als Abfrage (`company_id`, `contact_id`,
+`deal_id`, `ticket_id`, `q=LECKB`), dazu Fragen an den Bestand. Keine
+Antwort darf die Markierung enthalten, und als Trainer zeigt keine Tabelle
+aus `FREI` eine markierte Zeile.
+
+Der Test läuft zweimal: mit Erlaubnisliste und ohne. Der zweite Lauf
+beweist, dass die Datenbank allein dicht ist. Gegenprobe beim Bau: Eine
+vorübergehend geöffnete Regel an `activities` und eine nicht ausgeblendete
+Zusammenfassung machten beide Läufe rot.
+
+Eine neue Route ist von selbst dabei. Bricht der Test nach einer Änderung,
+ist das kein Testproblem: Es ist ein Weg, auf dem eine eingeschränkte
+Person sieht, was sie nicht sehen soll.
+
+### Die Oberfläche (seit 26.10.17)
+
+Schritt 3: Einschränken geht ohne API. Baustein RK-SICHT (`docs/MODULE.md`).
+
+- **Einstellungen › Firma und Team:** an jeder Person unter der Rolle der
+  Knopf „alles“ / „eingeschränkt“. Er öffnet den Sicht-Dialog: Alles, oder
+  nur ausgewählte Bereiche und Firmen, je bearbeiten oder nur lesen.
+  Darunter ein Satz, der sagt, was am Ende gilt (`lib/sicht.ts`,
+  `sichtSatz`). Eigentümerin und Verwalter sehen immer alles; für sie zeigt
+  der Dialog nur das. Die Rolle „Nur lesen“ ist jetzt wählbar.
+- **Bereiche** stehen im selben Bereich darunter: anlegen, umbenennen,
+  löschen mit Rückfrage.
+- **Firmenseite, rechte Spalte, „Sichtbarkeit“** (nur Verwalter): Bereich
+  wählen, und wer die Kontakte sieht — direkt oder über den Bereich, mit
+  Stufe, dazu die Zahl der Personen mit voller Sicht
+  (`GET /api/companies/{id}/sicht`).
+- **Kontaktseite, „Bezugspersonen“:** vorhandene Person verknüpfen oder eine
+  neue anlegen und verknüpfen — in einem Schritt, weil eine neue Person ohne
+  Firma für einen Trainer erst am Kind sichtbar wird (`neu` in
+  `POST /api/contacts/{id}/beziehungen`).
+- **Für Eingeschränkte:** Die Navigation zeigt nur Kontakte, Firmen,
+  Aufgaben, Listen, Kampagnen, Fragen und Einstellungen
+  (`lib/navigation.ts`, `EINGESCHRAENKT_OFFEN` — dasselbe wie die
+  Erlaubnisliste im Backend). Start führt zu den Kontakten, jede andere
+  Seite sagt „Dieser Bereich ist nicht freigegeben“, statt in jedem Block
+  einen Fehler zu zeigen. Über Kontakten und Firmen steht in
+  `.seitenhinweise`, wessen Kontakte die Person sieht. Erstellen bietet nur
+  Kontakt und Aufgabe an; Leads, Anreichern, Podcast, Zusammenfassung,
+  Firmen zuordnen und Senden über Relay fehlen. Die Einstellungen zeigen
+  nur das eigene Konto.
+- **Nebenbei gefunden:** Mitgliedern ohne Verwaltung bot die Tabelle
+  Umbenennen, Einladen und Entfernen an, die der Server abwies — jetzt nur
+  noch Verwaltern. Und im Block „Zweiter Faktor“ stand „Einrichten“ ohne
+  Abstand unter dem Satz; das sah erst der Rundgang als Trainer, die erste
+  geprüfte Person mit Passwort.
+
+`e2e/sicht.spec.ts`: Die Leitung legt per API zwei Firmen und einen Trainer
+für Firma A an; der Trainer löst eine Einladung ein und geht Kontakte,
+Kontakt, Firmen, beide Firmen, Aufgaben, Listen, Kampagnen, Fragen und
+Einstellungen durch — hell und dunkel, Desktop und Handy, mit denselben
+Prüfungen wie der Rundgang (keine Antwort 4xx der API, Lage, axe). Dazu
+der Sicht-Dialog per Tastatur, „Sichtbarkeit“ an der Firma und Eltern am
+Kind.
+
+### Was noch kommt
+
+Schritt 4 (vertrauliche Feldgruppen) und Schritt 5 (Modus Vertrieb/Verein:
+Begriffe wie Mannschaft und Person, Vorlagen für Trainer, Jugendleiter …)
+aus `docs/PLAN-TEAM.md`.
 

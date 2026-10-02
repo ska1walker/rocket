@@ -17,6 +17,8 @@ import { KontaktFirmen } from "@/components/kontakt-firmen";
 import { Einwilligungsblock } from "@/components/einwilligung";
 import { KontaktListen } from "@/components/kontakt-listen";
 import { Dokumente } from "@/components/dokumente";
+import { Bezugspersonen } from "@/components/kontakt-beziehungen";
+import { useSicht } from "@/lib/sicht";
 
 /** Entwurf für eine Ansprache. Er wird hingelegt, nie versendet. */
 function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
@@ -43,6 +45,9 @@ function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
     select: (liste) => liste.find((a) => a.kind === "email" && a.payload?.richtung === "eingehend") ?? null,
   });
   const post = useQuery({ queryKey: ["post-status"], queryFn: () => api.get<{ eingerichtet: boolean; hinweis: string | null }>("/api/post/status") });
+  // Senden über Relay steht Eingeschränkten nicht offen (auth.EINGESCHRAENKT_ERLAUBT);
+  // der Entwurf und die Zwischenablage schon.
+  const { alles } = useSicht();
   const senden = useMutation({
     mutationFn: () => api.post("/api/post/senden", { contact_id: kontaktId, subject: betreff || anlass, text }),
     onSuccess: () => { setText(""); setBetreff(""); },
@@ -107,9 +112,11 @@ function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
             {senden.isError && <Fehler text={(senden.error as Error).message} />}
             {senden.isSuccess && <p className="text-gelungen">Übergeben — steht im Verlauf.</p>}
             <div className="btn-reihe" style={{ marginTop: "var(--am-raum-3)" }}>
-              <button type="button" className="btn btn-primaer btn-klein" disabled={!post.data?.eingerichtet || !text.trim() || senden.isPending} title={post.data?.hinweis ?? undefined} onClick={() => senden.mutate()}>
-                {senden.isPending ? "Übergibt …" : "Senden"}
-              </button>
+              {alles && (
+                <button type="button" className="btn btn-primaer btn-klein" disabled={!post.data?.eingerichtet || !text.trim() || senden.isPending} title={post.data?.hinweis ?? undefined} onClick={() => senden.mutate()}>
+                  {senden.isPending ? "Übergibt …" : "Senden"}
+                </button>
+              )}
               <button type="button" className="btn btn-still btn-klein" onClick={() => navigator.clipboard.writeText(text)}>In die Zwischenablage</button>
             </div>
             {!post.data?.eingerichtet && post.data?.hinweis && <p style={{ fontSize: "0.75rem", color: "var(--am-text-gedaempft)", marginTop: "var(--am-raum-2)" }}>{post.data.hinweis}</p>}
@@ -122,6 +129,7 @@ function Entwurfsblock({ kontaktId }: { kontaktId: string }) {
 
 export default function KontaktSeite({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { alles } = useSicht();
 
   const kontakt = useQuery({
     queryKey: ["kontakt", id],
@@ -165,9 +173,11 @@ export default function KontaktSeite({ params }: { params: Promise<{ id: string 
             }}
           />
 
-          <Anreicherungsblock entity="contacts" id={id} werte={k as unknown as Record<string, unknown>} abfrageSchluessel={["kontakt", id]} />
+          {alles && <Anreicherungsblock entity="contacts" id={id} werte={k as unknown as Record<string, unknown>} abfrageSchluessel={["kontakt", id]} />}
 
           <KontaktFirmen kontaktId={id} />
+
+          <Bezugspersonen kontaktId={id} />
 
         </div>
 

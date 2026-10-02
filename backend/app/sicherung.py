@@ -36,13 +36,19 @@ TABELLEN: list[str] = [
     # Gruppen vor den Eigenschaften — die Eigenschaft zeigt auf ihre Gruppe.
     "property_groups",
     "property_definitions",
+    # Bereiche vor den Firmen — die Firma zeigt auf ihren Bereich.
+    "bereiche",
     "companies",
+    # Wer welche Firma oder welchen Bereich sieht; die Person wird beim
+    # Zurückspielen wie überall umgeschrieben.
+    "zugriffe",
     "pipelines",
     "pipeline_stages",
     "products",
     "loss_reasons",
     "webhook_sources",
     "contacts",
+    "kontakt_beziehungen",
     "anreicherungen",
     "ticket_pipelines",
     "ticket_stages",
@@ -110,6 +116,9 @@ AUSGENOMMEN = {
     # erzeugt man neue — ein alter, irgendwo hinterlegter Schlüssel soll
     # nicht stillschweigend wieder Zugang haben.
     "api_schluessel",
+    # Abgeleitet: Die Trigger an `contacts` und `contact_companies` bauen sie
+    # beim Zurückspielen von selbst wieder auf.
+    "kontakt_mannschaften",
 }
 
 # Tabellen ohne eigene org_id — sie hängen an einer Elterntabelle.
@@ -213,7 +222,7 @@ async def abzug_erstellen(conn: asyncpg.Connection, org_id: UUID) -> dict[str, A
                u.passwort_hash, u.passwort_am, u.totp_geheimnis, u.totp_seit,
                u.absender_email, u.absender_name, u.smtp_host, u.smtp_port,
                u.smtp_benutzer, u.smtp_passwort, u.smtp_sicherheit,
-               r.role
+               r.role, r.sicht
         from public.users u
         join public.user_org_roles r on r.user_id = u.id
         where r.org_id = $1
@@ -402,13 +411,17 @@ async def _nutzerzuordnung(
         if heutige is not None:
             # Die Mitgliedschaft gehört dazu: Ohne sie gälte die Person
             # nicht als angemeldet (siehe auth._aus_sitzung).
+            # Die Sicht kommt mit: Ein eingeschränkter Trainer, der nach
+            # einer Neuinstallation plötzlich alles sähe, wäre ein Leck.
+            # Ältere Abzüge kennen sie nicht — dann gilt die Vorgabe.
             await conn.execute(
-                "insert into public.user_org_roles (user_id, org_id, role) "
-                "values ($1, $2, coalesce($3::public.user_role, 'member')) "
+                "insert into public.user_org_roles (user_id, org_id, role, sicht) "
+                "values ($1, $2, coalesce($3::public.user_role, 'member'), coalesce($4, 'alles')) "
                 "on conflict (user_id, org_id) do nothing",
                 heutige,
                 ziel_org,
                 eintrag.get("role"),
+                eintrag.get("sicht"),
             )
 
         zuordnung[eintrag["id"]] = heutige or ersatz

@@ -164,11 +164,27 @@ nichts, eine Voreinstellung füllt die richtigen Ports, ein abgelaufenes
 Microsoft-Token wird erneuert, ein widerrufenes gemeldet, die
 Microsoft-Freigabe fragt keine Anmelderechte an (`openid` fehlt).
 
-## Stufe 3 — Feinere Rechte
+## Stufe 3 — Feinere Rechte (begonnen 2.10.2026)
 
 Wenn Teams wachsen: Sichtbarkeit von Firmen, Kontakten und Geschäften
-nach Besitzer oder Team („sieht nur die eigenen Kunden"), als Richtlinie
-in der Zeilensicherheit. Erst angehen, wenn ein Kunde es braucht.
+nach Zuordnung („sieht nur die eigenen Kunden"), als Richtlinie in der
+Zeilensicherheit. Angestoßen von Kai für den Verein (Spartenleitung sieht
+alles, der Trainer seine Mannschaft), gebaut als CRM-Funktion.
+
+Fünf Schritte, je ein Release:
+
+1. ✅ **Fundament (26.10.15):** Sicht je Person, Zugriff auf Firma oder
+   Bereich (lesen/bearbeiten), Beziehungen zwischen Kontakten, Regeln in
+   der Datenbank, `viewer` liest nur, Lücken bei Sicherung und
+   Import-Verlauf zu. `docs/BETRIEB.md`, „Sicht nach Zuordnung“.
+2. ✅ **Dicht für den Alltag (26.10.16):** Erlaubnisliste der Pfade für Eingeschränkte,
+   gespeicherte AI-Ergebnisse heraus, neutrale Dubletten-Meldung, Empfänger
+   beim Start festschreiben, Leck-Test über jede Route.
+3. ✅ **Oberfläche (26.10.17):** Vorlagen beim Einladen, Zugriffe anhaken, Bereiche,
+   „Wer sieht diese Firma“, Eltern am Kind, Rundgang als Trainer.
+4. **Vertrauliche Feldgruppen:** Werte in eigener Tabelle, nur mit
+   Schalter „sieht vertrauliche Felder“.
+5. **Modus Vertrieb/Verein:** nur Begriffe und Navigation, keine Rechte.
 
 ## Reihenfolge und grober Umfang
 

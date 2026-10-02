@@ -107,11 +107,16 @@ async def _suchen(conn, begriffe: list[str], grenze: int) -> list[Fundstelle]:
 
     firmen = await conn.fetch(
         """
-        select id, name, industry, city, description, ai_summary, lifecycle_stage
+        select id, name, industry, city, description,
+               -- Die Zusammenfassung fasst auch Verborgenes zusammen; wer
+               -- nicht alles sieht, bekommt sie nicht (seit 26.10.16).
+               case when public.sicht_alles() then ai_summary end as ai_summary,
+               lifecycle_stage
         from public.companies
         where deleted_at is null
           and (name ilike any($1) or industry ilike any($1) or city ilike any($1)
-               or description ilike any($1) or ai_summary ilike any($1)
+               or description ilike any($1)
+               or (public.sicht_alles() and ai_summary ilike any($1))
                or custom::text ilike any($1))
         limit $2
         """,

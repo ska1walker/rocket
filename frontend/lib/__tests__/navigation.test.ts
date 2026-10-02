@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   ALLE_ZIELE,
+  EINGESCHRAENKT_OFFEN,
+  LEISTE_EINGESCHRAENKT,
+  gruppenFuer,
+  offenFuerEingeschraenkt,
   GRUPPEN,
   LEISTE_STANDARD,
   MOBIL_STANDARD,
@@ -68,3 +72,31 @@ describe("Navigation", () => {
     expect(unten.size + rest.length).toBe(15);
   });
 });
+
+describe("eingeschränkte Sicht", () => {
+  it("zeigt nur, was der Server auch öffnet", () => {
+    expect(leisteZiele([], true).map((z) => z.pfad)).toEqual(LEISTE_EINGESCHRAENKT);
+    expect(leisteZiele(["/deals", "/kontakte"], true).map((z) => z.pfad)).toEqual(["/kontakte"]);
+    // Nur verschlossene Favoriten: dann die Vorgabe, nicht eine leere Leiste.
+    expect(leisteZiele(["/deals"], true).map((z) => z.pfad)).toEqual(LEISTE_EINGESCHRAENKT);
+    for (const z of [...mobilZiele(["/", "/prognose"], true), ...mobilRest([], true)]) {
+      expect(EINGESCHRAENKT_OFFEN).toContain(z.pfad);
+    }
+    const mehr = gruppenFuer(true).flatMap((g) => g.ziele.map((z) => z.pfad));
+    expect(mehr).not.toContain("/");
+    expect(mehr).not.toContain("/deals");
+    expect(gruppenFuer(true).every((g) => g.ziele.length > 0)).toBe(true);
+  });
+
+  it("öffnet Unterseiten, aber keine Nachbarn mit gleichem Anfang", () => {
+    expect(offenFuerEingeschraenkt("/kontakte/123")).toBe(true);
+    expect(offenFuerEingeschraenkt("/")).toBe(false);
+    expect(offenFuerEingeschraenkt("/deals/1")).toBe(false);
+    expect(offenFuerEingeschraenkt("/listenx")).toBe(false);
+  });
+
+  it("ändert für volle Sicht nichts", () => {
+    expect(gruppenFuer(false)).toEqual(GRUPPEN);
+  });
+});
+

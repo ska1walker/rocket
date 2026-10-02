@@ -20,6 +20,7 @@ import { Prioritaetspille } from "@/components/prioritaet";
 import { Segmentliste } from "@/components/segmentliste";
 import { Fehler, Laedt, Leer } from "@/components/zustaende";
 import { useNeuGewuenscht } from "@/lib/neu";
+import { useSicht } from "@/lib/sicht";
 import { reiterTaste } from "@/lib/tasten";
 import { Ueberfaellig } from "@/components/ueberfaellig";
 
@@ -55,9 +56,13 @@ export default function AufgabenSeite() {
     queryFn: () => api.get<Mitglied[]>("/api/mitglieder"),
   });
 
+  // Leads gibt es nur mit voller Sicht — Eingeschränkte legen Aufgaben
+  // ohne Lead an (seit 26.10.17).
+  const { alles } = useSicht();
   const deals = useQuery({
     queryKey: ["deals-auswahl"],
     queryFn: () => api.get<Deal[]>("/api/deals?status=open&limit=200"),
+    enabled: alles,
   });
 
   const parameter = suchparameter({
@@ -210,7 +215,7 @@ export default function AufgabenSeite() {
                 onChange={(e) => setFaellig(e.target.value)}
                 aria-label="Fällig am"
               />
-              <select
+              {alles && <select
                 className="aufgabe-neu-lead"
                 value={dealId}
                 onChange={(e) => setDealId(e.target.value)}
@@ -223,7 +228,7 @@ export default function AufgabenSeite() {
                     {d.company_name ? ` · ${d.company_name}` : ""}
                   </option>
                 ))}
-              </select>
+              </select>}
               <button type="submit" className="btn btn-primaer" disabled={!titel.trim() || anlegen.isPending}>
                 Anlegen
               </button>

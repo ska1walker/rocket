@@ -22,6 +22,8 @@ export function Sicherungsblock() {
   const staende = useQuery({
     queryKey: ["sicherungsstaende"],
     queryFn: () => api.get<Sicherungsstand[]>("/api/sicherung/staende"),
+    // Seit 26.10.15 nur für Verwalter; der Block sagt das, statt zu fehlen.
+    retry: false,
   });
 
   const sichern = useMutation({
@@ -71,7 +73,10 @@ export function Sicherungsblock() {
           Selbsttätig nach jeder Änderung, die letzten vierzehn Stände bleiben liegen.
         </p>
 
-        <div className="btn-reihe">
+        {staende.isError && (
+          <p className="text-leise">Sichern, herunterladen und zurückspielen können nur die Eigentümerin und Verwalter.</p>
+        )}
+        {!staende.isError && <div className="btn-reihe">
           <button
             type="button"
             className="btn btn-primaer btn-klein"
@@ -85,7 +90,7 @@ export function Sicherungsblock() {
             <Download size={16} aria-hidden="true" />
             Ausfuhr herunterladen
           </a>
-        </div>
+        </div>}
 
         {sichern.isError && <Fehler text={(sichern.error as Error).message} />}
         {sichern.data && (

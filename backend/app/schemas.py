@@ -91,6 +91,9 @@ class Company(CompanyIn):
     contact_count: int = 0
     open_deal_count: int = 0
     open_amount_cents: int = 0
+    # In welchem Bereich die Firma steht (seit 26.10.15). Setzen nur über
+    # PUT /api/companies/{id}/bereich — damit ändert sich, wer sie sieht.
+    bereich_id: UUID | None = None
 
 
 # ── Kontakte ────────────────────────────────────────────────────────────
