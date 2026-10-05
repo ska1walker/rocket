@@ -393,6 +393,22 @@ der Lieferung und liest die Token über `var(--am-*)`.
     Fix. „Gemergt" heißt: GitHub zeigt `merged: true`. Kai soll nie
     nachfragen müssen, ob ein Build fertig ist (festgelegt 30.9.2026).
 
+
+12. **Sitzungen** (Kai, 5.10.2026): Eine Sitzung je App und je größerem
+    Thema, nicht eine endlose — das Gedächtnis sind diese Datei und `docs/`.
+    Eine Rocket-Sitzung hat `ska1walker/rocket` und `ska1walker/aimighty-ci`
+    mit Schreibrecht, dazu `ska1walker/aimighty-market` zum Prüfen des Markts.
+    Eine gemeinsame Änderung (Token, Zeichen, `AM-`/`HB-`) beginnt in der
+    App-Sitzung, die sie braucht: dort ausprobieren, PR ins CI, mergen; die
+    Action `stand` öffnet dann in jeder App einen PR „CI-Stand ci-…“. Diese
+    PRs mergt dieselbe Sitzung bei grün, auch in Insilo — wenn Insilo mit
+    Schreibrecht verbunden ist. **Zu Beginn jeder Sitzung** nach offenen PRs
+    „CI-Stand ci-…“ in diesem Repo sehen und sie bei grün mergen (rot: im
+    selben PR anpassen). Eine eigene CI-Sitzung nur für reine
+    Designsystem-Arbeit (Abgleich-Pakete, Regeln, eine neue App anschließen),
+    mit allen Apps verbunden. Nie zwei Sitzungen auf demselben Zweig; im
+    CI-Repo nur ein offener PR zur Zeit, weil jeder Merge einen Stand setzt
+    (CI `STAND.md`, „Sitzungen“).
 ---
 
 ## Lokale Entwicklung
