@@ -116,6 +116,12 @@ for (const thema of ["hell", "dunkel"] as const) {
     const bereiche = page.getByRole("navigation", { name: "Bereiche der Einstellungen" });
     await expect(bereiche.getByRole("link", { name: /Sicherheit/ })).toHaveCount(1);
     await expect(bereiche.getByRole("link", { name: /Daten/ })).toHaveCount(0);
+    // Im Profil „Mein Konto“, aber keine Einstellungen der Organisation (seit 26.10.22).
+    await page.locator(".kopfleiste .person-knopf").click();
+    const konto = page.getByRole("dialog", { name: "Konto" });
+    await expect(konto.getByRole("link", { name: "Mein Konto" })).toBeVisible();
+    await expect(konto.getByRole("link", { name: /Einstellungen de/ })).toHaveCount(0);
+    await page.keyboard.press("Escape");
 
     // Was er sieht: den eigenen Spieler, nicht den fremden — und einen Satz dazu.
     await page.goto("/kontakte", { waitUntil: "networkidle" });

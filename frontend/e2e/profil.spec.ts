@@ -50,3 +50,32 @@ test("Profil: ganz rechts, Menü per Tastatur, „Mein Konto“ führt ins Profi
   await expect(page).toHaveURL(/bereich=profil/);
   await expect(page.getByRole("heading", { name: "Profil", level: 2 })).toBeVisible();
 });
+
+test("Einstellungen nur über das Profil: nicht in der Navigation, Organisation im Menü, Suche findet Bereiche", async ({ page, isMobile }) => {
+  await page.goto("/firmen", { waitUntil: "networkidle" });
+  // Kein Zahnrad in der Leiste, nicht unter „Mehr“ (CI G8, seit 26.10.22).
+  const nav = page.locator("nav.huelle-nav");
+  await expect(nav.locator('a[href="/einstellungen"]')).toHaveCount(0);
+  if (isMobile) {
+    await nav.getByRole("button", { name: "Mehr" }).last().click();
+  } else {
+    await nav.locator(".huelle-mehr-knopf").click();
+  }
+  await expect(page.locator('a[href="/einstellungen"]')).toHaveCount(0);
+  await page.keyboard.press("Escape");
+
+  // Die Eigentümerin sieht im Profil auch die Organisation.
+  await page.locator(".kopfleiste .person-knopf").click();
+  const menue = page.getByRole("dialog", { name: "Konto" });
+  await menue.getByRole("link", { name: "Einstellungen der Organisation" }).click();
+  await expect(page).toHaveURL(/bereich=firma/);
+
+  // Die Suche findet einen Bereich der Einstellungen.
+  if (!isMobile) {
+    await page.getByRole("combobox", { name: "Suchen oder fragen" }).fill("passwort");
+    const zeile = page.getByRole("option").filter({ hasText: "Sicherheit" });
+    await expect(zeile).toContainText("Einstellung");
+    await zeile.click();
+    await expect(page).toHaveURL(/bereich=sicherheit/);
+  }
+});
