@@ -14,20 +14,20 @@ test("Mein Postfach: verbinden, Microsoft, trennen", async ({ page }) => {
   await expect(block.locator(".stufe")).toHaveText("nicht verbunden");
 
   // Microsoft: Rocket sagt den Grund, statt an der Anmeldung zu scheitern.
-  await page.getByLabel("Anbieter").selectOption("eigen");
-  await page.getByLabel("E-Mail-Adresse").fill("rundgang@firma.de");
-  await page.getByLabel("Passwort", { exact: true }).fill("geheim");
-  await page.getByLabel("IMAP-Server (Empfang)").fill("outlook.office365.com");
+  await block.getByLabel("Anbieter").selectOption("eigen");
+  await block.getByLabel("E-Mail-Adresse").fill("rundgang@firma.de");
+  await block.getByLabel("Passwort", { exact: true }).fill("geheim");
+  await block.getByLabel("IMAP-Server (Empfang)").fill("outlook.office365.com");
   await block.getByRole("button", { name: "Verbinden" }).click();
   await expect(block.getByRole("alert")).toContainText("Microsoft");
 
   // Eine Voreinstellung füllt die Server.
-  await page.getByLabel("Anbieter").selectOption("ionos");
-  await expect(page.getByLabel("IMAP-Server (Empfang)")).toHaveValue("imap.ionos.de");
-  await expect(page.getByLabel("SMTP-Server (Versand)")).toHaveValue("smtp.ionos.de");
-  await page.getByLabel("Passwort", { exact: true }).fill("geheim");
+  await block.getByLabel("Anbieter").selectOption("ionos");
+  await expect(block.getByLabel("IMAP-Server (Empfang)")).toHaveValue("imap.ionos.de");
+  await expect(block.getByLabel("SMTP-Server (Versand)")).toHaveValue("smtp.ionos.de");
+  await block.getByLabel("Passwort", { exact: true }).fill("geheim");
   await block.getByRole("button", { name: "Verbinden" }).click();
-  await expect(page.getByLabel("Passwort", { exact: true })).toHaveAttribute("placeholder", /gespeichert/);
+  await expect(block.getByLabel("Passwort", { exact: true })).toHaveAttribute("placeholder", /gespeichert/);
   await expect(block.getByRole("button", { name: "Verbindung testen" })).toBeVisible();
 
   // Trennen mit der Tastatur: Fokus auf „Abbrechen“, Escape schließt.

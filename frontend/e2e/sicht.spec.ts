@@ -104,11 +104,18 @@ for (const thema of ["hell", "dunkel"] as const) {
       "/kampagnen",
       "/fragen",
       "/einstellungen",
-      "/einstellungen?bereich=firma",
+      "/einstellungen?bereich=profil",
+      "/einstellungen?bereich=sicherheit",
       "/einstellungen?bereich=postfach",
     ]) {
       await pruefen(page, pfad);
     }
+
+    // In den Einstellungen nur „Mein Konto“; die Organisation verwaltet die Leitung.
+    await page.goto("/einstellungen", { waitUntil: "networkidle" });
+    const bereiche = page.getByRole("navigation", { name: "Bereiche der Einstellungen" });
+    await expect(bereiche.getByRole("link", { name: /Sicherheit/ })).toHaveCount(1);
+    await expect(bereiche.getByRole("link", { name: /Daten/ })).toHaveCount(0);
 
     // Was er sieht: den eigenen Spieler, nicht den fremden — und einen Satz dazu.
     await page.goto("/kontakte", { waitUntil: "networkidle" });
