@@ -14,6 +14,12 @@ Stelle:
 - `functions/_lib.ts`: der Chart-Schlüssel `rocket-<version>.tgz` mit dem
   frisch kodierten Release-Anhang, alte Rocket-Schlüssel entfernt, und
   `CANONICAL_EPOCH_MS` streng über dem Wert auf main.
+- `functions/_lib.ts`: mit `--quelle` die Kennung `SOURCE_ID`, unter der
+  Kais Box den Markt eingetragen hat. Groß- und Kleinschreibung zählen: Meldet
+  sich der Markt unter einer anderen Kennung, übernimmt die Box kein Update
+  mehr (6.10.2026, docs/MARKT.md „Kennung des Markts“). Kennt der Markt die
+  Version schon und weicht nur die Kennung ab, setzt das Skript allein die
+  Kennung und hebt den Zeitstempel.
 
 Aufruf (aus der Action `markt.yml` oder von Hand):
 
@@ -141,6 +147,56 @@ def rocket_block(apps: str) -> tuple[int, int]:
     return anfang, ende
 
 
+def quelle_lesen(lib: str) -> str:
+    m = re.search(r'export const SOURCE_ID = "([^"]+)";', lib)
+    if not m:
+        raise SystemExit("_lib.ts: SOURCE_ID nicht gefunden")
+    return m.group(1)
+
+
+def quelle_setzen(lib: str, quelle: str) -> str:
+    if not re.fullmatch(r"[a-z0-9.]+", quelle):
+        raise SystemExit(f"--quelle {quelle!r}: nur Kleinbuchstaben, Ziffern und Punkte")
+    neu, n = re.subn(r'export const SOURCE_ID = "[^"]+";', f'export const SOURCE_ID = "{quelle}";', lib, count=1)
+    if n != 1:
+        raise SystemExit("_lib.ts: SOURCE_ID nicht gefunden")
+    return neu
+
+
+def epoch_heben(lib: str) -> tuple[str, int, int]:
+    m = re.search(r"const CANONICAL_EPOCH_MS = (\d+);", lib)
+    if not m:
+        raise SystemExit("_lib.ts: CANONICAL_EPOCH_MS nicht gefunden")
+    epoch_alt = int(m.group(1))
+    epoch_neu = (epoch_alt // 1_000_000_000 + 1) * 1_000_000_000
+    return lib[: m.start(1)] + str(epoch_neu) + lib[m.end(1):], epoch_alt, epoch_neu
+
+
+def nur_quelle(arg: argparse.Namespace, lib_datei: Path, lib: str, quelle_alt: str, alt: str) -> None:
+    """Der Markt kennt die Version schon, meldet sich aber unter der falschen
+    Kennung — dann nur die Kennung richten und den Zeitstempel heben, damit
+    die Boxen neu holen."""
+    lib, epoch_alt, epoch_neu = epoch_heben(lib)
+    lib = quelle_setzen(lib, arg.quelle)
+    lib_datei.write_text(lib, encoding="utf-8")
+    if arg.pr_text:
+        arg.pr_text.write_text(
+            "\n".join(
+                [
+                    "Kennung des Markts, gesetzt von der Action `markt.yml` im Rocket-Repo.",
+                    "",
+                    f"- `functions/_lib.ts`: `SOURCE_ID` `{quelle_alt}` → `{arg.quelle}` — unter dieser Kennung "
+                    "haben die Boxen den Markt eingetragen; bei einer anderen übernehmen sie kein Update.",
+                    f"- `CANONICAL_EPOCH_MS` {epoch_alt} → {epoch_neu}, damit die Boxen neu holen.",
+                    f"- Rocket bleibt {alt}.",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    print(f"market: SOURCE_ID {arg.quelle} (rocket {alt})")
+
+
 def main() -> None:
     a = argparse.ArgumentParser()
     a.add_argument("--markt", type=Path, required=True)
@@ -150,6 +206,7 @@ def main() -> None:
     a.add_argument("--pr-text", type=Path)
     a.add_argument("--manifest", type=Path, help="olares/OlaresManifest.yaml — Kategorien von dort")
     a.add_argument("--texte", type=Path, help="Ordner mit beschreibung.en.md und beschreibung.de.md")
+    a.add_argument("--quelle", help="SOURCE_ID, unter der die Boxen den Markt kennen (z. B. market.aimighty)")
     arg = a.parse_args()
 
     v = arg.version
@@ -165,7 +222,11 @@ def main() -> None:
     if not m:
         raise SystemExit("_apps.ts: keine Rocket-Version gefunden")
     alt = m.group(1)
+    quelle_alt = quelle_lesen(lib)
     if version_tupel(alt) >= version_tupel(v):
+        if arg.quelle and quelle_alt != arg.quelle:
+            nur_quelle(arg, lib_datei, lib, quelle_alt, alt)
+            return
         print(f"Markt hat Rocket {alt}, nichts zu tun für {v}", file=sys.stderr)
         raise SystemExit(3)
 
@@ -221,12 +282,9 @@ def main() -> None:
     einrueck = re.match(r"\n(\s*)", k.group(0)).group(1)
     lib = lib[: k.start()] + f'\n{einrueck}"rocket-{v}.tgz": "{b64}"{komma}' + lib[k.end():]
 
-    m = re.search(r"const CANONICAL_EPOCH_MS = (\d+);", lib)
-    if not m:
-        raise SystemExit("_lib.ts: CANONICAL_EPOCH_MS nicht gefunden")
-    epoch_alt = int(m.group(1))
-    epoch_neu = (epoch_alt // 1_000_000_000 + 1) * 1_000_000_000
-    lib = lib[: m.start(1)] + str(epoch_neu) + lib[m.end(1):]
+    lib, epoch_alt, epoch_neu = epoch_heben(lib)
+    if arg.quelle:
+        lib = quelle_setzen(lib, arg.quelle)
 
     apps_datei.write_text(apps, encoding="utf-8")
     lib_datei.write_text(lib, encoding="utf-8")
@@ -244,6 +302,11 @@ def main() -> None:
                     (
                         f"- `functions/_lib.ts`: `rocket-{v}.tgz` (Release-Anhang, sha256 `{sha}`), "
                         f"`CANONICAL_EPOCH_MS` {epoch_alt} → {epoch_neu}."
+                    ),
+                    *(
+                        [f"- `functions/_lib.ts`: `SOURCE_ID` `{quelle_alt}` → `{arg.quelle}` (Kennung der Boxen)."]
+                        if arg.quelle and quelle_alt != arg.quelle
+                        else []
                     ),
                     "",
                     "Vor dem PR lokal mit wrangler bewiesen: Hash, Chart byte-gleich, Detail mit Version und chartName.",

@@ -37,6 +37,10 @@ jobs:
       MARKT_TOKEN: ${{ secrets.MARKT_TOKEN }}
       UPSTREAM: bayerhazard/aimighty-market
       FORK: ska1walker/aimighty-market
+      # Kennung, unter der Kais Box den Markt eingetragen hat (Marc bestätigt,
+      # 6.10.2026). Groß- und Kleinschreibung zählen; meldet sich der Markt
+      # anders, übernimmt die Box kein Update. docs/MARKT.md „Kennung des Markts“.
+      MARKT_QUELLE: market.aimighty
     steps:
       - uses: actions/checkout@v4
         with:
@@ -94,7 +98,7 @@ jobs:
             --chart "$RUNNER_TEMP/rocket-$V.tgz" --version "$V" \
             --notizen "$GITHUB_WORKSPACE/olares/markt" --pr-text "$RUNNER_TEMP/pr.md" \
             --manifest "$GITHUB_WORKSPACE/olares/OlaresManifest.yaml" \
-            --texte "$GITHUB_WORKSPACE/olares/markt")
+            --texte "$GITHUB_WORKSPACE/olares/markt" --quelle "$MARKT_QUELLE")
           RC=$?
           set -e
           if [ $RC -eq 3 ]; then
@@ -131,8 +135,11 @@ jobs:
           git config user.email "ska1walker@users.noreply.github.com"
           git checkout -q -b "rocket-$V"
           git add functions/_apps.ts functions/_lib.ts
-          [ "$(git diff --cached --name-only | sort | tr '\n' ' ')" = "functions/_apps.ts functions/_lib.ts " ] \
-            || { echo "unerwartete Dateien"; git diff --cached --name-only; exit 1; }
+          # Ein Eintrag ändert beide Dateien, eine reine Korrektur der Kennung nur _lib.ts.
+          case "$(git diff --cached --name-only | sort | tr '\n' ' ')" in
+            "functions/_apps.ts functions/_lib.ts "|"functions/_lib.ts ") ;;
+            *) echo "unerwartete Dateien"; git diff --cached --name-only; exit 1 ;;
+          esac
           git commit -q -m "$TITEL"
           git push -q -f "https://x-access-token:${MARKT_TOKEN}@github.com/${FORK}.git" "rocket-$V"
           # main darf sich seit dem Bau nicht bewegt haben (MARKT.md, Regel 4):
@@ -161,6 +168,9 @@ jobs:
           assert hashlib.sha256(base64.b64decode(keys[0][1])).hexdigest() == sha, "Chart auf main weicht ab"
           print(f"main: rocket-{v}.tgz byte-gleich, keine alten Schlüssel")
           PY
+          grep -qF "export const SOURCE_ID = \"$MARKT_QUELLE\";" "$RUNNER_TEMP/pruef/functions/_lib.ts" \
+            || { echo "SOURCE_ID auf main ist nicht $MARKT_QUELLE"; exit 1; }
+          echo "main: SOURCE_ID $MARKT_QUELLE"
           MERGE=$(gh pr view "$PR_URL" --json mergeCommit -q .mergeCommit.oid)
           for _ in $(seq 1 30); do
             RUN=$(gh run list -R "$UPSTREAM" --workflow deploy.yml --commit "$MERGE" --json databaseId -q '.[0].databaseId' || true)
