@@ -23,11 +23,11 @@ Git (bayerhazard/aimighty-market, functions/)
 | Beitragsweg | Fork (`ska1walker/aimighty-market`) → Branch → PR an `bayerhazard/aimighty-market`, nie direkt auf `main`; Kai hat Schreibrechte und kann selbst mergen |
 | Kanonische Adresse | `https://aimighty-market.pages.dev` |
 | Vorschau eines Deploys | `https://<hash>.aimighty-market.pages.dev` — sofort aktuell, die kanonische Adresse cacht 1–2 Minuten |
-| Market-Source-ID in Olares | `market.AImighty` |
+| Market-Source-ID in Olares | `market.aimighty` (klein, seit 6.10.2026; Groß- und Kleinschreibung zählen) |
 
 Drei Ebenen können auseinanderliegen und werden immer abgeglichen: Git
 (`_apps.ts`, `_lib.ts`), das Deployment auf Cloudflare und der Katalog in
-Olares (`olares-cli market get rocket -s market.AImighty`).
+Olares (`olares-cli market get rocket -s market.aimighty`).
 
 ## Was der Markt verlangt — und wie Rocket dasteht
 
@@ -201,9 +201,9 @@ Commit <SHA>, ein Commit auf main <BASIS>. Er ändert nur:
 ## Befehle auf der Box
 
 ```bash
-olares-cli market get rocket -s market.AImighty        # Stand im Katalog
+olares-cli market get rocket -s market.aimighty        # Stand im Katalog
 olares-cli market upgrade rocket --watch               # Update einspielen
-olares-cli market install rocket -s market.AImighty --watch
+olares-cli market install rocket -s market.aimighty --watch
 ```
 
 - `market upgrade` meldet „app is not installed", wenn vorher
@@ -292,9 +292,26 @@ Einundzwanzigster Durchlauf: Rocket 26.10.19, PR #103, 2.10.2026 — von der Act
 
 Zweiundzwanzigster Durchlauf: Rocket 26.10.20, PR #105, 2.10.2026 — von der Action: Mein Postfach (Stufe 2a, ohne Microsoft). Seit 26.10.19 hat Marc Insilo 0.1.104 eingetragen (#104); Rocket baute auf diesem `main`. Zeitstempel 4412000000000. Auf `main` byte-gleich geprüft (sha256 `b9b5c646…ed3c`, keine alten Schlüssel). Migration 0041 legt eine Tabelle an.
 
-Dreiundzwanzigster Durchlauf: Rocket 26.10.21, PR #108, 6.10.2026 — von der Action: Profil oben rechts, Einstellungen in zwei Gruppen, CI-Stand `ci-26.10.13`. Seit 26.10.20 hat Marc viel eingetragen (Modell-Apps, Wings, Relay, Insilo 0.1.105/0.1.106) und die Quellkennung kurz auf `market.aimighty` und wieder zurück auf `market.AImighty` gestellt; die Action baute auf diesem `main`. Zeitstempel 4603000000000. Auf `main` byte-gleich geprüft (sha256 `155c403f…`, keine alten Schlüssel). Keine Migration. Insilo 0.1.106 kam drei Minuten vorher mit derselben Action als PR #107 (sha256 `4b42da9b…`). Kai sah beide nicht sofort auf der Box: Der Markt war deployt, Olares holt den Katalog nur in Abständen.
+Dreiundzwanzigster Durchlauf: Rocket 26.10.21, PR #108, 6.10.2026 — von der Action: Profil oben rechts, Einstellungen in zwei Gruppen, CI-Stand `ci-26.10.13`. Seit 26.10.20 hat Marc viel eingetragen (Modell-Apps, Wings, Relay, Insilo 0.1.105/0.1.106) und die Quellkennung kurz auf `market.aimighty` und wieder zurück auf `market.AImighty` gestellt; die Action baute auf diesem `main`. Zeitstempel 4603000000000. Auf `main` byte-gleich geprüft (sha256 `155c403f…`, keine alten Schlüssel). Keine Migration. Insilo 0.1.106 kam drei Minuten vorher mit derselben Action als PR #107 (sha256 `4b42da9b…`). Kai sah beide nicht auf der Box: Seit Marcs Zurückstellen meldete sich der Markt als `market.AImighty`, Kais Box kennt ihn als `market.aimighty` — siehe „Kennung des Markts“.
 
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
+
+## Kennung des Markts (6.10.2026)
+
+Der Markt meldet sich bei jeder Box mit einer Kennung (`SOURCE_ID` in
+`functions/_lib.ts`). Die Box übernimmt nur, was unter der Kennung kommt, mit
+der sie den Markt eingetragen hat — **Groß- und Kleinschreibung zählen**. Kais
+Box kennt ihn als `market.aimighty` (Marc bestätigt, 6.10.2026). Marcs Agent
+hatte die Kennung am 4.10. auf `market.aimighty` und 40 Minuten später zurück
+auf `market.AImighty` gestellt; seitdem übernahm Kais Box kein Update mehr,
+obwohl der Markt Rocket 26.10.21 und Insilo 0.1.106 auslieferte.
+
+Seitdem setzt die Action `markt.yml` die Kennung bei jedem Lauf
+(`MARKT_QUELLE`, `scripts/markt-eintrag.py --quelle`). Kennt der Markt die
+Version schon und weicht nur die Kennung ab, richtet ein Lauf von Hand
+(„Run workflow“ mit der aktuellen Version) allein die Kennung und hebt den
+Zeitstempel. Prüfen: Zeigt `/api/v2/applications/rocket` die neue Version, die
+Box aber nicht, zuerst die Kennung vergleichen.
 
 ## Bekannte Fallen im Markt
 
@@ -302,6 +319,7 @@ Dreiundzwanzigster Durchlauf: Rocket 26.10.21, PR #108, 6.10.2026 — von der Ac
 |---|---|---|
 | Katalog zeigt alte Version, API die neue | `CHARTS`-Schlüssel ≠ Version in `_apps.ts` | Schlüssel angleichen |
 | Olares synct nicht | Version nicht erhöht, oder Cache-Fehler im Markt | Version erhöhen |
+| Markt zeigt die neue Version, die Box nicht | `SOURCE_ID` ≠ Kennung, unter der die Box den Markt kennt | Kennung angleichen („Kennung des Markts“) |
 | Chart-Download 500 (Cloudflare 1101) | base64 kaputt | Chart neu packen, frisch kodieren |
 | „render failed", App hängt in der Fehlerliste | kein automatischer Neuversuch | Version erhöhen |
 | `sync-app` HTTP 500 „render failed or timed out" | meist nur ein Timeout | abwarten, rendert trotzdem |
