@@ -384,6 +384,30 @@ der Lieferung und liest die Token über `var(--am-*)`.
    verlangt (Version an 5 Stellen, frisches base64, jede Änderung = neue
    Version) und wo Rocket bewusst abweicht, steht in `docs/MARKT.md`.
 
+   **Gelernt am 6.10.2026 (Markt):**
+   - **Kennung des Markts:** Kais Box kennt ihn als `market.aimighty`
+     (klein; Groß- und Kleinschreibung zählen). Meldet sich der Markt anders
+     (`SOURCE_ID` in Marcs `functions/_lib.ts`), übernimmt die Box kein
+     Update, obwohl `/api/v2/applications/rocket` die neue Version zeigt. Die
+     Action hält die Kennung seitdem selbst (`MARKT_QUELLE`); steht sie falsch,
+     „Run workflow“ für `markt` mit der aktuellen Version — das richtet nur die
+     Kennung (`docs/MARKT.md` „Kennung des Markts“).
+   - **Fehlersuche, wenn die Box nichts zeigt:** erst Marcs `main` (Version,
+     Chart byte-gleich, Zeitstempel), dann die Live-API im Browser
+     (`https://aimighty-market.pages.dev/api/v2/applications/<app>`), dann die
+     Kennung. Die Sitzung erreicht die Live-Adresse nicht, Kai schon.
+   - **Die Sitzung schreibt nie selbst in `bayerhazard/aimighty-market`**
+     (kein Zugriff, und die Freigaben werten das als Produktions-Deploy).
+     Jede Änderung dort läuft über `markt.yml` in diesem Repo (PR, Merge,
+     `workflow_dispatch`). Kai hat Claude dafür ausdrücklich freigegeben
+     („mach du alles“).
+   - **Versionen sieht Kai** in der Markt-App auf der Detailseite der App
+     („Chart version“; „Open“ heißt: schon aktuell). Insilo steht dort unter
+     der Kategorie „AI“, Rocket unter „Applications“. Rocket zeigt seine
+     Version nicht in der Oberfläche, Insilo auf „Über Insilo“.
+   - **`olares-cli` auf der Box** braucht einmal
+     `olares-cli profile login --olares-id kaivostudio@olares.de` (Browser, TOTP).
+
 10. **Bei Unsicherheit:** stoppen und Kai fragen.
 
 11. **Builds, CI und Merges selbst verfolgen — nicht fragen.** Nach jedem
