@@ -313,6 +313,10 @@ Version schon und weicht nur die Kennung ab, richtet ein Lauf von Hand
 Zeitstempel. Prüfen: Zeigt `/api/v2/applications/rocket` die neue Version, die
 Box aber nicht, zuerst die Kennung vergleichen.
 
+Erster Einsatz am 6.10.2026: Lauf von Hand mit 26.10.21, PR #109 (nur
+`_lib.ts`, Zeitstempel 4604000000000). Wenige Minuten später zeigte Kais
+Box Rocket 26.10.21 und Insilo 0.1.106; beide sind aktualisiert (Kai).
+
 ## Bekannte Fallen im Markt
 
 | Symptom | Ursache | Abhilfe |
