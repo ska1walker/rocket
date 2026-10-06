@@ -19,7 +19,6 @@ import {
   Megaphone,
   MessageCircleQuestion,
   MessagesSquare,
-  Settings,
   TrendingUp,
   Users,
 } from "@/lib/symbole";
@@ -29,7 +28,6 @@ import { Assistent } from "@/components/assistent";
 import { useNavigationKlapp } from "@/components/navigation";
 import { Kopfleiste } from "@/components/kopfleiste";
 import {
-  NACHRANGIG,
   gruppenFuer,
   istAktiv,
   offenFuerEingeschraenkt,
@@ -65,7 +63,6 @@ const ZEICHEN: Record<NavZeichen, SymbolKomponente> = {
   kampagnen: Megaphone,
   fragen: MessageCircleQuestion,
   erkenntnisse: Lightbulb,
-  einstellungen: Settings,
 };
 
 export function Huelle({ children }: { children: React.ReactNode }) {
@@ -136,9 +133,8 @@ export function Huelle({ children }: { children: React.ReactNode }) {
           <MehrFeld eingeschraenkt={eingeschraenkt} aktuell={aktuell} favoriten={favoriten} umschalten={umschalten} schliessen={feldSchliessen} knopf={mehrKnopf} />
         )}
 
-        <div className="huelle-nav-spacer" />
-
-        <NavGruppe ziele={NACHRANGIG} aktuell={aktuell} favoriten={favoriten} umschalten={umschalten} eingeklappt={eingeklappt === true} nachrangig />
+        {/* Unten steht nichts: Einstellungen und Konto sind im Profil oben
+            rechts (CI G8, seit 26.10.22). */}
 
         {/* Die schmale Leiste unten: Favoriten oder die Vorgabe, dazu „Mehr“. */}
         <div className="huelle-nav-mobil">
@@ -226,8 +222,7 @@ function MehrFeld({
     };
   }, [schliessen, knopf]);
 
-  const gruppen = gruppenFuer(eingeschraenkt, useBegriffe());
-  const spalten = gruppen.map((g, i) => (i === gruppen.length - 1 ? { ...g, ziele: [...g.ziele, ...NACHRANGIG] } : g));
+  const spalten = gruppenFuer(eingeschraenkt, useBegriffe());
 
   return (
     <div className="huelle-mehr" id="huelle-mehr" role="dialog" aria-label="Alle Bereiche" ref={wurzel}>
@@ -241,7 +236,7 @@ function MehrFeld({
   );
 }
 
-function NavLink({ ziel, aktuell, eingeklappt = false, nachrangig = false }: { ziel: NavZiel; aktuell: string; eingeklappt?: boolean; nachrangig?: boolean }) {
+function NavLink({ ziel, aktuell, eingeklappt = false }: { ziel: NavZiel; aktuell: string; eingeklappt?: boolean }) {
   const Zeichen = ZEICHEN[ziel.zeichen];
   const aktiv = istAktiv(ziel.pfad, aktuell);
   return (
@@ -250,7 +245,6 @@ function NavLink({ ziel, aktuell, eingeklappt = false, nachrangig = false }: { z
       className={`huelle-nav-item${aktiv ? " aktiv" : ""}`}
       aria-current={aktiv ? "page" : undefined}
       title={eingeklappt ? ziel.text : undefined}
-      data-nachrangig={nachrangig ? "true" : undefined}
     >
       <Zeichen size={20} aria-hidden="true" />
       <span>{ziel.text}</span>
@@ -269,7 +263,6 @@ function NavGruppe({
   favoriten,
   umschalten,
   eingeklappt,
-  nachrangig = false,
 }: {
   titel?: string;
   ziele: NavZiel[];
@@ -277,7 +270,6 @@ function NavGruppe({
   favoriten: string[];
   umschalten: (pfad: string) => void;
   eingeklappt: boolean;
-  nachrangig?: boolean;
 }) {
   const id = titel ? `huelle-nav-${titel.toLowerCase()}` : undefined;
   return (
@@ -287,7 +279,7 @@ function NavGruppe({
         const istFavorit = favoriten.includes(z.pfad);
         return (
           <div key={z.pfad} className={`huelle-nav-eintrag${istFavorit ? " ist-favorit" : ""}`}>
-            <NavLink ziel={z} aktuell={aktuell} eingeklappt={eingeklappt} nachrangig={nachrangig} />
+            <NavLink ziel={z} aktuell={aktuell} eingeklappt={eingeklappt} />
             <button
               type="button"
               className="huelle-nav-stern"

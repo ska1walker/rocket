@@ -3,13 +3,15 @@
 // Modul HB-KONTO — docs/MODULE.md
 
 import { useQuery } from "@tanstack/react-query";
-import { KeyRound, LogOut, Settings } from "@/lib/symbole";
+import { KeyRound, LogOut, Settings, Users } from "@/lib/symbole";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { abmelden, lage } from "@/lib/anmeldung";
 import { initialenAusName } from "@/lib/format";
 import { useWer } from "@/lib/wer";
+import { useSicht } from "@/lib/sicht";
+import { useBegriffe } from "@/lib/modus";
 import { Darstellungsschalter, Dichteschalter } from "@/components/darstellung";
 
 /**
@@ -21,6 +23,10 @@ import { Darstellungsschalter, Dichteschalter } from "@/components/darstellung";
  * das Profil ganz rechts in der Kopfleiste, am Desktop und am Handy an
  * derselben Stelle, wie bei HubSpot, Google und Microsoft. Der Nachweis
  * entfiel: Er war kein Mehrwert; die Datenwege stehen unter Einstellungen.
+ *
+ * Seit 26.10.22 ist das Profil auch der einzige Weg zu den Einstellungen:
+ * Das Zahnrad unten in der Navigation stand allein da und wirkte lauter als
+ * die Arbeit (Kai, 6.10.2026, CI G8 Nachtrag).
  */
 export function Profilknopf() {
   const aktuell = usePathname();
@@ -74,7 +80,8 @@ const ROLLE: Record<string, string> = {
 /**
  * Das Menü klappt nach unten, am Handy als Blatt über die ganze Breite.
  * Reihenfolge wie in jeder AImighty-App (CI HB-KONTO): Kopf, „Mein Konto“,
- * Darstellung, Abmelden zuletzt. Es schließt bei Escape, bei einem Klick
+ * „Einstellungen der Organisation“ (nur wer verwaltet), Darstellung,
+ * Abmelden zuletzt. Es schließt bei Escape, bei einem Klick
  * außerhalb und beim Seitenwechsel, und der Fokus kehrt zum Knopf zurück —
  * dasselbe Verhalten wie das Feld „Mehr" in der Hülle. Die alte
  * Personenliste schloss nur durch Auswahl; wer sie versehentlich öffnete,
@@ -90,6 +97,8 @@ function Kontomenue({
   const wurzel = useRef<HTMLDivElement>(null);
   const { wer } = useWer();
   const person = wer.data;
+  const { verwaltet } = useSicht();
+  const w = useBegriffe();
 
   useEffect(() => {
     wurzel.current?.querySelector<HTMLElement>("a, button")?.focus();
@@ -129,6 +138,12 @@ function Kontomenue({
         <Settings size={16} aria-hidden="true" />
         <span className="person-eintrag-text">Mein Konto</span>
       </Link>
+      {verwaltet && (
+        <Link href="/einstellungen?bereich=firma" className="person-eintrag">
+          <Users size={16} aria-hidden="true" />
+          <span className="person-eintrag-text">{w.modus === "verein" ? "Einstellungen des Vereins" : "Einstellungen der Organisation"}</span>
+        </Link>
+      )}
 
       <div className="konto-teil">
         <p className="konto-abschnitt">Darstellung</p>

@@ -262,10 +262,12 @@ nichts. Geprüft in `e2e/dichte.spec.ts`.
 
 - **Kurze Leiste nach HubSpot:** Sie zeigt nur, was man mit dem
   Lesezeichen markiert hat. „Mehr" öffnet ein Feld mit allen Bereichen in
-  Gruppen, dort hat jeder Eintrag sein Lesezeichen.
+  Gruppen, dort hat jeder Eintrag sein Lesezeichen. Gesetzte Lesezeichen
+  sind gedämpft, nicht golden; in der Leiste erscheinen sie nur beim
+  Hinzeigen (seit 26.10.22).
 - **Einklappen** mit ⌘B / Strg+B, gemerkt im Cookie (die Breite hängt am
   Bildschirm, nicht an der Person).
-- **Unten:** nur das Zahnrad „Einstellungen“; das Konto steht seit G8 oben rechts (HB-KONTO).
+- **Unten:** nichts. Einstellungen und Konto stehen seit 26.10.22 nur im Profil oben rechts (HB-KONTO, CI G8 Nachtrag); die Suche findet die Bereiche der Einstellungen (`lib/einstellungen.ts`).
 - **Handy:** Leiste unten, „Mehr" als Feld darüber.
 - **Tastatur:** `aria-current="page"`, Mehr-Feld als Dialog mit Fokus
   hinein und Escape zurück.

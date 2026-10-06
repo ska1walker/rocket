@@ -15,7 +15,7 @@ export type NavZeichen =
   | "start" | "leads" | "angebote" | "prognose" | "aufgaben"
   | "firmen" | "kontakte" | "listen"
   | "eingang" | "besprechungen" | "tickets" | "kampagnen"
-  | "fragen" | "erkenntnisse" | "einstellungen";
+  | "fragen" | "erkenntnisse";
 
 export interface NavZiel {
   pfad: string;
@@ -66,8 +66,6 @@ export const GRUPPEN: NavGruppe[] = [
     ],
   },
 ];
-
-export const NACHRANGIG: NavZiel[] = [{ pfad: "/einstellungen", text: "Einstellungen", zeichen: "einstellungen" }];
 
 export const ALLE_ZIELE: NavZiel[] = GRUPPEN.flatMap((g) => g.ziele);
 
@@ -131,7 +129,9 @@ export function istAktiv(pfad: string, aktuell: string): boolean {
   return aktuell === pfad || aktuell.startsWith(`${pfad}/`);
 }
 
-const JE_PFAD = new Map([...ALLE_ZIELE, ...NACHRANGIG].map((z) => [z.pfad, z]));
+// Einstellungen stehen nicht in der Navigation, sondern im Profil oben rechts
+// (CI G8, seit 26.10.22) — auch ein altes Lesezeichen darauf fällt weg.
+const JE_PFAD = new Map(ALLE_ZIELE.map((z) => [z.pfad, z]));
 
 /** Die Favoriten als Ziele — in gemerkter Reihenfolge; Unbekanntes und Doppeltes fällt weg. */
 export function favoritenZiele(favoriten: string[]): NavZiel[] {
@@ -174,8 +174,8 @@ export function mobilZiele(favoriten: string[], eingeschraenkt = false, b: Begri
   return ziele;
 }
 
-/** Alles, was nicht auf der Leiste ist — für „Mehr“, inklusive Einstellungen. */
+/** Alles, was nicht auf der Leiste ist — für „Mehr“. Die Einstellungen stehen im Profil. */
 export function mobilRest(favoriten: string[], eingeschraenkt = false, b: Begriffe = VERTRIEB): NavZiel[] {
   const gezeigt = new Set(mobilZiele(favoriten, eingeschraenkt, b).map((z) => z.pfad));
-  return nurOffene([...ALLE_ZIELE, ...NACHRANGIG], eingeschraenkt, b).filter((z) => !gezeigt.has(z.pfad));
+  return nurOffene(ALLE_ZIELE, eingeschraenkt, b).filter((z) => !gezeigt.has(z.pfad));
 }

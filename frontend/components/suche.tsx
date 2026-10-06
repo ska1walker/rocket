@@ -10,6 +10,9 @@ import { useEffect, useId, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { Frageantwort, Suchergebnis, Suchtreffer } from "@/lib/typen";
 import { Fehler } from "@/components/zustaende";
+import { einstellungenFinden } from "@/lib/einstellungen";
+import { useBegriffe } from "@/lib/modus";
+import { useSicht } from "@/lib/sicht";
 
 const ART_TEXT: Record<string, string> = {
   firma: "Firma",
@@ -18,7 +21,11 @@ const ART_TEXT: Record<string, string> = {
   ticket: "Ticket",
   liste: "Liste",
   kampagne: "Kampagne",
+  einstellung: "Einstellung",
 };
+
+/** Ein Treffer im Feld: aus dem Bestand (Server) oder ein Bereich der Einstellungen. */
+type Zeile = Omit<Suchtreffer, "art"> & { art: Suchtreffer["art"] | "einstellung" };
 
 /** Sieht der Text wie eine Frage aus? Dann ist die Frage die letzte Zeile. */
 function istFrage(text: string): boolean {
@@ -59,7 +66,13 @@ export function Suchfeld() {
     mutationFn: (f: string) => api.post<Frageantwort>("/api/fragen", { frage: f }),
   });
 
-  const treffer: Suchtreffer[] = suche.data?.treffer ?? [];
+  // Die Einstellungen stehen seit 26.10.22 nicht mehr in der Navigation:
+  // Wer „Passwort“ oder „Eigenschaften“ tippt, findet den Bereich hier —
+  // ohne Server, vor den Treffern aus dem Bestand.
+  const w = useBegriffe();
+  const { verwaltet } = useSicht();
+  const einstellungen: Zeile[] = einstellungenFinden(text, w, verwaltet).map((e) => ({ ...e, art: "einstellung", id: e.pfad }));
+  const treffer: Zeile[] = [...einstellungen, ...(suche.data?.treffer ?? [])];
   const fragbar = text.trim().length >= 3 && istFrage(text);
   // Zeilen: erst die Treffer, dann — wenn es eine Frage ist — die Frage.
   const zeilen = treffer.length + (fragbar ? 1 : 0);
@@ -98,7 +111,7 @@ export function Suchfeld() {
     frage.reset();
   }
 
-  function oeffnen(t: Suchtreffer) {
+  function oeffnen(t: Zeile) {
     router.push(t.pfad);
     setText("");
     schliessen();

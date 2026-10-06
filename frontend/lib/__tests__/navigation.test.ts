@@ -34,11 +34,10 @@ describe("Navigation", () => {
     expect(istAktiv("/deals", "/dealsx")).toBe(false);
   });
 
-  it("hält die Reihenfolge der Favoriten und lässt Unbekanntes weg", () => {
+  it("hält die Reihenfolge der Favoriten und lässt Unbekanntes weg — auch ein altes Lesezeichen auf die Einstellungen", () => {
     expect(favoritenZiele(["/kontakte", "/nix", "/firmen", "/kontakte", "/einstellungen"]).map((z) => z.pfad)).toEqual([
       "/kontakte",
       "/firmen",
-      "/einstellungen",
     ]);
   });
 
@@ -70,8 +69,9 @@ describe("Navigation", () => {
     const unten = new Set(mobilZiele([]).map((z) => z.pfad));
     const rest = mobilRest([]).map((z) => z.pfad);
     expect(rest.some((p) => unten.has(p))).toBe(false);
-    expect(rest).toContain("/einstellungen");
-    expect(unten.size + rest.length).toBe(15);
+    // Die Einstellungen stehen im Profil oben rechts, nicht unter „Mehr“ (CI G8).
+    expect(rest).not.toContain("/einstellungen");
+    expect(unten.size + rest.length).toBe(14);
   });
 });
 

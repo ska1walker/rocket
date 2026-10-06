@@ -3308,3 +3308,23 @@ Tests: `e2e/profil.spec.ts` (ganz rechts, Menü per Tastatur, „Mein Konto“
 führt ins Profil, am Handy Blatt in voller Breite, kein Fuß),
 `sicht.spec.ts` (der Trainer sieht nur „Mein Konto“), Rundgang mit den
 neuen Bereichen `profil`, `sicherheit`, `darstellung`.
+
+### Einstellungen nur über das Profil (seit 26.10.22)
+
+Nach den ersten Bildern mit dem Profil oben rechts stand unten links nur
+noch das Zahnrad „Einstellungen“ — ein einzelner, umrahmter Eintrag, der
+lauter wirkte als die Arbeit. Kai, 6.10.2026: **weg, nur noch über oben
+rechts** (CI `ABGLEICH.md`, G8 Nachtrag; Insilo ebenso).
+
+- **Nicht in der Navigation**, nicht unter „Mehr“, nicht in der Handy-Leiste
+  (`lib/navigation.ts`: kein `NACHRANGIG` mehr). Ein altes Lesezeichen auf
+  `/einstellungen` fällt still weg.
+- **Im Profilmenü:** „Mein Konto“ für alle; **„Einstellungen der
+  Organisation“** (im Verein „des Vereins“) nur für Eigentümerin und
+  Verwalter mit voller Sicht — es führt auf `?bereich=firma`.
+- **In der Suche:** Wer „Passwort“, „Eigenschaften“ oder „Einstellungen“
+  tippt, bekommt die Bereiche als „Einstellung“ vor den Treffern aus dem
+  Bestand — ohne Server, gefiltert wie die Seite (`lib/einstellungen.ts`,
+  `einstellungenFinden`; dieselbe Liste baut die Unternavigation).
+- **Lesezeichen dezenter:** gesetzt gedämpft statt golden; in der Leiste —
+  wo ohnehin alles gemerkt ist — nur beim Hinzeigen (AM-HUELLE, CI).
