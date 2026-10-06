@@ -27,7 +27,6 @@ import type { SymbolKomponente } from "@/components/symbol";
 import { useEffect, useRef, useState } from "react";
 import { Assistent } from "@/components/assistent";
 import { useNavigationKlapp } from "@/components/navigation";
-import { Kontozeile, Nachweiszeile } from "@/components/konto";
 import { Kopfleiste } from "@/components/kopfleiste";
 import {
   NACHRANGIG,
@@ -165,10 +164,6 @@ export function Huelle({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <div className="huelle-fuss">
-          <Kontozeile />
-          <Nachweiszeile />
-        </div>
       </nav>
 
       <main className="huelle-inhalt">

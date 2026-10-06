@@ -3,7 +3,7 @@
 // Modul HB-EINSTELLUNGEN — docs/MODULE.md
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ChevronLeft, Cpu, Database, Inbox, Info, Mail, SlidersHorizontal, TrendingUp, Users } from "@/lib/symbole";
+import { AlertTriangle, ChevronLeft, Cpu, Database, Inbox, Info, KeyRound, Mail, Monitor, Settings, SlidersHorizontal, TrendingUp, Users } from "@/lib/symbole";
 import { lage } from "@/lib/anmeldung";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -37,31 +37,39 @@ import { useSicht } from "@/lib/sicht";
 import { useBegriffe } from "@/lib/modus";
 import type { Begriffe } from "@/lib/begriffe";
 import { Modusblock } from "@/components/modus";
+import { Profilblock, Darstellungsblock } from "@/components/profil";
 
 /**
- * Die Einstellungen in sieben Unterpunkten.
+ * Die Einstellungen in zwei Gruppen (Kai, 6.10.2026; wie Linear und HubSpot):
+ * „Mein Konto“ für alles, was nur die eigene Person betrifft, und
+ * „Organisation“ für den gemeinsamen Bestand. Das Profil oben rechts führt
+ * auf „Mein Konto“, das Zahnrad in der Navigation auf dieselbe Seite.
  *
  * Eine Seite mit vierzehn Blöcken untereinander liest niemand. Jeder
  * Unterpunkt trägt, was zusammengehört; jeder Block sagt in einem Satz,
  * wozu er da ist, und hält das Kleingedruckte hinter dem Symbol.
  */
 const BEREICHE = [
-  { schluessel: "firma", text: "Firma und Team", beschreibung: "Firmendaten, Team, Passwort, zweiter Faktor, Geräte", symbol: Users },
-  { schluessel: "postfach", text: "Mein Postfach", beschreibung: "Ihr eigenes Postfach: Mails mit Kontakten im Verlauf", symbol: Inbox },
+  { schluessel: "profil", text: "Profil", beschreibung: "Name, Anmeldename, Rolle und was Sie sehen", symbol: Settings },
+  { schluessel: "sicherheit", text: "Sicherheit", beschreibung: "Passwort, zweiter Faktor, angemeldete Geräte", symbol: KeyRound },
+  { schluessel: "postfach", text: "Mein Postfach", beschreibung: "Ihr Postfach und Ihre Absenderadresse", symbol: Inbox },
+  { schluessel: "darstellung", text: "Darstellung", beschreibung: "Hell oder dunkel, Dichte", symbol: Monitor },
+  { schluessel: "firma", text: "Firma und Team", beschreibung: "Firmendaten, Team, Bereiche", symbol: Users },
   { schluessel: "vertrieb", text: "Vertrieb", beschreibung: "Pipelines und Stufen, Produktkatalog, Verlustgründe", symbol: TrendingUp },
   { schluessel: "eigenschaften", text: "Eigenschaften", beschreibung: "Felder und Gruppen für Firmen, Kontakte und Leads", symbol: SlidersHorizontal },
-  { schluessel: "email", text: "E-Mail", beschreibung: "Konto, Absenderadresse, Marketing, Postfach, Relay", symbol: Mail },
+  { schluessel: "email", text: "E-Mail", beschreibung: "Konto der Organisation, Marketing, Postfach, Relay", symbol: Mail },
   { schluessel: "ki", text: "AI und Programme", beschreibung: "Sprachmodell, Sprachausgabe, Ergänzen, Insilo, Programme, API-Schlüssel", symbol: Cpu },
   { schluessel: "daten", text: "Daten", beschreibung: "Sicherung, Import und Export, Datenbank, Datenwege", symbol: Database },
 ] as const;
 
 type Bereich = (typeof BEREICHE)[number]["schluessel"];
 
-/** Drei Gruppen wie in HubSpots Einstellungen: wer, womit verkauft wird, worauf es läuft. */
+/** Was nur die eigene Person betrifft — das sieht jede, auch wer eingeschränkt ist. */
+const MEIN_KONTO: Bereich[] = ["profil", "sicherheit", "postfach", "darstellung"];
+
 const GRUPPEN: { titel: string; schluessel: Bereich[] }[] = [
-  { titel: "Konto", schluessel: ["firma", "postfach"] },
-  { titel: "Vertrieb", schluessel: ["vertrieb", "eigenschaften", "email"] },
-  { titel: "System", schluessel: ["ki", "daten"] },
+  { titel: "Mein Konto", schluessel: MEIN_KONTO },
+  { titel: "Organisation", schluessel: ["firma", "vertrieb", "eigenschaften", "email", "ki", "daten"] },
 ];
 
 /** Was ein Bereich nach Modus heißt und ob es ihn gibt (seit 26.10.19):
@@ -71,7 +79,7 @@ function bereicheFuer(w: Begriffe) {
     .filter((b) => w.modus !== "verein" || b.schluessel !== "vertrieb")
     .map((b) => {
       if (b.schluessel === "firma") {
-        return { ...b, text: w.firmaUndTeam, beschreibung: w.modus === "verein" ? "Modus, Team, Bereiche, Passwort, zweiter Faktor, Geräte" : b.beschreibung };
+        return { ...b, text: w.firmaUndTeam, beschreibung: w.modus === "verein" ? "Modus, Team, Bereiche" : "Modus, Firmendaten, Team, Bereiche" };
       }
       if (b.schluessel === "eigenschaften") {
         return { ...b, beschreibung: `Felder und Gruppen für ${w.firmen}, ${w.kontakte}${w.modus === "verein" ? "" : " und Leads"}` };
@@ -86,11 +94,9 @@ function navigation(w: Begriffe, eingeschraenkt: boolean): UnternavGruppe[] {
     const b = bereiche.find((x) => x.schluessel === k);
     return b ? [{ ...b, href: `/einstellungen?bereich=${b.schluessel}` }] : [];
   };
-  // Wer eingeschränkt sieht, verwaltet nichts: Für ihn gibt es nur das
-  // eigene Konto (Passwort, zweiter Faktor, Geräte) und das eigene Postfach.
-  if (eingeschraenkt) return [{ titel: "Konto", eintraege: [...eintrag("firma"), ...eintrag("postfach")] }];
-  return GRUPPEN.map((g) => ({
-    titel: g.titel === "Vertrieb" && w.modus === "verein" ? "Verein" : g.titel,
+  // Wer eingeschränkt sieht, verwaltet nichts: Für ihn gibt es nur „Mein Konto“.
+  return GRUPPEN.filter((g) => !eingeschraenkt || g.titel === "Mein Konto").map((g) => ({
+    titel: g.titel,
     eintraege: g.schluessel.flatMap(eintrag),
   }));
 }
@@ -196,14 +202,14 @@ function Datenwege({ e }: { e: OrgSettings }) {
 
 function Inhalt() {
   const suche = useSearchParams();
-  // Ohne gültigen Bereich zeigt der Desktop „Firma und Team“, das Handy die
+  // Ohne gültigen Bereich zeigt der Desktop „Profil“, das Handy die
   // Übersicht (CSS an `data-auswahl`, siehe HB-UNTERNAV).
   const { eingeschraenkt } = useSicht();
   const w = useBegriffe();
   const moeglich = bereicheFuer(w);
   const gewaehlt = suche.get("bereich") as Bereich | null;
-  const ausgewaehlt = moeglich.some((b) => b.schluessel === gewaehlt && (!eingeschraenkt || b.schluessel === "firma" || b.schluessel === "postfach"));
-  const bereich: Bereich = ausgewaehlt ? gewaehlt! : "firma";
+  const ausgewaehlt = moeglich.some((b) => b.schluessel === gewaehlt && (!eingeschraenkt || MEIN_KONTO.includes(b.schluessel)));
+  const bereich: Bereich = ausgewaehlt ? gewaehlt! : "profil";
   const bereichName = moeglich.find((b) => b.schluessel === bereich)!.text;
 
   const abfrage = useQuery({
@@ -246,12 +252,23 @@ function Inhalt() {
                 {!eingeschraenkt && w.modus === "vertrieb" && <Absenderblock />}
                 <Mitgliederblock />
                 <Bereicheblock />
+              </>
+            )}
+            {bereich === "profil" && <Profilblock />}
+            {bereich === "sicherheit" && (
+              <>
                 <Passwortblock />
                 <Faktorblock />
                 <Geraeteblock />
               </>
             )}
-            {bereich === "postfach" && <MeinPostfachblock />}
+            {bereich === "postfach" && (
+              <>
+                <MeinPostfachblock />
+                <Absenderkontoblock />
+              </>
+            )}
+            {bereich === "darstellung" && <Darstellungsblock />}
             {bereich === "vertrieb" && (
               <>
                 <Pipelinesblock />
@@ -263,7 +280,6 @@ function Inhalt() {
             {bereich === "email" && (
               <>
                 <Versandblock />
-                <Absenderkontoblock />
                 <Marketingversandblock />
                 <Postfachblock />
                 <Postausgangblock />

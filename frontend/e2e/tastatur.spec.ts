@@ -128,7 +128,7 @@ test("Rückfrage vor dem Löschen: Fokus auf „Abbrechen“, Escape löscht nic
 test("Einstellungen: Bereich über die Navigation links wählen, Markierung folgt", async ({ page }) => {
   await page.goto("/einstellungen", { waitUntil: "networkidle" });
   const nav = page.getByRole("navigation", { name: "Bereiche der Einstellungen" });
-  await expect(nav.getByRole("link", { name: /Firma und Team/ })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: /Profil/ })).toHaveAttribute("aria-current", "page");
   const email = nav.getByRole("link", { name: /E-Mail/ });
   await email.focus();
   await page.keyboard.press("Enter");

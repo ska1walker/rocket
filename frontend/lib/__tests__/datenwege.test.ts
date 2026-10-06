@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { datenziele, host, istIntern, nachweis, zone } from "@/lib/datenwege";
+import { datenziele, host, istIntern, zone } from "@/lib/datenwege";
 import type { OrgSettings } from "@/lib/typen";
 
 const LEER = {
@@ -66,9 +66,8 @@ describe("zone", () => {
   });
 });
 
-describe("datenziele und nachweis", () => {
+describe("datenziele", () => {
   it("sagt ohne Einstellungen nichts", () => {
-    expect(nachweis(undefined)).toBeNull();
     expect(datenziele(undefined)).toEqual([]);
   });
 
@@ -80,14 +79,11 @@ describe("datenziele und nachweis", () => {
       tts_endpoint_url: "http://speaches.speachesv3-shared.svc.cluster.local:8000",
     });
     expect(datenziele(e)).toEqual([]);
-    expect(nachweis(e)).toEqual({ text: "Alles auf dieser Box", extern: false, ziele: [] });
   });
 
   it("nennt fremde Ziele beim Namen und zählt sie", () => {
     const eins = mit({ suche_endpoint_url: "https://api.search.brave.com/res/v1/web/search" });
     expect(datenziele(eins)).toEqual([{ was: "Suchdienst", host: "api.search.brave.com" }]);
-    expect(nachweis(eins)!.text).toBe("1 Ziel außerhalb");
-    expect(nachweis(eins)!.extern).toBe(true);
 
     const drei = mit({
       suche_endpoint_url: "https://api.search.brave.com",
@@ -97,7 +93,6 @@ describe("datenziele und nachweis", () => {
       brevo_api_key_set: true,
     });
     expect(datenziele(drei).map((z) => z.was)).toEqual(["Suchdienst", "E-Mail", "Marketing"]);
-    expect(nachweis(drei)!.text).toBe("3 Ziele außerhalb");
   });
 
   it("zählt nur, was auch benutzt wird", () => {

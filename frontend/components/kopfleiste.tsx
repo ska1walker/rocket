@@ -19,6 +19,7 @@
 // Nachweis ist kein Bedienelement, sondern die Aussage des Produkts —
 // oben würde daraus ein Symbol neben anderen, und der Satz wäre weg.
 
+import { Profilknopf } from "@/components/konto";
 import { ChevronDown, Plus } from "@/lib/symbole";
 import Link from "next/link";
 import { useId } from "react";
@@ -109,6 +110,9 @@ export function Kopfleiste({
       </div>
 
       <NeuMenue />
+
+      {/* Ganz rechts, auf jedem Gerät an derselben Stelle (CI HB-KONTO). */}
+      <Profilknopf />
     </header>
   );
 }

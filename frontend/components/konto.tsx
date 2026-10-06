@@ -3,34 +3,26 @@
 // Modul HB-KONTO — docs/MODULE.md
 
 import { useQuery } from "@tanstack/react-query";
-import { ChevronsUpDown, Globe, KeyRound, LogOut, Lokal } from "@/lib/symbole";
+import { KeyRound, LogOut, Settings } from "@/lib/symbole";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { api } from "@/lib/api";
 import { abmelden, lage } from "@/lib/anmeldung";
-import { nachweis } from "@/lib/datenwege";
 import { initialenAusName } from "@/lib/format";
-import type { OrgSettings } from "@/lib/typen";
 import { useWer } from "@/lib/wer";
 import { Darstellungsschalter, Dichteschalter } from "@/components/darstellung";
 
 /**
- * Der Fuß der Navigation: eine Zeile für das Konto, eine für den Nachweis.
+ * Das Profil oben rechts (ABGLEICH G8, Kai 6.10.2026).
  *
- * Vorher standen hier drei Dinge nebeneinander, die nichts miteinander zu
- * tun haben — eine Personenkarte mit Rahmen, ein Dreifach-Schalter für die
- * Darstellung und der Satz „läuft auf dieser Box". Die Karte wog mehr als
- * jeder Navigationseintrag und sagte „angemeldet", was man ohnehin sieht;
- * der Schalter stand dauerhaft da für eine Entscheidung, die man einmal
- * trifft; und der Satz war eine Zusage ohne Beleg, die seit dem ersten
- * fremden Endpunkt schlicht nicht mehr stimmte.
- *
- * Jetzt: eine ruhige Zeile, die ein Menü öffnet (Darstellung, Zugang),
- * und darunter der gemessene Stand — oder nichts.
+ * Bis 26.10.20 stand hier der Fuß der Navigation: Initialen, Name und
+ * darunter „Alles auf dieser Box“. Am Handy war der Fuß ausgeblendet —
+ * Abmelden und Darstellung waren dort gar nicht erreichbar. Jetzt sitzt
+ * das Profil ganz rechts in der Kopfleiste, am Desktop und am Handy an
+ * derselben Stelle, wie bei HubSpot, Google und Microsoft. Der Nachweis
+ * entfiel: Er war kein Mehrwert; die Datenwege stehen unter Einstellungen.
  */
-
-export function Kontozeile() {
+export function Profilknopf() {
   const aktuell = usePathname();
   const [offen, setOffen] = useState(false);
   const knopf = useRef<HTMLButtonElement>(null);
@@ -57,27 +49,32 @@ export function Kontozeile() {
         aria-expanded={offen}
         aria-haspopup="dialog"
         aria-controls="konto-menue"
-        aria-label={`Sie arbeiten als ${name}. Konto und Darstellung`}
+        aria-label={`Konto: ${name}`}
+        title={`Konto: ${name}`}
         onClick={() => setOffen((o) => !o)}
       >
         <span className="person-kreis" aria-hidden="true">
           {initialenAusName(person?.display_name ?? person?.login_username)}
         </span>
-        <span className="person-text">
-          <span className="person-name">{name}</span>
-        </span>
-        <ChevronsUpDown size={16} aria-hidden="true" className="person-pfeil" />
       </button>
 
-      {offen && (
-        <Kontomenue schliessen={schliessen} knopf={knopf} />
-      )}
+      {offen && <Kontomenue schliessen={schliessen} knopf={knopf} />}
     </div>
   );
 }
 
+/** Was eine Rolle im Satz heißt — wie in der Teamliste. */
+const ROLLE: Record<string, string> = {
+  owner: "Eigentümerin",
+  admin: "Verwalter",
+  member: "Mitglied",
+  viewer: "Nur lesen",
+};
+
 /**
- * Das Menü klappt nach oben. Es schließt bei Escape, bei einem Klick
+ * Das Menü klappt nach unten, am Handy als Blatt über die ganze Breite.
+ * Reihenfolge wie in jeder AImighty-App (CI HB-KONTO): Kopf, „Mein Konto“,
+ * Darstellung, Abmelden zuletzt. Es schließt bei Escape, bei einem Klick
  * außerhalb und beim Seitenwechsel, und der Fokus kehrt zum Knopf zurück —
  * dasselbe Verhalten wie das Feld „Mehr" in der Hülle. Die alte
  * Personenliste schloss nur durch Auswahl; wer sie versehentlich öffnete,
@@ -91,9 +88,11 @@ function Kontomenue({
   knopf: React.RefObject<HTMLButtonElement | null>;
 }) {
   const wurzel = useRef<HTMLDivElement>(null);
+  const { wer } = useWer();
+  const person = wer.data;
 
   useEffect(() => {
-    wurzel.current?.querySelector<HTMLElement>("button")?.focus();
+    wurzel.current?.querySelector<HTMLElement>("a, button")?.focus();
     function taste(e: KeyboardEvent) {
       if (e.key === "Escape") schliessen(true);
     }
@@ -112,7 +111,26 @@ function Kontomenue({
 
   return (
     <div className="person-liste" id="konto-menue" role="dialog" aria-label="Konto" ref={wurzel}>
-      <div>
+      <div className="person-kopf">
+        <span className="person-kreis" aria-hidden="true">
+          {initialenAusName(person?.display_name ?? person?.login_username)}
+        </span>
+        <span className="person-text">
+          <span className="person-name">{person?.display_name ?? person?.login_username ?? "…"}</span>
+          {person && (
+            <span className="person-unter">
+              {person.login_username} · {ROLLE[person.rolle] ?? person.rolle}
+            </span>
+          )}
+        </span>
+      </div>
+
+      <Link href="/einstellungen?bereich=profil" className="person-eintrag">
+        <Settings size={16} aria-hidden="true" />
+        <span className="person-eintrag-text">Mein Konto</span>
+      </Link>
+
+      <div className="konto-teil">
         <p className="konto-abschnitt">Darstellung</p>
         <Darstellungsschalter />
         <Dichteteil />
@@ -138,8 +156,7 @@ function Abmeldeteil() {
 
   return (
     <div className="konto-teil">
-      <p className="konto-abschnitt">Zugang</p>
-      <Link href="/einstellungen?bereich=firma" className="person-eintrag">
+      <Link href="/einstellungen?bereich=sicherheit" className="person-eintrag">
         <KeyRound size={16} aria-hidden="true" />
         <span className="person-eintrag-text">Passwort und zweiter Faktor</span>
       </Link>
@@ -156,36 +173,6 @@ function Abmeldeteil() {
         <span className="person-eintrag-text">Abmelden</span>
       </button>
     </div>
-  );
-}
-
-/**
- * Der Nachweis — gemessen an dem, was eingetragen ist.
- *
- * docs/DESIGN.md §5: „mit gemessenen Werten — oder gar nicht". Solange die
- * Einstellungen nicht da sind, steht hier deshalb nichts. Farbe trägt die
- * Aussage nie allein: Das Zeichen wechselt mit.
- */
-export function Nachweiszeile() {
-  const einstellungen = useQuery({
-    queryKey: ["einstellungen"],
-    queryFn: () => api.get<OrgSettings>("/api/settings"),
-    staleTime: 5 * 60_000,
-  });
-
-  const stand = nachweis(einstellungen.data);
-  if (!stand) return null;
-
-  const Zeichen = stand.extern ? Globe : Lokal;
-  const titel = stand.extern
-    ? stand.ziele.map((z) => `${z.was}: ${z.host}`).join(" · ")
-    : "Kein eingetragenes Ziel außerhalb dieser Box";
-
-  return (
-    <Link href="/einstellungen?bereich=daten" className="nachweis" data-extern={stand.extern ? "true" : undefined} title={titel}>
-      <Zeichen size={16} aria-hidden="true" />
-      <span>{stand.text}</span>
-    </Link>
   );
 }
 

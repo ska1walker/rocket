@@ -1,6 +1,6 @@
 // Wohin Daten gehen — gemessen, nicht behauptet.
 //
-// Die Regel steht in docs/DESIGN.md §5: Der Nachweis am Fuß der Navigation
+// Die Regel steht in docs/DESIGN.md §5: Die Datenwege unter Einstellungen › Daten
 // trägt gemessene Werte oder gar nichts, denn „eine Zusage ohne Beleg ist
 // schlechter als keine". Gemessen wird an dem, was eingetragen ist: Was
 // nicht nachweislich auf dieser Box liegt, gilt als außerhalb — dieselbe
@@ -81,26 +81,4 @@ export function datenziele(e: OrgSettings | undefined): Datenziel[] {
     ziele.push({ was: "Marketing", host: "brevo.com" });
   }
   return ziele;
-}
-
-export interface Nachweis {
-  text: string;
-  extern: boolean;
-  ziele: Datenziel[];
-}
-
-/**
- * Der Satz für den Fuß der Navigation. Ohne Einstellungen (noch nicht
- * geladen, Abfrage gescheitert) gibt es keinen Satz — dann steht dort
- * nichts, statt etwas Unbelegtes zu behaupten.
- */
-export function nachweis(e: OrgSettings | undefined): Nachweis | null {
-  if (!e) return null;
-  const ziele = datenziele(e);
-  if (ziele.length === 0) return { text: "Alles auf dieser Box", extern: false, ziele };
-  return {
-    text: ziele.length === 1 ? "1 Ziel außerhalb" : `${ziele.length} Ziele außerhalb`,
-    extern: true,
-    ziele,
-  };
 }

@@ -1157,7 +1157,10 @@ Menü nach oben mit **Darstellung** und, bei eigener Anmeldung, **Zugang**
 Klick außerhalb und Seitenwechsel und gibt den Fokus zurück. Die
 Sitzplatz-Auswahl ist seit 26.9.2 weg.
 
-*Die Nachweiszeile* nennt den **gemessenen** Stand und führt auf
+**Seit 26.10.21 überholt** (Abschnitt „Profil oben rechts“): Konto oben
+rechts in der Kopfleiste, die Nachweiszeile entfiel. Zur Geschichte:
+
+*Die Nachweiszeile* nannte den **gemessenen** Stand und führte auf
 *Einstellungen › Daten › Wohin Daten gehen*. `lib/datenwege.ts` prüft
 jeden eingetragenen Endpunkt (Sprachmodell, Sprachausgabe, Suchdienst,
 SMTP, Postausgang, Brevo). Als **auf dieser Box** gelten Kubernetes-
@@ -2223,9 +2226,9 @@ flex-shrink: 0 }`.
 
 **Die eigenen Zeichen des CI** (seit 26.10.10): Die Produktleiter trägt die
 Rollenzeichen — Assistent, Analyst und Experte im Produktkatalog und in der
-Prognose „Nach Produkt“ (RK-PRODUKT). Die Nachweiszeile unten links zeigt
-`lokal` (Haus mit Punkt), solange kein Ziel außerhalb der Box eingetragen ist;
-vorher stand dort ein Server. Damit ist R2 aus dem Abgleich vollständig.
+Prognose „Nach Produkt“ (RK-PRODUKT). Die Nachweiszeile unten links zeigte
+`lokal` (Haus mit Punkt), solange kein Ziel außerhalb der Box eingetragen war;
+seit 26.10.21 gibt es sie nicht mehr. Damit ist R2 aus dem Abgleich vollständig.
 Dabei fiel auf, dass Zahlenfelder in bearbeitbaren Tabellen keine
 Mindestbreite hatten, obwohl der Kommentar es versprach: „14500“ stand im
 Katalog als „1450“. Sie haben jetzt 4,5rem.
@@ -2274,7 +2277,7 @@ Bis 26.10.3 eine Reihe von sechs Pillen über dem Inhalt — ohne Symbol,
 ohne Gruppen, ohne Fokusring, auf dem Handy einfach umgebrochen. Kai
 fand das nicht schön gelöst. Seitdem nach Stand der Technik (HubSpot,
 Stripe, GitHub): **am Desktop eine senkrechte, mitlaufende Liste links**
-in drei Gruppen (Konto · Vertrieb · System) mit Symbolen, **auf dem
+in Gruppen (seit 26.10.21: Mein Konto · Organisation) mit Symbolen, **auf dem
 Handy eine Übersichtsliste** mit Kurzbeschreibung, aus der man in einen
 Bereich wechselt; „‹ Alle Einstellungen“ führt zurück. Entschieden von
 Kai am 1.10.2026: Übersichtsliste auf dem Handy, nur Bereiche (keine
@@ -3269,3 +3272,39 @@ einmal ganz geladen, Passwort verschlüsselt, nur Neues im zweiten Lauf,
 dieselbe Mail bei zweien ein Eintrag, jedes Postfach nur seiner Person,
 `viewer` 403, Microsoft erklärt, Trainer nur seine Spieler, Verbindung
 testen); im Browser `e2e/mein-postfach.spec.ts` und der Rundgang.
+
+## Profil oben rechts (seit 26.10.21)
+
+Kai am 6.10.2026: Der Fuß unten links — Initialen, Name, darunter „Alles
+auf dieser Box“ — war nicht gut, und am Handy gar nicht da (`.huelle-fuss`
+war dort ausgeblendet): **Abmelden, Darstellung und der Weg zu Passwort und
+zweitem Faktor waren am Handy nicht erreichbar.** Verglichen mit den Großen:
+oben rechts (HubSpot, Google Workspace, Microsoft 365, GitHub, Atlassian,
+Figma), unten links (ChatGPT, Claude, Discord), oben links als
+Arbeitsbereich-Menü (Slack, Linear, Notion). Entschieden (CI `ABGLEICH.md`,
+**G8**), gültig für jede AImighty-App:
+
+- **Profil oben rechts** in der Kopfleiste, am Desktop und am Handy an
+  derselben Stelle (HB-KONTO, `components/konto.tsx` → `Profilknopf`). Ein
+  Kreis mit Initialen öffnet das Menü: Kopf (Name, Anmeldename · Rolle) ›
+  „Mein Konto“ › Darstellung und Dichte › Passwort und zweiter Faktor,
+  Abmelden — die beiden nur bei eigener Anmeldung. Am Handy ein Blatt über
+  die ganze Breite.
+- **Kein Fuß in der Navigation.** „Alles auf dieser Box“ entfiel: kein
+  echter Mehrwert. Wohin Daten gehen, steht weiter unter Einstellungen ›
+  Daten › Datenwege.
+- **Einstellungen in zwei Gruppen** auf einer Seite (wie Linear, HubSpot):
+  **Mein Konto** — Profil, Sicherheit (Passwort, zweiter Faktor, Geräte),
+  Mein Postfach (mit der Absenderadresse, vorher unter „E-Mail“),
+  Darstellung — und **Organisation** — Firma und Team, Vertrieb,
+  Eigenschaften, E-Mail, AI und Programme, Daten. Ohne `?bereich=` öffnet
+  „Profil“. Wer eingeschränkt sieht, bekommt nur „Mein Konto“.
+
+Insilo bekam im selben Durchgang dasselbe Profil (mit Sprache, ohne
+Abmelden — Olares meldet an); sein Datenschutz-Nachweis steht seitdem auf
+„Über Insilo“.
+
+Tests: `e2e/profil.spec.ts` (ganz rechts, Menü per Tastatur, „Mein Konto“
+führt ins Profil, am Handy Blatt in voller Breite, kein Fuß),
+`sicht.spec.ts` (der Trainer sieht nur „Mein Konto“), Rundgang mit den
+neuen Bereichen `profil`, `sicherheit`, `darstellung`.

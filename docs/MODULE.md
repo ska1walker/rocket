@@ -65,7 +65,7 @@ hier liest, findet den Code mit einer Suche nach der Kennung.
 | HB-NAVIGATION | Seitenspalte, „Mehr", Favoriten, Einklappen | `huelle.tsx`, `navigation.tsx` | ◐ Ziele, Favoritenquelle |
 | HB-KOPFLEISTE | Leiste oben: Marke, Suche, Erstellen | `kopfleiste.tsx` | ◐ Produktwort, Ziele |
 | HB-SUCHE | Suchen oder fragen (⌘K) | `suche.tsx` | ○ Muster |
-| HB-KONTO | Kontozeile und Nachweis unten links | `konto.tsx` | ○ Muster |
+| HB-KONTO | Profil oben rechts: Kreis, Menü, am Handy Blatt | `konto.tsx` | ● Muster und CSS |
 | HB-SEITENKOPF | Titel, Anzahl, Rückweg, Knöpfe | `seitenkopf.tsx` | ● |
 | HB-ZUSTAND | Lädt, Fehler, Leer, Hinweiszeile | `zustaende.tsx` | ● |
 | HB-SCHALTER | Ein/Aus-Schalter | `schalter.tsx` | ● |
@@ -265,7 +265,7 @@ nichts. Geprüft in `e2e/dichte.spec.ts`.
   Gruppen, dort hat jeder Eintrag sein Lesezeichen.
 - **Einklappen** mit ⌘B / Strg+B, gemerkt im Cookie (die Breite hängt am
   Bildschirm, nicht an der Person).
-- **Unten:** HB-KONTO.
+- **Unten:** nur das Zahnrad „Einstellungen“; das Konto steht seit G8 oben rechts (HB-KONTO).
 - **Handy:** Leiste unten, „Mehr" als Feld darüber.
 - **Tastatur:** `aria-current="page"`, Mehr-Feld als Dialog mit Fokus
   hinein und Escape zurück.
@@ -283,11 +283,11 @@ Cookie-Name tauschen. Das Gerüst bleibt.
 ![Kopfleiste](module/hb-kopfleiste.png)
 
 `components/kopfleiste.tsx` → `Kopfleiste({ eingeklappt, klappen })`.
-Links Marke, Produktwort und Klappschalter, in der Mitte HB-SUCHE, rechts
-„Erstellen ▾" (HB-KNOPFMENUE-Klassen).
+Links Marke, Produktwort und Klappschalter, in der Mitte HB-SUCHE, dahinter
+„+ ▾" (HB-KNOPFMENUE-Klassen), ganz rechts das Profil (HB-KONTO).
 
-- **Bewusst nur zwei Dinge:** suchen und anlegen. Konto und Nachweis
-  bleiben unten.
+- **Bewusst nur drei Dinge:** suchen, anlegen, das eigene Konto. Einen
+  Fuß in der Navigation gibt es seit G8 (6.10.2026) nicht mehr.
 - „Erstellen" öffnet ein Menü. Jeder Eintrag führt auf die Zielseite mit
   `?neu=1`; dort öffnet sich der Dialog. Die Dialoge sitzen nicht in der
   Hülle, sonst stellte jede Seite ihre Abfragen.
@@ -311,21 +311,27 @@ echte Feld; die Treffer klappen darunter auf.
 `.suchpalette-*`) ist allgemein. Die Datenquelle `/api/suche` und die
 Routen sind Rocket.
 
-### HB-KONTO — Kontozeile und Nachweis ○
+### HB-KONTO — Profil oben rechts ●
 
-![Kontozeile](module/hb-konto.png)
+![Profil](module/hb-konto.png)
 
-`components/konto.tsx` → `Kontozeile()`, `Nachweiszeile()`.
+`components/konto.tsx` → `Profilknopf()`, eingehängt ganz rechts in
+`Kopfleiste`. Seit 26.10.21 (CI G8, Kai 6.10.2026); vorher Kontozeile und
+„Alles auf dieser Box“ am Fuß der Navigation — am Handy war der Fuß
+ausgeblendet, Abmelden und Darstellung dort nicht erreichbar.
 
-- **Kontozeile:** Initialen und Name. Das Menü klappt nach oben und
-  enthält Darstellung, Konto und Abmelden. „Abmelden" erscheint nur, wenn
-  die App selbst anmeldet — sonst wäre es eine Attrappe.
-- **Nachweiszeile:** gemessen, nicht behauptet — „Alles auf dieser Box"
-  oder „2 Ziele außerhalb" mit den Hosts im `title`. Das Zeichen wechselt
-  mit der Aussage.
+- **Knopf:** Kreis mit Initialen, 40 px Ziel (44 px zum Tippen), Name
+  „Konto: <Name>“ als Tooltip und für Vorleser.
+- **Menü, Reihenfolge fest (CI):** Kopf mit Name, Anmeldename und Rolle ›
+  „Mein Konto“ (Einstellungen › Profil) › Darstellung und Dichte ›
+  „Passwort und zweiter Faktor“ und Abmelden — nur bei eigener Anmeldung.
+- **Handy:** Blatt über die ganze Breite unter der Kopfleiste.
+- **Tastatur:** Fokus auf den ersten Eintrag; Escape, Klick außerhalb,
+  Seitenwechsel schließen, Fokus zurück zum Knopf.
 
-**Übernahme:** Das Muster passt für jede App, die Datenquelle
-(`/api/anmeldung/lage`, `/api/settings`) muss neu.
+**Übernahme:** CSS aus dem CI, die Komponente nach den Regeln in
+`bauteile/HB-KONTO.md` (Insilo: `components/profil.tsx`, mit Sprache, ohne
+Abmelden).
 
 ### HB-SEITENKOPF — Seitenkopf ●
 
