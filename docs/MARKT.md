@@ -292,6 +292,8 @@ Einundzwanzigster Durchlauf: Rocket 26.10.19, PR #103, 2.10.2026 — von der Act
 
 Zweiundzwanzigster Durchlauf: Rocket 26.10.20, PR #105, 2.10.2026 — von der Action: Mein Postfach (Stufe 2a, ohne Microsoft). Seit 26.10.19 hat Marc Insilo 0.1.104 eingetragen (#104); Rocket baute auf diesem `main`. Zeitstempel 4412000000000. Auf `main` byte-gleich geprüft (sha256 `b9b5c646…ed3c`, keine alten Schlüssel). Migration 0041 legt eine Tabelle an.
 
+Dreiundzwanzigster Durchlauf: Rocket 26.10.21, PR #108, 6.10.2026 — von der Action: Profil oben rechts, Einstellungen in zwei Gruppen, CI-Stand `ci-26.10.13`. Seit 26.10.20 hat Marc viel eingetragen (Modell-Apps, Wings, Relay, Insilo 0.1.105/0.1.106) und die Quellkennung kurz auf `market.aimighty` und wieder zurück auf `market.AImighty` gestellt; die Action baute auf diesem `main`. Zeitstempel 4603000000000. Auf `main` byte-gleich geprüft (sha256 `155c403f…`, keine alten Schlüssel). Keine Migration. Insilo 0.1.106 kam drei Minuten vorher mit derselben Action als PR #107 (sha256 `4b42da9b…`). Kai sah beide nicht sofort auf der Box: Der Markt war deployt, Olares holt den Katalog nur in Abständen.
+
 **Gelernt:** Eine Markt-Sitzung, die diese Sitzung anlegt, fragt vor PR und Merge in Marcs Repo nach — eine über Claude weitergereichte Freigabe zählt dort nicht. Entweder beantwortet Kai die Rückfrage in der Markt-Sitzung, oder er startet sie selbst mit dem vorbereiteten Auftrag.
 
 ## Bekannte Fallen im Markt
