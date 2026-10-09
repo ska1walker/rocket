@@ -408,6 +408,16 @@ der Lieferung und liest die Token über `var(--am-*)`.
    - **`olares-cli` auf der Box** braucht einmal
      `olares-cli profile login --olares-id kaivostudio@olares.de` (Browser, TOTP).
 
+   **Vor jedem Release die offenen Issues** (Kai, 9.10.2026), bevor der PR
+   entsteht — nur dann kann eines noch mit hinein. Jedes offene Issue unter
+   `https://github.com/ska1walker/rocket/issues` wird eingeordnet: **mit rein** (klein, passt, geringes Risiko, oder
+   ein Fehler, der Nutzer jetzt trifft), **später** (Label `später` und ein Satz
+   Begründung im Issue) oder **Kai fragen**. Der PR-Text bekommt den Abschnitt
+   `## Offene Issues geprüft` mit einer Zeile je Issue (`- #12 mit rein`,
+   `- #13 später: …`). Die Action `issues.yml` wird rot, solange dort ein
+   offenes Issue fehlt; ein Release-PR ist einer, der die Version in
+   `olares/Chart.yaml` hebt.
+
 10. **Bei Unsicherheit:** stoppen und Kai fragen.
 
 11. **Builds, CI und Merges selbst verfolgen — nicht fragen.** Nach jedem
